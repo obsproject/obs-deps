@@ -48,6 +48,8 @@ export MACOSX_DEPLOYMENT_TARGET=10.11
 # If you need an olders SDK and Xcode won't give it to you
 # https://github.com/phracker/MacOSX-SDKs
 
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig
+
 # libopus
 curl -L -O https://ftp.osuosl.org/pub/xiph/releases/opus/opus-1.2.1.tar.gz
 tar -xf opus-1.2.1.tar.gz
@@ -55,7 +57,7 @@ cd ./opus-1.2.1
 mkdir build
 cd ./build
 ../configure --disable-shared --enable-static --prefix="/tmp/obsdeps"
-make -j 12
+make -j
 make install
 
 cd $WORK_DIR
@@ -67,7 +69,7 @@ cd ./libogg-1.3.3
 mkdir build
 cd ./build
 ../configure --disable-shared --enable-static --prefix="/tmp/obsdeps"
-make -j 12
+make -j
 make install
 
 cd $WORK_DIR
@@ -79,7 +81,7 @@ cd ./libvorbis-1.3.6
 mkdir build
 cd ./build
 ../configure --disable-shared --enable-static --prefix="/tmp/obsdeps"
-make -j 12
+make -j
 make install
 
 cd $WORK_DIR
@@ -92,7 +94,7 @@ cd ./libvpx-v1.7.0
 mkdir -p build
 cd ./build
 ../configure --disable-shared --prefix="/tmp/obsdeps" --libdir="/tmp/obsdeps/lib"
-make -j 12
+make -j
 make install
 
 cd $WORK_DIR
@@ -104,10 +106,10 @@ git checkout origin/stable
 mkdir build
 cd ./build
 ../configure --extra-ldflags="-mmacosx-version-min=10.11" --enable-static --prefix="/tmp/obsdeps"
-make -j 12
+make -j
 make install
 ../configure --extra-ldflags="-mmacosx-version-min=10.11" --enable-shared --libdir="/tmp/obsdeps/bin" --prefix="/tmp/obsdeps"
-make -j 12
+make -j
 ln -f -s libx264.*.dylib libx264.dylib
 find . -name \*.dylib -exec cp \{\} $DEPS_DEST/bin/ \;
 rsync -avh --include="*/" --include="*.h" --exclude="*" ../* $DEPS_DEST/include/
@@ -122,7 +124,7 @@ cd jansson-2.11
 mkdir build
 cd ./build
 ../configure --libdir="/tmp/obsdeps/bin" --enable-shared --disable-static
-make -j 12
+make -j
 find . -name \*.dylib -exec cp \{\} $DEPS_DEST/bin/ \;
 rsync -avh --include="*/" --include="*.h" --exclude="*" ../* $DEPS_DEST/include/
 rsync -avh --include="*/" --include="*.h" --exclude="*" ./* $DEPS_DEST/include/
@@ -139,7 +141,7 @@ cd ./FFmpeg-n4.0.2
 mkdir build
 cd ./build
 ../configure --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=10.11" --enable-shared --disable-static --shlibdir="/tmp/obsdeps/bin" --enable-gpl --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --disable-outdev=sdl
-make -j 12
+make -j
 find . -name \*.dylib -exec cp \{\} $DEPS_DEST/bin/ \;
 rsync -avh --include="*/" --include="*.h" --exclude="*" ../* $DEPS_DEST/include/
 rsync -avh --include="*/" --include="*.h" --exclude="*" ./* $DEPS_DEST/include/

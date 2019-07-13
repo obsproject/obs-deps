@@ -1,1 +1,1 @@
-brew install nasm
+brew install nasm pkg-config
