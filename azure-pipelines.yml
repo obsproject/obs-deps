@@ -7,6 +7,8 @@ jobs:
   steps:
   - script: git submodule update --init --recursive
     displayName: 'Checkout Submodules'
+  - script: ./osx-install-tools.sh
+    displayName: 'Install Tools'
   - script: ./build-package-deps-osx.sh
     displayName: 'Build And Package'
 
