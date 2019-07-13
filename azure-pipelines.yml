@@ -1,0 +1,17 @@
+# https://aka.ms/yaml
+
+jobs:
+- job: 'Build_macOS'
+  pool:
+    vmImage: 'macos-10.13'
+  steps:
+  - script: git submodule update --init --recursive
+    displayName: 'Checkout Submodules'
+  - script: ./build-package-deps-osx.sh
+    displayName: 'Build And Package'
+
+  - task: PublishBuildArtifacts@1
+    condition: ne(variables['Build.Reason'], 'PullRequest')
+    inputs:
+      pathtoPublish: './osx'
+      artifactName: osx-deps
