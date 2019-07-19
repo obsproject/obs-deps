@@ -141,7 +141,7 @@ cd ./FFmpeg-n4.0.2
 mkdir build
 cd ./build
 ../configure --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=10.11" --enable-shared --disable-static --shlibdir="/tmp/obsdeps/bin" --enable-gpl --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --disable-outdev=sdl
-make -j
+make 
 find . -name \*.dylib -exec cp \{\} $DEPS_DEST/bin/ \;
 rsync -avh --include="*/" --include="*.h" --exclude="*" ../* $DEPS_DEST/include/
 rsync -avh --include="*/" --include="*.h" --exclude="*" ./* $DEPS_DEST/include/

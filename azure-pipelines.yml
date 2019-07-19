@@ -17,3 +17,25 @@ jobs:
     inputs:
       pathtoPublish: './osx'
       artifactName: osx-deps
+
+- job: 'Build_Win64'
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - script: ./win-install-tools.sh
+    displayName: 'Install Tools'  
+  - script: ./win64.sh
+    displayName: 'Build deps'
+  
+  - task: PublishBuildArtifacts@1
+    condition: ne(variables['Build.Reason'], 'PullRequest')
+    inputs:
+      pathtoPublish: './FFmpeg-n4.1.4/ffbuild'
+      artifactName: ffmpeglogs
+
+  - task: PublishBuildArtifacts@1
+    condition: ne(variables['Build.Reason'], 'PullRequest')
+    inputs:
+      pathtoPublish: './buildprefix'
+      artifactName: win64-deps
+
