@@ -1,0 +1,236 @@
+From 97d648307e09b578a92bdcdf03f1db5cdc4775c4 Mon Sep 17 00:00:00 2001
+From: Michael Fabian 'Xaymar' Dirks <info@xaymar.com>
+Date: Sat, 26 Oct 2019 06:04:15 +0200
+Subject: [PATCH] MinGW Support
+
+---
+ build/make/Makefile                  |  15 ++
+ build/make/configure.sh              |  10 +-
+ configure                            |  15 +-
+ examples.mk                          |   4 +
+ libs.mk                              |  17 ++-
+ vp8/common/generic/systemdependent.c | 205 ++++++++++++++-------------
+ vpx/exports_enc                      |   1 +
+ 7 files changed, 154 insertions(+), 113 deletions(-)
+
+diff --git a/build/make/Makefile b/build/make/Makefile
+index be2810229..86f94bbf8 100644
+--- a/build/make/Makefile
++++ b/build/make/Makefile
+@@ -308,6 +308,20 @@ $(1):
+             $$(filter %.o,$$^) $$(extralibs)
+ endef
+ 
++define dll_gnu_template
++# Not using a pattern rule here because we don't want to generate empty
++# archives when they are listed as a dependency in files not responsible
++# for creating them.
++#
++# This needs further abstraction for dealing with non-GNU linkers.
++$(1):
++	$(if $(quiet),@echo "    [LD] $$@")
++	$(qexec)$$(LD) -shared $$(LDFLAGS) \
++            -Wl,--no-undefined \
++            -o $$@ \
++            -Wl,--out-implib=$$(subst $(2),.dll.a,$(1)) $$(filter %.o,$$^) $$(extralibs)
++endef
++
+ define dl_template
+ # Not using a pattern rule here because we don't want to generate empty
+ # archives when they are listed as a dependency in files not responsible
+@@ -391,6 +405,7 @@ $(foreach lib,$(filter %_g.a,$(LIBS)),$(eval $(call archive_template,$(lib))))
+ $(foreach lib,$(filter %so.$(SO_VERSION_MAJOR).$(SO_VERSION_MINOR).$(SO_VERSION_PATCH),$(LIBS)),$(eval $(call so_template,$(lib))))
+ $(foreach lib,$(filter %$(SO_VERSION_MAJOR).dylib,$(LIBS)),$(eval $(call dl_template,$(lib))))
+ $(foreach lib,$(filter %$(SO_VERSION_MAJOR).dll,$(LIBS)),$(eval $(call dll_template,$(lib))))
++$(foreach lib,$(filter %-$(VERSION_MAJOR).dll,$(LIBS)),$(eval $(call dll_gnu_template,$(lib),-$(VERSION_MAJOR).dll)))
+ 
+ INSTALL-LIBS=$(call cond_enabled,CONFIG_INSTALL_LIBS,INSTALL-LIBS)
+ ifeq ($(MAKECMDGOALS),dist)
+diff --git a/build/make/configure.sh b/build/make/configure.sh
+index 0e25f65da..d001c7888 100644
+--- a/build/make/configure.sh
++++ b/build/make/configure.sh
+@@ -647,7 +647,10 @@ process_common_cmdline() {
+       --libdir=*)
+         libdir="${optval}"
+         ;;
+-      --libc|--as|--prefix|--libdir)
++      --bindir=*)
++        bindir="${optval}"
++        ;;
++      --libc|--as|--prefix|--libdir|--bindir)
+         die "Option ${opt} requires argument"
+         ;;
+       --help|-h)
+@@ -676,9 +679,14 @@ post_process_common_cmdline() {
+   prefix="${prefix%/}"
+   libdir="${libdir:-${prefix}/lib}"
+   libdir="${libdir%/}"
++  bindir="${bindir:-${prefix}/bin}"
++  bindir="${bindir%/}"
+   if [ "${libdir#${prefix}}" = "${libdir}" ]; then
+     die "Libdir ${libdir} must be a subdirectory of ${prefix}"
+   fi
++  if [ "${bindir#${prefix}}" = "${bindir}" ]; then
++    die "Bindir ${bindir} must be a subdirectory of ${prefix}"
++  fi
+ }
+ 
+ post_process_cmdline() {
+diff --git a/configure b/configure
+index 4f5816134..8282a455e 100644
+--- a/configure
++++ b/configure
+@@ -265,7 +265,6 @@ ARCH_EXT_LIST="
+ HAVE_LIST="
+     ${ARCH_EXT_LIST}
+     vpx_ports
+-    pthread_h
+     unistd_h
+ "
+ EXPERIMENT_LIST="
+@@ -495,6 +494,7 @@ else
+ DIST_DIR?=\$(DESTDIR)${prefix}
+ endif
+ LIBSUBDIR=${libdir##${prefix}/}
++BINSUBDIR=${bindir##${prefix}/}
+ 
+ VERSION_STRING=${VERSION_STRING}
+ 
+@@ -532,9 +532,13 @@ process_detect() {
+             ;;
+         *)
+             if enabled gnu; then
+-                echo "--enable-shared is only supported on ELF; assuming this is OK"
++                echo "--enable-shared is only supported on ELF and PE; assuming this is OK"
++            elif enabled win32; then
++                echo "--enable-shared is only supported on ELF and PE; assuming this is OK"
++            elif enabled win64; then
++                echo "--enable-shared is only supported on ELF and PE; assuming this is OK"
+             else
+-                die "--enable-shared only supported on ELF, OS/2, and Darwin for now"
++                die "--enable-shared only supported on ELF, OS/2, Darwin and PE for now"
+             fi
+             ;;
+         esac
+@@ -591,11 +595,6 @@ EOF
+ 
+     # Use both check_header and check_lib here, since check_lib
+     # could be a stub that always returns true.
+-    check_header pthread.h && check_lib -lpthread <<EOF || disable_feature pthread_h
+-#include <pthread.h>
+-#include <stddef.h>
+-int main(void) { return pthread_create(NULL, NULL, NULL, NULL); }
+-EOF
+     check_header unistd.h # for sysconf(3) and friends.
+ 
+     check_header vpx/vpx_integer.h -I${source_path} && enable_feature vpx_ports
+diff --git a/examples.mk b/examples.mk
+index 758ca7f88..cd38c4b7d 100644
+--- a/examples.mk
++++ b/examples.mk
+@@ -329,9 +329,13 @@ else
+ ifneq ($(filter os2%,$(TGT_OS)),)
+ SHARED_LIB_SUF=_dll.a
+ else
++ifneq ($(filter win%,$(TGT_OS)),)
++SHARED_LIB_SUF=.dll.a
++else
+ SHARED_LIB_SUF=.so
+ endif
+ endif
++endif
+ CODEC_LIB_SUF=$(if $(CONFIG_SHARED),$(SHARED_LIB_SUF),.a)
+ $(foreach bin,$(BINS-yes),\
+     $(eval $(bin):$(LIB_PATH)/lib$(CODEC_LIB)$(CODEC_LIB_SUF))\
+diff --git a/libs.mk b/libs.mk
+index 3ccb45dfb..72981757a 100644
+--- a/libs.mk
++++ b/libs.mk
+@@ -125,6 +125,7 @@ endif
+ INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/vpx/%
+ INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/vpx_ports/%
+ INSTALL_MAPS += $(LIBSUBDIR)/%     %
++INSTALL_MAPS += $(BINSUBDIR)/%     %
+ INSTALL_MAPS += src/%     $(SRC_PATH_BARE)/%
+ ifeq ($(CONFIG_MSVS),yes)
+ INSTALL_MAPS += $(foreach p,$(VS_PLATFORMS),$(LIBSUBDIR)/$(p)/%  $(p)/Release/%)
+@@ -255,6 +256,13 @@ EXPORT_FILE             := libvpx.def
+ LIBVPX_SO_SYMLINKS      :=
+ LIBVPX_SO_IMPLIB        := libvpx_dll.a
+ else
++ifeq ($(filter win%,$(TGT_OS)),$(TGT_OS))
++LIBVPX_SO               := libvpx-$(VERSION_MAJOR).dll
++SHARED_LIB_SUF          := .dll.a
++EXPORT_FILE             :=
++LIBVPX_SO_SYMLINKS      :=
++LIBVPX_SO_IMPLIB        := libvpx.dll.a
++else
+ LIBVPX_SO               := libvpx.so.$(SO_VERSION_MAJOR).$(SO_VERSION_MINOR).$(SO_VERSION_PATCH)
+ SHARED_LIB_SUF          := .so
+ EXPORT_FILE             := libvpx.ver
+@@ -264,13 +272,14 @@ LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, \
+ endif
+ endif
+ endif
++endif
+ 
+ LIBS-$(CONFIG_SHARED) += $(BUILD_PFX)$(LIBVPX_SO)\
+                            $(notdir $(LIBVPX_SO_SYMLINKS)) \
+                            $(if $(LIBVPX_SO_IMPLIB), $(BUILD_PFX)$(LIBVPX_SO_IMPLIB))
+ $(BUILD_PFX)$(LIBVPX_SO): $(LIBVPX_OBJS) $(EXPORT_FILE)
+ $(BUILD_PFX)$(LIBVPX_SO): extralibs += -lm
+-$(BUILD_PFX)$(LIBVPX_SO): SONAME = libvpx.so.$(SO_VERSION_MAJOR)
++$(BUILD_PFX)$(LIBVPX_SO): SONAME = $(LIBVPX_SO)
+ $(BUILD_PFX)$(LIBVPX_SO): EXPORTS_FILE = $(EXPORT_FILE)
+ 
+ libvpx.def: $(call enabled,CODEC_EXPORTS)
+@@ -286,6 +295,10 @@ libvpx_dll.a: $(LIBVPX_SO)
+ 	$(qexec)emximp -o $@ $<
+ CLEAN-OBJS += libvpx_dll.a
+ 
++libvpx.dll.a: $(LIBVPX_SO)
++	@echo "    [IMPLIB] $@"
++CLEAN-OBJS += libvpx.dll.a
++
+ define libvpx_symlink_template
+ $(1): $(2)
+ 	@echo "    [LN]     $(2) $$@"
+@@ -302,7 +315,7 @@ $(eval $(call libvpx_symlink_template,\
+ 
+ 
+ INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBVPX_SO_SYMLINKS)
+-INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBSUBDIR)/$(LIBVPX_SO)
++INSTALL-LIBS-$(CONFIG_SHARED) += $(BINSUBDIR)/$(LIBVPX_SO)
+ INSTALL-LIBS-$(CONFIG_SHARED) += $(if $(LIBVPX_SO_IMPLIB),$(LIBSUBDIR)/$(LIBVPX_SO_IMPLIB))
+ 
+ 
+diff --git a/vp8/common/generic/systemdependent.c b/vp8/common/generic/systemdependent.c
+index 0432ee988..1301e7570 100644
+--- a/vp8/common/generic/systemdependent.c
++++ b/vp8/common/generic/systemdependent.c
+@@ -23,7 +23,8 @@
+ #if CONFIG_MULTITHREAD
+ #if HAVE_UNISTD_H && !defined(__OS2__)
+ #include <unistd.h>
+-#elif defined(_WIN32)
++#endif
++#if defined(_WIN32)
+ #include <windows.h>
+ typedef void(WINAPI *PGNSI)(LPSYSTEM_INFO);
+ #elif defined(__OS2__)
+diff --git a/vpx/exports_enc b/vpx/exports_enc
+index 914e36cd4..9781e8375 100644
+--- a/vpx/exports_enc
++++ b/vpx/exports_enc
+@@ -2,6 +2,7 @@ text vpx_codec_enc_config_default
+ text vpx_codec_enc_config_set
+ text vpx_codec_enc_init_multi_ver
+ text vpx_codec_enc_init_ver
++text vpx_codec_enc_init_multi_ver
+ text vpx_codec_encode
+ text vpx_codec_get_cx_data
+ text vpx_codec_get_global_headers
+-- 
+2.23.0.windows.1
+

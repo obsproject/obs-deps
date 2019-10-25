@@ -1,0 +1,27 @@
+From 41c658615595a5eae408c2ceb945cf21122678e4 Mon Sep 17 00:00:00 2001
+From: Michael Fabian 'Xaymar' Dirks <info@xaymar.com>
+Date: Sat, 26 Oct 2019 11:56:41 +0200
+Subject: [PATCH] MSVC Cross-Compile Support
+
+---
+ CMakeLists.txt | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0fe939d..375414c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -57,7 +57,9 @@ endif()
+ #
+ # Check for unistd.h
+ #
+-check_include_file(unistd.h Z_HAVE_UNISTD_H)
++if(NOT WIN32)
++    check_include_file(unistd.h Z_HAVE_UNISTD_H)
++endif()
+ 
+ if(MSVC)
+     set(CMAKE_DEBUG_POSTFIX "d")
+-- 
+2.23.0.windows.1
+

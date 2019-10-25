@@ -1,0 +1,11 @@
+prefix=@@PREFIX@@
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: mbedx509
+Description: mbedx509, but a fake pkg-config entry
+Version: 99.99.99.99
+
+Requires:
+Libs: -L${libdir} -llibmbedx509.dll.a
+Cflags: -I${includedir}

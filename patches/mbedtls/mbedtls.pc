@@ -1,0 +1,11 @@
+prefix=@@PREFIX@@
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: mbedtls
+Description: mbedtls, but a fake pkg-config entry
+Version: 99.99.99.99
+
+Requires:
+Libs: -L${libdir} -llibmbedtls.dll.a
+Cflags: -I${includedir}

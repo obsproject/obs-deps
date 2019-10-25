@@ -1,0 +1,182 @@
+name: Windows
+
+on: [push, pull_request]
+
+jobs:
+  zlib:
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [ win32, win64 ]
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Clone
+      uses: actions/checkout@v1
+    - name: Update Submodule
+      run: git submodule update --init --recursive --force zlib
+    - name: Build
+      run: |
+        ./win-cross-compile.sh -t ${{matrix.target}} -v -v -- zlib
+        rm -rf build/${{ matrix.target }}/tmp
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: zlib-${{ matrix.target }}
+        path: build/${{ matrix.target }}
+  x264:
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [ win32, win64 ]
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Clone
+      uses: actions/checkout@v1
+    - name: Update Submodule
+      run: git submodule update --init --recursive --force x264
+    - name: Build
+      run: |
+        ./win-cross-compile.sh -t ${{matrix.target}} -v -v -- x264
+        rm -rf build/${{ matrix.target }}/tmp
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: x264-${{ matrix.target }}
+        path: build/${{ matrix.target }}
+  ogg:
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [ win32, win64 ]
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Clone
+      uses: actions/checkout@v1
+    - name: Update Submodule
+      run: git submodule update --init --recursive --force ogg
+    - name: Build
+      run: |
+        ./win-cross-compile.sh -t ${{matrix.target}} -v -v -- ogg
+        rm -rf build/${{ matrix.target }}/tmp
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: ogg-${{ matrix.target }}
+        path: build/${{ matrix.target }}
+  opus:
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [ win32, win64 ]
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Clone
+      uses: actions/checkout@v1
+    - name: Update Submodule
+      run: git submodule update --init --recursive --force opus
+    - name: Build
+      run: |
+        ./win-cross-compile.sh -t ${{matrix.target}} -v -v -- opus
+        rm -rf build/${{ matrix.target }}/tmp
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: opus-${{ matrix.target }}
+        path: build/${{ matrix.target }}
+  vpx:
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [ win32, win64 ]
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Clone
+      uses: actions/checkout@v1
+    - name: Update Submodule
+      run: git submodule update --init --recursive --force libvpx
+    - name: Build
+      run: |
+        ./win-cross-compile.sh -t ${{matrix.target}} -v -v -- vpx
+        rm -rf build/${{ matrix.target }}/tmp
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: vpx-${{ matrix.target }}
+        path: build/${{ matrix.target }}
+  luajit:
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [ win32, win64 ]
+        include:
+          - target: win32
+            arch: Win32
+            arch_host: x86
+          - target: win64
+            arch: x64
+            arch_host: x64
+    runs-on: windows-2019
+    steps:      
+    - name: Clone
+      uses: actions/checkout@v1
+    - name: Update Submodule
+      run: git submodule update --init --recursive --force luajit
+    - name: Configure
+      shell: bash
+      run: |
+        cmake -Hluajit -Bbuild -G"Visual Studio 16 2019" -A${{ matrix.arch }} -T"host=${{ matrix.arch_host }}" -DCMAKE_INSTALL_PREFIX=output -DINSTALL_LIB=output/bin -DINSTALL_LMOD=output/bin/lua -DINSTALL_CMOD=output/bin/lua --no-warn-unused-cli -DCMAKE_INSTALL_MESSAGE=LAZY -Wno-dev
+    - name: Build
+      shell: bash
+      run: |
+        cmake --build build --target INSTALL --config RelWithDebInfo
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: luajit-${{ matrix.target }}
+        path: output
+  mbedtls:
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [ win32, win64 ]
+        include:
+          - target: win32
+            arch: Win32
+            arch_host: x86
+          - target: win64
+            arch: x64
+            arch_host: x64
+    needs: [ zlib ]
+    runs-on: windows-2019
+    steps:      
+    - name: Clone
+      uses: actions/checkout@v1
+    - name: Update Submodule
+      run: git submodule update --init --recursive --force mbedtls
+    - name: Download zlib
+      uses: actions/download-artifact@v1
+      with:
+        name: zlib-${{ matrix.target }}
+    - name: Configure
+      shell: bash
+      run: |
+        ls
+        ls zlib-${{ matrix.target }}
+        ls zlib-${{ matrix.target }}/bin
+        ls zlib-${{ matrix.target }}/lib        
+        cmake -H"mbedtls" -B"build" -G"Visual Studio 16 2019" -A"${{matrix.arch}}" -T"host=${{matrix.arch_host}}" -DCMAKE_INSTALL_PREFIX="${PWD}/output" -DENABLE_TESTING=Off -DENABLE_PROGRAMS=Off -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DUSE_STATIC_MBEDTLS_LIBRARY=OFF -DENABLE_ZLIB_SUPPORT=ON -DZLIB_ROOT="${PWD}/zlib-${{ matrix.target }}" -DZLIB_LIBRARY="${PWD}/zlib-${{ matrix.target }}/lib/zlib" -DZLIB_INCLUDE_DIRS="${PWD}/zlib-${{ matrix.target }}/include" --no-warn-unused-cli -DCMAKE_INSTALL_MESSAGE=LAZY -Wno-dev
+    - name: Build
+      shell: bash
+      run: |
+        cmake --build build --target INSTALL --config RelWithDebInfo
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: mbedtls-${{ matrix.target }}
+        path: output
+
+  #   - name: Configure & Build libWebSockets
+  #     run: |
+  #       git submodule update --init --recursive --force libwebsockets
+  #       cmake "-Hlibwebsockets" "-Bbuild/${{ matrix.target }}/libwebsockets" -G"${{ matrix.generator }}" -A${{ matrix.arch }} -T"host=${{ matrix.arch_host }}" -DCMAKE_INSTALL_PREFIX=output -DLWS_IPV6=ON -DLWS_WITH_MBEDTLS=1 "-DMBEDTLS_LIBRARY=deps/bin/libmbedtls.lib" "-DMBEDX509_LIBRARY=deps/bin/libmbedx509.lib" "-DMBEDCRYPTO_LIBRARY=deps/bin/libmbedcrypto.lib" "-DLWS_MBEDTLS_INCLUDE_DIRS=deps/include" -DLWS_WITHOUT_DAEMONIZE=ON -DLWS_WITHOUT_TESTAPPS=ON -DLWS_WITHOUT_TEST_CLIENT=ON -DLWS_WITHOUT_TEST_PING=ON -DLWS_WITHOUT_TEST_SERVER=ON -DLWS_WITHOUT_TEST_SERVER_EXTPOLL=ON -DLWS_WITH_SHARED=ON -DLWS_WITH_ZLIB=ON -DLWS_WITH_BUNDLED_ZLIB=OFF "-DLWS_ZLIB_INCLUDE_DIRS=deps\/include" "-DLWS_ZLIB_LIBRARIES=deps\/bin\/libzlib.lib"
+  #       cmake --build "build/${{ matrix.target }}/libwebsockets" --config RelWithDebInfo --target INSTALL

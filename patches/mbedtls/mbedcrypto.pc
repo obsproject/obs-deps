@@ -1,0 +1,11 @@
+prefix=@@PREFIX@@
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: mbedcrypto
+Description: mbedcrypto, but a fake pkg-config entry
+Version: 99.99.99.99
+
+Requires:
+Libs: -L${libdir} -llibmbedcrypto.dll.a
+Cflags: -I${includedir}

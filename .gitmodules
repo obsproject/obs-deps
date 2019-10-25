@@ -1,0 +1,45 @@
+[submodule "x264"]
+	path = x264
+	url = https://code.videolan.org/videolan/x264.git
+[submodule "ffmpeg"]
+	path = ffmpeg
+	url = https://git.ffmpeg.org/ffmpeg.git
+[submodule "mbedtls"]
+	path = mbedtls
+	url = https://github.com/Xaymar/mbedtls.git
+[submodule "zlib"]
+	path = zlib
+	url = https://github.com/madler/zlib.git
+[submodule "vorbis"]
+	path = vorbis
+	url = https://github.com/xiph/vorbis.git
+[submodule "ogg"]
+	path = ogg
+	url = https://github.com/xiph/ogg.git
+[submodule "opus"]
+	path = opus
+	url = https://github.com/xiph/opus.git
+[submodule "libvpx"]
+	path = libvpx
+	url = https://chromium.googlesource.com/webm/libvpx
+[submodule "nv-codec-headers"]
+	path = nv-codec-headers
+	url = https://github.com/FFmpeg/nv-codec-headers.git
+[submodule "libpng"]
+	path = libpng
+	url = https://github.com/glennrp/libpng.git
+[submodule "srt"]
+	path = srt
+	url = https://github.com/Haivision/srt.git
+[submodule "curl"]
+	path = curl
+	url = https://github.com/curl/curl.git
+[submodule "freetype"]
+	path = freetype
+	url = git://git.sv.nongnu.org/freetype/freetype2.git
+[submodule "luajit"]
+	path = luajit
+	url = https://github.com/Xaymar/luajit.git
+[submodule "libwebsockets"]
+	path = libwebsockets
+	url = https://libwebsockets.org/repo/libwebsockets
