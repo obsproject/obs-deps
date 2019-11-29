@@ -211,10 +211,11 @@ function arch_select {
 function quiet_call {
 	if ! can_log_debug; then
 		$* > /dev/null
+		return $?
 	else
 		$*
+		return $?
 	fi
-	return $?
 }
 
 function ninja_args {

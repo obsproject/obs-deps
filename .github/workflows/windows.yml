@@ -186,15 +186,15 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: zlib-${{ matrix.target }}
-        path: build/${{ matrix.target }}
+        path: deps
     - name: Download Dependencies 2
       uses: actions/download-artifact@v1
       with:
         name: mbedtls-${{ matrix.target }}
-        path: build/${{ matrix.target }}
+        path: deps
     - name: Build
       run: |
-        ./win-cross-compile.sh -t ${{matrix.target}} -v -v -- curl
+        ./win-cross-compile.sh -t ${{matrix.target}} -v -v -d ${PWD}/deps/ -- curl
         rm -rf build/${{ matrix.target }}/tmp
     - name: Upload Artifact
       uses: actions/upload-artifact@v1
