@@ -16,6 +16,7 @@ OPT_LOGLEVEL=0
 OPT_TARGET=
 OPT_BUILDDIR=
 OPT_OUTPUTDIR=
+OPT_DEPDIR=
 OPT_SOLO=FALSE
 
 # Steps
@@ -75,6 +76,7 @@ Available Options:
       win64                      64-bit Windows
   -o,--output <path>         Output directory for final binaries.
   -b,--build <path>          Build directory to use during building.
+  -d,--deps <path>           Path to dependencies of the step.
   -s,--solo                  Do not build any dependencies, only the given steps.
 EOF
 			exit 0
@@ -107,6 +109,11 @@ EOF
 			SHIFT=$((SHIFT + 1))
 			shift
 			;;
+		-d|--deps)
+			OPT_DEPDIR=$2
+			SHIFT=$((SHIFT + 1))
+			shift
+			;;
 		-s|--solo)
 			OPT_SOLO=TRUE
 			;;
@@ -126,6 +133,9 @@ EOF
 	fi
 	if [ "$OPT_BUILDDIR" == "" ]; then
 		OPT_BUILDDIR=${SCRIPT_DIR}/build/${OPT_TARGET}
+	fi
+	if [ "$OPT_DEPDIR" == "" ]; then
+		OPT_DEPDIR=${OPT_BUILDDIR}
 	fi
 	if [ "$OPT_OUTPUTDIR" == "" ]; then
 		OPT_OUTPUTDIR=${SCRIPT_DIR}/build/${OPT_TARGET}-bin
@@ -826,8 +836,8 @@ function step_curl {
 		--enable-secure-transport \
 		--disable-manual \
 		--disable-versioned-symbols \
-		--with-mbedtls=${_SYSROOT} \
-		--with-zlib=${_SYSROOT}
+		--with-mbedtls=${OPT_DEPDIR} \
+		--with-zlib=${OPT_DEPDIR}
 
 	clear_call_env
 	if [ $? -ne 0 ]; then popd > /dev/null; return $?; fi
