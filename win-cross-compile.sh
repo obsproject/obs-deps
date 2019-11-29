@@ -57,7 +57,7 @@ declare -A STEPS_COMPLETED
 # Argument Function
 function arguments {
 	# --long "help,verbose"
-	OPTIONS=$(getopt -l "help,verbose,quiet,target:,output:,build:,solo" -o "hvqt:o:b:s" -- $*)
+	OPTIONS=$(getopt -l "help,verbose,quiet,target:,output:,build:,solo,deps:" -o "hvqt:o:b:sd:" -- $*)
 	if [ $? -ne 0 ]; then
 		return 1
 	fi
