@@ -160,10 +160,6 @@ jobs:
     - name: Configure
       shell: bash
       run: |
-        ls
-        ls zlib-${{ matrix.target }}
-        ls zlib-${{ matrix.target }}/bin
-        ls zlib-${{ matrix.target }}/lib        
         cmake -H"mbedtls" -B"build" -G"Visual Studio 16 2019" -A"${{matrix.arch}}" -T"host=${{matrix.arch_host}}" -DCMAKE_INSTALL_PREFIX="${PWD}/output" -DENABLE_TESTING=Off -DENABLE_PROGRAMS=Off -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DUSE_STATIC_MBEDTLS_LIBRARY=OFF -DENABLE_ZLIB_SUPPORT=ON -DZLIB_ROOT="${PWD}/zlib-${{ matrix.target }}" -DZLIB_LIBRARY="${PWD}/zlib-${{ matrix.target }}/lib/zlib" -DZLIB_INCLUDE_DIRS="${PWD}/zlib-${{ matrix.target }}/include" --no-warn-unused-cli -DCMAKE_INSTALL_MESSAGE=LAZY -Wno-dev
     - name: Build
       shell: bash
@@ -174,6 +170,37 @@ jobs:
       with:
         name: mbedtls-${{ matrix.target }}
         path: output
+  curl:
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [ win32, win64 ]
+    runs-on: ubuntu-18.04
+    needs: [ zlib, mbedtls ]
+    steps:
+    - name: Clone
+      uses: actions/checkout@v1
+    - name: Update Submodule
+      run: git submodule update --init --recursive --force curl
+    - name: Download Dependencies 1
+      uses: actions/download-artifact@v1
+      with:
+        name: zlib-${{ matrix.target }}
+        path: build/${{ matrix.target }}
+    - name: Download Dependencies 2
+      uses: actions/download-artifact@v1
+      with:
+        name: mbedtls-${{ matrix.target }}
+        path: build/${{ matrix.target }}
+    - name: Build
+      run: |
+        ./win-cross-compile.sh -t ${{matrix.target}} -v -v -- curl
+        rm -rf build/${{ matrix.target }}/tmp
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: curl-${{ matrix.target }}
+        path: build/${{ matrix.target }}
 
   #   - name: Configure & Build libWebSockets
   #     run: |
