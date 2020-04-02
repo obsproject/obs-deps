@@ -100,7 +100,7 @@ make install
 cd $WORK_DIR
 
 # x264
-git clone git://git.videolan.org/x264.git
+git clone https://code.videolan.org/videolan/x264.git
 cd ./x264
 git checkout origin/stable
 mkdir build
