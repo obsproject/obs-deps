@@ -63,10 +63,11 @@ make install
 cd $WORK_DIR
 
 # libogg
-curl -L -O https://ftp.osuosl.org/pub/xiph/releases/ogg/libogg-1.3.3.tar.gz
-tar -xf libogg-1.3.3.tar.gz
-cd ./libogg-1.3.3
+curl -L -o ogg-68ca384.tar.gz 'https://git.xiph.org/?p=ogg.git;a=snapshot;h=68ca3841567247ac1f7850801a164f58738d8df9;sf=tgz'
+tar -xf ogg-68ca384.tar.gz
+cd ./ogg-68ca384
 mkdir build
+./autogen.sh
 cd ./build
 ../configure --disable-shared --enable-static --prefix="/tmp/obsdeps"
 make -j
