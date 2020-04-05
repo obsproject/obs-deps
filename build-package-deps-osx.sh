@@ -51,9 +51,9 @@ export MACOSX_DEPLOYMENT_TARGET=10.11
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig
 
 # libopus
-curl -L -O https://ftp.osuosl.org/pub/xiph/releases/opus/opus-1.2.1.tar.gz
-tar -xf opus-1.2.1.tar.gz
-cd ./opus-1.2.1
+curl -L -O https://ftp.osuosl.org/pub/xiph/releases/opus/opus-1.3.1.tar.gz
+tar -xf opus-1.3.1.tar.gz
+cd ./opus-1.3.1
 mkdir build
 cd ./build
 ../configure --disable-shared --enable-static --prefix="/tmp/obsdeps"
@@ -63,10 +63,11 @@ make install
 cd $WORK_DIR
 
 # libogg
-curl -L -O https://ftp.osuosl.org/pub/xiph/releases/ogg/libogg-1.3.3.tar.gz
-tar -xf libogg-1.3.3.tar.gz
-cd ./libogg-1.3.3
+curl -L -o ogg-68ca384.tar.gz 'https://git.xiph.org/?p=ogg.git;a=snapshot;h=68ca3841567247ac1f7850801a164f58738d8df9;sf=tgz'
+tar -xf ogg-68ca384.tar.gz
+cd ./ogg-68ca384
 mkdir build
+./autogen.sh
 cd ./build
 ../configure --disable-shared --enable-static --prefix="/tmp/obsdeps"
 make -j
@@ -87,10 +88,10 @@ make install
 cd $WORK_DIR
 
 # libvpx
-curl -L -O https://chromium.googlesource.com/webm/libvpx/+archive/v1.7.0.tar.gz
-mkdir -p ./libvpx-v1.7.0
-tar -xf v1.7.0.tar.gz -C $PWD/libvpx-v1.7.0
-cd ./libvpx-v1.7.0
+curl -L -O https://chromium.googlesource.com/webm/libvpx/+archive/v1.8.2.tar.gz
+mkdir -p ./libvpx-v1.8.2
+tar -xf v1.8.2.tar.gz -C $PWD/libvpx-v1.8.2
+cd ./libvpx-v1.8.2
 mkdir -p build
 cd ./build
 ../configure --disable-shared --prefix="/tmp/obsdeps" --libdir="/tmp/obsdeps/lib"
@@ -118,9 +119,9 @@ rsync -avh --include="*/" --include="*.h" --exclude="*" ./* $DEPS_DEST/include/
 cd $WORK_DIR
 
 # janson
-curl -L -O http://www.digip.org/jansson/releases/jansson-2.11.tar.gz
-tar -xf jansson-2.11.tar.gz
-cd jansson-2.11
+curl -L -O http://www.digip.org/jansson/releases/jansson-2.12.tar.gz
+tar -xf jansson-2.12.tar.gz
+cd jansson-2.12
 mkdir build
 cd ./build
 ../configure --libdir="/tmp/obsdeps/bin" --enable-shared --disable-static
@@ -135,9 +136,9 @@ export LDFLAGS="-L/tmp/obsdeps/lib"
 export CFLAGS="-I/tmp/obsdeps/include"
 
 # FFMPEG
-curl -L -O https://github.com/FFmpeg/FFmpeg/archive/n4.0.2.zip
-unzip ./n4.0.2.zip
-cd ./FFmpeg-n4.0.2
+curl -L -O https://github.com/FFmpeg/FFmpeg/archive/n4.2.2.zip
+unzip ./n4.2.2.zip
+cd ./FFmpeg-n4.2.2
 mkdir build
 cd ./build
 ../configure --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=10.11" --enable-shared --disable-static --shlibdir="/tmp/obsdeps/bin" --enable-gpl --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --disable-outdev=sdl

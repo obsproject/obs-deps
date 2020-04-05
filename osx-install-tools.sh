@@ -1,1 +1,1 @@
-brew install nasm pkg-config
+brew install nasm pkg-config automake
