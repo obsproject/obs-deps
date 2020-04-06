@@ -1,6 +1,9 @@
 name: build_macos
 
 on:
+  push:
+    branches: 
+      - master
   pull_request:
     paths-ignore:
       - '**.md'
