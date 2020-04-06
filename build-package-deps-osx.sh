@@ -198,6 +198,18 @@ Requires.private: mbedcrypto
 EOF
 
 cd $WORK_DIR
+
+# srt
+curl -L -O https://github.com/Haivision/srt/archive/v1.4.1.tar.gz
+tar -xf v1.4.1.tar.gz
+cd srt-1.4.1
+mkdir build
+cd ./build
+cmake -DCMAKE_INSTALL_PREFIX="/tmp/obsdeps" -DENABLE_APPS=OFF -DUSE_ENCLIB="mbedtls" -DENABLE_STATIC=ON -DENABLE_SHARED=OFF  -DSSL_INCLUDE_DIRS="/tmp/obsdeps/include" -DSSL_LIBRARY_DIRS="/tmp/obsdeps/lib" -DCMAKE_FIND_FRAMEWORK=LAST ..
+make -j
+make install
+
+cd $WORK_DIR
 export LDFLAGS="-L/tmp/obsdeps/lib"
 export CFLAGS="-I/tmp/obsdeps/include"
 
