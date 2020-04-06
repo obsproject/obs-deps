@@ -132,8 +132,87 @@ rsync -avh --include="*/" --include="*.h" --exclude="*" ./* $DEPS_DEST/include/
 
 cd $WORK_DIR
 
+# mbedtls
+curl -L -O https://tls.mbed.org/download/mbedtls-2.16.5-apache.tgz
+tar -xf mbedtls-2.16.5-apache.tgz
+cd mbedtls-2.16.5
+sed -i '.orig' 's/\/\/\#define MBEDTLS_THREADING_PTHREAD/\#define MBEDTLS_THREADING_PTHREAD/g' include/mbedtls/config.h
+sed -i '.orig' 's/\/\/\#define MBEDTLS_THREADING_C/\#define MBEDTLS_THREADING_C/g' include/mbedtls/config.h
+mkdir build
+cd ./build
+cmake -DCMAKE_INSTALL_PREFIX="/tmp/obsdeps" -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PROGRAMS=OFF ..
+make -j
+make install
+find /tmp/obsdeps/lib -name libmbed\*.dylib -exec cp \{\} $DEPS_DEST/bin/ \;
+install_name_tool -id $DEPS_DEST/bin/libmbedtls.12.dylib $DEPS_DEST/bin/libmbedtls.12.dylib
+install_name_tool -id $DEPS_DEST/bin/libmbedcrypto.3.dylib $DEPS_DEST/bin/libmbedcrypto.3.dylib
+install_name_tool -id $DEPS_DEST/bin/libmbedx509.0.dylib $DEPS_DEST/bin/libmbedx509.0.dylib
+install_name_tool -change libmbedtls.12.dylib $DEPS_DEST/bin/libmbedtls.12.dylib $DEPS_DEST/bin/libmbedcrypto.3.dylib
+install_name_tool -change libmbedx509.0.dylib $DEPS_DEST/bin/libmbedx509.0.dylib $DEPS_DEST/bin/libmbedx509.0.dylib
+install_name_tool -change libmbedcrypto.3.dylib $DEPS_DEST/bin/libmbedcrypto.3.dylib $DEPS_DEST/bin/libmbedx509.0.dylib
+install_name_tool -change libmbedtls.12.dylib $DEPS_DEST/bin/libmbedtls.12.dylib $DEPS_DEST/bin/libmbedtls.12.dylib
+install_name_tool -change libmbedx509.0.dylib $DEPS_DEST/bin/libmbedx509.0.dylib $DEPS_DEST/bin/libmbedtls.12.dylib
+install_name_tool -change libmbedcrypto.3.dylib $DEPS_DEST/bin/libmbedcrypto.3.dylib $DEPS_DEST/bin/libmbedtls.12.dylib
+rsync -avh --include="*/" --include="*.h" --exclude="*" ./include/mbedtls/* $DEPS_DEST/include/mbedtls
+rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/mbedtls/* $DEPS_DEST/include/mbedtls
+if ! [ -d /tmp/obsdeps/lib/pkgconfig ]; then
+    mkdir -p /tmp/obsdeps/lib/pkgconfig
+fi
+cat <<EOF > /tmp/obsdeps/lib/pkgconfig/mbedcrypto.pc
+prefix=/tmp/obsdeps
+libdir=\${prefix}/lib
+includedir=\${prefix}/include
+
+Name: mbedcrypto
+Description: lightweight crypto and SSL/TLS library.
+Version: 2.16.5
+
+Libs: -L\${libdir} -lmbedcrypto
+Cflags: -I\${includedir}
+EOF
+cat <<EOF > /tmp/obsdeps/lib/pkgconfig/mbedtls.pc
+prefix=/tmp/obsdeps
+libdir=\${prefix}/lib
+includedir=\${prefix}/include
+
+Name: mbedtls
+Description: lightweight crypto and SSL/TLS library.
+Version: 2.16.5
+
+Libs: -L\${libdir} -lmbedtls
+Cflags: -I\${includedir}
+Requires.private: mbedx509
+EOF
+cat <<EOF > /tmp/obsdeps/lib/pkgconfig/mbedx509.pc
+prefix=/tmp/obsdeps
+libdir=\${prefix}/lib
+includedir=\${prefix}/include
+
+Name: mbedx509
+Description: The mbedTLS X.509 library
+Version: 2.16.5
+
+Libs: -L\${libdir} -lmbedx509
+Cflags: -I\${includedir}
+Requires.private: mbedcrypto
+EOF
+
+cd $WORK_DIR
+
+# srt
+curl -L -O https://github.com/Haivision/srt/archive/v1.4.1.tar.gz
+tar -xf v1.4.1.tar.gz
+cd srt-1.4.1
+mkdir build
+cd ./build
+cmake -DCMAKE_INSTALL_PREFIX="/tmp/obsdeps" -DENABLE_APPS=OFF -DUSE_ENCLIB="mbedtls" -DENABLE_STATIC=ON -DENABLE_SHARED=OFF  -DSSL_INCLUDE_DIRS="/tmp/obsdeps/include" -DSSL_LIBRARY_DIRS="/tmp/obsdeps/lib" -DCMAKE_FIND_FRAMEWORK=LAST ..
+make -j
+make install
+
+cd $WORK_DIR
 export LDFLAGS="-L/tmp/obsdeps/lib"
 export CFLAGS="-I/tmp/obsdeps/include"
+export LD_LIBRARY_PATH="/tmp/obsdeps/lib"
 
 # FFMPEG
 curl -L -O https://github.com/FFmpeg/FFmpeg/archive/n4.2.2.zip
@@ -141,11 +220,22 @@ unzip ./n4.2.2.zip
 cd ./FFmpeg-n4.2.2
 mkdir build
 cd ./build
-../configure --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=10.11" --enable-shared --disable-static --shlibdir="/tmp/obsdeps/bin" --enable-gpl --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --disable-outdev=sdl
+../configure --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=10.11" --enable-shared --disable-static --shlibdir="/tmp/obsdeps/bin" --enable-gpl --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --disable-outdev=sdl
 make -j
 find . -name \*.dylib -exec cp \{\} $DEPS_DEST/bin/ \;
 rsync -avh --include="*/" --include="*.h" --exclude="*" ../* $DEPS_DEST/include/
 rsync -avh --include="*/" --include="*.h" --exclude="*" ./* $DEPS_DEST/include/
+install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib $DEPS_DEST/bin/libavfilter.7.dylib
+install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib $DEPS_DEST/bin/libavdevice.58.dylib
+install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib $DEPS_DEST/bin/libavformat.58.dylib
+install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib $DEPS_DEST/bin/libavfilter.7.dylib
+install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib $DEPS_DEST/bin/libavdevice.58.dylib
+install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib $DEPS_DEST/bin/libavformat.58.dylib
+install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib $DEPS_DEST/bin/libavfilter.7.dylib
+install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib $DEPS_DEST/bin/libavdevice.58.dylib
+install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib $DEPS_DEST/bin/libavformat.58.dylib
+
+cd $WORK_DIR
 
 #luajit
 curl -L -O https://luajit.org/download/LuaJIT-2.0.5.tar.gz
