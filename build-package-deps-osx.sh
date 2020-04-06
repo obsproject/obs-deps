@@ -209,15 +209,15 @@ build_mbedtls() {
     make -j
     make install
     find /tmp/obsdeps/lib -name libmbed\*.dylib -exec cp \{\} ${DEPS_DEST}/bin/ \;
-    install_name_tool -id ${DEPS_DEST}/bin/libmbedtls.12.dylib ${DEPS_DEST}/bin/libmbedtls.12.dylib
-    install_name_tool -id ${DEPS_DEST}/bin/libmbedcrypto.3.dylib ${DEPS_DEST}/bin/libmbedcrypto.3.dylib
-    install_name_tool -id ${DEPS_DEST}/bin/libmbedx509.0.dylib ${DEPS_DEST}/bin/libmbedx509.0.dylib
-    install_name_tool -change libmbedtls.12.dylib ${DEPS_DEST}/bin/libmbedtls.12.dylib ${DEPS_DEST}/bin/libmbedcrypto.3.dylib
-    install_name_tool -change libmbedx509.0.dylib ${DEPS_DEST}/bin/libmbedx509.0.dylib ${DEPS_DEST}/bin/libmbedx509.0.dylib
-    install_name_tool -change libmbedcrypto.3.dylib ${DEPS_DEST}/bin/libmbedcrypto.3.dylib ${DEPS_DEST}/bin/libmbedx509.0.dylib
-    install_name_tool -change libmbedtls.12.dylib ${DEPS_DEST}/bin/libmbedtls.12.dylib ${DEPS_DEST}/bin/libmbedtls.12.dylib
-    install_name_tool -change libmbedx509.0.dylib ${DEPS_DEST}/bin/libmbedx509.0.dylib ${DEPS_DEST}/bin/libmbedtls.12.dylib
-    install_name_tool -change libmbedcrypto.3.dylib ${DEPS_DEST}/bin/libmbedcrypto.3.dylib ${DEPS_DEST}/bin/libmbedtls.12.dylib
+    install_name_tool -id /tmp/obsdeps/bin/libmbedtls.12.dylib ${DEPS_DEST}/bin/libmbedtls.12.dylib
+    install_name_tool -id /tmp/obsdeps/bin/libmbedcrypto.3.dylib ${DEPS_DEST}/bin/libmbedcrypto.3.dylib
+    install_name_tool -id /tmp/obsdeps/bin/libmbedx509.0.dylib ${DEPS_DEST}/bin/libmbedx509.0.dylib
+    install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib ${DEPS_DEST}/bin/libmbedcrypto.3.dylib
+    install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib ${DEPS_DEST}/bin/libmbedx509.0.dylib
+    install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib ${DEPS_DEST}/bin/libmbedx509.0.dylib
+    install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib ${DEPS_DEST}/bin/libmbedtls.12.dylib
+    install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib ${DEPS_DEST}/bin/libmbedtls.12.dylib
+    install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib ${DEPS_DEST}/bin/libmbedtls.12.dylib
     rsync -avh --include="*/" --include="*.h" --exclude="*" ./include/mbedtls/* ${DEPS_DEST}/include/mbedtls
     rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/mbedtls/* ${DEPS_DEST}/include/mbedtls
     if ! [ -d /tmp/obsdeps/lib/pkgconfig ]; then
