@@ -1,0 +1,32 @@
+name: build_macos
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build
+    runs-on: [macos-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Install Tools
+        if: success()
+        shell: bash
+        run: ./osx-install-tools.sh
+      - name: Build and Package
+        if: success()
+        shell: bash
+        run: ./build-package-deps-osx.sh
+      - name: PublishBuildArtifacts
+        if: success() && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v1
+        with:
+          name: macos-deps
+          path: './osx'
