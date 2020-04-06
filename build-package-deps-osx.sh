@@ -212,6 +212,7 @@ make install
 cd $WORK_DIR
 export LDFLAGS="-L/tmp/obsdeps/lib"
 export CFLAGS="-I/tmp/obsdeps/include"
+export LD_LIBRARY_PATH="/tmp/obsdeps/lib"
 
 # FFMPEG
 curl -L -O https://github.com/FFmpeg/FFmpeg/archive/n4.2.2.zip
@@ -219,11 +220,22 @@ unzip ./n4.2.2.zip
 cd ./FFmpeg-n4.2.2
 mkdir build
 cd ./build
-../configure --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=10.11" --enable-shared --disable-static --shlibdir="/tmp/obsdeps/bin" --enable-gpl --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --disable-outdev=sdl
+../configure --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=10.11" --enable-shared --disable-static --shlibdir="/tmp/obsdeps/bin" --enable-gpl --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --disable-outdev=sdl
 make -j
 find . -name \*.dylib -exec cp \{\} $DEPS_DEST/bin/ \;
 rsync -avh --include="*/" --include="*.h" --exclude="*" ../* $DEPS_DEST/include/
 rsync -avh --include="*/" --include="*.h" --exclude="*" ./* $DEPS_DEST/include/
+install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib $DEPS_DEST/bin/libavfilter.7.dylib
+install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib $DEPS_DEST/bin/libavdevice.58.dylib
+install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib $DEPS_DEST/bin/libavformat.58.dylib
+install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib $DEPS_DEST/bin/libavfilter.7.dylib
+install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib $DEPS_DEST/bin/libavdevice.58.dylib
+install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib $DEPS_DEST/bin/libavformat.58.dylib
+install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib $DEPS_DEST/bin/libavfilter.7.dylib
+install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib $DEPS_DEST/bin/libavdevice.58.dylib
+install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib $DEPS_DEST/bin/libavformat.58.dylib
+
+cd $WORK_DIR
 
 #luajit
 curl -L -O https://luajit.org/download/LuaJIT-2.0.5.tar.gz
