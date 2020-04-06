@@ -132,6 +132,72 @@ rsync -avh --include="*/" --include="*.h" --exclude="*" ./* $DEPS_DEST/include/
 
 cd $WORK_DIR
 
+# mbedtls
+curl -L -O https://tls.mbed.org/download/mbedtls-2.16.5-apache.tgz
+tar -xf mbedtls-2.16.5-apache.tgz
+cd mbedtls-2.16.5
+sed -i '.orig' 's/\/\/\#define MBEDTLS_THREADING_PTHREAD/\#define MBEDTLS_THREADING_PTHREAD/g' include/mbedtls/config.h
+sed -i '.orig' 's/\/\/\#define MBEDTLS_THREADING_C/\#define MBEDTLS_THREADING_C/g' include/mbedtls/config.h
+mkdir build
+cd ./build
+cmake -DCMAKE_INSTALL_PREFIX="/tmp/obsdeps" -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PROGRAMS=OFF ..
+make -j
+make install
+find /tmp/obsdeps/lib -name libmbed\*.dylib -exec cp \{\} $DEPS_DEST/bin/ \;
+install_name_tool -id $DEPS_DEST/bin/libmbedtls.12.dylib $DEPS_DEST/bin/libmbedtls.12.dylib
+install_name_tool -id $DEPS_DEST/bin/libmbedcrypto.3.dylib $DEPS_DEST/bin/libmbedcrypto.3.dylib
+install_name_tool -id $DEPS_DEST/bin/libmbedx509.0.dylib $DEPS_DEST/bin/libmbedx509.0.dylib
+install_name_tool -change libmbedtls.12.dylib $DEPS_DEST/bin/libmbedtls.12.dylib $DEPS_DEST/bin/libmbedcrypto.3.dylib
+install_name_tool -change libmbedx509.0.dylib $DEPS_DEST/bin/libmbedx509.0.dylib $DEPS_DEST/bin/libmbedx509.0.dylib
+install_name_tool -change libmbedcrypto.3.dylib $DEPS_DEST/bin/libmbedcrypto.3.dylib $DEPS_DEST/bin/libmbedx509.0.dylib
+install_name_tool -change libmbedtls.12.dylib $DEPS_DEST/bin/libmbedtls.12.dylib $DEPS_DEST/bin/libmbedtls.12.dylib
+install_name_tool -change libmbedx509.0.dylib $DEPS_DEST/bin/libmbedx509.0.dylib $DEPS_DEST/bin/libmbedtls.12.dylib
+install_name_tool -change libmbedcrypto.3.dylib $DEPS_DEST/bin/libmbedcrypto.3.dylib $DEPS_DEST/bin/libmbedtls.12.dylib
+rsync -avh --include="*/" --include="*.h" --exclude="*" ./include/mbedtls/* $DEPS_DEST/include/mbedtls
+rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/mbedtls/* $DEPS_DEST/include/mbedtls
+if ! [ -d /tmp/obsdeps/lib/pkgconfig ]; then
+    mkdir -p /tmp/obsdeps/lib/pkgconfig
+fi
+cat <<EOF > /tmp/obsdeps/lib/pkgconfig/mbedcrypto.pc
+prefix=/tmp/obsdeps
+libdir=\${prefix}/lib
+includedir=\${prefix}/include
+
+Name: mbedcrypto
+Description: lightweight crypto and SSL/TLS library.
+Version: 2.16.5
+
+Libs: -L\${libdir} -lmbedcrypto
+Cflags: -I\${includedir}
+EOF
+cat <<EOF > /tmp/obsdeps/lib/pkgconfig/mbedtls.pc
+prefix=/tmp/obsdeps
+libdir=\${prefix}/lib
+includedir=\${prefix}/include
+
+Name: mbedtls
+Description: lightweight crypto and SSL/TLS library.
+Version: 2.16.5
+
+Libs: -L\${libdir} -lmbedtls
+Cflags: -I\${includedir}
+Requires.private: mbedx509
+EOF
+cat <<EOF > /tmp/obsdeps/lib/pkgconfig/mbedx509.pc
+prefix=/tmp/obsdeps
+libdir=\${prefix}/lib
+includedir=\${prefix}/include
+
+Name: mbedx509
+Description: The mbedTLS X.509 library
+Version: 2.16.5
+
+Libs: -L\${libdir} -lmbedx509
+Cflags: -I\${includedir}
+Requires.private: mbedcrypto
+EOF
+
+cd $WORK_DIR
 export LDFLAGS="-L/tmp/obsdeps/lib"
 export CFLAGS="-I/tmp/obsdeps/include"
 
