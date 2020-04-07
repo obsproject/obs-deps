@@ -188,7 +188,8 @@ build_jansson() {
     make -j
     find . -name \*.dylib -exec cp \{\} ${DEPS_DEST}/bin/ \;
     rsync -avh --include="*/" --include="*.h" --exclude="*" ../src/* ${DEPS_DEST}/include/
-    rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${DEPS_DEST}/include/
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ./src/* ${DEPS_DEST}/include/
+    cp ./*.h ${DEPS_DEST}/include/
 
     cd $WORK_DIR
 }
