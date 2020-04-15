@@ -201,8 +201,8 @@ build_mbedtls() {
     hr "Building mbedtls v${MBEDTLS_VERSION}"
 
     # mbedtls
-    curl -L -O https://tls.mbed.org/download/mbedtls-${MBEDTLS_VERSION}-apache.tgz
-    tar -xf mbedtls-${MBEDTLS_VERSION}-apache.tgz
+    curl -L -O https://tls.mbed.org/download/mbedtls-${MBEDTLS_VERSION}-gpl.tgz
+    tar -xf mbedtls-${MBEDTLS_VERSION}-gpl.tgz
     cd mbedtls-${MBEDTLS_VERSION}
     sed -i '.orig' 's/\/\/\#define MBEDTLS_THREADING_PTHREAD/\#define MBEDTLS_THREADING_PTHREAD/g' include/mbedtls/config.h
     sed -i '.orig' 's/\/\/\#define MBEDTLS_THREADING_C/\#define MBEDTLS_THREADING_C/g' include/mbedtls/config.h
