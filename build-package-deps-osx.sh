@@ -9,6 +9,7 @@ set -eE
 # the libs are portable.
 
 BUILD_PACKAGES=(
+    "libpng 1.6.37"
     "opus 1.3.1"
     "ogg 68ca384"
     "vorbis 1.3.6"
@@ -19,6 +20,7 @@ BUILD_PACKAGES=(
     "srt 1.4.1"
     "ffmpeg 4.2.2"
     "luajit 2.0.5"
+    "freetype 2.9"
 )
 
 ## START UTILITIES ##
@@ -332,6 +334,32 @@ build_luajit() {
     rsync -avh --include="*/" --include="*.h" --exclude="*" src/* ${DEPS_DEST}/include/
     make PREFIX=/tmp/obsdeps uninstall
 
+    cd $WORK_DIR
+}
+
+build_libpng() {
+    LIBPNG_VERSION=${1}
+    hr "Building libpng v${LIBPNG_VERSION}"
+
+    curl -L -O https://downloads.sourceforge.net/project/libpng/libpng16/${LIBPNG_VERSION}/libpng-${LIBPNG_VERSION}.tar.xz
+    tar -xf libpng-${LIBPNG_VERSION}.tar.xz
+    cd libpng-${LIBPNG_VERSION}
+    ./configure --enable-static --disable-shared --prefix="/tmp/obsdeps"
+    make PREFIX=/tmp/obsdeps
+    make PREFIX=/tmp/obsdeps install
+    cd $WORK_DIR
+}
+
+build_freetype() {
+    FREETYPE_VERSION=${1}
+    hr "Building libfreetype v${FREETYPE_VERSION}"
+
+    curl -L -O https://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.bz2
+    tar -xf freetype-${FREETYPE_VERSION}.tar.bz2
+    cd freetype-${FREETYPE_VERSION}
+    ./configure --enable-shared --disable-static --prefix="/tmp/obsdeps" --enable-freetype-config --without-harfbuzz
+    make PREFIX=/tmp/obsdeps
+    make PREFIX=/tmp/obsdeps install
     cd $WORK_DIR
 }
 ## END BUILD FUNCS ##
