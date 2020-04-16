@@ -356,8 +356,8 @@ build_freetype() {
 
     export CFLAGS="-mmacosx-version-min=10.11"
 
-    curl -L -O https://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.bz2
-    tar -xf freetype-${FREETYPE_VERSION}.tar.bz2
+    curl -L -O https://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.gz
+    tar -xf freetype-${FREETYPE_VERSION}.tar.gz
     cd freetype-${FREETYPE_VERSION}
     ./configure --enable-shared --disable-static --prefix="/tmp/obsdeps" --enable-freetype-config --without-harfbuzz
     make PREFIX=/tmp/obsdeps
