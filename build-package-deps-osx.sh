@@ -20,7 +20,7 @@ BUILD_PACKAGES=(
     "srt 1.4.1"
     "ffmpeg 4.2.2"
     "luajit 2.0.5"
-    "freetype 2.9"
+    "freetype 2.10.1"
 )
 
 ## START UTILITIES ##
@@ -354,12 +354,17 @@ build_freetype() {
     FREETYPE_VERSION=${1}
     hr "Building libfreetype v${FREETYPE_VERSION}"
 
-    curl -L -O https://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.bz2
-    tar -xf freetype-${FREETYPE_VERSION}.tar.bz2
+    export CFLAGS="-mmacosx-version-min=10.11"
+
+    curl -L -O https://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.gz
+    tar -xf freetype-${FREETYPE_VERSION}.tar.gz
     cd freetype-${FREETYPE_VERSION}
     ./configure --enable-shared --disable-static --prefix="/tmp/obsdeps" --enable-freetype-config --without-harfbuzz
     make PREFIX=/tmp/obsdeps
     make PREFIX=/tmp/obsdeps install
+    find /tmp/obsdeps/lib -name libfreetype\*.dylib -exec cp \{\} ${DEPS_DEST}/bin/ \;
+    rsync -avh --include="*/" --include="*.h" --exclude="*" include/* ${DEPS_DEST}/include/
+    unset CFLAGS
     cd $WORK_DIR
 }
 ## END BUILD FUNCS ##
