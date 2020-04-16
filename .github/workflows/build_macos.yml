@@ -23,13 +23,17 @@ jobs:
         if: success()
         shell: bash
         run: ./osx-install-tools.sh
+      - name: Get Current Date
+        shell: bash
+        id: get_date
+        run: echo ::set-output name=CURRENT_DATE::$(date +"%Y-%m-%d")
       - name: Build and Package
         if: success()
         shell: bash
         run: ./build-package-deps-osx.sh
       - name: PublishBuildArtifacts
         if: success() && github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2-preview
         with:
-          name: macos-deps
-          path: './osx'
+          name: '${{ steps.get_date.outputs.CURRENT_DATE }}'
+          path: ./osx/*.tar.gz
