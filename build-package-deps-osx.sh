@@ -20,7 +20,7 @@ BUILD_PACKAGES=(
     "srt 1.4.1"
     "ffmpeg 4.2.2"
     "luajit 2.0.5"
-    "freetype 2.9"
+    "freetype 2.10.1"
 )
 
 ## START UTILITIES ##
@@ -362,8 +362,8 @@ build_freetype() {
     ./configure --enable-shared --disable-static --prefix="/tmp/obsdeps" --enable-freetype-config --without-harfbuzz
     make PREFIX=/tmp/obsdeps
     make PREFIX=/tmp/obsdeps install
-    find /tmp/obsdeps/lib -name libfreetype\*.dylib -exec cp \{\} ${DEPS_DEST}/lib/ \;
-    rsync -avh --include="*/" --include="*.h" --exclude="*" src/* ${DEPS_DEST}/include/
+    find /tmp/obsdeps/lib -name libfreetype\*.dylib -exec cp \{\} ${DEPS_DEST}/bin/ \;
+    rsync -avh --include="*/" --include="*.h" --exclude="*" include/* ${DEPS_DEST}/include/
     unset CFLAGS
     cd $WORK_DIR
 }
