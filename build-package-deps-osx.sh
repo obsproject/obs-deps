@@ -19,7 +19,7 @@ BUILD_PACKAGES=(
     "mbedtls 2.16.5"
     "srt 1.4.1"
     "ffmpeg 4.2.2"
-    "luajit 2.0.5"
+    "luajit 2.1.0-beta3"
     "freetype 2.10.1"
 )
 
@@ -330,6 +330,7 @@ build_luajit() {
     cd LuaJIT-${LUAJIT_VERSION}
     make PREFIX=/tmp/obsdeps
     make PREFIX=/tmp/obsdeps install
+    ln -sf luajit-${LUAJIT_VERSION} /tmp/obsdeps/bin/luajit
     find /tmp/obsdeps/lib -name libluajit\*.dylib -exec cp \{\} ${DEPS_DEST}/lib/ \;
     rsync -avh --include="*/" --include="*.h" --exclude="*" src/* ${DEPS_DEST}/include/
     make PREFIX=/tmp/obsdeps uninstall
