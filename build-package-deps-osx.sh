@@ -75,7 +75,7 @@ mkdir ${DEPS_DEST}/include
 mkdir ${DEPS_DEST}/lib
 
 # OSX COMPAT
-export MACOSX_DEPLOYMENT_TARGET=10.11
+export MACOSX_DEPLOYMENT_TARGET=10.13
 
 # If you need an olders SDK and Xcode won't give it to you
 # https://github.com/phracker/MacOSX-SDKs
@@ -163,10 +163,10 @@ build_x264() {
     git checkout ${X264_VERSION}
     mkdir build
     cd ./build
-    ../configure --extra-ldflags="-mmacosx-version-min=10.11" --enable-static --prefix="/tmp/obsdeps"
+    ../configure --extra-ldflags="-mmacosx-version-min=10.13" --enable-static --prefix="/tmp/obsdeps"
     make -j
     make install
-    ../configure --extra-ldflags="-mmacosx-version-min=10.11" --enable-shared --libdir="/tmp/obsdeps/bin" --prefix="/tmp/obsdeps"
+    ../configure --extra-ldflags="-mmacosx-version-min=10.13" --enable-shared --libdir="/tmp/obsdeps/bin" --prefix="/tmp/obsdeps"
     make -j
     ln -f -s libx264.*.dylib libx264.dylib
     find . -name \*.dylib -exec cp \{\} ${DEPS_DEST}/bin/ \;
@@ -299,7 +299,7 @@ build_ffmpeg() {
     cd ./FFmpeg-n${FFMPEG_VERSION}
     mkdir build
     cd ./build
-    ../configure --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=10.11" --enable-shared --disable-static --shlibdir="/tmp/obsdeps/bin" --enable-gpl --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --disable-outdev=sdl
+    ../configure --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=10.13" --enable-shared --disable-static --shlibdir="/tmp/obsdeps/bin" --enable-gpl --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --disable-outdev=sdl
     make -j
     find . -name \*.dylib -exec cp \{\} ${DEPS_DEST}/bin/ \;
     rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${DEPS_DEST}/include/
@@ -355,7 +355,7 @@ build_freetype() {
     FREETYPE_VERSION=${1}
     hr "Building libfreetype v${FREETYPE_VERSION}"
 
-    export CFLAGS="-mmacosx-version-min=10.11"
+    export CFLAGS="-mmacosx-version-min=10.13"
 
     curl -L -O https://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.gz
     tar -xf freetype-${FREETYPE_VERSION}.tar.gz
