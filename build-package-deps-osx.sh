@@ -11,7 +11,7 @@ set -eE
 BUILD_PACKAGES=(
     "libpng 1.6.37"
     "opus 1.3.1"
-    "ogg 68ca384"
+    "ogg 68ca3841567247ac1f7850801a164f58738d8df9"
     "vorbis 1.3.6"
     "vpx 1.8.2"
     "jansson 2.12"
@@ -106,7 +106,7 @@ build_ogg() {
     hr "Building libogg v${OGG_VERSION}"
 
     # libogg
-    curl -L -o ogg-${OGG_VERSION}.tar.gz 'https://git.xiph.org/?p=ogg.git;a=snapshot;h=68ca3841567247ac1f7850801a164f58738d8df9;sf=tgz'
+    curl -L -o ogg-${OGG_VERSION}.tar.gz https://gitlab.xiph.org/xiph/ogg/-/archive/${OGG_VERSION}/ogg-${OGG_VERSION}.tar.gz
     tar -xf ogg-${OGG_VERSION}.tar.gz
     cd ./ogg-${OGG_VERSION}
     mkdir build
