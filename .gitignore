@@ -1,0 +1,15 @@
+# Ignore Finder metadata files
+.DS_Store
+._*
+# Ignore Brew bundle files
+Brewfile.lock.json
+# Ignore CI build directory
+CI_BUILD
+CI_BUiLD/*
+# Ignore artifact output directory
+macos
+macos/*
+linux
+linux/*
+windows
+windows/*
