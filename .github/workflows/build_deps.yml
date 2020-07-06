@@ -235,7 +235,7 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD/jansson-${{ env.LIBJANSSON_VERSION }}/build
         run: |
-          find . -name \*.dylib -exec cp \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
+          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
           rsync -avh --include="*/" --include="*.h" --exclude="*" ../src/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
           rsync -avh --include="*/" --include="*.h" --exclude="*" ./src/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
           cp ./*.h ${{ github.workspace }}/CI_BUILD/obsdeps/include/
@@ -270,13 +270,13 @@ jobs:
         working-directory: ${{ github.workspace }}/CI_BUILD/x264/build
         run: |
           ../configure --extra-ldflags="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}" --enable-shared --libdir="/tmp/obsdeps/bin" --prefix="/tmp/obsdeps"
-          make -j
+          make -j${{ env.PARALLELISM }}
       - name: 'Install dependency libx264 (dylib)'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD/x264/build
         run: |
           ln -f -s libx264.*.dylib libx264.dylib
-          find . -name \*.dylib -exec cp \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
+          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
           rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
           rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
       - name: 'Restore libmbedtls from cache'
@@ -299,23 +299,20 @@ jobs:
           sed -i '.orig' 's/\/\/\#define MBEDTLS_THREADING_C/\#define MBEDTLS_THREADING_C/g' include/mbedtls/config.h
           mkdir build
           cd ./build
-          cmake -DCMAKE_INSTALL_PREFIX="/tmp/obsdeps" -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PROGRAMS=OFF ..
+          cmake -DCMAKE_INSTALL_PREFIX="/tmp/obsdeps" -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DENABLE_PROGRAMS=OFF ..
           make -j${{ env.PARALLELISM }}
       - name: 'Install dependency libmbedtls'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD/mbedtls-${{ env.LIBMBEDTLS_VERSION }}/build
         run: |
           make install
-          find /tmp/obsdeps/lib -name libmbed\*.dylib -exec cp \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
-          install_name_tool -id /tmp/obsdeps/bin/libmbedtls.12.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libmbedtls.12.dylib
-          install_name_tool -id /tmp/obsdeps/bin/libmbedcrypto.3.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libmbedcrypto.3.dylib
-          install_name_tool -id /tmp/obsdeps/bin/libmbedx509.0.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libmbedx509.0.dylib
-          install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libmbedcrypto.3.dylib
-          install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libmbedx509.0.dylib
-          install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libmbedx509.0.dylib
-          install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libmbedtls.12.dylib
-          install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libmbedtls.12.dylib
-          install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libmbedtls.12.dylib
+          install_name_tool -id /tmp/obsdeps/lib/libmbedtls.${{ env.LIBMBEDTLS_VERSION }}.dylib /tmp/obsdeps/lib/libmbedtls.${{ env.LIBMBEDTLS_VERSION }}.dylib
+          install_name_tool -id /tmp/obsdeps/lib/libmbedcrypto.${{ env.LIBMBEDTLS_VERSION }}.dylib /tmp/obsdeps/lib/libmbedcrypto.${{ env.LIBMBEDTLS_VERSION }}.dylib
+          install_name_tool -id /tmp/obsdeps/lib/libmbedx509.${{ env.LIBMBEDTLS_VERSION }}.dylib /tmp/obsdeps/lib/libmbedx509.${{ env.LIBMBEDTLS_VERSION }}.dylib
+          install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/lib/libmbedx509.0.dylib /tmp/obsdeps/lib/libmbedtls.${{ env.LIBMBEDTLS_VERSION }}.dylib
+          install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/lib/libmbedcrypto.3.dylib /tmp/obsdeps/lib/libmbedtls.${{ env.LIBMBEDTLS_VERSION }}.dylib
+          install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/lib/libmbedcrypto.3.dylib /tmp/obsdeps/lib/libmbedx509.${{ env.LIBMBEDTLS_VERSION }}.dylib
+          find /tmp/obsdeps/lib -name libmbed\*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
           rsync -avh --include="*/" --include="*.h" --exclude="*" ./include/mbedtls/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/mbedtls
           rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/mbedtls/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/mbedtls
           if [ ! -d /tmp/obsdeps/lib/pkgconfig ]; then
@@ -414,23 +411,14 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD/FFmpeg-n${{ env.FFMPEG_VERSION }}/build
         run: |
-          find . -name \*.dylib -exec cp \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
+          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
           rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
           rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
-          install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libavfilter.7.dylib
-          install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libavdevice.58.dylib
-          install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libavformat.58.dylib
-          install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libavfilter.7.dylib
-          install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libavdevice.58.dylib
-          install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libavformat.58.dylib
-          install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libavfilter.7.dylib
-          install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libavdevice.58.dylib
-          install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib ${{ github.workspace }}/CI_BUILD/obsdeps/bin/libavformat.58.dylib
       - name: 'Restore libluajit from cache'
         id: libluajit-cache
         uses: actions/cache@v2
         env:
-          CACHE_NAME: 'libluajit-cache-rev2'
+          CACHE_NAME: 'libluajit-cache-rev3'
         with:
           path: ${{ github.workspace }}/CI_BUILD/LuaJIT-${{ env.LIBLUAJIT_VERSION }}
           key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.LIBLUAJIT_VERSION }}
@@ -439,18 +427,18 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD
         run: |
-          curl --retry 5 -L -C - -O https://luajit.org/download/LuaJIT-${{ env.LIBLUAJIT_VERSION }}.tar.gz
+          curl --retry 5 -L -C - -O https://LuaJIT.org/download/LuaJIT-${{ env.LIBLUAJIT_VERSION }}.tar.gz
           tar -xf LuaJIT-${{ env.LIBLUAJIT_VERSION }}.tar.gz
           cd LuaJIT-${{ env.LIBLUAJIT_VERSION }}
-          mkdir build
-          make PREFIX=${{ github.workspace }}/CI_BUILD/LuaJIT-${{ env.LIBLUAJIT_VERSION }}/build -j${{ env.PARALLELISM }}
+          make PREFIX="/tmp/obsdeps" -j${{ env.PARALLELISM }}
       - name: 'Install dependency libluajit'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD/LuaJIT-${{ env.LIBLUAJIT_VERSION }}
         run: |
-          make PREFIX=${{ github.workspace }}/CI_BUILD/LuaJIT-${{ env.LIBLUAJIT_VERSION }}/build install
-          find ./build/lib -name libluajit\*.dylib -exec cp \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
+          make PREFIX="/tmp/obsdeps" install
+          find /tmp/obsdeps/lib -name libluajit\*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
           rsync -avh --include="*/" --include="*.h" --exclude="*" src/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+          make PREFIX="/tmp/obsdeps" uninstall
       - name: 'Restore libfreetype from cache'
         id: libfreetype-cache
         uses: actions/cache@v2
@@ -478,7 +466,7 @@ jobs:
         working-directory: ${{ github.workspace }}/CI_BUILD/freetype-${{ env.LIBFREETYPE_VERSION }}/build
         run: |
           make install
-          find /tmp/obsdeps/lib -name libfreetype\*.dylib -exec cp \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
+          find /tmp/obsdeps/lib -name libfreetype\*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
           rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
           unset CFLAGS
       - name: Package dependencies
@@ -554,7 +542,7 @@ jobs:
             WITH_CCACHE=" -ccache"
           fi
           ../configure ${WITH_CCACHE} --prefix="/tmp/obsdeps" -release -opensource -confirm-license -system-zlib \
-            -qt-libpng -qt-libjpeg -qt-freetype -qt-pcre -nomake examples -nomake tests -no-rpath -pkg-config -dbus-runtime \
+            -qt-libpng -qt-libjpeg -qt-freetype -qt-pcre -nomake examples -nomake tests -no-rpath -no-glib -pkg-config -dbus-runtime \
             -skip qt3d -skip qtactiveqt -skip qtandroidextras -skip qtcharts -skip qtconnectivity -skip qtdatavis3d \
             -skip qtdeclarative -skip qtdoc -skip qtgamepad -skip qtgraphicaleffects -skip qtlocation \
             -skip qtlottie -skip qtmultimedia -skip qtnetworkauth -skip qtpurchasing -skip qtquick3d \
