@@ -71,7 +71,7 @@ caught_error() {
     exit 1
 }
 
-build_bff8b464-21b7-4ce8-b19c-c41ff8e84acd() {
+build_346b9331-5e1f-49a7-994e-8a83156c1d52() {
     step "Install Homebrew dependencies"
     trap "caught_error 'Install Homebrew dependencies'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps
@@ -80,7 +80,7 @@ build_bff8b464-21b7-4ce8-b19c-c41ff8e84acd() {
 }
 
 
-build_245d62f1-377d-47fd-a7d4-1a6f0fd23998() {
+build_54c5571f-e0d3-4780-9393-bd44360864b5() {
     step "Get Current Date"
     trap "caught_error 'Get Current Date'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps
@@ -89,7 +89,7 @@ build_245d62f1-377d-47fd-a7d4-1a6f0fd23998() {
 }
 
 
-build_1297205c-3650-4b7e-bd25-b78992d7bcce() {
+build_d482b142-7d1a-45b7-bcb6-7175b64016f4() {
     step "Build environment setup"
     trap "caught_error 'Build environment setup'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps
@@ -102,7 +102,7 @@ build_1297205c-3650-4b7e-bd25-b78992d7bcce() {
 }
 
 
-build_15e31178-ba46-4371-a5da-d11df0935f3b() {
+build_bff0ec03-b2f3-477f-9221-2f7cada6bc96() {
     step "Build dependency Qt"
     trap "caught_error 'Build dependency Qt'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
@@ -124,7 +124,7 @@ build_15e31178-ba46-4371-a5da-d11df0935f3b() {
       WITH_CCACHE=" -ccache"
     fi
     ../configure ${WITH_CCACHE} --prefix="/tmp/obsdeps" -release -opensource -confirm-license -system-zlib \
-      -qt-libpng -qt-libjpeg -qt-freetype -qt-pcre -nomake examples -nomake tests -no-rpath -pkg-config -dbus-runtime \
+      -qt-libpng -qt-libjpeg -qt-freetype -qt-pcre -nomake examples -nomake tests -no-rpath -no-glib -pkg-config -dbus-runtime \
       -skip qt3d -skip qtactiveqt -skip qtandroidextras -skip qtcharts -skip qtconnectivity -skip qtdatavis3d \
       -skip qtdeclarative -skip qtdoc -skip qtgamepad -skip qtgraphicaleffects -skip qtlocation \
       -skip qtlottie -skip qtmultimedia -skip qtnetworkauth -skip qtpurchasing -skip qtquick3d \
@@ -137,7 +137,7 @@ build_15e31178-ba46-4371-a5da-d11df0935f3b() {
 }
 
 
-build_005161ca-4d4e-4fe0-a117-c8b8ec45515c() {
+build_beaabc9b-b0fc-4dcb-b925-8e83414dc812() {
     step "Package dependencies"
     trap "caught_error 'Package dependencies'" ERR
     ensure_dir /tmp
@@ -153,11 +153,11 @@ build_005161ca-4d4e-4fe0-a117-c8b8ec45515c() {
 obs-deps-build-main() {
     ensure_dir /home/runner/work/obs-deps/obs-deps
 
-    build_bff8b464-21b7-4ce8-b19c-c41ff8e84acd
-    build_245d62f1-377d-47fd-a7d4-1a6f0fd23998
-    build_1297205c-3650-4b7e-bd25-b78992d7bcce
-    build_15e31178-ba46-4371-a5da-d11df0935f3b
-    build_005161ca-4d4e-4fe0-a117-c8b8ec45515c
+    build_346b9331-5e1f-49a7-994e-8a83156c1d52
+    build_54c5571f-e0d3-4780-9393-bd44360864b5
+    build_d482b142-7d1a-45b7-bcb6-7175b64016f4
+    build_bff0ec03-b2f3-477f-9221-2f7cada6bc96
+    build_beaabc9b-b0fc-4dcb-b925-8e83414dc812
 
     hr "All Done"
 }

@@ -71,7 +71,7 @@ caught_error() {
     exit 1
 }
 
-build_b96545c3-fd65-4a2c-8033-5a8341d0f827() {
+build_47cd2282-8965-4b61-ab28-62fec66c2cb4() {
     step "Install Homebrew dependencies"
     trap "caught_error 'Install Homebrew dependencies'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps
@@ -80,7 +80,7 @@ build_b96545c3-fd65-4a2c-8033-5a8341d0f827() {
 }
 
 
-build_c8ebcfb8-bf1f-4d9b-bbaa-52e191ba3269() {
+build_4a472a79-6484-4b41-b403-734d35e18080() {
     step "Get Current Date"
     trap "caught_error 'Get Current Date'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps
@@ -89,7 +89,7 @@ build_c8ebcfb8-bf1f-4d9b-bbaa-52e191ba3269() {
 }
 
 
-build_412dc87a-fb95-4b11-8ce0-1a0edd003834() {
+build_9daf28d2-6c93-4c31-a049-0588be784b54() {
     step "Build environment setup"
     trap "caught_error 'Build environment setup'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps
@@ -103,7 +103,7 @@ build_412dc87a-fb95-4b11-8ce0-1a0edd003834() {
 }
 
 
-build_de21b3b3-8765-4148-ab13-5299df6b6082() {
+build_2f0aa16d-f472-4ada-a7d9-8c50c8840ec9() {
     step "Build dependency swig"
     trap "caught_error 'Build dependency swig'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
@@ -118,7 +118,7 @@ build_de21b3b3-8765-4148-ab13-5299df6b6082() {
 }
 
 
-build_a1e48a03-667b-4bfd-95ba-08f8ec0f587a() {
+build_6cce7e1e-2351-4da7-813c-16c7d65ffe89() {
     step "Install dependency swig"
     trap "caught_error 'Install dependency swig'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/swig-3.0.12/build
@@ -129,7 +129,7 @@ build_a1e48a03-667b-4bfd-95ba-08f8ec0f587a() {
 }
 
 
-build_e61ca4f2-a119-4e3d-aee0-00fc047d6cbe() {
+build_7870c90a-edb7-4670-b79f-377202ce0a89() {
     step "Build dependency libpng"
     trap "caught_error 'Build dependency libpng'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
@@ -144,7 +144,7 @@ build_e61ca4f2-a119-4e3d-aee0-00fc047d6cbe() {
 }
 
 
-build_06e7c257-51cd-4510-a294-c00def3a621d() {
+build_17d343fe-15d1-4fcd-a41d-2b8b35ab7305() {
     step "Install dependency libpng"
     trap "caught_error 'Install dependency libpng'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/libpng-1.6.37/build
@@ -153,7 +153,7 @@ build_06e7c257-51cd-4510-a294-c00def3a621d() {
 }
 
 
-build_c6068e37-b1d4-41f3-b450-f8d4163cc7dc() {
+build_b02ec058-c61d-4670-a0ad-0e55b317f8fd() {
     step "Build dependency libopus"
     trap "caught_error 'Build dependency libopus'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
@@ -168,7 +168,7 @@ build_c6068e37-b1d4-41f3-b450-f8d4163cc7dc() {
 }
 
 
-build_2d9e27c3-8c31-45b5-86d5-f8ad2f816dcf() {
+build_45dd03a7-e455-4d23-a31c-8b9054b75b6c() {
     step "Install dependency libopus"
     trap "caught_error 'Install dependency libopus'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/opus-1.3.1/build
@@ -177,7 +177,7 @@ build_2d9e27c3-8c31-45b5-86d5-f8ad2f816dcf() {
 }
 
 
-build_9b7b1cd0-7897-47cb-b875-5bf579dba029() {
+build_546a5d90-1b4f-47e4-b359-50a2ea10c191() {
     step "Build dependency libogg"
     trap "caught_error 'Build dependency libogg'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
@@ -193,7 +193,7 @@ build_9b7b1cd0-7897-47cb-b875-5bf579dba029() {
 }
 
 
-build_0a50357d-cad4-495f-8be6-4bdeae313244() {
+build_c6086b77-5e5e-4f3e-8799-294185078080() {
     step "Install dependency libogg"
     trap "caught_error 'Install dependency libogg'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/ogg-68ca3841567247ac1f7850801a164f58738d8df9/build
@@ -202,7 +202,7 @@ build_0a50357d-cad4-495f-8be6-4bdeae313244() {
 }
 
 
-build_3f19fe04-fbae-46d4-8d36-4be912870f8e() {
+build_7f599a16-96d4-426e-a72a-23d19d23a592() {
     step "Build dependency libvorbis"
     trap "caught_error 'Build dependency libvorbis'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
@@ -217,7 +217,7 @@ build_3f19fe04-fbae-46d4-8d36-4be912870f8e() {
 }
 
 
-build_1a884933-24c0-4d2b-977b-22d946293634() {
+build_d9ea00d0-7d17-4448-8bfe-22008a0b5f1d() {
     step "Install dependency libvorbis"
     trap "caught_error 'Install dependency libvorbis'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/libvorbis-1.3.6/build
@@ -226,7 +226,7 @@ build_1a884933-24c0-4d2b-977b-22d946293634() {
 }
 
 
-build_0a874bdd-8456-4f69-aac9-ebe738c641a7() {
+build_66f24758-7e0f-4987-8ad8-d667187700cc() {
     step "Build dependency libvpx"
     trap "caught_error 'Build dependency libvpx'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
@@ -242,7 +242,7 @@ build_0a874bdd-8456-4f69-aac9-ebe738c641a7() {
 }
 
 
-build_153a8285-7213-43b1-a7da-3e6ec66c64e5() {
+build_8395dc25-155f-4048-94cc-52bd98d5f418() {
     step "Install dependency libvpx"
     trap "caught_error 'Install dependency libvpx'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/libvpx-v1.8.2/build
@@ -251,7 +251,7 @@ build_153a8285-7213-43b1-a7da-3e6ec66c64e5() {
 }
 
 
-build_69c1cccd-879f-44ce-a45c-fe5fe7218dde() {
+build_e36fba56-e72e-4237-98be-9325773282bb() {
     step "Build dependency libjansson"
     trap "caught_error 'Build dependency libjansson'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
@@ -266,19 +266,19 @@ build_69c1cccd-879f-44ce-a45c-fe5fe7218dde() {
 }
 
 
-build_950fece5-dddd-4ee6-80f5-f77979e6cc58() {
+build_789673d5-6cb2-4f88-b1a1-adeb8f264dc9() {
     step "Install dependency libjansson"
     trap "caught_error 'Install dependency libjansson'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/jansson-2.12/build
 
-    find . -name \*.dylib -exec cp \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/ \;
+    find . -name \*.dylib -exec cp -PR \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/ \;
     rsync -avh --include="*/" --include="*.h" --exclude="*" ../src/* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
     rsync -avh --include="*/" --include="*.h" --exclude="*" ./src/* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
     cp ./*.h /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
 }
 
 
-build_729cd2ea-8fcd-47ee-ac56-b725825c93bd() {
+build_d3cd16bd-9ff2-4c55-bfbc-a36278bfeaff() {
     step "Build dependency libx264"
     trap "caught_error 'Build dependency libx264'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
@@ -293,7 +293,7 @@ build_729cd2ea-8fcd-47ee-ac56-b725825c93bd() {
 }
 
 
-build_3fd08d0c-b966-4942-bd0a-73bbad7a2f83() {
+build_36dfe32d-2255-4a3d-873a-daaa29b198e9() {
     step "Install dependency libx264"
     trap "caught_error 'Install dependency libx264'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/x264/build
@@ -302,29 +302,29 @@ build_3fd08d0c-b966-4942-bd0a-73bbad7a2f83() {
 }
 
 
-build_6f4b0bcd-ec34-4a08-a8d9-7ff0a988433d() {
+build_304b4465-63e3-4413-9365-e21a4e025170() {
     step "Build dependency libx264 (dylib)"
     trap "caught_error 'Build dependency libx264 (dylib)'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/x264/build
 
     ../configure --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" --enable-shared --libdir="/tmp/obsdeps/bin" --prefix="/tmp/obsdeps"
-    make -j
+    make -j${PARALLELISM}
 }
 
 
-build_b8b7d727-7f1e-405b-925b-c33ad91243fb() {
+build_14a337ca-49c7-47bc-bed9-3c03d1607fd0() {
     step "Install dependency libx264 (dylib)"
     trap "caught_error 'Install dependency libx264 (dylib)'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/x264/build
 
     ln -f -s libx264.*.dylib libx264.dylib
-    find . -name \*.dylib -exec cp \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/ \;
+    find . -name \*.dylib -exec cp -PR \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/ \;
     rsync -avh --include="*/" --include="*.h" --exclude="*" ../* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
     rsync -avh --include="*/" --include="*.h" --exclude="*" ./* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
 }
 
 
-build_f95090b3-c2c3-4754-8236-c8c57a9fcf61() {
+build_ed02c88a-2cc9-48ab-83a8-d8634dbcdb46() {
     step "Build dependency libmbedtls"
     trap "caught_error 'Build dependency libmbedtls'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
@@ -336,27 +336,24 @@ build_f95090b3-c2c3-4754-8236-c8c57a9fcf61() {
     sed -i '.orig' 's/\/\/\#define MBEDTLS_THREADING_C/\#define MBEDTLS_THREADING_C/g' include/mbedtls/config.h
     mkdir build
     cd ./build
-    cmake -DCMAKE_INSTALL_PREFIX="/tmp/obsdeps" -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PROGRAMS=OFF ..
+    cmake -DCMAKE_INSTALL_PREFIX="/tmp/obsdeps" -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DENABLE_PROGRAMS=OFF ..
     make -j${PARALLELISM}
 }
 
 
-build_d53bdd3e-6327-4314-be0f-5588f6e217d1() {
+build_2802676a-13c9-457d-bf32-41548f8693a6() {
     step "Install dependency libmbedtls"
     trap "caught_error 'Install dependency libmbedtls'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/mbedtls-2.16.5/build
 
     make install
-    find /tmp/obsdeps/lib -name libmbed\*.dylib -exec cp \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/ \;
-    install_name_tool -id /tmp/obsdeps/bin/libmbedtls.12.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libmbedtls.12.dylib
-    install_name_tool -id /tmp/obsdeps/bin/libmbedcrypto.3.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libmbedcrypto.3.dylib
-    install_name_tool -id /tmp/obsdeps/bin/libmbedx509.0.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libmbedx509.0.dylib
-    install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libmbedcrypto.3.dylib
-    install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libmbedx509.0.dylib
-    install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libmbedx509.0.dylib
-    install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libmbedtls.12.dylib
-    install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libmbedtls.12.dylib
-    install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libmbedtls.12.dylib
+    install_name_tool -id /tmp/obsdeps/lib/libmbedtls.${LIBMBEDTLS_VERSION}.dylib /tmp/obsdeps/lib/libmbedtls.${LIBMBEDTLS_VERSION}.dylib
+    install_name_tool -id /tmp/obsdeps/lib/libmbedcrypto.${LIBMBEDTLS_VERSION}.dylib /tmp/obsdeps/lib/libmbedcrypto.${LIBMBEDTLS_VERSION}.dylib
+    install_name_tool -id /tmp/obsdeps/lib/libmbedx509.${LIBMBEDTLS_VERSION}.dylib /tmp/obsdeps/lib/libmbedx509.${LIBMBEDTLS_VERSION}.dylib
+    install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/lib/libmbedx509.0.dylib /tmp/obsdeps/lib/libmbedtls.${LIBMBEDTLS_VERSION}.dylib
+    install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/lib/libmbedcrypto.3.dylib /tmp/obsdeps/lib/libmbedtls.${LIBMBEDTLS_VERSION}.dylib
+    install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/lib/libmbedcrypto.3.dylib /tmp/obsdeps/lib/libmbedx509.${LIBMBEDTLS_VERSION}.dylib
+    find /tmp/obsdeps/lib -name libmbed\*.dylib -exec cp -PR \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/lib/ \;
     rsync -avh --include="*/" --include="*.h" --exclude="*" ./include/mbedtls/* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/mbedtls
     rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/mbedtls/* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/mbedtls
     if [ ! -d /tmp/obsdeps/lib/pkgconfig ]; then
@@ -406,7 +403,7 @@ EOF
 }
 
 
-build_850a66bf-6484-4d88-b220-f735374b0404() {
+build_7d5a2071-b648-48fa-aa8c-34edb3d9c954() {
     step "Build dependency libsrt"
     trap "caught_error 'Build dependency libsrt'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
@@ -421,7 +418,7 @@ build_850a66bf-6484-4d88-b220-f735374b0404() {
 }
 
 
-build_c710525f-039f-42f3-a102-c6368f2f1608() {
+build_211d3e18-2145-4b81-b7a5-60fb9068e4b1() {
     step "Install dependency libsrt"
     trap "caught_error 'Install dependency libsrt'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/srt-1.4.1/build
@@ -430,7 +427,7 @@ build_c710525f-039f-42f3-a102-c6368f2f1608() {
 }
 
 
-build_1a69c0df-b98b-4fce-8645-379031a7b01d() {
+build_8417055a-4767-435b-ab87-5124a7c7b2e7() {
     step "Build dependency ffmpeg"
     trap "caught_error 'Build dependency ffmpeg'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
@@ -450,51 +447,42 @@ build_1a69c0df-b98b-4fce-8645-379031a7b01d() {
 }
 
 
-build_99bf9165-8e63-49d9-a261-1c40d0879719() {
+build_74d271ae-f6e0-4972-82db-226fedce0877() {
     step "Install dependency ffmpeg"
     trap "caught_error 'Install dependency ffmpeg'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/FFmpeg-n4.2.2/build
 
-    find . -name \*.dylib -exec cp \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/ \;
+    find . -name \*.dylib -exec cp -PR \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/ \;
     rsync -avh --include="*/" --include="*.h" --exclude="*" ../* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
     rsync -avh --include="*/" --include="*.h" --exclude="*" ./* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
-    install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libavfilter.7.dylib
-    install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libavdevice.58.dylib
-    install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/bin/libmbedcrypto.3.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libavformat.58.dylib
-    install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libavfilter.7.dylib
-    install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libavdevice.58.dylib
-    install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/bin/libmbedx509.0.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libavformat.58.dylib
-    install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libavfilter.7.dylib
-    install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libavdevice.58.dylib
-    install_name_tool -change libmbedtls.12.dylib /tmp/obsdeps/bin/libmbedtls.12.dylib /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/libavformat.58.dylib
 }
 
 
-build_3998d899-d1a5-49ad-b553-945aead582cb() {
+build_b1e56d19-844d-4603-aa3d-2a46f58c3bf9() {
     step "Build dependency libluajit"
     trap "caught_error 'Build dependency libluajit'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
 
-    curl --retry 5 -L -C - -O https://luajit.org/download/LuaJIT-${LIBLUAJIT_VERSION}.tar.gz
+    curl --retry 5 -L -C - -O https://LuaJIT.org/download/LuaJIT-${LIBLUAJIT_VERSION}.tar.gz
     tar -xf LuaJIT-${LIBLUAJIT_VERSION}.tar.gz
     cd LuaJIT-${LIBLUAJIT_VERSION}
-    mkdir build
-    make PREFIX=/home/runner/work/obs-deps/obs-deps/CI_BUILD/LuaJIT-${LIBLUAJIT_VERSION}/build -j${PARALLELISM}
+    make PREFIX="/tmp/obsdeps" -j${PARALLELISM}
 }
 
 
-build_db082519-2a2e-4b6e-8d29-9e1fb9025a8e() {
+build_c6a7d0d2-ebd9-4849-aadf-a5dd33efa3d0() {
     step "Install dependency libluajit"
     trap "caught_error 'Install dependency libluajit'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/LuaJIT-2.1.0-beta3
 
-    make PREFIX=/home/runner/work/obs-deps/obs-deps/CI_BUILD/LuaJIT-${LIBLUAJIT_VERSION}/build install
-    find ./build/lib -name libluajit\*.dylib -exec cp \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/lib/ \;
+    make PREFIX="/tmp/obsdeps" install
+    find /tmp/obsdeps/lib -name libluajit\*.dylib -exec cp -PR \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/lib/ \;
     rsync -avh --include="*/" --include="*.h" --exclude="*" src/* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
+    make PREFIX="/tmp/obsdeps" uninstall
 }
 
 
-build_78f87b41-66fa-4a25-b563-7a5a91501b0f() {
+build_1ad8eb04-55e9-429c-8156-7be6ffa29531() {
     step "Build dependency libfreetype"
     trap "caught_error 'Build dependency libfreetype'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
@@ -511,19 +499,19 @@ build_78f87b41-66fa-4a25-b563-7a5a91501b0f() {
 }
 
 
-build_66422ee7-931a-4d32-a5a4-165d22ceca2e() {
+build_e0461cdf-975d-4040-83f0-a2884b77fb2b() {
     step "Install dependency libfreetype"
     trap "caught_error 'Install dependency libfreetype'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/freetype-2.10.1/build
 
     make install
-    find /tmp/obsdeps/lib -name libfreetype\*.dylib -exec cp \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/lib/ \;
+    find /tmp/obsdeps/lib -name libfreetype\*.dylib -exec cp -PR \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/lib/ \;
     rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
     unset CFLAGS
 }
 
 
-build_e78bc660-4a1d-4be4-89b7-a36686ebce58() {
+build_6f69bd52-7ade-472e-ad06-e815b2e9eac9() {
     step "Package dependencies"
     trap "caught_error 'Package dependencies'" ERR
     ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
@@ -539,38 +527,38 @@ build_e78bc660-4a1d-4be4-89b7-a36686ebce58() {
 obs-deps-build-main() {
     ensure_dir /home/runner/work/obs-deps/obs-deps
 
-    build_b96545c3-fd65-4a2c-8033-5a8341d0f827
-    build_c8ebcfb8-bf1f-4d9b-bbaa-52e191ba3269
-    build_412dc87a-fb95-4b11-8ce0-1a0edd003834
-    build_de21b3b3-8765-4148-ab13-5299df6b6082
-    build_a1e48a03-667b-4bfd-95ba-08f8ec0f587a
-    build_e61ca4f2-a119-4e3d-aee0-00fc047d6cbe
-    build_06e7c257-51cd-4510-a294-c00def3a621d
-    build_c6068e37-b1d4-41f3-b450-f8d4163cc7dc
-    build_2d9e27c3-8c31-45b5-86d5-f8ad2f816dcf
-    build_9b7b1cd0-7897-47cb-b875-5bf579dba029
-    build_0a50357d-cad4-495f-8be6-4bdeae313244
-    build_3f19fe04-fbae-46d4-8d36-4be912870f8e
-    build_1a884933-24c0-4d2b-977b-22d946293634
-    build_0a874bdd-8456-4f69-aac9-ebe738c641a7
-    build_153a8285-7213-43b1-a7da-3e6ec66c64e5
-    build_69c1cccd-879f-44ce-a45c-fe5fe7218dde
-    build_950fece5-dddd-4ee6-80f5-f77979e6cc58
-    build_729cd2ea-8fcd-47ee-ac56-b725825c93bd
-    build_3fd08d0c-b966-4942-bd0a-73bbad7a2f83
-    build_6f4b0bcd-ec34-4a08-a8d9-7ff0a988433d
-    build_b8b7d727-7f1e-405b-925b-c33ad91243fb
-    build_f95090b3-c2c3-4754-8236-c8c57a9fcf61
-    build_d53bdd3e-6327-4314-be0f-5588f6e217d1
-    build_850a66bf-6484-4d88-b220-f735374b0404
-    build_c710525f-039f-42f3-a102-c6368f2f1608
-    build_1a69c0df-b98b-4fce-8645-379031a7b01d
-    build_99bf9165-8e63-49d9-a261-1c40d0879719
-    build_3998d899-d1a5-49ad-b553-945aead582cb
-    build_db082519-2a2e-4b6e-8d29-9e1fb9025a8e
-    build_78f87b41-66fa-4a25-b563-7a5a91501b0f
-    build_66422ee7-931a-4d32-a5a4-165d22ceca2e
-    build_e78bc660-4a1d-4be4-89b7-a36686ebce58
+    build_47cd2282-8965-4b61-ab28-62fec66c2cb4
+    build_4a472a79-6484-4b41-b403-734d35e18080
+    build_9daf28d2-6c93-4c31-a049-0588be784b54
+    build_2f0aa16d-f472-4ada-a7d9-8c50c8840ec9
+    build_6cce7e1e-2351-4da7-813c-16c7d65ffe89
+    build_7870c90a-edb7-4670-b79f-377202ce0a89
+    build_17d343fe-15d1-4fcd-a41d-2b8b35ab7305
+    build_b02ec058-c61d-4670-a0ad-0e55b317f8fd
+    build_45dd03a7-e455-4d23-a31c-8b9054b75b6c
+    build_546a5d90-1b4f-47e4-b359-50a2ea10c191
+    build_c6086b77-5e5e-4f3e-8799-294185078080
+    build_7f599a16-96d4-426e-a72a-23d19d23a592
+    build_d9ea00d0-7d17-4448-8bfe-22008a0b5f1d
+    build_66f24758-7e0f-4987-8ad8-d667187700cc
+    build_8395dc25-155f-4048-94cc-52bd98d5f418
+    build_e36fba56-e72e-4237-98be-9325773282bb
+    build_789673d5-6cb2-4f88-b1a1-adeb8f264dc9
+    build_d3cd16bd-9ff2-4c55-bfbc-a36278bfeaff
+    build_36dfe32d-2255-4a3d-873a-daaa29b198e9
+    build_304b4465-63e3-4413-9365-e21a4e025170
+    build_14a337ca-49c7-47bc-bed9-3c03d1607fd0
+    build_ed02c88a-2cc9-48ab-83a8-d8634dbcdb46
+    build_2802676a-13c9-457d-bf32-41548f8693a6
+    build_7d5a2071-b648-48fa-aa8c-34edb3d9c954
+    build_211d3e18-2145-4b81-b7a5-60fb9068e4b1
+    build_8417055a-4767-435b-ab87-5124a7c7b2e7
+    build_74d271ae-f6e0-4972-82db-226fedce0877
+    build_b1e56d19-844d-4603-aa3d-2a46f58c3bf9
+    build_c6a7d0d2-ebd9-4849-aadf-a5dd33efa3d0
+    build_1ad8eb04-55e9-429c-8156-7be6ffa29531
+    build_e0461cdf-975d-4040-83f0-a2884b77fb2b
+    build_6f69bd52-7ade-472e-ad06-e815b2e9eac9
 
     hr "All Done"
 }
