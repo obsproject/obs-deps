@@ -3,6 +3,7 @@
 set -eE
 
 PRODUCT_NAME="OBS Pre-Built Dependencies"
+BASE_DIR="$(git rev-parse --show-toplevel)"
 
 COLOR_RED=$(tput setaf 1)
 COLOR_GREEN=$(tput setaf 2)
