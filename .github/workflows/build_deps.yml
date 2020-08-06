@@ -43,6 +43,7 @@ jobs:
       - name: Install Homebrew dependencies
         shell: bash
         run: |
+          brew update --preinstall
           brew bundle
       - name: Get Current Date
         shell: bash
@@ -499,6 +500,7 @@ jobs:
       - name: Install Homebrew dependencies
         shell: bash
         run: |
+          brew update --preinstall
           brew bundle
       - name: Get Current Date
         shell: bash
@@ -516,7 +518,7 @@ jobs:
         id: qt-cache
         uses: actions/cache@v2
         env:
-          CACHE_NAME: 'qt-build-cache'
+          CACHE_NAME: 'qt-build-cache-rev3'
         with:
           path: /tmp/obsdeps
           key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.MAC_QT_VERSION }}
@@ -527,6 +529,14 @@ jobs:
         run: |
           if [ -d /usr/local/opt/zstd ]; then
             brew unlink zstd
+          fi
+
+          if [ -d /usr/local/opt/libtiff ]; then
+            brew unlink libtiff
+          fi
+
+          if [ -d /usr/local/opt/webp ]; then
+            brew unlink webp
           fi
 
           curl --retry 5 -L -C - -O "https://download.qt.io/official_releases/qt/$(echo "${{ env.MAC_QT_VERSION }}" | cut -d "." -f -2)/${{ env.MAC_QT_VERSION }}/single/qt-everywhere-src-${{ env.MAC_QT_VERSION }}.tar.xz"
