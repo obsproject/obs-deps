@@ -3,6 +3,7 @@
 set -eE
 
 PRODUCT_NAME="OBS Pre-Built Dependencies"
+BASE_DIR="$(git rev-parse --show-toplevel)"
 
 COLOR_RED=$(tput setaf 1)
 COLOR_GREEN=$(tput setaf 2)
@@ -67,32 +68,33 @@ trap cleanup EXIT
 
 caught_error() {
     error "ERROR during build step: ${1}"
-    cleanup $/home/runner/work/obs-deps/obs-deps
+    cleanup $${BASE_DIR}
     exit 1
 }
 
-build_346b9331-5e1f-49a7-994e-8a83156c1d52() {
+build_792c0b10-0ff1-4fa1-bf66-129cf54232e5() {
     step "Install Homebrew dependencies"
     trap "caught_error 'Install Homebrew dependencies'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps
+    ensure_dir ${BASE_DIR}
 
+    brew update --preinstall
     brew bundle
 }
 
 
-build_54c5571f-e0d3-4780-9393-bd44360864b5() {
+build_398b9eb5-e5ab-4e88-9e8a-758697dbf012() {
     step "Get Current Date"
     trap "caught_error 'Get Current Date'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps
+    ensure_dir ${BASE_DIR}
 
 
 }
 
 
-build_d482b142-7d1a-45b7-bcb6-7175b64016f4() {
+build_c9c6a42b-6b05-43b0-8af9-8039e6f65f14() {
     step "Build environment setup"
     trap "caught_error 'Build environment setup'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps
+    ensure_dir ${BASE_DIR}
 
     mkdir -p CI_BUILD/obsdeps/bin
     mkdir -p CI_BUILD/obsdeps/include
@@ -102,20 +104,28 @@ build_d482b142-7d1a-45b7-bcb6-7175b64016f4() {
 }
 
 
-build_bff0ec03-b2f3-477f-9221-2f7cada6bc96() {
+build_ec6d0df5-e701-423b-82d1-29fc2d394f7a() {
     step "Build dependency Qt"
     trap "caught_error 'Build dependency Qt'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
+    ensure_dir ${BASE_DIR}/CI_BUILD
 
     if [ -d /usr/local/opt/zstd ]; then
       brew unlink zstd
+    fi
+    
+    if [ -d /usr/local/opt/libtiff ]; then
+      brew unlink libtiff
+    fi
+    
+    if [ -d /usr/local/opt/webp ]; then
+      brew unlink webp
     fi
     
     curl --retry 5 -L -C - -O "https://download.qt.io/official_releases/qt/$(echo "${MAC_QT_VERSION}" | cut -d "." -f -2)/${MAC_QT_VERSION}/single/qt-everywhere-src-${MAC_QT_VERSION}.tar.xz"
     tar -xf qt-everywhere-src-${MAC_QT_VERSION}.tar.xz
     if [ "${MAC_QT_VERSION}" = "5.14.1" ]; then
         cd qt-everywhere-src-${MAC_QT_VERSION}/qtbase
-        git apply /home/runner/work/obs-deps/obs-deps/patch/qt/qtbase.patch
+        git apply ${BASE_DIR}/patch/qt/qtbase.patch
         cd ..
     fi
     mkdir build
@@ -137,27 +147,27 @@ build_bff0ec03-b2f3-477f-9221-2f7cada6bc96() {
 }
 
 
-build_beaabc9b-b0fc-4dcb-b925-8e83414dc812() {
+build_ec53269b-5bef-4e93-90c4-18fa09b242da() {
     step "Package dependencies"
     trap "caught_error 'Package dependencies'" ERR
     ensure_dir /tmp
 
     tar -czf macos-qt-${MAC_QT_VERSION}-${CURRENT_DATE}.tar.gz obsdeps
-    if [ ! -d "/home/runner/work/obs-deps/obs-deps/macos" ]; then
-      mkdir /home/runner/work/obs-deps/obs-deps/macos
+    if [ ! -d "${BASE_DIR}/macos" ]; then
+      mkdir ${BASE_DIR}/macos
     fi
-    mv macos-qt-${MAC_QT_VERSION}-${CURRENT_DATE}.tar.gz /home/runner/work/obs-deps/obs-deps/macos
+    mv macos-qt-${MAC_QT_VERSION}-${CURRENT_DATE}.tar.gz ${BASE_DIR}/macos
 }
 
 
 obs-deps-build-main() {
-    ensure_dir /home/runner/work/obs-deps/obs-deps
+    ensure_dir ${BASE_DIR}
 
-    build_346b9331-5e1f-49a7-994e-8a83156c1d52
-    build_54c5571f-e0d3-4780-9393-bd44360864b5
-    build_d482b142-7d1a-45b7-bcb6-7175b64016f4
-    build_bff0ec03-b2f3-477f-9221-2f7cada6bc96
-    build_beaabc9b-b0fc-4dcb-b925-8e83414dc812
+    build_792c0b10-0ff1-4fa1-bf66-129cf54232e5
+    build_398b9eb5-e5ab-4e88-9e8a-758697dbf012
+    build_c9c6a42b-6b05-43b0-8af9-8039e6f65f14
+    build_ec6d0df5-e701-423b-82d1-29fc2d394f7a
+    build_ec53269b-5bef-4e93-90c4-18fa09b242da
 
     hr "All Done"
 }

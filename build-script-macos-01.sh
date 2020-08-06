@@ -3,6 +3,7 @@
 set -eE
 
 PRODUCT_NAME="OBS Pre-Built Dependencies"
+BASE_DIR="$(git rev-parse --show-toplevel)"
 
 COLOR_RED=$(tput setaf 1)
 COLOR_GREEN=$(tput setaf 2)
@@ -67,32 +68,33 @@ trap cleanup EXIT
 
 caught_error() {
     error "ERROR during build step: ${1}"
-    cleanup $/home/runner/work/obs-deps/obs-deps
+    cleanup $${BASE_DIR}
     exit 1
 }
 
-build_47cd2282-8965-4b61-ab28-62fec66c2cb4() {
+build_3799b249-17d8-4ce6-a820-5b11a168dc20() {
     step "Install Homebrew dependencies"
     trap "caught_error 'Install Homebrew dependencies'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps
+    ensure_dir ${BASE_DIR}
 
+    brew update --preinstall
     brew bundle
 }
 
 
-build_4a472a79-6484-4b41-b403-734d35e18080() {
+build_a9a3cca1-34b4-456a-b90c-52164bf20280() {
     step "Get Current Date"
     trap "caught_error 'Get Current Date'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps
+    ensure_dir ${BASE_DIR}
 
 
 }
 
 
-build_9daf28d2-6c93-4c31-a049-0588be784b54() {
+build_ef74bc17-c962-462a-9693-c524e6499710() {
     step "Build environment setup"
     trap "caught_error 'Build environment setup'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps
+    ensure_dir ${BASE_DIR}
 
     mkdir -p CI_BUILD/obsdeps/bin
     mkdir -p CI_BUILD/obsdeps/include
@@ -103,10 +105,10 @@ build_9daf28d2-6c93-4c31-a049-0588be784b54() {
 }
 
 
-build_2f0aa16d-f472-4ada-a7d9-8c50c8840ec9() {
+build_6623744a-5eb4-49b4-87da-2fd95fdc70c6() {
     step "Build dependency swig"
     trap "caught_error 'Build dependency swig'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
+    ensure_dir ${BASE_DIR}/CI_BUILD
 
     curl --retry 5 -L -O "https://downloads.sourceforge.net/project/swig/swig/swig-${SWIG_VERSION}/swig-${SWIG_VERSION}.tar.gz"
     tar -xf swig-${SWIG_VERSION}.tar.gz
@@ -118,21 +120,21 @@ build_2f0aa16d-f472-4ada-a7d9-8c50c8840ec9() {
 }
 
 
-build_6cce7e1e-2351-4da7-813c-16c7d65ffe89() {
+build_fa13ba52-7998-403e-8982-9c770d8b5a0f() {
     step "Install dependency swig"
     trap "caught_error 'Install dependency swig'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/swig-3.0.12/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/swig-3.0.12/build
 
-    cp swig /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/
-    mkdir -p /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/share/swig/${SWIG_VERSION}
-    rsync -avh --include="*.i" --include="*.swg" --include="python" --include="lua" --include="typemaps" --exclude="*" ../Lib/* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/share/swig/${SWIG_VERSION}
+    cp swig ${BASE_DIR}/CI_BUILD/obsdeps/bin/
+    mkdir -p ${BASE_DIR}/CI_BUILD/obsdeps/share/swig/${SWIG_VERSION}
+    rsync -avh --include="*.i" --include="*.swg" --include="python" --include="lua" --include="typemaps" --exclude="*" ../Lib/* ${BASE_DIR}/CI_BUILD/obsdeps/share/swig/${SWIG_VERSION}
 }
 
 
-build_7870c90a-edb7-4670-b79f-377202ce0a89() {
+build_cd7f3fde-f62b-48ae-a818-8bebaa6bfda2() {
     step "Build dependency libpng"
     trap "caught_error 'Build dependency libpng'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
+    ensure_dir ${BASE_DIR}/CI_BUILD
 
     curl --retry 5 -L -O "https://downloads.sourceforge.net/project/libpng/libpng16/${LIBPNG_VERSION}/libpng-${LIBPNG_VERSION}.tar.xz"
     tar -xf libpng-${LIBPNG_VERSION}.tar.xz
@@ -144,19 +146,19 @@ build_7870c90a-edb7-4670-b79f-377202ce0a89() {
 }
 
 
-build_17d343fe-15d1-4fcd-a41d-2b8b35ab7305() {
+build_ce51c2b1-a49f-4998-a7e5-b5dd26eb6866() {
     step "Install dependency libpng"
     trap "caught_error 'Install dependency libpng'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/libpng-1.6.37/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/libpng-1.6.37/build
 
     make install
 }
 
 
-build_b02ec058-c61d-4670-a0ad-0e55b317f8fd() {
+build_f021803e-0c67-47d7-8e43-f3e34b560d06() {
     step "Build dependency libopus"
     trap "caught_error 'Build dependency libopus'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
+    ensure_dir ${BASE_DIR}/CI_BUILD
 
     curl --retry 5 -L -C - -O "https://ftp.osuosl.org/pub/xiph/releases/opus/opus-${LIBOPUS_VERSION}.tar.gz"
     tar -xf opus-${LIBOPUS_VERSION}.tar.gz
@@ -168,19 +170,19 @@ build_b02ec058-c61d-4670-a0ad-0e55b317f8fd() {
 }
 
 
-build_45dd03a7-e455-4d23-a31c-8b9054b75b6c() {
+build_db94f2fe-0329-416d-8334-9e7ccec37a7d() {
     step "Install dependency libopus"
     trap "caught_error 'Install dependency libopus'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/opus-1.3.1/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/opus-1.3.1/build
 
     make install
 }
 
 
-build_546a5d90-1b4f-47e4-b359-50a2ea10c191() {
+build_08d4e1a2-bca9-46eb-8878-ace4fef0b98a() {
     step "Build dependency libogg"
     trap "caught_error 'Build dependency libogg'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
+    ensure_dir ${BASE_DIR}/CI_BUILD
 
     curl --retry 5 -L -O https://gitlab.xiph.org/xiph/ogg/-/archive/${LIBOGG_VERSION}/ogg-${LIBOGG_VERSION}.tar.gz
     tar -xf ogg-${LIBOGG_VERSION}.tar.gz
@@ -193,19 +195,19 @@ build_546a5d90-1b4f-47e4-b359-50a2ea10c191() {
 }
 
 
-build_c6086b77-5e5e-4f3e-8799-294185078080() {
+build_8d2830f6-92c1-4a91-8078-a35eceb56635() {
     step "Install dependency libogg"
     trap "caught_error 'Install dependency libogg'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/ogg-68ca3841567247ac1f7850801a164f58738d8df9/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/ogg-68ca3841567247ac1f7850801a164f58738d8df9/build
 
     make install
 }
 
 
-build_7f599a16-96d4-426e-a72a-23d19d23a592() {
+build_65c6d647-ee16-4190-b9e6-ad1947da4519() {
     step "Build dependency libvorbis"
     trap "caught_error 'Build dependency libvorbis'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
+    ensure_dir ${BASE_DIR}/CI_BUILD
 
     curl --retry 5 -L -C - -O "https://ftp.osuosl.org/pub/xiph/releases/vorbis/libvorbis-${LIBVORBIS_VERSION}.tar.gz"
     tar -xf libvorbis-${LIBVORBIS_VERSION}.tar.gz
@@ -217,19 +219,19 @@ build_7f599a16-96d4-426e-a72a-23d19d23a592() {
 }
 
 
-build_d9ea00d0-7d17-4448-8bfe-22008a0b5f1d() {
+build_c9e39651-4a08-4935-b6d2-a6f4853e1885() {
     step "Install dependency libvorbis"
     trap "caught_error 'Install dependency libvorbis'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/libvorbis-1.3.6/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/libvorbis-1.3.6/build
 
     make install
 }
 
 
-build_66f24758-7e0f-4987-8ad8-d667187700cc() {
+build_d219f3a9-b80b-4f46-a414-e7f60f71cee0() {
     step "Build dependency libvpx"
     trap "caught_error 'Build dependency libvpx'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
+    ensure_dir ${BASE_DIR}/CI_BUILD
 
     curl --retry 5 -L -O "https://chromium.googlesource.com/webm/libvpx/+archive/v${LIBVPX_VERSION}.tar.gz"
     mkdir -p ./libvpx-v${LIBVPX_VERSION}
@@ -242,19 +244,19 @@ build_66f24758-7e0f-4987-8ad8-d667187700cc() {
 }
 
 
-build_8395dc25-155f-4048-94cc-52bd98d5f418() {
+build_94642559-233c-4b80-ab3f-7f45d18f76bd() {
     step "Install dependency libvpx"
     trap "caught_error 'Install dependency libvpx'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/libvpx-v1.8.2/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/libvpx-v1.8.2/build
 
     make install
 }
 
 
-build_e36fba56-e72e-4237-98be-9325773282bb() {
+build_dd66a191-5a28-47ab-8fcf-e747b5a2d580() {
     step "Build dependency libjansson"
     trap "caught_error 'Build dependency libjansson'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
+    ensure_dir ${BASE_DIR}/CI_BUILD
 
     curl --retry 5 -L -C - -O http://www.digip.org/jansson/releases/jansson-${LIBJANSSON_VERSION}.tar.gz
     tar -xf jansson-${LIBJANSSON_VERSION}.tar.gz
@@ -266,22 +268,22 @@ build_e36fba56-e72e-4237-98be-9325773282bb() {
 }
 
 
-build_789673d5-6cb2-4f88-b1a1-adeb8f264dc9() {
+build_74396316-38e6-4232-b7b7-d8ad014819c4() {
     step "Install dependency libjansson"
     trap "caught_error 'Install dependency libjansson'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/jansson-2.12/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/jansson-2.12/build
 
-    find . -name \*.dylib -exec cp -PR \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/ \;
-    rsync -avh --include="*/" --include="*.h" --exclude="*" ../src/* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
-    rsync -avh --include="*/" --include="*.h" --exclude="*" ./src/* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
-    cp ./*.h /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
+    find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/bin/ \;
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ../src/* ${BASE_DIR}/CI_BUILD/obsdeps/include/
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ./src/* ${BASE_DIR}/CI_BUILD/obsdeps/include/
+    cp ./*.h ${BASE_DIR}/CI_BUILD/obsdeps/include/
 }
 
 
-build_d3cd16bd-9ff2-4c55-bfbc-a36278bfeaff() {
+build_9a01fea9-abe7-4fd7-9a42-b3314204d29e() {
     step "Build dependency libx264"
     trap "caught_error 'Build dependency libx264'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
+    ensure_dir ${BASE_DIR}/CI_BUILD
 
     if [ ! -d ./x264 ]; then git clone https://code.videolan.org/videolan/x264.git; fi
     cd ./x264
@@ -293,41 +295,41 @@ build_d3cd16bd-9ff2-4c55-bfbc-a36278bfeaff() {
 }
 
 
-build_36dfe32d-2255-4a3d-873a-daaa29b198e9() {
+build_11bb7c8a-6a92-4f3c-9cdf-216cd77464c2() {
     step "Install dependency libx264"
     trap "caught_error 'Install dependency libx264'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/x264/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/x264/build
 
     make install
 }
 
 
-build_304b4465-63e3-4413-9365-e21a4e025170() {
+build_35a2146a-4873-4caa-aed6-fbd1c311c019() {
     step "Build dependency libx264 (dylib)"
     trap "caught_error 'Build dependency libx264 (dylib)'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/x264/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/x264/build
 
     ../configure --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" --enable-shared --libdir="/tmp/obsdeps/bin" --prefix="/tmp/obsdeps"
     make -j${PARALLELISM}
 }
 
 
-build_14a337ca-49c7-47bc-bed9-3c03d1607fd0() {
+build_3b7e2a93-9e33-4e84-acf7-6a7222569fa4() {
     step "Install dependency libx264 (dylib)"
     trap "caught_error 'Install dependency libx264 (dylib)'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/x264/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/x264/build
 
     ln -f -s libx264.*.dylib libx264.dylib
-    find . -name \*.dylib -exec cp -PR \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/ \;
-    rsync -avh --include="*/" --include="*.h" --exclude="*" ../* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
-    rsync -avh --include="*/" --include="*.h" --exclude="*" ./* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
+    find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/bin/ \;
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${BASE_DIR}/CI_BUILD/obsdeps/include/
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${BASE_DIR}/CI_BUILD/obsdeps/include/
 }
 
 
-build_ed02c88a-2cc9-48ab-83a8-d8634dbcdb46() {
+build_e2526b78-8f56-4015-8be9-906738eb7d84() {
     step "Build dependency libmbedtls"
     trap "caught_error 'Build dependency libmbedtls'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
+    ensure_dir ${BASE_DIR}/CI_BUILD
 
     curl --retry 5 -L -C - -O https://tls.mbed.org/download/mbedtls-${LIBMBEDTLS_VERSION}-gpl.tgz
     tar -xf mbedtls-${LIBMBEDTLS_VERSION}-gpl.tgz
@@ -341,10 +343,10 @@ build_ed02c88a-2cc9-48ab-83a8-d8634dbcdb46() {
 }
 
 
-build_2802676a-13c9-457d-bf32-41548f8693a6() {
+build_cfbdfa8a-fa9b-4830-b087-1c3677075d9b() {
     step "Install dependency libmbedtls"
     trap "caught_error 'Install dependency libmbedtls'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/mbedtls-2.16.5/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/mbedtls-2.16.5/build
 
     make install
     install_name_tool -id /tmp/obsdeps/lib/libmbedtls.${LIBMBEDTLS_VERSION}.dylib /tmp/obsdeps/lib/libmbedtls.${LIBMBEDTLS_VERSION}.dylib
@@ -353,9 +355,9 @@ build_2802676a-13c9-457d-bf32-41548f8693a6() {
     install_name_tool -change libmbedx509.0.dylib /tmp/obsdeps/lib/libmbedx509.0.dylib /tmp/obsdeps/lib/libmbedtls.${LIBMBEDTLS_VERSION}.dylib
     install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/lib/libmbedcrypto.3.dylib /tmp/obsdeps/lib/libmbedtls.${LIBMBEDTLS_VERSION}.dylib
     install_name_tool -change libmbedcrypto.3.dylib /tmp/obsdeps/lib/libmbedcrypto.3.dylib /tmp/obsdeps/lib/libmbedx509.${LIBMBEDTLS_VERSION}.dylib
-    find /tmp/obsdeps/lib -name libmbed\*.dylib -exec cp -PR \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/lib/ \;
-    rsync -avh --include="*/" --include="*.h" --exclude="*" ./include/mbedtls/* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/mbedtls
-    rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/mbedtls/* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/mbedtls
+    find /tmp/obsdeps/lib -name libmbed\*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/lib/ \;
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ./include/mbedtls/* ${BASE_DIR}/CI_BUILD/obsdeps/include/mbedtls
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/mbedtls/* ${BASE_DIR}/CI_BUILD/obsdeps/include/mbedtls
     if [ ! -d /tmp/obsdeps/lib/pkgconfig ]; then
         mkdir -p /tmp/obsdeps/lib/pkgconfig
     fi
@@ -403,10 +405,10 @@ EOF
 }
 
 
-build_7d5a2071-b648-48fa-aa8c-34edb3d9c954() {
+build_3f1e3733-49f6-41aa-b023-78be16c65548() {
     step "Build dependency libsrt"
     trap "caught_error 'Build dependency libsrt'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
+    ensure_dir ${BASE_DIR}/CI_BUILD
 
     curl --retry 5 -L -O https://github.com/Haivision/srt/archive/v${LIBSRT_VERSION}.tar.gz
     tar -xf v${LIBSRT_VERSION}.tar.gz
@@ -418,19 +420,19 @@ build_7d5a2071-b648-48fa-aa8c-34edb3d9c954() {
 }
 
 
-build_211d3e18-2145-4b81-b7a5-60fb9068e4b1() {
+build_c14610b9-4734-45ca-815c-4ae44d8d88fd() {
     step "Install dependency libsrt"
     trap "caught_error 'Install dependency libsrt'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/srt-1.4.1/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/srt-1.4.1/build
 
     make install
 }
 
 
-build_8417055a-4767-435b-ab87-5124a7c7b2e7() {
+build_07825e04-1c21-4433-aa6e-0537e9288d0d() {
     step "Build dependency ffmpeg"
     trap "caught_error 'Build dependency ffmpeg'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
+    ensure_dir ${BASE_DIR}/CI_BUILD
 
     export LDFLAGS="-L/tmp/obsdeps/lib"
     export CFLAGS="-I/tmp/obsdeps/include"
@@ -447,21 +449,21 @@ build_8417055a-4767-435b-ab87-5124a7c7b2e7() {
 }
 
 
-build_74d271ae-f6e0-4972-82db-226fedce0877() {
+build_5260dbbc-b531-446b-a084-49b9b0615497() {
     step "Install dependency ffmpeg"
     trap "caught_error 'Install dependency ffmpeg'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/FFmpeg-n4.2.2/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/FFmpeg-n4.2.2/build
 
-    find . -name \*.dylib -exec cp -PR \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/bin/ \;
-    rsync -avh --include="*/" --include="*.h" --exclude="*" ../* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
-    rsync -avh --include="*/" --include="*.h" --exclude="*" ./* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
+    find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/bin/ \;
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${BASE_DIR}/CI_BUILD/obsdeps/include/
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${BASE_DIR}/CI_BUILD/obsdeps/include/
 }
 
 
-build_b1e56d19-844d-4603-aa3d-2a46f58c3bf9() {
+build_0c13c3ef-b7a8-4416-b622-e002480fbecd() {
     step "Build dependency libluajit"
     trap "caught_error 'Build dependency libluajit'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
+    ensure_dir ${BASE_DIR}/CI_BUILD
 
     curl --retry 5 -L -C - -O https://LuaJIT.org/download/LuaJIT-${LIBLUAJIT_VERSION}.tar.gz
     tar -xf LuaJIT-${LIBLUAJIT_VERSION}.tar.gz
@@ -470,22 +472,22 @@ build_b1e56d19-844d-4603-aa3d-2a46f58c3bf9() {
 }
 
 
-build_c6a7d0d2-ebd9-4849-aadf-a5dd33efa3d0() {
+build_61fe05f2-a524-4613-9c5d-01b8ff0b0981() {
     step "Install dependency libluajit"
     trap "caught_error 'Install dependency libluajit'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/LuaJIT-2.1.0-beta3
+    ensure_dir ${BASE_DIR}/CI_BUILD/LuaJIT-2.1.0-beta3
 
     make PREFIX="/tmp/obsdeps" install
-    find /tmp/obsdeps/lib -name libluajit\*.dylib -exec cp -PR \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/lib/ \;
-    rsync -avh --include="*/" --include="*.h" --exclude="*" src/* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
+    find /tmp/obsdeps/lib -name libluajit\*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/lib/ \;
+    rsync -avh --include="*/" --include="*.h" --exclude="*" src/* ${BASE_DIR}/CI_BUILD/obsdeps/include/
     make PREFIX="/tmp/obsdeps" uninstall
 }
 
 
-build_1ad8eb04-55e9-429c-8156-7be6ffa29531() {
+build_4c10c1bc-b482-416d-af09-e6637cb23e2d() {
     step "Build dependency libfreetype"
     trap "caught_error 'Build dependency libfreetype'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
+    ensure_dir ${BASE_DIR}/CI_BUILD
 
     export CFLAGS="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
     
@@ -499,66 +501,66 @@ build_1ad8eb04-55e9-429c-8156-7be6ffa29531() {
 }
 
 
-build_e0461cdf-975d-4040-83f0-a2884b77fb2b() {
+build_4230b4b9-411c-44d6-a6b5-65a90222f5e9() {
     step "Install dependency libfreetype"
     trap "caught_error 'Install dependency libfreetype'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD/freetype-2.10.1/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/freetype-2.10.1/build
 
     make install
-    find /tmp/obsdeps/lib -name libfreetype\*.dylib -exec cp -PR \{\} /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/lib/ \;
-    rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/* /home/runner/work/obs-deps/obs-deps/CI_BUILD/obsdeps/include/
+    find /tmp/obsdeps/lib -name libfreetype\*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/lib/ \;
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/* ${BASE_DIR}/CI_BUILD/obsdeps/include/
     unset CFLAGS
 }
 
 
-build_6f69bd52-7ade-472e-ad06-e815b2e9eac9() {
+build_c06e0646-8055-4028-9b1d-f26eef778f31() {
     step "Package dependencies"
     trap "caught_error 'Package dependencies'" ERR
-    ensure_dir /home/runner/work/obs-deps/obs-deps/CI_BUILD
+    ensure_dir ${BASE_DIR}/CI_BUILD
 
     tar -czf macos-deps-${CURRENT_DATE}.tar.gz obsdeps
-    if [ ! -d "/home/runner/work/obs-deps/obs-deps/macos" ]; then
-      mkdir /home/runner/work/obs-deps/obs-deps/macos
+    if [ ! -d "${BASE_DIR}/macos" ]; then
+      mkdir ${BASE_DIR}/macos
     fi
-    mv ./macos-deps-${CURRENT_DATE}.tar.gz /home/runner/work/obs-deps/obs-deps/macos
+    mv ./macos-deps-${CURRENT_DATE}.tar.gz ${BASE_DIR}/macos
 }
 
 
 obs-deps-build-main() {
-    ensure_dir /home/runner/work/obs-deps/obs-deps
+    ensure_dir ${BASE_DIR}
 
-    build_47cd2282-8965-4b61-ab28-62fec66c2cb4
-    build_4a472a79-6484-4b41-b403-734d35e18080
-    build_9daf28d2-6c93-4c31-a049-0588be784b54
-    build_2f0aa16d-f472-4ada-a7d9-8c50c8840ec9
-    build_6cce7e1e-2351-4da7-813c-16c7d65ffe89
-    build_7870c90a-edb7-4670-b79f-377202ce0a89
-    build_17d343fe-15d1-4fcd-a41d-2b8b35ab7305
-    build_b02ec058-c61d-4670-a0ad-0e55b317f8fd
-    build_45dd03a7-e455-4d23-a31c-8b9054b75b6c
-    build_546a5d90-1b4f-47e4-b359-50a2ea10c191
-    build_c6086b77-5e5e-4f3e-8799-294185078080
-    build_7f599a16-96d4-426e-a72a-23d19d23a592
-    build_d9ea00d0-7d17-4448-8bfe-22008a0b5f1d
-    build_66f24758-7e0f-4987-8ad8-d667187700cc
-    build_8395dc25-155f-4048-94cc-52bd98d5f418
-    build_e36fba56-e72e-4237-98be-9325773282bb
-    build_789673d5-6cb2-4f88-b1a1-adeb8f264dc9
-    build_d3cd16bd-9ff2-4c55-bfbc-a36278bfeaff
-    build_36dfe32d-2255-4a3d-873a-daaa29b198e9
-    build_304b4465-63e3-4413-9365-e21a4e025170
-    build_14a337ca-49c7-47bc-bed9-3c03d1607fd0
-    build_ed02c88a-2cc9-48ab-83a8-d8634dbcdb46
-    build_2802676a-13c9-457d-bf32-41548f8693a6
-    build_7d5a2071-b648-48fa-aa8c-34edb3d9c954
-    build_211d3e18-2145-4b81-b7a5-60fb9068e4b1
-    build_8417055a-4767-435b-ab87-5124a7c7b2e7
-    build_74d271ae-f6e0-4972-82db-226fedce0877
-    build_b1e56d19-844d-4603-aa3d-2a46f58c3bf9
-    build_c6a7d0d2-ebd9-4849-aadf-a5dd33efa3d0
-    build_1ad8eb04-55e9-429c-8156-7be6ffa29531
-    build_e0461cdf-975d-4040-83f0-a2884b77fb2b
-    build_6f69bd52-7ade-472e-ad06-e815b2e9eac9
+    build_3799b249-17d8-4ce6-a820-5b11a168dc20
+    build_a9a3cca1-34b4-456a-b90c-52164bf20280
+    build_ef74bc17-c962-462a-9693-c524e6499710
+    build_6623744a-5eb4-49b4-87da-2fd95fdc70c6
+    build_fa13ba52-7998-403e-8982-9c770d8b5a0f
+    build_cd7f3fde-f62b-48ae-a818-8bebaa6bfda2
+    build_ce51c2b1-a49f-4998-a7e5-b5dd26eb6866
+    build_f021803e-0c67-47d7-8e43-f3e34b560d06
+    build_db94f2fe-0329-416d-8334-9e7ccec37a7d
+    build_08d4e1a2-bca9-46eb-8878-ace4fef0b98a
+    build_8d2830f6-92c1-4a91-8078-a35eceb56635
+    build_65c6d647-ee16-4190-b9e6-ad1947da4519
+    build_c9e39651-4a08-4935-b6d2-a6f4853e1885
+    build_d219f3a9-b80b-4f46-a414-e7f60f71cee0
+    build_94642559-233c-4b80-ab3f-7f45d18f76bd
+    build_dd66a191-5a28-47ab-8fcf-e747b5a2d580
+    build_74396316-38e6-4232-b7b7-d8ad014819c4
+    build_9a01fea9-abe7-4fd7-9a42-b3314204d29e
+    build_11bb7c8a-6a92-4f3c-9cdf-216cd77464c2
+    build_35a2146a-4873-4caa-aed6-fbd1c311c019
+    build_3b7e2a93-9e33-4e84-acf7-6a7222569fa4
+    build_e2526b78-8f56-4015-8be9-906738eb7d84
+    build_cfbdfa8a-fa9b-4830-b087-1c3677075d9b
+    build_3f1e3733-49f6-41aa-b023-78be16c65548
+    build_c14610b9-4734-45ca-815c-4ae44d8d88fd
+    build_07825e04-1c21-4433-aa6e-0537e9288d0d
+    build_5260dbbc-b531-446b-a084-49b9b0615497
+    build_0c13c3ef-b7a8-4416-b622-e002480fbecd
+    build_61fe05f2-a524-4613-9c5d-01b8ff0b0981
+    build_4c10c1bc-b482-416d-af09-e6637cb23e2d
+    build_4230b4b9-411c-44d6-a6b5-65a90222f5e9
+    build_c06e0646-8055-4028-9b1d-f26eef778f31
 
     hr "All Done"
 }
