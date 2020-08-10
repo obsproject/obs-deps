@@ -33,6 +33,7 @@ jobs:
       FFMPEG_VERSION: '4.2.2'
       LIBLUAJIT_VERSION: '2.1.0-beta3'
       LIBFREETYPE_VERSION: '2.10.1'
+      PCRE_VERSION: '8.44'
       SWIG_VERSION: '3.0.12'
       MACOSX_DEPLOYMENT_TARGET: '10.13'
     steps:
@@ -43,6 +44,9 @@ jobs:
       - name: Install Homebrew dependencies
         shell: bash
         run: |
+          if [ -d /usr/local/opt/xz ]; then
+            brew unlink xz
+          fi
           brew update --preinstall
           brew bundle
       - name: Get Current Date
@@ -62,7 +66,7 @@ jobs:
         id: swig-cache
         uses: actions/cache@v2
         env:
-          CACHE_NAME: 'swig-cache'
+          CACHE_NAME: 'swig-cache-rev2'
         with:
           path: ${{ github.workspace }}/CI_BUILD/swig-${{ env.SWIG_VERSION }}
           key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.SWIG_VERSION }}
@@ -76,6 +80,8 @@ jobs:
           cd swig-${{ env.SWIG_VERSION }}
           mkdir build
           cd build
+          curl --retry 5 -L -O "https://ftp.pcre.org/pub/pcre/pcre-${{ env.PCRE_VERSION }}.tar.bz2"
+          ../Tools/pcre-build.sh
           ../configure --disable-dependency-tracking --prefix="/tmp/obsdeps"
           make -j${{ env.PARALLELISM }}
       - name: 'Install dependency swig'
@@ -244,7 +250,7 @@ jobs:
         id: libx264-cache
         uses: actions/cache@v2
         env:
-          CACHE_NAME: 'libx264-cache'
+          CACHE_NAME: 'libx264-cache-rev2'
         with:
           path: ${{ github.workspace }}/CI_BUILD/x264
           key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.LIBX264_VERSION }}
@@ -386,11 +392,11 @@ jobs:
         id: ffmpeg-cache
         uses: actions/cache@v2
         env:
-          CACHE_NAME: 'ffmpeg-cache'
-          CACHE_VARIATION: '${{ env.ffmpeg_VERSION }}-${{ env.LIBOGG_VERSION }}-${{ env.LIBVORBIS_VERSION }}-${{ env.LIBVPX_VERSION }}-${{ env.LIBOPUS_VERSION }}-${{ env.LIBX264_VERSION }}-${{ env.LIBSRT_VERSION }}-${{ env.LIBMBEDTLS_VERSION }}'
+          CACHE_NAME: 'ffmpeg-cache-rev2'
+          CACHE_VARIATION: '${{ env.FFMPEG_VERSION }}-${{ env.LIBOGG_VERSION }}-${{ env.LIBVORBIS_VERSION }}-${{ env.LIBVPX_VERSION }}-${{ env.LIBOPUS_VERSION }}-${{ env.LIBX264_VERSION }}-${{ env.LIBSRT_VERSION }}-${{ env.LIBMBEDTLS_VERSION }}'
         with:
           path: ${{ github.workspace }}/CI_BUILD/FFmpeg-n${{ env.FFMPEG_VERSION }}
-          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.ffmpeg_VERSION }}-${{ env.CACHE_VARIATION }}
+          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.FFMPEG_VERSION }}-${{ env.CACHE_VARIATION }}
       - name: 'Build dependency ffmpeg'
         if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
         shell: bash
