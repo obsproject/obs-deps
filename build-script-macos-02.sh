@@ -25,6 +25,7 @@ export LIBSRT_VERSION="1.4.1"
 export FFMPEG_VERSION="4.2.2"
 export LIBLUAJIT_VERSION="2.1.0-beta3"
 export LIBFREETYPE_VERSION="2.10.1"
+export PCRE_VERSION="8.44"
 export SWIG_VERSION="3.0.12"
 export MACOSX_DEPLOYMENT_TARGET="10.13"
 export PATH="/usr/local/opt/ccache/libexec:${PATH}"
@@ -72,7 +73,7 @@ caught_error() {
     exit 1
 }
 
-build_792c0b10-0ff1-4fa1-bf66-129cf54232e5() {
+build_731f3204-e7ea-4206-8378-9794efe4029b() {
     step "Install Homebrew dependencies"
     trap "caught_error 'Install Homebrew dependencies'" ERR
     ensure_dir ${BASE_DIR}
@@ -82,7 +83,7 @@ build_792c0b10-0ff1-4fa1-bf66-129cf54232e5() {
 }
 
 
-build_398b9eb5-e5ab-4e88-9e8a-758697dbf012() {
+build_7d848e22-0591-451e-bac4-e0b75ef3473d() {
     step "Get Current Date"
     trap "caught_error 'Get Current Date'" ERR
     ensure_dir ${BASE_DIR}
@@ -91,7 +92,7 @@ build_398b9eb5-e5ab-4e88-9e8a-758697dbf012() {
 }
 
 
-build_c9c6a42b-6b05-43b0-8af9-8039e6f65f14() {
+build_cf6816b8-3768-4076-8ee9-8dd072e4f6c8() {
     step "Build environment setup"
     trap "caught_error 'Build environment setup'" ERR
     ensure_dir ${BASE_DIR}
@@ -104,7 +105,7 @@ build_c9c6a42b-6b05-43b0-8af9-8039e6f65f14() {
 }
 
 
-build_ec6d0df5-e701-423b-82d1-29fc2d394f7a() {
+build_43e9bba1-21ed-42f3-8e8a-3a6b701b1434() {
     step "Build dependency Qt"
     trap "caught_error 'Build dependency Qt'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -147,7 +148,7 @@ build_ec6d0df5-e701-423b-82d1-29fc2d394f7a() {
 }
 
 
-build_ec53269b-5bef-4e93-90c4-18fa09b242da() {
+build_9a308b2f-5ecf-4808-aae5-3a9d110268cd() {
     step "Package dependencies"
     trap "caught_error 'Package dependencies'" ERR
     ensure_dir /tmp
@@ -163,11 +164,11 @@ build_ec53269b-5bef-4e93-90c4-18fa09b242da() {
 obs-deps-build-main() {
     ensure_dir ${BASE_DIR}
 
-    build_792c0b10-0ff1-4fa1-bf66-129cf54232e5
-    build_398b9eb5-e5ab-4e88-9e8a-758697dbf012
-    build_c9c6a42b-6b05-43b0-8af9-8039e6f65f14
-    build_ec6d0df5-e701-423b-82d1-29fc2d394f7a
-    build_ec53269b-5bef-4e93-90c4-18fa09b242da
+    build_731f3204-e7ea-4206-8378-9794efe4029b
+    build_7d848e22-0591-451e-bac4-e0b75ef3473d
+    build_cf6816b8-3768-4076-8ee9-8dd072e4f6c8
+    build_43e9bba1-21ed-42f3-8e8a-3a6b701b1434
+    build_9a308b2f-5ecf-4808-aae5-3a9d110268cd
 
     hr "All Done"
 }
