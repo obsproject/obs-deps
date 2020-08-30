@@ -16,10 +16,11 @@ export WIN_QT_VERSION="5.10"
 export LIBPNG_VERSION="1.6.37"
 export LIBOPUS_VERSION="1.3.1"
 export LIBOGG_VERSION="68ca3841567247ac1f7850801a164f58738d8df9"
+export LIBRNNOISE_VERSION="90ec41ef659fd82cfec2103e9bb7fc235e9ea66c"
 export LIBVORBIS_VERSION="1.3.6"
 export LIBVPX_VERSION="1.8.2"
 export LIBJANSSON_VERSION="2.12"
-export LIBX264_VERSION="origin/stable"
+export LIBX264_VERSION="stable"
 export LIBMBEDTLS_VERSION="2.16.5"
 export LIBSRT_VERSION="1.4.1"
 export FFMPEG_VERSION="4.2.2"
@@ -73,7 +74,7 @@ caught_error() {
     exit 1
 }
 
-build_731f3204-e7ea-4206-8378-9794efe4029b() {
+build_2cd0407b-ab79-4ee8-8dad-4217f66caf0b() {
     step "Install Homebrew dependencies"
     trap "caught_error 'Install Homebrew dependencies'" ERR
     ensure_dir ${BASE_DIR}
@@ -83,7 +84,7 @@ build_731f3204-e7ea-4206-8378-9794efe4029b() {
 }
 
 
-build_7d848e22-0591-451e-bac4-e0b75ef3473d() {
+build_ff5320d0-a4fd-4875-85c1-6a9c9d7bd13e() {
     step "Get Current Date"
     trap "caught_error 'Get Current Date'" ERR
     ensure_dir ${BASE_DIR}
@@ -92,7 +93,7 @@ build_7d848e22-0591-451e-bac4-e0b75ef3473d() {
 }
 
 
-build_cf6816b8-3768-4076-8ee9-8dd072e4f6c8() {
+build_d2457d0a-1001-4785-980f-38ecef529816() {
     step "Build environment setup"
     trap "caught_error 'Build environment setup'" ERR
     ensure_dir ${BASE_DIR}
@@ -105,7 +106,7 @@ build_cf6816b8-3768-4076-8ee9-8dd072e4f6c8() {
 }
 
 
-build_43e9bba1-21ed-42f3-8e8a-3a6b701b1434() {
+build_185b8d67-b8a0-4239-b0d7-a70e0402630e() {
     step "Build dependency Qt"
     trap "caught_error 'Build dependency Qt'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -148,7 +149,7 @@ build_43e9bba1-21ed-42f3-8e8a-3a6b701b1434() {
 }
 
 
-build_9a308b2f-5ecf-4808-aae5-3a9d110268cd() {
+build_6daa727e-5120-4372-a006-876acca58ad4() {
     step "Package dependencies"
     trap "caught_error 'Package dependencies'" ERR
     ensure_dir /tmp
@@ -164,11 +165,11 @@ build_9a308b2f-5ecf-4808-aae5-3a9d110268cd() {
 obs-deps-build-main() {
     ensure_dir ${BASE_DIR}
 
-    build_731f3204-e7ea-4206-8378-9794efe4029b
-    build_7d848e22-0591-451e-bac4-e0b75ef3473d
-    build_cf6816b8-3768-4076-8ee9-8dd072e4f6c8
-    build_43e9bba1-21ed-42f3-8e8a-3a6b701b1434
-    build_9a308b2f-5ecf-4808-aae5-3a9d110268cd
+    build_2cd0407b-ab79-4ee8-8dad-4217f66caf0b
+    build_ff5320d0-a4fd-4875-85c1-6a9c9d7bd13e
+    build_d2457d0a-1001-4785-980f-38ecef529816
+    build_185b8d67-b8a0-4239-b0d7-a70e0402630e
+    build_6daa727e-5120-4372-a006-876acca58ad4
 
     hr "All Done"
 }
