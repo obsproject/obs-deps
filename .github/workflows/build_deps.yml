@@ -24,10 +24,11 @@ jobs:
       LIBPNG_VERSION: '1.6.37'
       LIBOPUS_VERSION: '1.3.1'
       LIBOGG_VERSION: '68ca3841567247ac1f7850801a164f58738d8df9'
+      LIBRNNOISE_VERSION: '90ec41ef659fd82cfec2103e9bb7fc235e9ea66c'
       LIBVORBIS_VERSION: '1.3.6'
       LIBVPX_VERSION: '1.8.2'
       LIBJANSSON_VERSION: '2.12'
-      LIBX264_VERSION: 'origin/stable'
+      LIBX264_VERSION: 'stable'
       LIBMBEDTLS_VERSION: '2.16.5'
       LIBSRT_VERSION: '1.4.1'
       FFMPEG_VERSION: '4.2.2'
@@ -259,28 +260,29 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD
         run: |
-          if [ ! -d ./x264 ]; then git clone https://code.videolan.org/videolan/x264.git; fi
-          cd ./x264
-          git checkout ${{ env.LIBX264_VERSION }}
+          # if [ ! -d ./x264-${{ env.LIBX264_VERSION }} ]; then git clone https://code.videolan.org/videolan/x264.git x264-${{ env.LIBX264_VERSION }}; fi
+          if [ ! -d ./x264-${{ env.LIBX264_VERSION }} ]; then git clone https://github.com/mirror/x264.git x264-${{ env.LIBX264_VERSION }}; fi
+          cd ./x264-${{ env.LIBX264_VERSION }}
+          git checkout origin/${{ env.LIBX264_VERSION }}
           mkdir build
           cd ./build
           ../configure --extra-ldflags="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}" --enable-static --prefix="/tmp/obsdeps"
           make -j${{ env.PARALLELISM }}
       - name: 'Install dependency libx264'
         shell: bash
-        working-directory: ${{ github.workspace }}/CI_BUILD/x264/build
+        working-directory: ${{ github.workspace }}/CI_BUILD/x264-${{ env.LIBX264_VERSION }}/build
         run: |
           make install
       - name: 'Build dependency libx264 (dylib)'
         if: steps.libx264-cache.outputs.cache-hit != 'true'
         shell: bash
-        working-directory: ${{ github.workspace }}/CI_BUILD/x264/build
+        working-directory: ${{ github.workspace }}/CI_BUILD/x264-${{ env.LIBX264_VERSION }}/build
         run: |
           ../configure --extra-ldflags="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}" --enable-shared --libdir="/tmp/obsdeps/bin" --prefix="/tmp/obsdeps"
           make -j${{ env.PARALLELISM }}
       - name: 'Install dependency libx264 (dylib)'
         shell: bash
-        working-directory: ${{ github.workspace }}/CI_BUILD/x264/build
+        working-directory: ${{ github.workspace }}/CI_BUILD/x264-${{ env.LIBX264_VERSION }}/build
         run: |
           ln -f -s libx264.*.dylib libx264.dylib
           find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
@@ -299,7 +301,7 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD
         run: |
-          curl --retry 5 -L -C - -O https://tls.mbed.org/download/mbedtls-${{ env.LIBMBEDTLS_VERSION }}-gpl.tgz
+          curl --retry 5 -L -C - -O "https://tls.mbed.org/download/mbedtls-${{ env.LIBMBEDTLS_VERSION }}-gpl.tgz"
           tar -xf mbedtls-${{ env.LIBMBEDTLS_VERSION }}-gpl.tgz
           cd mbedtls-${{ env.LIBMBEDTLS_VERSION }}
           sed -i '.orig' 's/\/\/\#define MBEDTLS_THREADING_PTHREAD/\#define MBEDTLS_THREADING_PTHREAD/g' include/mbedtls/config.h
@@ -460,7 +462,6 @@ jobs:
         working-directory: ${{ github.workspace }}/CI_BUILD
         run: |
           export CFLAGS="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}"
-
           curl --retry 5 -L -C - -O "https://download.savannah.gnu.org/releases/freetype/freetype-${{ env.LIBFREETYPE_VERSION }}.tar.gz"
           tar -xf freetype-${{ env.LIBFREETYPE_VERSION }}.tar.gz
           cd freetype-${{ env.LIBFREETYPE_VERSION }}
@@ -475,7 +476,34 @@ jobs:
           make install
           find /tmp/obsdeps/lib -name libfreetype\*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
           rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
-          unset CFLAGS
+      - name: 'Restore librnnoise from cache'
+        id: librnnoise-cache
+        uses: actions/cache@v2
+        env:
+          CACHE_NAME: 'librnnoise-cache'
+        with:
+          path: ${{ github.workspace }}/CI_BUILD/rnnoise-${{ env.LIBRNNOISE_VERSION }}
+          key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.LIBRNNOISE_VERSION }}
+      - name: 'Build dependency librnnoise'
+        if: steps.librnnoise-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          if [ ! -d ./rnnoise-${{ env.LIBRNNOISE_VERSION }} ]; then git clone https://github.com/xiph/rnnoise.git rnnoise-${{ env.LIBRNNOISE_VERSION }}; fi
+          cd ./rnnoise-${{ env.LIBRNNOISE_VERSION }}
+          git checkout ${{ env.LIBRNNOISE_VERSION }}
+          ./autogen.sh
+          mkdir build
+          cd build
+          ../configure --prefix="/tmp/obsdeps"
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency librnnoise'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/rnnoise-${{ env.LIBRNNOISE_VERSION }}/build
+        run: |
+          make install
+          find /tmp/obsdeps/lib -name librnnoise\*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
       - name: Package dependencies
         if: success()
         shell: bash
@@ -492,7 +520,6 @@ jobs:
         with:
           name: 'macos-deps-${{ env.CURRENT_DATE }}'
           path: ./macos/*.tar.gz
-
   macos64-qt:
     name: Build macOS Qt dependency (64bit)
     runs-on: [macos-latest]
