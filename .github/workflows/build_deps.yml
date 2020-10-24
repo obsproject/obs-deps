@@ -253,7 +253,7 @@ jobs:
         env:
           CACHE_NAME: 'libx264-cache-rev2'
         with:
-          path: ${{ github.workspace }}/CI_BUILD/x264
+          path: ${{ github.workspace }}/CI_BUILD/x264-${{ env.LIBX264_VERSION }}
           key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.LIBX264_VERSION }}
       - name: 'Build dependency libx264'
         if: steps.libx264-cache.outputs.cache-hit != 'true'
