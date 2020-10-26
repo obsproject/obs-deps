@@ -144,18 +144,25 @@ cd ../..
 #---------------------------------
 
 
+# x264
 read -n1 -r -p "Press any key to build x264..." key
 
+# download and prep x264
+git clone https://code.videolan.org/videolan/x264.git
 cd x264
+git checkout 72db437770fd1ce3961f624dd57a8e75ff65ae0b
+
+# build x264
+x264_api="$(grep '#define X264_BUILD' < x264.h | sed 's/^.* \([1-9][0-9]*\).*$/\1/')"
 make clean
 LDFLAGS="-static-libgcc" ./configure --enable-shared --disable-avs --disable-ffms --disable-gpac --disable-interlaced --disable-lavf --cross-prefix=i686-w64-mingw32- --host=i686-pc-mingw32 --prefix="$PREFIX"
 make -j$(nproc)
 make install
-i686-w64-mingw32-dlltool -z $PREFIX/bin/x264.orig.def --export-all-symbols $PREFIX/bin/libx264-157.dll
+i686-w64-mingw32-dlltool -z $PREFIX/bin/x264.orig.def --export-all-symbols $PREFIX/bin/libx264-$x264_api.dll
 grep "EXPORTS\|x264" $PREFIX/bin/x264.orig.def > $PREFIX/bin/x264.def
-rm -f $PREFIX/bin/x264.org.def
+rm -f $PREFIX/bin/x264.orig.def
 sed -i -e "/\\t.*DATA/d" -e "/\\t\".*/d" -e "s/\s@.*//" $PREFIX/bin/x264.def
-i686-w64-mingw32-dlltool -m i386 -d $PREFIX/bin/x264.def -l $PREFIX/bin/x264.lib -D $PREFIX/bin/libx264-157.dll
+i686-w64-mingw32-dlltool -m i386 -d $PREFIX/bin/x264.def -l $PREFIX/bin/x264.lib -D $PREFIX/bin/libx264-$x264_api.dll
 cd ..
 
 
