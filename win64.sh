@@ -193,9 +193,21 @@ cd ..
 #---------------------------------
 
 
+# zlib
 #read -n1 -r -p "Press any key to build zlib..." key
 
-cd zlib/build64
+# download zlib
+curl --retry 5 -L -O https://www.zlib.net/zlib-1.2.11.tar.gz
+tar -xf zlib-1.2.11.tar.gz
+mv zlib-1.2.11 zlib
+
+# patch CMakeLists.txt to remove the "lib" prefix when building shared libraries
+cd zlib
+patch -p1 < $WORKDIR/patch/zlib/zlib-disable-shared-lib-prefix.patch
+
+# build zlib
+mkdir build64
+cd build64
 make clean
 cmake .. -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres -DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -Wl,--strip-debug"
 make -j$(nproc)
@@ -205,6 +217,11 @@ mv $PREFIX/lib/libzlibstatic.a $PREFIX/lib/libz.a
 cp ../win32/zlib.def $PREFIX/bin
 x86_64-w64-mingw32-dlltool -m i386:x86-64 -d ../win32/zlib.def -l $PREFIX/bin/zlib.lib -D $PREFIX/bin/zlib.dll
 cd ../..
+
+# patch include/zconf.h
+cd $PREFIX
+patch -p1 < $WORKDIR/patch/zlib/zlib-include-zconf.patch
+cd $WORKDIR
 
 
 #---------------------------------

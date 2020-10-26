@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0fe939d..67254b3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -3,6 +3,8 @@ set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
+ 
+ project(zlib C)
+ 
++set(CMAKE_SHARED_LIBRARY_PREFIX "")
++
+ set(VERSION "1.2.11")
+ 
+ option(ASM686 "Enable building i686 assembly implementation")
