@@ -1,5 +1,6 @@
 #/bin/bash
 
+# make directories
 rm -rf win64
 mkdir win64
 cd win64
@@ -7,6 +8,7 @@ mkdir bin
 mkdir include
 mkdir lib
 cd ..
+mkdir -p win64/lib/pkgconfig
 
 read -n1 -r -p "Press any key to build mbedtls.." key
 
@@ -35,7 +37,6 @@ make install
 cd ../..
 
 mv win64/lib/*.dll win64/bin
-mkdir win64/lib/pkgconfig
 
 #---------------------------------
 
