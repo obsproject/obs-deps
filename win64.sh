@@ -10,7 +10,7 @@ mkdir lib
 cd ..
 mkdir -p win64/lib/pkgconfig
 
-read -n1 -r -p "Press any key to build mbedtls.." key
+read -n1 -r -p "Press any key to build mbedtls..." key
 
 mkdir mbedtlsbuild
 mkdir mbedtlsbuild/win64
@@ -91,14 +91,14 @@ EOF
 
 #---------------------------------
 
-read -n1 -r -p "Press any key to build pthread-win32.." key
+read -n1 -r -p "Press any key to build pthread-win32..." key
 
 cd pthread-win32
 make DESTROOT=/home/jim/packages/win64 CROSS=x86_64-w64-mingw32- realclean GC-small-static
 cp libpthreadGC2.a /home/jim/packages/win64/lib
 cd ..
 
-read -n1 -r -p "Press any key to build libsrt.." key
+read -n1 -r -p "Press any key to build libsrt..." key
 
 mkdir srtbuild
 mkdir srtbuild/win64
@@ -110,7 +110,7 @@ x86_64-w64-mingw32-strip -w --keep-symbol=srt* libsrt.dll
 make install
 cd ../..
 
-read -n1 -r -p "Press any key to build x264.." key
+read -n1 -r -p "Press any key to build x264..." key
 
 cd x264
 make clean

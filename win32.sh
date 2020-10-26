@@ -10,7 +10,7 @@ mkdir lib
 cd ..
 mkdir -p win32/lib/pkgconfig
 
-read -n1 -r -p "Press any key to build mbedtls.." key
+read -n1 -r -p "Press any key to build mbedtls..." key
 
 mkdir mbedtlsbuild
 mkdir mbedtlsbuild/win32
@@ -88,14 +88,14 @@ EOF
 
 #---------------------------------
 
-read -n1 -r -p "Press any key to build pthread-win32.." key
+read -n1 -r -p "Press any key to build pthread-win32..." key
 
 cd pthread-win32
 make DESTROOT=/home/jim/packages/win32 CROSS=i686-w64-mingw32- realclean GC-small-static
 cp libpthreadGC2.a /home/jim/packages/win32/lib
 cd ..
 
-read -n1 -r -p "Press any key to build libsrt.." key
+read -n1 -r -p "Press any key to build libsrt..." key
 
 mkdir srtbuild
 mkdir srtbuild/win32
