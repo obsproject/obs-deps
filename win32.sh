@@ -223,8 +223,15 @@ cd $WORKDIR
 #---------------------------------
 
 
+# libpng
 #read -n1 -r -p "Press any key to build libpng..." key
 
+# download libpng
+curl --retry 5 -L -o libpng-1.6.37.tar.gz https://github.com/glennrp/libpng/archive/v1.6.37.tar.gz
+tar -xf libpng-1.6.37.tar.gz
+mv libpng-1.6.37 libpng
+
+# build libpng
 cd libpng
 make clean
 PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" LDFLAGS="-L$PREFIX/lib -static-libgcc" CPPFLAGS="-I$PREFIX/include" ./configure --host=i686-w64-mingw32 --prefix="$PREFIX" --enable-shared
