@@ -266,8 +266,15 @@ cd ../..
 #---------------------------------
 
 
+# libvorbis
 #read -n1 -r -p "Press any key to build libvorbis..." key
 
+# download libvorbis
+curl --retry 5 -L -O https://ftp.osuosl.org/pub/xiph/releases/vorbis/libvorbis-1.3.6.tar.gz
+tar -xf libvorbis-1.3.6.tar.gz
+mv libvorbis-1.3.6 libvorbis
+
+# build libvorbis
 cd libvorbis
 make clean
 PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" LDFLAGS="-L$PREFIX/lib -static-libgcc" CPPFLAGS="-I$PREFIX/include" ./configure --host=i686-w64-mingw32 --prefix="$PREFIX" --enable-shared --with-ogg="$PREFIX"
