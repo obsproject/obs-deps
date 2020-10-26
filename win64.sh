@@ -10,6 +10,10 @@ mkdir lib
 cd ..
 mkdir -p win64/lib/pkgconfig
 
+
+#---------------------------------
+
+
 read -n1 -r -p "Press any key to build mbedtls..." key
 
 mkdir mbedtlsbuild
@@ -38,8 +42,6 @@ cd ../..
 
 mv win64/lib/*.dll win64/bin
 
-#---------------------------------
-
 cat > win64/lib/pkgconfig/mbedtls.pc <<EOF
 prefix=/home/jim/packages/win64
 exec_prefix=\${prefix}
@@ -54,8 +56,6 @@ Conflicts:
 Libs: -L\${libdir} -lmbedtls
 Cflags: -I\${includedir} -I\${includedir}/mbedtls
 EOF
-
-#---------------------------------
 
 cat > win64/lib/pkgconfig/mbedcrypto.pc <<EOF
 prefix=/home/jim/packages/win64
@@ -72,8 +72,6 @@ Libs: -L\${libdir} -lmbedcrypto
 Cflags: -I\${includedir} -I\${includedir}/mbedtls
 EOF
 
-#---------------------------------
-
 cat > win64/lib/pkgconfig/mbedx509.pc <<EOF
 prefix=/home/jim/packages/win64
 exec_prefix=\${prefix}
@@ -89,7 +87,9 @@ Libs: -L\${libdir} -lmbedx509
 Cflags: -I\${includedir} -I\${includedir}/mbedtls
 EOF
 
+
 #---------------------------------
+
 
 read -n1 -r -p "Press any key to build pthread-win32..." key
 
@@ -97,6 +97,10 @@ cd pthread-win32
 make DESTROOT=/home/jim/packages/win64 CROSS=x86_64-w64-mingw32- realclean GC-small-static
 cp libpthreadGC2.a /home/jim/packages/win64/lib
 cd ..
+
+
+#---------------------------------
+
 
 read -n1 -r -p "Press any key to build libsrt..." key
 
@@ -109,6 +113,10 @@ make -j$(nproc)
 x86_64-w64-mingw32-strip -w --keep-symbol=srt* libsrt.dll
 make install
 cd ../..
+
+
+#---------------------------------
+
 
 read -n1 -r -p "Press any key to build x264..." key
 
@@ -125,6 +133,10 @@ sed -i -e "/\\t.*DATA/d" -e "/\\t\".*/d" -e "s/\s@.*//" /home/jim/packages/win64
 x86_64-w64-mingw32-dlltool -m i386:x86-64 -d /home/jim/packages/win64/bin/x264.def -l /home/jim/packages/win64/bin/x264.lib -D /home/jim/win64/packages/bin/libx264-157.dll
 cd ..
 
+
+#---------------------------------
+
+
 #read -n1 -r -p "Press any key to build opus..." key
 
 cd opus
@@ -133,6 +145,10 @@ LDFLAGS="-static-libgcc" ./configure --host=x86_64-w64-mingw32 --prefix="/home/j
 make -j$(nproc)
 make install
 cd ..
+
+
+#---------------------------------
+
 
 #read -n1 -r -p "Press any key to build zlib..." key
 
@@ -147,6 +163,10 @@ cp ../win32/zlib.def /home/jim/packages/win64/bin
 x86_64-w64-mingw32-dlltool -m i386:x86-64 -d ../win32/zlib.def -l /home/jim/packages/win64/bin/zlib.lib -D /home/jim/win64/packages/bin/zlib.dll
 cd ../..
 
+
+#---------------------------------
+
+
 #read -n1 -r -p "Press any key to build libpng..." key
 
 cd libpng
@@ -155,6 +175,10 @@ PKG_CONFIG_PATH="/home/jim/packages/win64/lib/pkgconfig" LDFLAGS="-L/home/jim/pa
 make -j$(nproc)
 make install
 cd ..
+
+
+#---------------------------------
+
 
 #read -n1 -r -p "Press any key to build libogg..." key
 
@@ -165,6 +189,10 @@ make -j$(nproc)
 make install
 cd ..
 
+
+#---------------------------------
+
+
 #read -n1 -r -p "Press any key to build libvorbis..." key
 
 cd libvorbis
@@ -173,6 +201,10 @@ PKG_CONFIG_PATH="/home/jim/packages/win64/lib/pkgconfig" LDFLAGS="-L/home/jim/pa
 make -j$(nproc)
 make install
 cd ..
+
+
+#---------------------------------
+
 
 #read -n1 -r -p "Press any key to build libvpx..." key
 
@@ -183,6 +215,10 @@ make -j$(nproc)
 make install
 x86_64-w64-mingw32-dlltool -m i386:x86-64 -d libvpx.def -l /home/jim/packages/win64/bin/vpx.lib -D /home/jim/win64/packages/bin/libvpx-1.dll
 cd ..
+
+
+#---------------------------------
+
 
 read -n1 -r -p "Press any key to build FFmpeg..." key
 
