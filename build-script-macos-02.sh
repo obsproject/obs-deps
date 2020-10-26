@@ -74,7 +74,7 @@ caught_error() {
     exit 1
 }
 
-build_2cd0407b-ab79-4ee8-8dad-4217f66caf0b() {
+build_3d906614-78a8-44f4-ae98-6f682d21e54d() {
     step "Install Homebrew dependencies"
     trap "caught_error 'Install Homebrew dependencies'" ERR
     ensure_dir ${BASE_DIR}
@@ -84,7 +84,7 @@ build_2cd0407b-ab79-4ee8-8dad-4217f66caf0b() {
 }
 
 
-build_ff5320d0-a4fd-4875-85c1-6a9c9d7bd13e() {
+build_3e719959-15ec-429b-8b7b-c44690f0b7f6() {
     step "Get Current Date"
     trap "caught_error 'Get Current Date'" ERR
     ensure_dir ${BASE_DIR}
@@ -93,7 +93,7 @@ build_ff5320d0-a4fd-4875-85c1-6a9c9d7bd13e() {
 }
 
 
-build_d2457d0a-1001-4785-980f-38ecef529816() {
+build_d2a914db-251f-408f-b381-cda15ea2997e() {
     step "Build environment setup"
     trap "caught_error 'Build environment setup'" ERR
     ensure_dir ${BASE_DIR}
@@ -106,7 +106,7 @@ build_d2457d0a-1001-4785-980f-38ecef529816() {
 }
 
 
-build_185b8d67-b8a0-4239-b0d7-a70e0402630e() {
+build_c0c670ba-bfc3-48ff-ab8d-0715d56b1d0d() {
     step "Build dependency Qt"
     trap "caught_error 'Build dependency Qt'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -149,7 +149,7 @@ build_185b8d67-b8a0-4239-b0d7-a70e0402630e() {
 }
 
 
-build_6daa727e-5120-4372-a006-876acca58ad4() {
+build_9352655c-c1e6-4bc0-ad91-546480909c1e() {
     step "Package dependencies"
     trap "caught_error 'Package dependencies'" ERR
     ensure_dir /tmp
@@ -165,11 +165,11 @@ build_6daa727e-5120-4372-a006-876acca58ad4() {
 obs-deps-build-main() {
     ensure_dir ${BASE_DIR}
 
-    build_2cd0407b-ab79-4ee8-8dad-4217f66caf0b
-    build_ff5320d0-a4fd-4875-85c1-6a9c9d7bd13e
-    build_d2457d0a-1001-4785-980f-38ecef529816
-    build_185b8d67-b8a0-4239-b0d7-a70e0402630e
-    build_6daa727e-5120-4372-a006-876acca58ad4
+    build_3d906614-78a8-44f4-ae98-6f682d21e54d
+    build_3e719959-15ec-429b-8b7b-c44690f0b7f6
+    build_d2a914db-251f-408f-b381-cda15ea2997e
+    build_c0c670ba-bfc3-48ff-ab8d-0715d56b1d0d
+    build_9352655c-c1e6-4bc0-ad91-546480909c1e
 
     hr "All Done"
 }
