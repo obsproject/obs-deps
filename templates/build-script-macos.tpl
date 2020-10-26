@@ -38,7 +38,7 @@ ensure_dir() {{
 }}
 
 cleanup() {{
-    :
+    restore_brews
 }}
 
 mkdir() {{
@@ -53,12 +53,32 @@ caught_error() {{
     exit 1
 }}
 
+restore_brews() {{
+    if [ -d /usr/local/opt/xz ]; then
+      brew link xz
+    fi
+
+    if [ -d /usr/local/opt/zstd ]; then
+      brew link zstd
+    fi
+
+    if [ -d /usr/local/opt/libtiff ]; then
+      brew link libtiff
+    fi
+
+    if [ -d /usr/local/opt/webp ]; then
+      brew link webp
+    fi
+}}
+
 {build_steps}
 
 obs-deps-build-main() {{
     ensure_dir {workspace}
 
 {call_build_steps}
+
+    restore_brews
 
     hr "All Done"
 }}

@@ -81,6 +81,7 @@ def parse_macos_job(job_data, template, step_template, global_env):
             for match in matches:
                 environment.update({match[0]: match[1]})
 
+            script_content = script_content.replace('curl --retry 5', 'curl --progress-bar --retry 5')
             script_content = find_setenv_pattern.sub('', script_content)
             script_content = script_content.replace('${{ github.workspace }}', current_path)
             script_content = find_env_pattern.sub('${\\1}', script_content)
