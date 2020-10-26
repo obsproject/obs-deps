@@ -19,10 +19,22 @@ export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 #---------------------------------
 
 
+# start mbedTLS
 read -n1 -r -p "Press any key to build mbedtls..." key
 
-mkdir mbedtlsbuild
-mkdir mbedtlsbuild/win64
+# download mbedTLS
+curl --retry 5 -L -o mbedtls-2.23.0.tar.gz https://github.com/ARMmbed/mbedtls/archive/v2.23.0.tar.gz
+tar -xf mbedtls-2.23.0.tar.gz
+mv mbedtls-2.23.0 mbedtls
+
+# build mbedTLS
+# Enable the threading abstraction layer and use an alternate implementation
+sed -i -e "s/\/\/#define MBEDTLS_THREADING_C/#define MBEDTLS_THREADING_C/" \
+-e "s/\/\/#define MBEDTLS_THREADING_ALT/#define MBEDTLS_THREADING_ALT/" mbedtls/include/mbedtls/config.h
+cp -p patch/mbedtls/threading_alt.h mbedtls/include/mbedtls/threading_alt.h
+
+
+mkdir -p mbedtlsbuild/win64
 cd mbedtlsbuild/win64
 rm -rf *
 cmake ../../mbedtls -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres -DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -Wl,--strip-debug" -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DUSE_STATIC_MBEDTLS_LIBRARY=OFF -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF
@@ -47,6 +59,7 @@ cd ../..
 
 mv $PREFIX/lib/*.dll $PREFIX/bin
 
+# create pkgconfig files for mbedTLS
 cat > $PKG_CONFIG_PATH/mbedtls.pc <<EOF
 prefix=$PREFIX
 exec_prefix=\${prefix}
