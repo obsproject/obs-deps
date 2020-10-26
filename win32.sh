@@ -10,6 +10,11 @@ mkdir lib
 cd ..
 mkdir -p win32/lib/pkgconfig
 
+# set build prefix
+WORKDIR=$PWD
+PREFIX=$PWD/win32
+export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
+
 
 #---------------------------------
 
@@ -20,7 +25,7 @@ mkdir mbedtlsbuild
 mkdir mbedtlsbuild/win32
 cd mbedtlsbuild/win32
 rm -rf *
-cmake ../../mbedtls -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc -DCMAKE_INSTALL_PREFIX=/home/jim/packages/win32 -DCMAKE_RC_COMPILER=i686-w64-mingw32-windres -DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -Wl,--strip-debug" -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DUSE_STATIC_MBEDTLS_LIBRARY=OFF -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF
+cmake ../../mbedtls -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_RC_COMPILER=i686-w64-mingw32-windres -DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -Wl,--strip-debug" -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DUSE_STATIC_MBEDTLS_LIBRARY=OFF -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF
 make -j$(nproc)
 i686-w64-mingw32-dlltool -z mbedtls.orig.def --export-all-symbols library/libmbedtls.dll
 i686-w64-mingw32-dlltool -z mbedcrypto.orig.def --export-all-symbols library/libmbedcrypto.dll
@@ -31,16 +36,16 @@ grep "EXPORTS\|mbedtls" mbedx509.orig.def > mbedx509.def
 sed -i -e "/\\t.*DATA/d" -e "/\\t\".*/d" -e "s/\s@.*//" mbedtls.def
 sed -i -e "/\\t.*DATA/d" -e "/\\t\".*/d" -e "s/\s@.*//" mbedcrypto.def
 sed -i -e "/\\t.*DATA/d" -e "/\\t\".*/d" -e "s/\s@.*//" mbedx509.def
-i686-w64-mingw32-dlltool -m i386 -d mbedtls.def -l /home/jim/packages/win32/bin/mbedtls.lib -D library/libmbedtls.dll
-i686-w64-mingw32-dlltool -m i386 -d mbedcrypto.def -l /home/jim/packages/win32/bin/mbedcrypto.lib -D library/libmbedcrypto.dll
-i686-w64-mingw32-dlltool -m i386 -d mbedx509.def -l /home/jim/packages/win32/bin/mbedx509.lib -D library/libmbedx509.dll
+i686-w64-mingw32-dlltool -m i386 -d mbedtls.def -l $PREFIX/bin/mbedtls.lib -D library/libmbedtls.dll
+i686-w64-mingw32-dlltool -m i386 -d mbedcrypto.def -l $PREFIX/bin/mbedcrypto.lib -D library/libmbedcrypto.dll
+i686-w64-mingw32-dlltool -m i386 -d mbedx509.def -l $PREFIX/bin/mbedx509.lib -D library/libmbedx509.dll
 make install
 cd ../..
 
-mv win32/lib/*.dll win32/bin
+mv $PREFIX/lib/*.dll $PREFIX/bin
 
-cat > win32/lib/pkgconfig/mbedtls.pc <<EOF
-prefix=/home/jim/packages/win32
+cat > $PKG_CONFIG_PATH/mbedtls.pc <<EOF
+prefix=$PREFIX
 exec_prefix=\${prefix}
 libdir=\${exec_prefix}/lib
 includedir=\${prefix}/include
@@ -54,8 +59,8 @@ Libs: -L\${libdir} -lmbedtls
 Cflags: -I\${includedir} -I\${includedir}/mbedtls
 EOF
 
-cat > win32/lib/pkgconfig/mbedcrypto.pc <<EOF
-prefix=/home/jim/packages/win32
+cat > $PKG_CONFIG_PATH/mbedcrypto.pc <<EOF
+prefix=$PREFIX
 exec_prefix=\${prefix}
 libdir=\${exec_prefix}/lib
 includedir=\${prefix}/include
@@ -69,8 +74,8 @@ Libs: -L\${libdir} -lmbedcrypto
 Cflags: -I\${includedir} -I\${includedir}/mbedtls
 EOF
 
-cat > win32/lib/pkgconfig/mbedx509.pc <<EOF
-prefix=/home/jim/packages/win32
+cat > $PKG_CONFIG_PATH/mbedx509.pc <<EOF
+prefix=$PREFIX
 exec_prefix=\${prefix}
 libdir=\${exec_prefix}/lib
 includedir=\${prefix}/include
@@ -91,8 +96,8 @@ EOF
 read -n1 -r -p "Press any key to build pthread-win32..." key
 
 cd pthread-win32
-make DESTROOT=/home/jim/packages/win32 CROSS=i686-w64-mingw32- realclean GC-small-static
-cp libpthreadGC2.a /home/jim/packages/win32/lib
+make DESTROOT=$PREFIX CROSS=i686-w64-mingw32- realclean GC-small-static
+cp libpthreadGC2.a $PREFIX/lib
 cd ..
 
 
@@ -105,7 +110,7 @@ mkdir srtbuild
 mkdir srtbuild/win32
 cd srtbuild/win32
 rm -rf *
-cmake ../../srt -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc -DCMAKE_INSTALL_PREFIX=/home/jim/packages/win32 -DCMAKE_RC_COMPILER=i686-w64-mingw32-windres -DUSE_ENCLIB=mbedtls -DENABLE_APPS=OFF -DENABLE_STATIC=OFF -DENABLE_SHARED=ON -DCMAKE_C_FLAGS="-I/home/jim/packages/pthread-win32" -DCMAKE_CXX_FLAGS="-I/home/jim/packages/pthread-win32" -DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -Wl,--strip-debug" -DPTHREAD_LIBRARY="/home/jim/packages/win32/lib/libpthreadGC2.a" -DPTHREAD_INCLUDE_DIR="/home/jim/packages/pthread-win32" -DUSE_OPENSSL_PC=OFF -DCMAKE_BUILD_TYPE=MinSizeRel
+cmake ../../srt -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_RC_COMPILER=i686-w64-mingw32-windres -DUSE_ENCLIB=mbedtls -DENABLE_APPS=OFF -DENABLE_STATIC=OFF -DENABLE_SHARED=ON -DCMAKE_C_FLAGS="-I$WORKDIR/pthread-win32" -DCMAKE_CXX_FLAGS="-I$WORKDIR/pthread-win32" -DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -Wl,--strip-debug" -DPTHREAD_LIBRARY="$PREFIX/lib/libpthreadGC2.a" -DPTHREAD_INCLUDE_DIR="$WORKDIR/pthread-win32" -DUSE_OPENSSL_PC=OFF -DCMAKE_BUILD_TYPE=MinSizeRel
 make -j$(nproc)
 i686-w64-mingw32-strip -w --keep-symbol=srt* libsrt.dll
 make install
@@ -119,14 +124,14 @@ read -n1 -r -p "Press any key to build x264..." key
 
 cd x264
 make clean
-LDFLAGS="-static-libgcc" ./configure --enable-shared --disable-avs --disable-ffms --disable-gpac --disable-interlaced --disable-lavf --cross-prefix=i686-w64-mingw32- --host=i686-pc-mingw32 --prefix="/home/jim/packages/win32"
+LDFLAGS="-static-libgcc" ./configure --enable-shared --disable-avs --disable-ffms --disable-gpac --disable-interlaced --disable-lavf --cross-prefix=i686-w64-mingw32- --host=i686-pc-mingw32 --prefix="$PREFIX"
 make -j$(nproc)
 make install
-i686-w64-mingw32-dlltool -z /home/jim/packages/win32/bin/x264.orig.def --export-all-symbols /home/jim/packages/win32/bin/libx264-157.dll
-grep "EXPORTS\|x264" /home/jim/packages/win32/bin/x264.orig.def > /home/jim/packages/win32/bin/x264.def
-rm -f /home/jim/packages/win32/bin/x264.org.def
-sed -i -e "/\\t.*DATA/d" -e "/\\t\".*/d" -e "s/\s@.*//" /home/jim/packages/win32/bin/x264.def
-i686-w64-mingw32-dlltool -m i386 -d /home/jim/packages/win32/bin/x264.def -l /home/jim/packages/win32/bin/x264.lib -D /home/jim/win32/packages/bin/libx264-157.dll
+i686-w64-mingw32-dlltool -z $PREFIX/bin/x264.orig.def --export-all-symbols $PREFIX/bin/libx264-157.dll
+grep "EXPORTS\|x264" $PREFIX/bin/x264.orig.def > $PREFIX/bin/x264.def
+rm -f $PREFIX/bin/x264.org.def
+sed -i -e "/\\t.*DATA/d" -e "/\\t\".*/d" -e "s/\s@.*//" $PREFIX/bin/x264.def
+i686-w64-mingw32-dlltool -m i386 -d $PREFIX/bin/x264.def -l $PREFIX/bin/x264.lib -D $PREFIX/bin/libx264-157.dll
 cd ..
 
 
@@ -137,7 +142,7 @@ cd ..
 
 cd opus
 make clean
-LDFLAGS="-static-libgcc" ./configure --host=i686-w64-mingw32 --prefix="/home/jim/packages/win32" --enable-shared
+LDFLAGS="-static-libgcc" ./configure --host=i686-w64-mingw32 --prefix="$PREFIX" --enable-shared
 make -j$(nproc)
 make install
 cd ..
@@ -150,13 +155,13 @@ cd ..
 
 cd zlib/build32
 make clean
-cmake .. -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc -DCMAKE_INSTALL_PREFIX=/home/jim/packages/win32 -DINSTALL_PKGCONFIG_DIR=/home/jim/packages/win32/lib/pkgconfig -DCMAKE_RC_COMPILER=i686-w64-mingw32-windres -DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -Wl,--strip-debug"
+cmake .. -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc -DCMAKE_INSTALL_PREFIX=$PREFIX -DINSTALL_PKGCONFIG_DIR=$PREFIX/lib/pkgconfig -DCMAKE_RC_COMPILER=i686-w64-mingw32-windres -DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -Wl,--strip-debug"
 make -j$(nproc)
 make install
-mv ../../win32/lib/libzlib.dll.a ../../win32/lib/libz.dll.a
-mv ../../win32/lib/libzlibstatic.a ../../win32/lib/libz.a
-cp ../win32/zlib.def /home/jim/packages/win32/bin
-i686-w64-mingw32-dlltool -m i386 -d ../win32/zlib.def -l /home/jim/packages/win32/bin/zlib.lib -D /home/jim/win32/packages/bin/zlib.dll
+mv $PREFIX/lib/libzlib.dll.a $PREFIX/lib/libz.dll.a
+mv $PREFIX/lib/libzlibstatic.a $PREFIX/lib/libz.a
+cp ../win32/zlib.def $PREFIX/bin
+i686-w64-mingw32-dlltool -m i386 -d ../win32/zlib.def -l $PREFIX/bin/zlib.lib -D $PREFIX/bin/zlib.dll
 cd ../..
 
 
@@ -167,7 +172,7 @@ cd ../..
 
 cd libpng
 make clean
-PKG_CONFIG_PATH="/home/jim/packages/win32/lib/pkgconfig" LDFLAGS="-L/home/jim/packages/win32/lib -static-libgcc" CPPFLAGS="-I/home/jim/packages/win32/include" ./configure --host=i686-w64-mingw32 --prefix="/home/jim/packages/win32" --enable-shared
+PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" LDFLAGS="-L$PREFIX/lib -static-libgcc" CPPFLAGS="-I$PREFIX/include" ./configure --host=i686-w64-mingw32 --prefix="$PREFIX" --enable-shared
 make -j$(nproc)
 make install
 cd ..
@@ -180,7 +185,7 @@ cd ..
 
 cd libogg
 make clean
-PKG_CONFIG_PATH="/home/jim/packages/win32/lib/pkgconfig" LDFLAGS="-L/home/jim/packages/win32/lib -static-libgcc" CPPFLAGS="-I/home/jim/packages/win32/include" ./configure --host=i686-w64-mingw32 --prefix="/home/jim/packages/win32" --enable-shared
+PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" LDFLAGS="-L$PREFIX/lib -static-libgcc" CPPFLAGS="-I$PREFIX/include" ./configure --host=i686-w64-mingw32 --prefix="$PREFIX" --enable-shared
 make -j$(nproc)
 make install
 cd ..
@@ -193,7 +198,7 @@ cd ..
 
 cd libvorbis
 make clean
-PKG_CONFIG_PATH="/home/jim/packages/win32/lib/pkgconfig" LDFLAGS="-L/home/jim/packages/win32/lib -static-libgcc" CPPFLAGS="-I/home/jim/packages/win32/include" ./configure --host=i686-w64-mingw32 --prefix="/home/jim/packages/win32" --enable-shared --with-ogg="/home/jim/packages/win32"
+PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" LDFLAGS="-L$PREFIX/lib -static-libgcc" CPPFLAGS="-I$PREFIX/include" ./configure --host=i686-w64-mingw32 --prefix="$PREFIX" --enable-shared --with-ogg="$PREFIX"
 make -j$(nproc)
 make install
 cd ..
@@ -206,10 +211,10 @@ cd ..
 
 cd libvpxbuild
 make clean
-PKG_CONFIG_PATH="/home/jim/packages/win32/lib/pkgconfig" CROSS=i686-w64-mingw32- LDFLAGS="-static-libgcc" ../libvpx/configure --prefix=/home/jim/packages/win32 --enable-vp8 --enable-vp9 --disable-docs --disable-examples --enable-shared --disable-static --enable-runtime-cpu-detect --enable-realtime-only --disable-install-bins --disable-install-docs --disable-unit-tests --target=x86-win32-gcc
+PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" CROSS=i686-w64-mingw32- LDFLAGS="-static-libgcc" ../libvpx/configure --prefix=$PREFIX --enable-vp8 --enable-vp9 --disable-docs --disable-examples --enable-shared --disable-static --enable-runtime-cpu-detect --enable-realtime-only --disable-install-bins --disable-install-docs --disable-unit-tests --target=x86-win32-gcc
 make -j$(nproc)
 make install
-i686-w64-mingw32-dlltool -m i386 -d libvpx.def -l /home/jim/packages/win32/bin/vpx.lib -D /home/jim/win32/packages/bin/libvpx-1.dll
+i686-w64-mingw32-dlltool -m i386 -d libvpx.def -l $PREFIX/bin/vpx.lib -D /home/jim/win32/packages/bin/libvpx-1.dll
 cd ..
 
 
@@ -219,16 +224,16 @@ cd ..
 read -n1 -r -p "Press any key to build FFmpeg..." key
 
 cd nv-codec-headers
-make PREFIX="/home/jim/packages/win32"
-make PREFIX="/home/jim/packages/win32" install
+make PREFIX="$PREFIX"
+make PREFIX="$PREFIX" install
 cd ..
 
-mkdir win32/include/AMF
-cp -a AMF/amf/public/include/* /home/jim/packages/win32/include/AMF
+mkdir $PREFIX/include/AMF
+cp -a AMF/amf/public/include/* $PREFIX/include/AMF
 
 cd ffmpeg
 make clean
-PKG_CONFIG_PATH="/home/jim/packages/win32/lib/pkgconfig" LDFLAGS="-L/home/jim/packages/win32/lib -static-libgcc" CFLAGS="-I/home/jim/packages/win32/include -I/home/jim/packages/pthread-win32" ./configure --enable-gpl --disable-programs --disable-doc --arch=x86 --enable-shared --enable-nvenc --enable-amf --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --disable-debug --cross-prefix=i686-w64-mingw32- --target-os=mingw32 --pkg-config=pkg-config --prefix="/home/jim/packages/win32" --disable-postproc
+PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" LDFLAGS="-L$PREFIX/lib -static-libgcc" CFLAGS="-I$PREFIX/include -I$WORKDIR/pthread-win32" ./configure --enable-gpl --disable-programs --disable-doc --arch=x86 --enable-shared --enable-nvenc --enable-amf --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --disable-debug --cross-prefix=i686-w64-mingw32- --target-os=mingw32 --pkg-config=pkg-config --prefix="$PREFIX" --disable-postproc
 read -n1 -r -p "Press any key to continue building FFmpeg..." key
 make -j$(nproc)
 make install
