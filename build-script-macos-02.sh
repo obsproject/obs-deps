@@ -74,7 +74,7 @@ caught_error() {
     exit 1
 }
 
-build_373a07c3-9016-4189-9992-f6280e6e94a5() {
+build_e9a217b8-5c04-44d3-bc51-7df2ebeedca3() {
     step "Install Homebrew dependencies"
     trap "caught_error 'Install Homebrew dependencies'" ERR
     ensure_dir ${BASE_DIR}
@@ -84,7 +84,7 @@ build_373a07c3-9016-4189-9992-f6280e6e94a5() {
 }
 
 
-build_64871fd6-4ac1-46d6-9296-c6e0a44fab3f() {
+build_879d071e-5b19-4df4-8915-7271f2d2a9c0() {
     step "Get Current Date"
     trap "caught_error 'Get Current Date'" ERR
     ensure_dir ${BASE_DIR}
@@ -93,7 +93,7 @@ build_64871fd6-4ac1-46d6-9296-c6e0a44fab3f() {
 }
 
 
-build_b62570e8-a9b1-4b5e-bc7b-5ee175b8083d() {
+build_376182d4-b43c-41f6-957a-516a5611c842() {
     step "Build environment setup"
     trap "caught_error 'Build environment setup'" ERR
     ensure_dir ${BASE_DIR}
@@ -106,7 +106,7 @@ build_b62570e8-a9b1-4b5e-bc7b-5ee175b8083d() {
 }
 
 
-build_665d4cd6-0735-47eb-ae6b-b6046cdba42b() {
+build_54ea825f-eded-4d75-b8b4-0029392f0e5a() {
     step "Build dependency Qt"
     trap "caught_error 'Build dependency Qt'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -145,11 +145,23 @@ build_665d4cd6-0735-47eb-ae6b-b6046cdba42b() {
       -skip qttranslations -skip qtwayland -skip qtwebchannel -skip qtwebengine -skip qtwebglplugin \
       -skip qtwebsockets -skip qtwebview -skip qtwinextras -skip qtx11extras -skip qtxmlpatterns
     make -j${PARALLELISM}
+    
+    if [ -d /usr/local/opt/zstd ]; then
+      brew link zstd
+    fi
+}
+
+
+build_10f8b9c5-ec4a-4711-9d12-9bbb3087965a() {
+    step "Install dependency Qt"
+    trap "caught_error 'Install dependency Qt'" ERR
+    ensure_dir ${BASE_DIR}/CI_BUILD/qt-everywhere-src-5.14.1/build
+
     make install
 }
 
 
-build_1c57aedb-be42-4e12-84a8-1020aa7aee43() {
+build_7e81a11c-8d59-4c92-9606-861e31785f49() {
     step "Package dependencies"
     trap "caught_error 'Package dependencies'" ERR
     ensure_dir /tmp
@@ -165,11 +177,12 @@ build_1c57aedb-be42-4e12-84a8-1020aa7aee43() {
 obs-deps-build-main() {
     ensure_dir ${BASE_DIR}
 
-    build_373a07c3-9016-4189-9992-f6280e6e94a5
-    build_64871fd6-4ac1-46d6-9296-c6e0a44fab3f
-    build_b62570e8-a9b1-4b5e-bc7b-5ee175b8083d
-    build_665d4cd6-0735-47eb-ae6b-b6046cdba42b
-    build_1c57aedb-be42-4e12-84a8-1020aa7aee43
+    build_e9a217b8-5c04-44d3-bc51-7df2ebeedca3
+    build_879d071e-5b19-4df4-8915-7271f2d2a9c0
+    build_376182d4-b43c-41f6-957a-516a5611c842
+    build_54ea825f-eded-4d75-b8b4-0029392f0e5a
+    build_10f8b9c5-ec4a-4711-9d12-9bbb3087965a
+    build_7e81a11c-8d59-4c92-9606-861e31785f49
 
     hr "All Done"
 }
