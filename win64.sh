@@ -109,8 +109,15 @@ EOF
 #---------------------------------
 
 
+# pthread-win32
 read -n1 -r -p "Press any key to build pthread-win32..." key
 
+# download pthread-win32
+curl --retry 5 -L -o pthread-win32-master.zip https://github.com/GerHobbelt/pthread-win32/archive/master.zip
+unzip pthread-win32-master.zip
+mv pthread-win32-master pthread-win32
+
+# build pthread-win32
 cd pthread-win32
 make DESTROOT=$PREFIX CROSS=x86_64-w64-mingw32- realclean GC-small-static
 cp libpthreadGC2.a $PREFIX/lib
