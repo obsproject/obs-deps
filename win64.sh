@@ -290,8 +290,19 @@ cd ..
 #---------------------------------
 
 
+# libvpx
 #read -n1 -r -p "Press any key to build libvpx..." key
 
+# download libvpx
+curl --retry 5 -L -o libvpx-v1.8.1.tar.gz https://chromium.googlesource.com/webm/libvpx/+archive/v1.8.1.tar.gz
+mkdir -p libvpx
+tar -xf libvpx-v1.8.1.tar.gz -C $PWD/libvpx
+
+# build libvpx
+cd libvpx
+patch -p1 < ../patch/libvpx/libvpx-crosscompile-win-dll.patch
+cd ..
+mkdir -p libvpxbuild
 cd libvpxbuild
 make clean
 PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" CROSS=x86_64-w64-mingw32- LDFLAGS="-static-libgcc" ../libvpx/configure --prefix=$PREFIX --enable-vp8 --enable-vp9 --disable-docs --disable-examples --enable-shared --disable-static --enable-runtime-cpu-detect --enable-realtime-only --disable-install-bins --disable-install-docs --disable-unit-tests --target=x86_64-win64-gcc
@@ -299,6 +310,8 @@ make -j$(nproc)
 make install
 x86_64-w64-mingw32-dlltool -m i386:x86-64 -d libvpx.def -l $PREFIX/bin/vpx.lib -D /home/jim/win64/packages/bin/libvpx-1.dll
 cd ..
+
+pkg-config --libs vpx
 
 
 #---------------------------------
