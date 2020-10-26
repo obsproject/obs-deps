@@ -17,3 +17,45 @@ jobs:
     inputs:
       pathtoPublish: './osx'
       artifactName: osx-deps
+
+- job: 'Build_Win32'
+  pool:
+    vmImage: 'ubuntu-18.04'
+  steps:
+  - script: ./win-install-tools.sh
+    displayName: 'Install Tools'
+  - script: ./win32.sh
+    displayName: 'Build deps'
+
+  - task: PublishBuildArtifacts@1
+    condition: ne(variables['Build.Reason'], 'PullRequest')
+    inputs:
+      pathtoPublish: './ffmpeg/ffbuild'
+      artifactName: ffmpeglogs
+
+  - task: PublishBuildArtifacts@1
+    condition: ne(variables['Build.Reason'], 'PullRequest')
+    inputs:
+      pathtoPublish: './win32'
+      artifactName: win32-deps
+
+- job: 'Build_Win64'
+  pool:
+    vmImage: 'ubuntu-18.04'
+  steps:
+  - script: ./win-install-tools.sh
+    displayName: 'Install Tools'
+  - script: ./win64.sh
+    displayName: 'Build deps'
+
+  - task: PublishBuildArtifacts@1
+    condition: ne(variables['Build.Reason'], 'PullRequest')
+    inputs:
+      pathtoPublish: './ffmpeg/ffbuild'
+      artifactName: ffmpeglogs
+
+  - task: PublishBuildArtifacts@1
+    condition: ne(variables['Build.Reason'], 'PullRequest')
+    inputs:
+      pathtoPublish: './win64'
+      artifactName: win64-deps
