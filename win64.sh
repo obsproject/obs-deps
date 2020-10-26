@@ -173,8 +173,15 @@ cd ..
 #---------------------------------
 
 
+# opus
 #read -n1 -r -p "Press any key to build opus..." key
 
+# download opus
+curl --retry 5 -L -O https://ftp.osuosl.org/pub/xiph/releases/opus/opus-1.3.1.tar.gz
+tar -xf opus-1.3.1.tar.gz
+mv opus-1.3.1 opus
+
+# build opus
 cd opus
 make clean
 LDFLAGS="-static-libgcc" ./configure --host=x86_64-w64-mingw32 --prefix="$PREFIX" --enable-shared
