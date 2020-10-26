@@ -129,7 +129,7 @@ cd ..
 
 cd opus
 make clean
-LDFLAGS="-static-libgcc" ./configure -host=x86_64-w64-mingw32 --prefix="/home/jim/packages/win64" --enable-shared
+LDFLAGS="-static-libgcc" ./configure --host=x86_64-w64-mingw32 --prefix="/home/jim/packages/win64" --enable-shared
 make -j$(nproc)
 make install
 cd ..
@@ -151,7 +151,7 @@ cd ../..
 
 cd libpng
 make clean
-PKG_CONFIG_PATH="/home/jim/packages/win64/lib/pkgconfig" LDFLAGS="-L/home/jim/packages/win64/lib" CPPFLAGS="-I/home/jim/packages/win64/include" ./configure -host=x86_64-w64-mingw32 --prefix="/home/jim/packages/win64" --enable-shared
+PKG_CONFIG_PATH="/home/jim/packages/win64/lib/pkgconfig" LDFLAGS="-L/home/jim/packages/win64/lib" CPPFLAGS="-I/home/jim/packages/win64/include" ./configure --host=x86_64-w64-mingw32 --prefix="/home/jim/packages/win64" --enable-shared
 make -j$(nproc)
 make install
 cd ..
@@ -160,7 +160,7 @@ cd ..
 
 cd libogg
 make clean
-PKG_CONFIG_PATH="/home/jim/packages/win64/lib/pkgconfig" LDFLAGS="-L/home/jim/packages/win64/lib -static-libgcc" CPPFLAGS="-I/home/jim/packages/win64/include" ./configure -host=x86_64-w64-mingw32 --prefix="/home/jim/packages/win64" --enable-shared
+PKG_CONFIG_PATH="/home/jim/packages/win64/lib/pkgconfig" LDFLAGS="-L/home/jim/packages/win64/lib -static-libgcc" CPPFLAGS="-I/home/jim/packages/win64/include" ./configure --host=x86_64-w64-mingw32 --prefix="/home/jim/packages/win64" --enable-shared
 make -j$(nproc)
 make install
 cd ..
@@ -169,7 +169,7 @@ cd ..
 
 cd libvorbis
 make clean
-PKG_CONFIG_PATH="/home/jim/packages/win64/lib/pkgconfig" LDFLAGS="-L/home/jim/packages/win64/lib -static-libgcc" CPPFLAGS="-I/home/jim/packages/win64/include" ./configure -host=x86_64-w64-mingw32 --prefix="/home/jim/packages/win64" --enable-shared --with-ogg="/home/jim/packages/win64"
+PKG_CONFIG_PATH="/home/jim/packages/win64/lib/pkgconfig" LDFLAGS="-L/home/jim/packages/win64/lib -static-libgcc" CPPFLAGS="-I/home/jim/packages/win64/include" ./configure --host=x86_64-w64-mingw32 --prefix="/home/jim/packages/win64" --enable-shared --with-ogg="/home/jim/packages/win64"
 make -j$(nproc)
 make install
 cd ..
