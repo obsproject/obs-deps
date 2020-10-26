@@ -17,7 +17,7 @@ mkdir mbedtlsbuild/win64
 cd mbedtlsbuild/win64
 rm -rf *
 cmake ../../mbedtls -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_INSTALL_PREFIX=/home/jim/packages/win64 -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres -DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -Wl,--strip-debug" -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DUSE_STATIC_MBEDTLS_LIBRARY=OFF -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF
-make -j6
+make -j$(nproc)
 x86_64-w64-mingw32-dlltool -z mbedtls.orig.def --export-all-symbols library/libmbedtls.dll
 x86_64-w64-mingw32-dlltool -z mbedcrypto.orig.def --export-all-symbols library/libmbedcrypto.dll
 x86_64-w64-mingw32-dlltool -z mbedx509.orig.def --export-all-symbols library/libmbedx509.dll
@@ -105,7 +105,7 @@ mkdir srtbuild/win64
 cd srtbuild/win64
 rm -rf *
 cmake ../../srt -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_INSTALL_PREFIX=/home/jim/packages/win64 -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres -DUSE_ENCLIB=mbedtls -DENABLE_APPS=OFF -DENABLE_STATIC=OFF -DENABLE_SHARED=ON -DCMAKE_C_FLAGS="-I/home/jim/packages/pthread-win32" -DCMAKE_CXX_FLAGS="-I/home/jim/packages/pthread-win32" -DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -Wl,--strip-debug" -DPTHREAD_LIBRARY="/home/jim/packages/win64/lib/libpthreadGC2.a" -DPTHREAD_INCLUDE_DIR="/home/jim/packages/pthread-win32" -DUSE_OPENSSL_PC=OFF -DCMAKE_BUILD_TYPE=MinSizeRel
-make -j6
+make -j$(nproc)
 x86_64-w64-mingw32-strip -w --keep-symbol=srt* libsrt.dll
 make install
 cd ../..
@@ -116,7 +116,7 @@ cd x264
 make clean
 LDFLAGS="-static-libgcc" ./configure --enable-shared --disable-avs --disable-ffms --disable-gpac --disable-interlaced --disable-lavf --cross-prefix=x86_64-w64-mingw32- --host=x86_64-pc-mingw32 --prefix="/home/jim/packages/win64"
 # make -j6 fprofiled VIDS="CITY_704x576_60_orig_01.yuv"
-make -j6
+make -j$(nproc)
 make install
 x86_64-w64-mingw32-dlltool -z /home/jim/packages/win64/bin/x264.orig.def --export-all-symbols /home/jim/packages/win64/bin/libx264-157.dll
 grep "EXPORTS\|x264" /home/jim/packages/win64/bin/x264.orig.def > /home/jim/packages/win64/bin/x264.def
@@ -130,7 +130,7 @@ cd ..
 cd opus
 make clean
 LDFLAGS="-static-libgcc" ./configure -host=x86_64-w64-mingw32 --prefix="/home/jim/packages/win64" --enable-shared
-make -j6
+make -j$(nproc)
 make install
 cd ..
 
@@ -139,7 +139,7 @@ cd ..
 cd zlib/build64
 make clean
 cmake .. -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_INSTALL_PREFIX=/home/jim/packages/win64 -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres -DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -Wl,--strip-debug"
-make -j6
+make -j$(nproc)
 make install
 mv ../../win64/lib/libzlib.dll.a ../../win64/lib/libz.dll.a
 mv ../../win64/lib/libzlibstatic.a ../../win64/lib/libz.a
@@ -152,7 +152,7 @@ cd ../..
 cd libpng
 make clean
 PKG_CONFIG_PATH="/home/jim/packages/win64/lib/pkgconfig" LDFLAGS="-L/home/jim/packages/win64/lib" CPPFLAGS="-I/home/jim/packages/win64/include" ./configure -host=x86_64-w64-mingw32 --prefix="/home/jim/packages/win64" --enable-shared
-make -j6
+make -j$(nproc)
 make install
 cd ..
 
@@ -161,7 +161,7 @@ cd ..
 cd libogg
 make clean
 PKG_CONFIG_PATH="/home/jim/packages/win64/lib/pkgconfig" LDFLAGS="-L/home/jim/packages/win64/lib -static-libgcc" CPPFLAGS="-I/home/jim/packages/win64/include" ./configure -host=x86_64-w64-mingw32 --prefix="/home/jim/packages/win64" --enable-shared
-make -j6
+make -j$(nproc)
 make install
 cd ..
 
@@ -170,7 +170,7 @@ cd ..
 cd libvorbis
 make clean
 PKG_CONFIG_PATH="/home/jim/packages/win64/lib/pkgconfig" LDFLAGS="-L/home/jim/packages/win64/lib -static-libgcc" CPPFLAGS="-I/home/jim/packages/win64/include" ./configure -host=x86_64-w64-mingw32 --prefix="/home/jim/packages/win64" --enable-shared --with-ogg="/home/jim/packages/win64"
-make -j6
+make -j$(nproc)
 make install
 cd ..
 
@@ -179,7 +179,7 @@ cd ..
 cd libvpxbuild
 make clean
 PKG_CONFIG_PATH="/home/jim/packages/win64/lib/pkgconfig" CROSS=x86_64-w64-mingw32- LDFLAGS="-static-libgcc" ../libvpx/configure --prefix=/home/jim/packages/win64 --enable-vp8 --enable-vp9 --disable-docs --disable-examples --enable-shared --disable-static --enable-runtime-cpu-detect --enable-realtime-only --disable-install-bins --disable-install-docs --disable-unit-tests --target=x86_64-win64-gcc
-make -j6
+make -j$(nproc)
 make install
 x86_64-w64-mingw32-dlltool -m i386:x86-64 -d libvpx.def -l /home/jim/packages/win64/bin/vpx.lib -D /home/jim/win64/packages/bin/libvpx-1.dll
 cd ..
@@ -198,6 +198,6 @@ cd ffmpeg
 make clean
 PKG_CONFIG_PATH="/home/jim/packages/win64/lib/pkgconfig" LDFLAGS="-L/home/jim/packages/win64/lib" CPPFLAGS="-I/home/jim/packages/win64/include -I/home/jim/packages/pthread-win32" ./configure --enable-gpl --disable-doc --arch=x86_64 --enable-shared --enable-nvenc --enable-amf --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --disable-debug --cross-prefix=x86_64-w64-mingw32- --target-os=mingw32 --pkg-config=pkg-config --prefix="/home/jim/packages/win64" --disable-postproc
 read -n1 -r -p "Press any key to continue building FFmpeg..." key
-make -j6
+make -j$(nproc)
 make install
 cd ..
