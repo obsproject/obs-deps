@@ -317,17 +317,33 @@ pkg-config --libs vpx
 #---------------------------------
 
 
+# FFmpeg
 read -n1 -r -p "Press any key to build FFmpeg..." key
 
+# nv-codec-headers
+# download nv-codec-headers
+git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
 cd nv-codec-headers
-make PREFIX="$PREFIX"
-make PREFIX="$PREFIX" install
+
+# build nv-codec-headers
+make PREFIX=$PREFIX
+make PREFIX=$PREFIX install
 cd ..
 
-mkdir $PREFIX/include/AMF
-cp -a AMF/amf/public/include/* $PREFIX/include/AMF
+# AMF
+# download/prep AMF
+git clone https://github.com/obsproject/obs-amd-encoder.git
+mkdir -p $PREFIX/include/AMF
+cp -a obs-amd-encoder/AMF/amf/public/include/* $PREFIX/include/AMF
 
+# download FFmpeg
+curl -L -o FFmpeg-n4.2.2.zip https://github.com/FFmpeg/FFmpeg/archive/n4.2.2.zip
+unzip FFmpeg-n4.2.2.zip
+mv FFmpeg-n4.2.2 ffmpeg
+
+# build FFmpeg
 cd ffmpeg
+patch -p1 < ../patch/ffmpeg/ffmpeg_flvdec.patch
 make clean
 PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" LDFLAGS="-L$PREFIX/lib" CPPFLAGS="-I$PREFIX/include -I$WORKDIR/pthread-win32" ./configure --enable-gpl --disable-doc --arch=x86_64 --enable-shared --enable-nvenc --enable-amf --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --disable-debug --cross-prefix=x86_64-w64-mingw32- --target-os=mingw32 --pkg-config=pkg-config --prefix="$PREFIX" --disable-postproc
 read -n1 -r -p "Press any key to continue building FFmpeg..." key
