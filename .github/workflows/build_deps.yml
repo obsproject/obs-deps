@@ -53,7 +53,7 @@ jobs:
       - name: Get Current Date
         shell: bash
         id: get_date
-        run: echo ::set-env name=CURRENT_DATE::$(date +"%Y-%m-%d")
+        run: echo "CURRENT_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
       - name: Build environment setup
         shell: bash
         run: |
@@ -61,8 +61,8 @@ jobs:
           mkdir -p CI_BUILD/obsdeps/include
           mkdir -p CI_BUILD/obsdeps/lib
           mkdir -p CI_BUILD/obsdeps/share
-          echo ::set-env name=PKG_CONFIG_PATH::$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig
-          echo ::set-env name=PARALLELISM::$(sysctl -n hw.ncpu)
+          echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig" >> $GITHUB_ENV
+          echo "PARALLELISM=$(sysctl -n hw.ncpu)" >> $GITHUB_ENV
       - name: 'Restore swig from cache'
         id: swig-cache
         uses: actions/cache@v2
@@ -538,15 +538,15 @@ jobs:
       - name: Get Current Date
         shell: bash
         id: get_date
-        run: echo ::set-env name=CURRENT_DATE::$(date +"%Y-%m-%d")
+        run: echo "CURRENT_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
       - name: Build environment setup
         shell: bash
         run: |
           mkdir -p CI_BUILD/obsdeps/bin
           mkdir -p CI_BUILD/obsdeps/include
           mkdir -p CI_BUILD/obsdeps/lib
-          echo ::set-env name=PKG_CONFIG_PATH::$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig
-          echo ::set-env name=PARALLELISM::$(sysctl -n hw.ncpu)
+          echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig" >> $GITHUB_ENV
+          echo "PARALLELISM=$(sysctl -n hw.ncpu)" >> $GITHUB_ENV
       - name: 'Restore qt from cache'
         id: qt-cache
         uses: actions/cache@v2
@@ -620,7 +620,7 @@ jobs:
       - name: Get Current Date
         shell: bash
         id: get_date
-        run: echo ::set-env name=CURRENT_DATE::$(date +"%Y-%m-%d")
+        run: echo "CURRENT_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
       - name: 'Create Release'
         id: create_release
         uses: actions/create-release@v1

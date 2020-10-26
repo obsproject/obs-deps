@@ -39,7 +39,7 @@ def un_indent(match):
 
 def parse_macos_job(job_data, template, step_template, global_env):
 
-    find_setenv_pattern = re.compile('echo ::set-env name=(.+?)::(.+)')
+    find_setenv_pattern = re.compile('echo "(.+?)=(.+?)" >> \$GITHUB_ENV')
     find_env_pattern = re.compile('\\${{ env.(.+?) }}')
     find_heredoc_pattern = re.compile('<<(.+?) (.+?)?\n(.+?)\\1', re.MULTILINE|re.DOTALL)
     # current_path = os.path.realpath('.')
