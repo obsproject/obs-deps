@@ -13,8 +13,8 @@ on:
       - master
 
 env:
-  MAC_QT_VERSION: '5.14.1'
-  MAC_QT_HASH: '6f17f488f512b39c2feb57d83a5e0a13dcef32999bea2e2a8f832f54a29badb8'
+  MAC_QT_VERSION: '5.15.1'
+  MAC_QT_HASH: '44da876057e21e1be42de31facd99be7d5f9f07893e1ea762359bcee0ef64ee9'
 
 jobs:
   macos64-main:
