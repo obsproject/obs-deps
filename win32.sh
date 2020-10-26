@@ -15,12 +15,17 @@ WORKDIR=$PWD
 PREFIX=$PWD/win32
 export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 
+# set variables
+SKIP_PROMPTS=true
+
 
 #---------------------------------
 
 
 # start mbedTLS
-read -n1 -r -p "Press any key to build mbedtls..." key
+if [ "$SKIP_PROMPTS" != true ]; then
+	read -n1 -r -p "Press any key to build mbedtls..." key
+fi
 
 # download mbedTLS
 curl --retry 5 -L -o mbedtls-2.23.0.tar.gz https://github.com/ARMmbed/mbedtls/archive/v2.23.0.tar.gz
@@ -106,7 +111,9 @@ EOF
 
 
 # pthread-win32
-read -n1 -r -p "Press any key to build pthread-win32..." key
+if [ "$SKIP_PROMPTS" != true ]; then
+	read -n1 -r -p "Press any key to build pthread-win32..." key
+fi
 
 # download pthread-win32
 curl --retry 5 -L -o pthread-win32-master.zip https://github.com/GerHobbelt/pthread-win32/archive/master.zip
@@ -123,7 +130,10 @@ cd ..
 #---------------------------------
 
 
-read -n1 -r -p "Press any key to build libsrt..." key
+# libsrt
+if [ "$SKIP_PROMPTS" != true ]; then
+	read -n1 -r -p "Press any key to build libsrt..." key
+fi
 
 # download libsrt
 curl --retry 5 -L -o srt-v1.4.1.tar.gz https://github.com/Haivision/srt/archive/v1.4.1.tar.gz
@@ -145,7 +155,9 @@ cd ../..
 
 
 # x264
-read -n1 -r -p "Press any key to build x264..." key
+if [ "$SKIP_PROMPTS" != true ]; then
+	read -n1 -r -p "Press any key to build x264..." key
+fi
 
 # download and prep x264
 git clone https://code.videolan.org/videolan/x264.git
@@ -170,7 +182,9 @@ cd ..
 
 
 # opus
-#read -n1 -r -p "Press any key to build opus..." key
+if [ "$SKIP_PROMPTS" != true ]; then
+	read -n1 -r -p "Press any key to build opus..." key
+fi
 
 # download opus
 curl --retry 5 -L -O https://ftp.osuosl.org/pub/xiph/releases/opus/opus-1.3.1.tar.gz
@@ -190,7 +204,9 @@ cd ..
 
 
 # zlib
-#read -n1 -r -p "Press any key to build zlib..." key
+if [ "$SKIP_PROMPTS" != true ]; then
+	read -n1 -r -p "Press any key to build zlib..." key
+fi
 
 # download zlib
 curl --retry 5 -L -O https://www.zlib.net/zlib-1.2.11.tar.gz
@@ -224,7 +240,9 @@ cd $WORKDIR
 
 
 # libpng
-#read -n1 -r -p "Press any key to build libpng..." key
+if [ "$SKIP_PROMPTS" != true ]; then
+	read -n1 -r -p "Press any key to build libpng..." key
+fi
 
 # download libpng
 curl --retry 5 -L -o libpng-1.6.37.tar.gz https://github.com/glennrp/libpng/archive/v1.6.37.tar.gz
@@ -244,7 +262,9 @@ cd ..
 
 
 # libogg
-#read -n1 -r -p "Press any key to build libogg..." key
+if [ "$SKIP_PROMPTS" != true ]; then
+	read -n1 -r -p "Press any key to build libogg..." key
+fi
 
 # download libogg
 curl --retry 5 -L -o ogg-68ca3841567247ac1f7850801a164f58738d8df9.tar.gz https://gitlab.xiph.org/xiph/ogg/-/archive/68ca3841567247ac1f7850801a164f58738d8df9/ogg-68ca3841567247ac1f7850801a164f58738d8df9.tar.gz
@@ -267,7 +287,9 @@ cd ../..
 
 
 # libvorbis
-#read -n1 -r -p "Press any key to build libvorbis..." key
+if [ "$SKIP_PROMPTS" != true ]; then
+	read -n1 -r -p "Press any key to build libvorbis..." key
+fi
 
 # download libvorbis
 curl --retry 5 -L -O https://ftp.osuosl.org/pub/xiph/releases/vorbis/libvorbis-1.3.6.tar.gz
@@ -287,7 +309,9 @@ cd ..
 
 
 # libvpx
-#read -n1 -r -p "Press any key to build libvpx..." key
+if [ "$SKIP_PROMPTS" != true ]; then
+	read -n1 -r -p "Press any key to build libvpx..." key
+fi
 
 # download libvpx
 curl --retry 5 -L -o libvpx-v1.8.1.tar.gz https://chromium.googlesource.com/webm/libvpx/+archive/v1.8.1.tar.gz
@@ -314,7 +338,9 @@ pkg-config --libs vpx
 
 
 # FFmpeg
-read -n1 -r -p "Press any key to build FFmpeg..." key
+if [ "$SKIP_PROMPTS" != true ]; then
+	read -n1 -r -p "Press any key to build FFmpeg..." key
+fi
 
 # nv-codec-headers
 # download nv-codec-headers
@@ -342,7 +368,9 @@ cd ffmpeg
 patch -p1 < ../patch/ffmpeg/ffmpeg_flvdec.patch
 make clean
 PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" LDFLAGS="-L$PREFIX/lib -static-libgcc" CFLAGS="-I$PREFIX/include -I$WORKDIR/pthread-win32" ./configure --enable-gpl --disable-programs --disable-doc --arch=x86 --enable-shared --enable-nvenc --enable-amf --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --disable-debug --cross-prefix=i686-w64-mingw32- --target-os=mingw32 --pkg-config=pkg-config --prefix="$PREFIX" --disable-postproc
-read -n1 -r -p "Press any key to continue building FFmpeg..." key
+if [ "$SKIP_PROMPTS" != true ]; then
+	read -n1 -r -p "Press any key to continue building FFmpeg..." key
+fi
 make -j$(nproc)
 make install
 cd ..
