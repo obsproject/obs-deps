@@ -243,14 +243,24 @@ cd ..
 #---------------------------------
 
 
+# libogg
 #read -n1 -r -p "Press any key to build libogg..." key
 
+# download libogg
+curl --retry 5 -L -o ogg-68ca3841567247ac1f7850801a164f58738d8df9.tar.gz https://gitlab.xiph.org/xiph/ogg/-/archive/68ca3841567247ac1f7850801a164f58738d8df9/ogg-68ca3841567247ac1f7850801a164f58738d8df9.tar.gz
+tar -xf ogg-68ca3841567247ac1f7850801a164f58738d8df9.tar.gz
+mv ogg-68ca3841567247ac1f7850801a164f58738d8df9 libogg
+
+# build libogg
 cd libogg
+mkdir build32
+./autogen.sh
+cd build32
 make clean
-PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" LDFLAGS="-L$PREFIX/lib -static-libgcc" CPPFLAGS="-I$PREFIX/include" ./configure --host=i686-w64-mingw32 --prefix="$PREFIX" --enable-shared
+PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" LDFLAGS="-L$PREFIX/lib -static-libgcc" CPPFLAGS="-I$PREFIX/include" ../configure --host=i686-w64-mingw32 --prefix="$PREFIX" --enable-shared
 make -j$(nproc)
 make install
-cd ..
+cd ../..
 
 
 #---------------------------------
