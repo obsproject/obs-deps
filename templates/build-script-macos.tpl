@@ -5,11 +5,11 @@ set -eE
 PRODUCT_NAME="OBS Pre-Built Dependencies"
 BASE_DIR="$(git rev-parse --show-toplevel)"
 
-COLOR_RED=$(tput setaf 1)
-COLOR_GREEN=$(tput setaf 2)
-COLOR_BLUE=$(tput setaf 4)
-COLOR_ORANGE=$(tput setaf 3)
-COLOR_RESET=$(tput sgr0)
+export COLOR_RED=$(tput setaf 1)
+export COLOR_GREEN=$(tput setaf 2)
+export COLOR_BLUE=$(tput setaf 4)
+export COLOR_ORANGE=$(tput setaf 3)
+export COLOR_RESET=$(tput sgr0)
 
 {environment}
 
@@ -54,19 +54,19 @@ caught_error() {{
 }}
 
 restore_brews() {{
-    if [ -d /usr/local/opt/xz ]; then
+    if [ -d /usr/local/opt/xz ] && [ ! -f /usr/local/lib/liblzma.dylib ]; then
       brew link xz
     fi
 
-    if [ -d /usr/local/opt/zstd ]; then
+    if [ -d /usr/local/opt/zstd ] && [ ! -f /usr/local/lib/libzstd.dylib ]; then
       brew link zstd
     fi
 
-    if [ -d /usr/local/opt/libtiff ]; then
+    if [ -d /usr/local/opt/libtiff ] && [ !  -f /usr/local/lib/libtiff.dylib ]; then
       brew link libtiff
     fi
 
-    if [ -d /usr/local/opt/webp ]; then
+    if [ -d /usr/local/opt/webp ] && [ ! -f /usr/local/lib/libwebp.dylib ]; then
       brew link webp
     fi
 }}
