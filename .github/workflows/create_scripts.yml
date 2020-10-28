@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/build_deps.yml'
       - '.github/workflows/create_scripts.yml'
+      - '!build-script-macos-01.sh'
+      - '!build-script-macos-02.sh'
     branches:
       - master
 
@@ -48,7 +50,7 @@ jobs:
           echo "  + Build scripts successfully generated"
 
           if git diff --quiet; then
-            echo "  + No script changes changes to commit";
+            echo "  + No script changes to commit";
             exit 0;
           fi
 
@@ -58,6 +60,7 @@ jobs:
 
           git config user.name "Github Actions CI"
           git config user.email "${{ github.event.pusher.email }}"
+          git config pull.rebase false
 
           git add build-script-*
           git pull
