@@ -110,7 +110,7 @@ restore_brews() {
     fi
 }
 
-build_ed174edc-ab61-465c-910b-2bd05906cd20() {
+build_02_install_homebrew_dependencies() {
     step "Install Homebrew dependencies"
     trap "caught_error 'Install Homebrew dependencies'" ERR
     ensure_dir ${BASE_DIR}
@@ -131,7 +131,7 @@ build_ed174edc-ab61-465c-910b-2bd05906cd20() {
 }
 
 
-build_890c5e1e-c32d-4051-ba13-bf240381e0b5() {
+build_03_get_current_date() {
     step "Get Current Date"
     trap "caught_error 'Get Current Date'" ERR
     ensure_dir ${BASE_DIR}
@@ -140,7 +140,7 @@ build_890c5e1e-c32d-4051-ba13-bf240381e0b5() {
 }
 
 
-build_458e84b8-c1a0-4709-8966-c312f225aab6() {
+build_04_build_environment_setup() {
     step "Build environment setup"
     trap "caught_error 'Build environment setup'" ERR
     ensure_dir ${BASE_DIR}
@@ -156,7 +156,7 @@ build_458e84b8-c1a0-4709-8966-c312f225aab6() {
 }
 
 
-build_a84b19c9-4c15-409e-a042-986e1b3d9881() {
+build_06_build_dependency_swig() {
     step "Build dependency swig"
     trap "caught_error 'Build dependency swig'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -173,7 +173,7 @@ build_a84b19c9-4c15-409e-a042-986e1b3d9881() {
 }
 
 
-build_15c11fdc-de82-43b2-9c02-faf7ab0af073() {
+build_07_install_dependency_swig() {
     step "Install dependency swig"
     trap "caught_error 'Install dependency swig'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/swig-4.0.2/build
@@ -184,7 +184,7 @@ build_15c11fdc-de82-43b2-9c02-faf7ab0af073() {
 }
 
 
-build_4a4bdf51-44ec-412a-b4bc-3464d350cad5() {
+build_09_build_dependency_libpng() {
     step "Build dependency libpng"
     trap "caught_error 'Build dependency libpng'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -199,7 +199,7 @@ build_4a4bdf51-44ec-412a-b4bc-3464d350cad5() {
 }
 
 
-build_5c1db530-a69b-45d1-bdbd-efe370c48b97() {
+build_10_install_dependency_libpng() {
     step "Install dependency libpng"
     trap "caught_error 'Install dependency libpng'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/libpng-1.6.37/build
@@ -208,7 +208,7 @@ build_5c1db530-a69b-45d1-bdbd-efe370c48b97() {
 }
 
 
-build_b1cf2e3b-3ec0-4a65-8db0-712bb5f36235() {
+build_12_build_dependency_libopus() {
     step "Build dependency libopus"
     trap "caught_error 'Build dependency libopus'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -223,7 +223,7 @@ build_b1cf2e3b-3ec0-4a65-8db0-712bb5f36235() {
 }
 
 
-build_9bb119a2-1d87-4b6e-a718-6ebc1bb353a0() {
+build_13_install_dependency_libopus() {
     step "Install dependency libopus"
     trap "caught_error 'Install dependency libopus'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/opus-1.3.1/build
@@ -232,7 +232,7 @@ build_9bb119a2-1d87-4b6e-a718-6ebc1bb353a0() {
 }
 
 
-build_163ae8f3-be08-4a54-9392-0ddcfd8317cc() {
+build_15_build_dependency_libogg() {
     step "Build dependency libogg"
     trap "caught_error 'Build dependency libogg'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -248,7 +248,7 @@ build_163ae8f3-be08-4a54-9392-0ddcfd8317cc() {
 }
 
 
-build_85d49403-896a-40f7-89ac-bd1045fb5027() {
+build_16_install_dependency_libogg() {
     step "Install dependency libogg"
     trap "caught_error 'Install dependency libogg'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/libogg-1.3.4/build
@@ -257,7 +257,7 @@ build_85d49403-896a-40f7-89ac-bd1045fb5027() {
 }
 
 
-build_eaca23f9-55fa-42ed-bf7a-c038b24334c5() {
+build_18_build_dependency_libvorbis() {
     step "Build dependency libvorbis"
     trap "caught_error 'Build dependency libvorbis'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -272,7 +272,7 @@ build_eaca23f9-55fa-42ed-bf7a-c038b24334c5() {
 }
 
 
-build_f9a838ba-36e0-42bd-9b34-17a8453a566a() {
+build_19_install_dependency_libvorbis() {
     step "Install dependency libvorbis"
     trap "caught_error 'Install dependency libvorbis'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/libvorbis-1.3.7/build
@@ -281,7 +281,7 @@ build_f9a838ba-36e0-42bd-9b34-17a8453a566a() {
 }
 
 
-build_24631f6e-cfd7-4f4a-a3ab-e2de2f6da256() {
+build_21_build_dependency_libvpx() {
     step "Build dependency libvpx"
     trap "caught_error 'Build dependency libvpx'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -297,7 +297,7 @@ build_24631f6e-cfd7-4f4a-a3ab-e2de2f6da256() {
 }
 
 
-build_d0d045f7-f573-4c91-98eb-20d4f888221e() {
+build_22_install_dependency_libvpx() {
     step "Install dependency libvpx"
     trap "caught_error 'Install dependency libvpx'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/libvpx-1.9.0/build
@@ -306,7 +306,7 @@ build_d0d045f7-f573-4c91-98eb-20d4f888221e() {
 }
 
 
-build_b3a6b33a-7893-450a-9043-47d643b90342() {
+build_24_build_dependency_libjansson() {
     step "Build dependency libjansson"
     trap "caught_error 'Build dependency libjansson'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -321,7 +321,7 @@ build_b3a6b33a-7893-450a-9043-47d643b90342() {
 }
 
 
-build_43959585-75fa-488a-ab1a-f60ade6b03ba() {
+build_25_install_dependency_libjansson() {
     step "Install dependency libjansson"
     trap "caught_error 'Install dependency libjansson'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/jansson-2.13.1/build
@@ -333,7 +333,7 @@ build_43959585-75fa-488a-ab1a-f60ade6b03ba() {
 }
 
 
-build_8d879ce6-afb1-4fc4-b869-f4b81db06cd7() {
+build_27_build_dependency_libx264() {
     step "Build dependency libx264"
     trap "caught_error 'Build dependency libx264'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -353,7 +353,7 @@ build_8d879ce6-afb1-4fc4-b869-f4b81db06cd7() {
 }
 
 
-build_69bec30c-194e-40cf-a66b-eacd757456fd() {
+build_28_install_dependency_libx264() {
     step "Install dependency libx264"
     trap "caught_error 'Install dependency libx264'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3018/build
@@ -362,7 +362,7 @@ build_69bec30c-194e-40cf-a66b-eacd757456fd() {
 }
 
 
-build_c034e411-2338-49be-b2fd-67084bcc4b55() {
+build_29_build_dependency_libx264__dylib_() {
     step "Build dependency libx264 (dylib)"
     trap "caught_error 'Build dependency libx264 (dylib)'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3018/build
@@ -372,7 +372,7 @@ build_c034e411-2338-49be-b2fd-67084bcc4b55() {
 }
 
 
-build_fdbd4441-6a6b-4d9f-b953-17271997557e() {
+build_30_install_dependency_libx264__dylib_() {
     step "Install dependency libx264 (dylib)"
     trap "caught_error 'Install dependency libx264 (dylib)'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3018/build
@@ -384,7 +384,7 @@ build_fdbd4441-6a6b-4d9f-b953-17271997557e() {
 }
 
 
-build_1f8c6383-2466-43a1-9f38-c53363138940() {
+build_32_build_dependency_libmbedtls() {
     step "Build dependency libmbedtls"
     trap "caught_error 'Build dependency libmbedtls'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -401,7 +401,7 @@ build_1f8c6383-2466-43a1-9f38-c53363138940() {
 }
 
 
-build_017d7372-8fe4-43e4-aec8-c5008eb353f6() {
+build_33_install_dependency_libmbedtls() {
     step "Install dependency libmbedtls"
     trap "caught_error 'Install dependency libmbedtls'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/mbedtls-mbedtls-2.24.0/build
@@ -463,7 +463,7 @@ EOF
 }
 
 
-build_7c419fd7-d06b-4b3e-84bd-c4f0354c08bc() {
+build_35_build_dependency_libsrt() {
     step "Build dependency libsrt"
     trap "caught_error 'Build dependency libsrt'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -478,7 +478,7 @@ build_7c419fd7-d06b-4b3e-84bd-c4f0354c08bc() {
 }
 
 
-build_3c76cefb-c241-447f-b348-8461ec09f271() {
+build_36_install_dependency_libsrt() {
     step "Install dependency libsrt"
     trap "caught_error 'Install dependency libsrt'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/srt-1.4.2/build
@@ -487,7 +487,7 @@ build_3c76cefb-c241-447f-b348-8461ec09f271() {
 }
 
 
-build_59b27ab6-8f3a-440b-b94c-ae8c05d89ef6() {
+build_38_build_dependency_libtheora() {
     step "Build dependency libtheora"
     trap "caught_error 'Build dependency libtheora'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -502,7 +502,7 @@ build_59b27ab6-8f3a-440b-b94c-ae8c05d89ef6() {
 }
 
 
-build_a36c85ad-fab1-4cd7-8bbb-9822946068c5() {
+build_39_install_dependency_libtheora() {
     step "Install dependency libtheora"
     trap "caught_error 'Install dependency libtheora'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/libtheora-1.1.1/build
@@ -511,7 +511,7 @@ build_a36c85ad-fab1-4cd7-8bbb-9822946068c5() {
 }
 
 
-build_0d667319-96d3-40f7-86a3-c00490370af5() {
+build_41_build_dependency_ffmpeg() {
     step "Build dependency ffmpeg"
     trap "caught_error 'Build dependency ffmpeg'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -530,7 +530,7 @@ build_0d667319-96d3-40f7-86a3-c00490370af5() {
 }
 
 
-build_3df330aa-6060-4115-ac84-bda230f9cf55() {
+build_42_install_dependency_ffmpeg() {
     step "Install dependency ffmpeg"
     trap "caught_error 'Install dependency ffmpeg'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/ffmpeg-4.3.1/build
@@ -541,7 +541,7 @@ build_3df330aa-6060-4115-ac84-bda230f9cf55() {
 }
 
 
-build_8c22d85a-0d5e-4140-a550-04dd8ff3b8ef() {
+build_44_build_dependency_libluajit() {
     step "Build dependency libluajit"
     trap "caught_error 'Build dependency libluajit'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -553,7 +553,7 @@ build_8c22d85a-0d5e-4140-a550-04dd8ff3b8ef() {
 }
 
 
-build_f46cfd0b-b35c-4538-9da7-d0d9a5115f2e() {
+build_45_install_dependency_libluajit() {
     step "Install dependency libluajit"
     trap "caught_error 'Install dependency libluajit'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/LuaJIT-2.1.0-beta3
@@ -565,7 +565,7 @@ build_f46cfd0b-b35c-4538-9da7-d0d9a5115f2e() {
 }
 
 
-build_1180debf-c3be-4679-8445-7903e0bbb8a1() {
+build_47_build_dependency_libfreetype() {
     step "Build dependency libfreetype"
     trap "caught_error 'Build dependency libfreetype'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -576,12 +576,12 @@ build_1180debf-c3be-4679-8445-7903e0bbb8a1() {
     cd freetype-${LIBFREETYPE_VERSION}
     mkdir build
     cd build
-    ../configure --enable-shared --disable-static --prefix="/tmp/obsdeps" --without-harfbuzz
+    ../configure --enable-shared --disable-static --prefix="/tmp/obsdeps" --without-harfbuzz --without-brotli
     make -j${PARALLELISM}
 }
 
 
-build_0cb6328d-5efe-41f6-a0f4-767938ec58b0() {
+build_48_install_dependency_libfreetype() {
     step "Install dependency libfreetype"
     trap "caught_error 'Install dependency libfreetype'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/freetype-2.10.4/build
@@ -592,7 +592,7 @@ build_0cb6328d-5efe-41f6-a0f4-767938ec58b0() {
 }
 
 
-build_5f1ed01d-dc1c-4f2f-8180-62fd13a01a47() {
+build_50_build_dependency_librnnoise() {
     step "Build dependency librnnoise"
     trap "caught_error 'Build dependency librnnoise'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -608,7 +608,7 @@ build_5f1ed01d-dc1c-4f2f-8180-62fd13a01a47() {
 }
 
 
-build_971801cd-b634-48b4-8ccc-cd9fa70c5c5d() {
+build_51_install_dependency_librnnoise() {
     step "Install dependency librnnoise"
     trap "caught_error 'Install dependency librnnoise'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/rnnoise-2020-07-28/build
@@ -619,7 +619,7 @@ build_971801cd-b634-48b4-8ccc-cd9fa70c5c5d() {
 }
 
 
-build_0b2ed5f3-5622-4582-b95f-b0d1fdd71b25() {
+build_52_package_dependencies() {
     step "Package dependencies"
     trap "caught_error 'Package dependencies'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -635,42 +635,42 @@ build_0b2ed5f3-5622-4582-b95f-b0d1fdd71b25() {
 obs-deps-build-main() {
     ensure_dir ${BASE_DIR}
 
-    build_ed174edc-ab61-465c-910b-2bd05906cd20
-    build_890c5e1e-c32d-4051-ba13-bf240381e0b5
-    build_458e84b8-c1a0-4709-8966-c312f225aab6
-    build_a84b19c9-4c15-409e-a042-986e1b3d9881
-    build_15c11fdc-de82-43b2-9c02-faf7ab0af073
-    build_4a4bdf51-44ec-412a-b4bc-3464d350cad5
-    build_5c1db530-a69b-45d1-bdbd-efe370c48b97
-    build_b1cf2e3b-3ec0-4a65-8db0-712bb5f36235
-    build_9bb119a2-1d87-4b6e-a718-6ebc1bb353a0
-    build_163ae8f3-be08-4a54-9392-0ddcfd8317cc
-    build_85d49403-896a-40f7-89ac-bd1045fb5027
-    build_eaca23f9-55fa-42ed-bf7a-c038b24334c5
-    build_f9a838ba-36e0-42bd-9b34-17a8453a566a
-    build_24631f6e-cfd7-4f4a-a3ab-e2de2f6da256
-    build_d0d045f7-f573-4c91-98eb-20d4f888221e
-    build_b3a6b33a-7893-450a-9043-47d643b90342
-    build_43959585-75fa-488a-ab1a-f60ade6b03ba
-    build_8d879ce6-afb1-4fc4-b869-f4b81db06cd7
-    build_69bec30c-194e-40cf-a66b-eacd757456fd
-    build_c034e411-2338-49be-b2fd-67084bcc4b55
-    build_fdbd4441-6a6b-4d9f-b953-17271997557e
-    build_1f8c6383-2466-43a1-9f38-c53363138940
-    build_017d7372-8fe4-43e4-aec8-c5008eb353f6
-    build_7c419fd7-d06b-4b3e-84bd-c4f0354c08bc
-    build_3c76cefb-c241-447f-b348-8461ec09f271
-    build_59b27ab6-8f3a-440b-b94c-ae8c05d89ef6
-    build_a36c85ad-fab1-4cd7-8bbb-9822946068c5
-    build_0d667319-96d3-40f7-86a3-c00490370af5
-    build_3df330aa-6060-4115-ac84-bda230f9cf55
-    build_8c22d85a-0d5e-4140-a550-04dd8ff3b8ef
-    build_f46cfd0b-b35c-4538-9da7-d0d9a5115f2e
-    build_1180debf-c3be-4679-8445-7903e0bbb8a1
-    build_0cb6328d-5efe-41f6-a0f4-767938ec58b0
-    build_5f1ed01d-dc1c-4f2f-8180-62fd13a01a47
-    build_971801cd-b634-48b4-8ccc-cd9fa70c5c5d
-    build_0b2ed5f3-5622-4582-b95f-b0d1fdd71b25
+    build_02_install_homebrew_dependencies
+    build_03_get_current_date
+    build_04_build_environment_setup
+    build_06_build_dependency_swig
+    build_07_install_dependency_swig
+    build_09_build_dependency_libpng
+    build_10_install_dependency_libpng
+    build_12_build_dependency_libopus
+    build_13_install_dependency_libopus
+    build_15_build_dependency_libogg
+    build_16_install_dependency_libogg
+    build_18_build_dependency_libvorbis
+    build_19_install_dependency_libvorbis
+    build_21_build_dependency_libvpx
+    build_22_install_dependency_libvpx
+    build_24_build_dependency_libjansson
+    build_25_install_dependency_libjansson
+    build_27_build_dependency_libx264
+    build_28_install_dependency_libx264
+    build_29_build_dependency_libx264__dylib_
+    build_30_install_dependency_libx264__dylib_
+    build_32_build_dependency_libmbedtls
+    build_33_install_dependency_libmbedtls
+    build_35_build_dependency_libsrt
+    build_36_install_dependency_libsrt
+    build_38_build_dependency_libtheora
+    build_39_install_dependency_libtheora
+    build_41_build_dependency_ffmpeg
+    build_42_install_dependency_ffmpeg
+    build_44_build_dependency_libluajit
+    build_45_install_dependency_libluajit
+    build_47_build_dependency_libfreetype
+    build_48_install_dependency_libfreetype
+    build_50_build_dependency_librnnoise
+    build_51_install_dependency_librnnoise
+    build_52_package_dependencies
 
     restore_brews
 
