@@ -39,9 +39,10 @@ def un_indent(match):
 
 def parse_macos_job(job_data, template, step_template, global_env):
 
-    find_setenv_pattern = re.compile('echo "(.+?)=(.+?)" >> \$GITHUB_ENV')
+    find_setenv_pattern = re.compile('echo "(.+?)=(.+?)" >> \\$GITHUB_ENV')
     find_env_pattern = re.compile('\\${{ env.(.+?) }}')
     find_heredoc_pattern = re.compile('<<(.+?) (.+?)?\n(.+?)\\1', re.MULTILINE|re.DOTALL)
+    find_title_pattern = re.compile('[^a-z^0-9]')
     # current_path = os.path.realpath('.')
     current_path = "${BASE_DIR}"
     environment = global_env
@@ -54,8 +55,9 @@ def parse_macos_job(job_data, template, step_template, global_env):
 
     for i, step in enumerate(steps, start=1):
 
-        step_id = str(uuid.uuid4())
         step_name = step.get('name', '')
+        safe_step_name = re.sub(find_title_pattern, '_', step_name.lower())
+        step_id = f"{i:02d}_{safe_step_name}"
         has_action = step.get('uses', '')
         step_shell = step.get('shell', '')
         script_content = step.get('run', '')

@@ -507,7 +507,7 @@ jobs:
         id: libfreetype-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'libfreetype-cache-rev2'
+          CACHE_NAME: 'libfreetype-cache-rev3'
         with:
           path: ${{ github.workspace }}/CI_BUILD/freetype-${{ env.LIBFREETYPE_VERSION }}
           key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.LIBFREETYPE_VERSION }}
@@ -522,7 +522,7 @@ jobs:
           cd freetype-${{ env.LIBFREETYPE_VERSION }}
           mkdir build
           cd build
-          ../configure --enable-shared --disable-static --prefix="/tmp/obsdeps" --without-harfbuzz
+          ../configure --enable-shared --disable-static --prefix="/tmp/obsdeps" --without-harfbuzz --without-brotli
           make -j${{ env.PARALLELISM }}
       - name: 'Install dependency libfreetype'
         shell: bash
