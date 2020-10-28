@@ -43,7 +43,7 @@ jobs:
           git checkout ${CHECKOUT_REF/refs\/heads\//}
 
           python -m pip install pyyaml
-          python build_script_generator.py ./.github/workflows/build_deps.yml
+          python ./utils/build_script_generator.py ./.github/workflows/build_deps.yml
 
           echo "  + Build scripts successfully generated"
 
