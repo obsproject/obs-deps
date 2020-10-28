@@ -7,13 +7,15 @@ jobs:
   steps:
   - script: git submodule update --init --recursive
     displayName: 'Checkout Submodules'
-  - script: ./osx-install-tools.sh
-    displayName: 'Install Tools'
-  - script: ./build-package-deps-osx.sh
-    displayName: 'Build And Package'
-
+  - bash: |
+      python3 -m pip install pyyaml
+      python3 ./utils/build_script_generator.py ./.github/workflows/build_deps.yml
+      echo "  + Build scripts successfully generated"
+    displayName: Generate build scripts
+  - script: TERM="" bash ./build-script-macos-01.sh
+    displayName: 'Build dependencies'
   - task: PublishBuildArtifacts@1
     condition: ne(variables['Build.Reason'], 'PullRequest')
     inputs:
-      pathtoPublish: './osx'
+      pathtoPublish: './macos'
       artifactName: osx-deps
