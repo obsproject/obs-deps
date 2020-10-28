@@ -5,34 +5,52 @@ set -eE
 PRODUCT_NAME="OBS Pre-Built Dependencies"
 BASE_DIR="$(git rev-parse --show-toplevel)"
 
-COLOR_RED=$(tput setaf 1)
-COLOR_GREEN=$(tput setaf 2)
-COLOR_BLUE=$(tput setaf 4)
-COLOR_ORANGE=$(tput setaf 3)
-COLOR_RESET=$(tput sgr0)
+export COLOR_RED=$(tput setaf 1)
+export COLOR_GREEN=$(tput setaf 2)
+export COLOR_BLUE=$(tput setaf 4)
+export COLOR_ORANGE=$(tput setaf 3)
+export COLOR_RESET=$(tput sgr0)
 
 export MAC_QT_VERSION="5.14.1"
-export WIN_QT_VERSION="5.10"
+export MAC_QT_HASH="6f17f488f512b39c2feb57d83a5e0a13dcef32999bea2e2a8f832f54a29badb8"
 export LIBPNG_VERSION="1.6.37"
+export LIBPNG_HASH="505e70834d35383537b6491e7ae8641f1a4bed1876dbfe361201fc80868d88ca"
 export LIBOPUS_VERSION="1.3.1"
-export LIBOGG_VERSION="68ca3841567247ac1f7850801a164f58738d8df9"
-export LIBRNNOISE_VERSION="90ec41ef659fd82cfec2103e9bb7fc235e9ea66c"
-export LIBVORBIS_VERSION="1.3.6"
-export LIBVPX_VERSION="1.8.2"
-export LIBJANSSON_VERSION="2.12"
-export LIBX264_VERSION="stable"
-export LIBMBEDTLS_VERSION="2.16.5"
-export LIBSRT_VERSION="1.4.1"
-export FFMPEG_VERSION="4.2.2"
+export LIBOPUS_HASH="65b58e1e25b2a114157014736a3d9dfeaad8d41be1c8179866f144a2fb44ff9d"
+export LIBOGG_VERSION="1.3.4"
+export LIBOGG_HASH="fe5670640bd49e828d64d2879c31cb4dde9758681bb664f9bdbf159a01b0c76e"
+export LIBRNNOISE_VERSION="2020-07-28"
+export LIBRNNOISE_HASH="90ec41ef659fd82cfec2103e9bb7fc235e9ea66c"
+export LIBVORBIS_VERSION="1.3.7"
+export LIBVORBIS_HASH="b33cc4934322bcbf6efcbacf49e3ca01aadbea4114ec9589d1b1e9d20f72954b"
+export LIBVPX_VERSION="1.9.0"
+export LIBVPX_HASH="d279c10e4b9316bf11a570ba16c3d55791e1ad6faa4404c67422eb631782c80a"
+export LIBJANSSON_VERSION="2.13.1"
+export LIBJANSSON_HASH="f4f377da17b10201a60c1108613e78ee15df6b12016b116b6de42209f47a474f"
+export LIBX264_VERSION="r3018"
+export LIBX264_HASH="db0d417728460c647ed4a847222a535b00d3dbcb"
+export LIBMBEDTLS_VERSION="2.24.0"
+export LIBMEDTLS_HASH="b5a779b5f36d5fc4cba55faa410685f89128702423ad07b36c5665441a06a5f3"
+export LIBSRT_VERSION="1.4.2"
+export LIBSRT_HASH="28a308e72dcbb50eb2f61b50cc4c393c413300333788f3a8159643536684a0c4"
+export LIBTHEORA_VERSION="1.1.1"
+export LIBTHEORA_HASH="b6ae1ee2fa3d42ac489287d3ec34c5885730b1296f0801ae577a35193d3affbc"
+export FFMPEG_VERSION="4.3.1"
+export FFMPEG_HASH="ad009240d46e307b4e03a213a0f49c11b650e445b1f8be0dda2a9212b34d2ffb"
 export LIBLUAJIT_VERSION="2.1.0-beta3"
-export LIBFREETYPE_VERSION="2.10.1"
+export LIBLUAJIT_HASH="1ad2e34b111c802f9d0cdf019e986909123237a28c746b21295b63c9e785d9c3"
+export LIBFREETYPE_VERSION="2.10.4"
+export LIBFREETYPE_HASH="86a854d8905b19698bbc8f23b860bc104246ce4854dcea8e3b0fb21284f75784"
 export PCRE_VERSION="8.44"
-export SWIG_VERSION="3.0.12"
+export PCRE_HASH="19108658b23b3ec5058edc9f66ac545ea19f9537234be1ec62b714c84399366d"
+export SWIG_VERSION="4.0.2"
+export SWIG_HASH="d53be9730d8d58a16bf0cbd1f8ac0c0c3e1090573168bfa151b01eb47fa906fc"
 export MACOSX_DEPLOYMENT_TARGET="10.13"
 export PATH="/usr/local/opt/ccache/libexec:${PATH}"
 export CURRENT_DATE="$(date +"%Y-%m-%d")"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig"
 export PARALLELISM="$(sysctl -n hw.ncpu)"
+export FFMPEG_CHECKSUM="$FFMPEG_CHECKSUM"
 
 hr() {
      echo -e "${COLOR_BLUE}[${PRODUCT_NAME}] ${1}${COLOR_RESET}"
@@ -59,7 +77,7 @@ ensure_dir() {
 }
 
 cleanup() {
-    :
+    restore_brews
 }
 
 mkdir() {
@@ -74,17 +92,43 @@ caught_error() {
     exit 1
 }
 
-build_e9a217b8-5c04-44d3-bc51-7df2ebeedca3() {
+restore_brews() {
+    if [ -d /usr/local/opt/xz ] && [ ! -f /usr/local/lib/liblzma.dylib ]; then
+      brew link xz
+    fi
+
+    if [ -d /usr/local/opt/zstd ] && [ ! -f /usr/local/lib/libzstd.dylib ]; then
+      brew link zstd
+    fi
+
+    if [ -d /usr/local/opt/libtiff ] && [ !  -f /usr/local/lib/libtiff.dylib ]; then
+      brew link libtiff
+    fi
+
+    if [ -d /usr/local/opt/webp ] && [ ! -f /usr/local/lib/libwebp.dylib ]; then
+      brew link webp
+    fi
+}
+
+build_3eb84227-98b8-4956-b33e-0b9d8d6331e2() {
     step "Install Homebrew dependencies"
     trap "caught_error 'Install Homebrew dependencies'" ERR
     ensure_dir ${BASE_DIR}
 
-    brew update --preinstall
+    if [ -d /usr/local/opt/openssl@1.0.2t ]; then
+        brew uninstall openssl@1.0.2t
+        brew untap local/openssl
+    fi
+    
+    if [ -d /usr/local/opt/python@2.7.17 ]; then
+        brew uninstall python@2.7.17
+        brew untap local/python2
+    fi
     brew bundle
 }
 
 
-build_879d071e-5b19-4df4-8915-7271f2d2a9c0() {
+build_a07d8866-47f8-4aef-8c0e-62feaff2a094() {
     step "Get Current Date"
     trap "caught_error 'Get Current Date'" ERR
     ensure_dir ${BASE_DIR}
@@ -93,7 +137,7 @@ build_879d071e-5b19-4df4-8915-7271f2d2a9c0() {
 }
 
 
-build_376182d4-b43c-41f6-957a-516a5611c842() {
+build_ee62fb3b-b328-41c3-ab0d-8c1f495c8755() {
     step "Build environment setup"
     trap "caught_error 'Build environment setup'" ERR
     ensure_dir ${BASE_DIR}
@@ -106,7 +150,7 @@ build_376182d4-b43c-41f6-957a-516a5611c842() {
 }
 
 
-build_54ea825f-eded-4d75-b8b4-0029392f0e5a() {
+build_c168584f-616a-4b3a-bb4b-fe136a39ab3a() {
     step "Build dependency Qt"
     trap "caught_error 'Build dependency Qt'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -123,12 +167,14 @@ build_54ea825f-eded-4d75-b8b4-0029392f0e5a() {
       brew unlink webp
     fi
     
-    curl --retry 5 -L -C - -O "https://download.qt.io/official_releases/qt/$(echo "${MAC_QT_VERSION}" | cut -d "." -f -2)/${MAC_QT_VERSION}/single/qt-everywhere-src-${MAC_QT_VERSION}.tar.xz"
+    ${BASE_DIR}/utils/safe_fetch "https://download.qt.io/official_releases/qt/$(echo "${MAC_QT_VERSION}" | cut -d "." -f -2)/${MAC_QT_VERSION}/single/qt-everywhere-src-${MAC_QT_VERSION}.tar.xz" "${MAC_QT_HASH}"
     tar -xf qt-everywhere-src-${MAC_QT_VERSION}.tar.xz
     if [ "${MAC_QT_VERSION}" = "5.14.1" ]; then
         cd qt-everywhere-src-${MAC_QT_VERSION}/qtbase
-        git apply ${BASE_DIR}/patch/qt/qtbase.patch
+        ${BASE_DIR}/utils/apply_patch "https://github.com/qt/qtbase/commit/8e5d6b422136dcca51f2c18fddcf28016f5ab99a.patch?full_index=1" "943e5e69160a39bcda0e88289b27c95732db1a195f0cf211601f10f1a067e608"
         cd ..
+    else
+        cd qt-everywhere-src-${MAC_QT_VERSION}
     fi
     mkdir build
     cd build
@@ -145,26 +191,20 @@ build_54ea825f-eded-4d75-b8b4-0029392f0e5a() {
       -skip qttranslations -skip qtwayland -skip qtwebchannel -skip qtwebengine -skip qtwebglplugin \
       -skip qtwebsockets -skip qtwebview -skip qtwinextras -skip qtx11extras -skip qtxmlpatterns
     make -j${PARALLELISM}
+    make install
     
-    if [ -d /usr/local/opt/zstd ]; then
+    mv /tmp/obsdeps ${BASE_DIR}/CI_BUILD/obsdeps
+    
+    if [ -d /usr/local/opt/zstd ] && [ ! -f /usr/local/bin/zstd ]; then
       brew link zstd
     fi
 }
 
 
-build_10f8b9c5-ec4a-4711-9d12-9bbb3087965a() {
-    step "Install dependency Qt"
-    trap "caught_error 'Install dependency Qt'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/qt-everywhere-src-5.14.1/build
-
-    make install
-}
-
-
-build_7e81a11c-8d59-4c92-9606-861e31785f49() {
+build_5fd9733e-a824-47af-9edb-59efa8783696() {
     step "Package dependencies"
     trap "caught_error 'Package dependencies'" ERR
-    ensure_dir /tmp
+    ensure_dir ${BASE_DIR}/CI_BUILD/obsdeps
 
     tar -czf macos-qt-${MAC_QT_VERSION}-${CURRENT_DATE}.tar.gz obsdeps
     if [ ! -d "${BASE_DIR}/macos" ]; then
@@ -177,12 +217,13 @@ build_7e81a11c-8d59-4c92-9606-861e31785f49() {
 obs-deps-build-main() {
     ensure_dir ${BASE_DIR}
 
-    build_e9a217b8-5c04-44d3-bc51-7df2ebeedca3
-    build_879d071e-5b19-4df4-8915-7271f2d2a9c0
-    build_376182d4-b43c-41f6-957a-516a5611c842
-    build_54ea825f-eded-4d75-b8b4-0029392f0e5a
-    build_10f8b9c5-ec4a-4711-9d12-9bbb3087965a
-    build_7e81a11c-8d59-4c92-9606-861e31785f49
+    build_3eb84227-98b8-4956-b33e-0b9d8d6331e2
+    build_a07d8866-47f8-4aef-8c0e-62feaff2a094
+    build_ee62fb3b-b328-41c3-ab0d-8c1f495c8755
+    build_c168584f-616a-4b3a-bb4b-fe136a39ab3a
+    build_5fd9733e-a824-47af-9edb-59efa8783696
+
+    restore_brews
 
     hr "All Done"
 }
