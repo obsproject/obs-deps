@@ -13,6 +13,8 @@ export COLOR_RESET=$(tput sgr0)
 
 export MAC_QT_VERSION="5.14.1"
 export MAC_QT_HASH="6f17f488f512b39c2feb57d83a5e0a13dcef32999bea2e2a8f832f54a29badb8"
+export LIBLAME_VERSION="3.100"
+export LIBLAME_HASH="ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e"
 export LIBPNG_VERSION="1.6.37"
 export LIBPNG_HASH="505e70834d35383537b6491e7ae8641f1a4bed1876dbfe361201fc80868d88ca"
 export LIBOPUS_VERSION="1.3.1"
@@ -50,7 +52,7 @@ export PATH="/usr/local/opt/ccache/libexec:${PATH}"
 export CURRENT_DATE="$(date +"%Y-%m-%d")"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig"
 export PARALLELISM="$(sysctl -n hw.ncpu)"
-export FFMPEG_CHECKSUM="$FFMPEG_CHECKSUM"
+export FFMPEG_DEP_HASH="$FFMPEG_DEP_HASH"
 
 hr() {
      echo -e "${COLOR_BLUE}[${PRODUCT_NAME}] ${1}${COLOR_RESET}"

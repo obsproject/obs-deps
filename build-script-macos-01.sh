@@ -13,6 +13,8 @@ export COLOR_RESET=$(tput sgr0)
 
 export MAC_QT_VERSION="5.14.1"
 export MAC_QT_HASH="6f17f488f512b39c2feb57d83a5e0a13dcef32999bea2e2a8f832f54a29badb8"
+export LIBLAME_VERSION="3.100"
+export LIBLAME_HASH="ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e"
 export LIBPNG_VERSION="1.6.37"
 export LIBPNG_HASH="505e70834d35383537b6491e7ae8641f1a4bed1876dbfe361201fc80868d88ca"
 export LIBOPUS_VERSION="1.3.1"
@@ -50,7 +52,7 @@ export PATH="/usr/local/opt/ccache/libexec:${PATH}"
 export CURRENT_DATE="$(date +"%Y-%m-%d")"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig"
 export PARALLELISM="$(sysctl -n hw.ncpu)"
-export FFMPEG_CHECKSUM="$FFMPEG_CHECKSUM"
+export FFMPEG_DEP_HASH="$FFMPEG_DEP_HASH"
 
 hr() {
      echo -e "${COLOR_BLUE}[${PRODUCT_NAME}] ${1}${COLOR_RESET}"
@@ -151,40 +153,12 @@ build_04_build_environment_setup() {
     mkdir -p CI_BUILD/obsdeps/share
     
     
-    FFMPEG_CHECKSUM="$(echo "${FFMPEG_VERSION}-${LIBOGG_VERSION}-${LIBVORBIS_VERSION}-${LIBVPX_VERSION}-${LIBOPUS_VERSION}-${LIBX264_VERSION}-${LIBSRT_VERSION}-${LIBMBEDTLS_VERSION}-${LIBTHEORA_VERSION}" | sha256sum | cut -d " " -f 1)"
+    FFMPEG_DEP_HASH="$(echo "${LIBPNG_VERSION}-${LIBLAME_VERSION}-${LIBOGG_VERSION}-${LIBVORBIS_VERSION}-${LIBVPX_VERSION}-${LIBOPUS_VERSION}-${LIBX264_VERSION}-${LIBSRT_VERSION}-${LIBMBEDTLS_VERSION}-${LIBTHEORA_VERSION}" | sha256sum | cut -d " " -f 1)"
     
 }
 
 
-build_06_build_dependency_swig() {
-    step "Build dependency swig"
-    trap "caught_error 'Build dependency swig'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD
-
-    ${BASE_DIR}/utils/safe_fetch "https://downloads.sourceforge.net/project/swig/swig/swig-${SWIG_VERSION}/swig-${SWIG_VERSION}.tar.gz" "${SWIG_HASH}"
-    tar -xf swig-${SWIG_VERSION}.tar.gz
-    cd swig-${SWIG_VERSION}
-    mkdir build
-    cd build
-    ${BASE_DIR}/utils/safe_fetch "https://ftp.pcre.org/pub/pcre/pcre-${PCRE_VERSION}.tar.bz2" "${PCRE_HASH}"
-    ../Tools/pcre-build.sh
-    ../configure --disable-dependency-tracking --prefix="/tmp/obsdeps"
-    make -j${PARALLELISM}
-}
-
-
-build_07_install_dependency_swig() {
-    step "Install dependency swig"
-    trap "caught_error 'Install dependency swig'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/swig-4.0.2/build
-
-    cp swig ${BASE_DIR}/CI_BUILD/obsdeps/bin/
-    mkdir -p ${BASE_DIR}/CI_BUILD/obsdeps/share/swig/${SWIG_VERSION}
-    rsync -avh --include="*.i" --include="*.swg" --include="python" --include="lua" --include="typemaps" --exclude="*" ../Lib/* ${BASE_DIR}/CI_BUILD/obsdeps/share/swig/${SWIG_VERSION}
-}
-
-
-build_09_build_dependency_libpng() {
+build_06_build_dependency_libpng() {
     step "Build dependency libpng"
     trap "caught_error 'Build dependency libpng'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -199,7 +173,7 @@ build_09_build_dependency_libpng() {
 }
 
 
-build_10_install_dependency_libpng() {
+build_07_install_dependency_libpng() {
     step "Install dependency libpng"
     trap "caught_error 'Install dependency libpng'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/libpng-1.6.37/build
@@ -208,7 +182,7 @@ build_10_install_dependency_libpng() {
 }
 
 
-build_12_build_dependency_libopus() {
+build_08_build_dependency_libopus() {
     step "Build dependency libopus"
     trap "caught_error 'Build dependency libopus'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -223,7 +197,7 @@ build_12_build_dependency_libopus() {
 }
 
 
-build_13_install_dependency_libopus() {
+build_09_install_dependency_libopus() {
     step "Install dependency libopus"
     trap "caught_error 'Install dependency libopus'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/opus-1.3.1/build
@@ -232,7 +206,7 @@ build_13_install_dependency_libopus() {
 }
 
 
-build_15_build_dependency_libogg() {
+build_10_build_dependency_libogg() {
     step "Build dependency libogg"
     trap "caught_error 'Build dependency libogg'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -248,7 +222,7 @@ build_15_build_dependency_libogg() {
 }
 
 
-build_16_install_dependency_libogg() {
+build_11_install_dependency_libogg() {
     step "Install dependency libogg"
     trap "caught_error 'Install dependency libogg'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/libogg-1.3.4/build
@@ -257,7 +231,7 @@ build_16_install_dependency_libogg() {
 }
 
 
-build_18_build_dependency_libvorbis() {
+build_12_build_dependency_libvorbis() {
     step "Build dependency libvorbis"
     trap "caught_error 'Build dependency libvorbis'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -272,7 +246,7 @@ build_18_build_dependency_libvorbis() {
 }
 
 
-build_19_install_dependency_libvorbis() {
+build_13_install_dependency_libvorbis() {
     step "Install dependency libvorbis"
     trap "caught_error 'Install dependency libvorbis'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/libvorbis-1.3.7/build
@@ -281,7 +255,7 @@ build_19_install_dependency_libvorbis() {
 }
 
 
-build_21_build_dependency_libvpx() {
+build_14_build_dependency_libvpx() {
     step "Build dependency libvpx"
     trap "caught_error 'Build dependency libvpx'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -297,7 +271,7 @@ build_21_build_dependency_libvpx() {
 }
 
 
-build_22_install_dependency_libvpx() {
+build_15_install_dependency_libvpx() {
     step "Install dependency libvpx"
     trap "caught_error 'Install dependency libvpx'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/libvpx-1.9.0/build
@@ -306,34 +280,7 @@ build_22_install_dependency_libvpx() {
 }
 
 
-build_24_build_dependency_libjansson() {
-    step "Build dependency libjansson"
-    trap "caught_error 'Build dependency libjansson'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD
-
-    ${BASE_DIR}/utils/safe_fetch "https://digip.org/jansson/releases/jansson-${LIBJANSSON_VERSION}.tar.gz" "${LIBJANSSON_HASH}"
-    tar -xf jansson-${LIBJANSSON_VERSION}.tar.gz
-    cd jansson-${LIBJANSSON_VERSION}
-    mkdir build
-    cd ./build
-    ../configure --libdir="/tmp/obsdeps/bin" --enable-shared --disable-static
-    make -j${PARALLELISM}
-}
-
-
-build_25_install_dependency_libjansson() {
-    step "Install dependency libjansson"
-    trap "caught_error 'Install dependency libjansson'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/jansson-2.13.1/build
-
-    find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/bin/ \;
-    rsync -avh --include="*/" --include="*.h" --exclude="*" ../src/* ${BASE_DIR}/CI_BUILD/obsdeps/include/
-    rsync -avh --include="*/" --include="*.h" --exclude="*" ./src/* ${BASE_DIR}/CI_BUILD/obsdeps/include/
-    cp ./*.h ${BASE_DIR}/CI_BUILD/obsdeps/include/
-}
-
-
-build_27_build_dependency_libx264() {
+build_16_build_dependency_libx264() {
     step "Build dependency libx264"
     trap "caught_error 'Build dependency libx264'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -353,7 +300,7 @@ build_27_build_dependency_libx264() {
 }
 
 
-build_28_install_dependency_libx264() {
+build_17_install_dependency_libx264() {
     step "Install dependency libx264"
     trap "caught_error 'Install dependency libx264'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3018/build
@@ -362,29 +309,56 @@ build_28_install_dependency_libx264() {
 }
 
 
-build_29_build_dependency_libx264__dylib_() {
-    step "Build dependency libx264 (dylib)"
-    trap "caught_error 'Build dependency libx264 (dylib)'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3018/build
+build_18_build_dependency_libtheora() {
+    step "Build dependency libtheora"
+    trap "caught_error 'Build dependency libtheora'" ERR
+    ensure_dir ${BASE_DIR}/CI_BUILD
 
-    ../configure --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" ${CONFIG_EXTRA} --enable-shared  --disable-lsmash --disable-swscale --disable-ffms --enable-strip --libdir="/tmp/obsdeps/bin" --prefix="/tmp/obsdeps"
+    ${BASE_DIR}/utils/safe_fetch "https://downloads.xiph.org/releases/theora/libtheora-${LIBTHEORA_VERSION}.tar.bz2" "${LIBTHEORA_HASH}"
+    tar -xf libtheora-${LIBTHEORA_VERSION}.tar.bz2
+    cd libtheora-${LIBTHEORA_VERSION}
+    mkdir build
+    cd ./build
+    ../configure --disable-shared --enable-static --disable-oggtest --disable-vorbistest --disable-examples --prefix="/tmp/obsdeps"
     make -j${PARALLELISM}
 }
 
 
-build_30_install_dependency_libx264__dylib_() {
-    step "Install dependency libx264 (dylib)"
-    trap "caught_error 'Install dependency libx264 (dylib)'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3018/build
+build_19_install_dependency_libtheora() {
+    step "Install dependency libtheora"
+    trap "caught_error 'Install dependency libtheora'" ERR
+    ensure_dir ${BASE_DIR}/CI_BUILD/libtheora-1.1.1/build
 
-    ln -f -s libx264.*.dylib libx264.dylib
-    find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/bin/ \;
-    rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${BASE_DIR}/CI_BUILD/obsdeps/include/
-    rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${BASE_DIR}/CI_BUILD/obsdeps/include/
+    make install
 }
 
 
-build_32_build_dependency_libmbedtls() {
+build_20_build_dependency_liblame() {
+    step "Build dependency liblame"
+    trap "caught_error 'Build dependency liblame'" ERR
+    ensure_dir ${BASE_DIR}/CI_BUILD
+
+    ${BASE_DIR}/utils/safe_fetch https://downloads.sourceforge.net/project/lame/lame/${LIBLAME_VERSION}/lame-${LIBLAME_VERSION}.tar.gz "${LIBLAME_HASH}"
+    tar -xf lame-${LIBLAME_VERSION}.tar.gz
+    cd lame-${LIBLAME_VERSION}
+    sed -i '.orig' '/lame_init_old/d' ./include/libmp3lame.sym
+    mkdir build
+    cd ./build
+    ../configure --disable-shared --disable-dependency-tracking --disable-debug --enable-nasm --prefix="/tmp/obsdeps"
+    make -j${PARALLELISM}
+}
+
+
+build_21_install_dependency_liblame() {
+    step "Install dependency liblame"
+    trap "caught_error 'Install dependency liblame'" ERR
+    ensure_dir ${BASE_DIR}/CI_BUILD/lame-3.100/build
+
+    make install
+}
+
+
+build_22_build_dependency_libmbedtls() {
     step "Build dependency libmbedtls"
     trap "caught_error 'Build dependency libmbedtls'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -401,7 +375,7 @@ build_32_build_dependency_libmbedtls() {
 }
 
 
-build_33_install_dependency_libmbedtls() {
+build_23_install_dependency_libmbedtls() {
     step "Install dependency libmbedtls"
     trap "caught_error 'Install dependency libmbedtls'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/mbedtls-mbedtls-2.24.0/build
@@ -463,7 +437,7 @@ EOF
 }
 
 
-build_35_build_dependency_libsrt() {
+build_24_build_dependency_libsrt() {
     step "Build dependency libsrt"
     trap "caught_error 'Build dependency libsrt'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -478,7 +452,7 @@ build_35_build_dependency_libsrt() {
 }
 
 
-build_36_install_dependency_libsrt() {
+build_25_install_dependency_libsrt() {
     step "Install dependency libsrt"
     trap "caught_error 'Install dependency libsrt'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/srt-1.4.2/build
@@ -487,31 +461,7 @@ build_36_install_dependency_libsrt() {
 }
 
 
-build_38_build_dependency_libtheora() {
-    step "Build dependency libtheora"
-    trap "caught_error 'Build dependency libtheora'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD
-
-    ${BASE_DIR}/utils/safe_fetch "https://downloads.xiph.org/releases/theora/libtheora-${LIBTHEORA_VERSION}.tar.bz2" "${LIBTHEORA_HASH}"
-    tar -xf libtheora-${LIBTHEORA_VERSION}.tar.bz2
-    cd libtheora-${LIBTHEORA_VERSION}
-    mkdir build
-    cd ./build
-    ../configure --disable-shared --enable-static --disable-oggtest --disable-vorbistest --disable-examples --prefix="/tmp/obsdeps"
-    make -j${PARALLELISM}
-}
-
-
-build_39_install_dependency_libtheora() {
-    step "Install dependency libtheora"
-    trap "caught_error 'Install dependency libtheora'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/libtheora-1.1.1/build
-
-    make install
-}
-
-
-build_41_build_dependency_ffmpeg() {
+build_27_build_dependency_ffmpeg() {
     step "Build dependency ffmpeg"
     trap "caught_error 'Build dependency ffmpeg'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -525,12 +475,12 @@ build_41_build_dependency_ffmpeg() {
     ${BASE_DIR}/utils/apply_patch "https://github.com/FFmpeg/FFmpeg/commit/7c59e1b0f285cd7c7b35fcd71f49c5fd52cf9315.patch?full_index=1" "1cbe1b68d70eadd49080a6e512a35f3e230de26b6e1b1c859d9119906417737f"
     mkdir build
     cd ./build
-    ../configure --host-cflags="-I/tmp/obsdeps/include" --host-ldflags="-L/tmp/obsdeps/lib" --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" --enable-shared --disable-static --enable-pthreads --enable-version3 --shlibdir="/tmp/obsdeps/bin" --enable-gpl --enable-videotoolbox --disable-libjack --disable-indev=jack --disable-outdev=sdl --disable-programs --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --enable-libtheora
+    ../configure --host-cflags="-I/tmp/obsdeps/include" --host-ldflags="-L/tmp/obsdeps/lib" --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" --enable-shared --disable-static --enable-pthreads --enable-version3 --shlibdir="/tmp/obsdeps/bin" --enable-gpl --enable-videotoolbox --disable-libjack --disable-indev=jack --disable-outdev=sdl --disable-programs --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --enable-libtheora --enable-libmp3lame
     make -j${PARALLELISM}
 }
 
 
-build_42_install_dependency_ffmpeg() {
+build_28_install_dependency_ffmpeg() {
     step "Install dependency ffmpeg"
     trap "caught_error 'Install dependency ffmpeg'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/ffmpeg-4.3.1/build
@@ -541,7 +491,84 @@ build_42_install_dependency_ffmpeg() {
 }
 
 
-build_44_build_dependency_libluajit() {
+build_29_build_dependency_libx264__dylib_() {
+    step "Build dependency libx264 (dylib)"
+    trap "caught_error 'Build dependency libx264 (dylib)'" ERR
+    ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3018/build
+
+    ../configure --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" ${CONFIG_EXTRA} --enable-shared  --disable-lsmash --disable-swscale --disable-ffms --enable-strip --libdir="/tmp/obsdeps/bin" --prefix="/tmp/obsdeps"
+    make -j${PARALLELISM}
+}
+
+
+build_30_install_dependency_libx264__dylib_() {
+    step "Install dependency libx264 (dylib)"
+    trap "caught_error 'Install dependency libx264 (dylib)'" ERR
+    ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3018/build
+
+    ln -f -s libx264.*.dylib libx264.dylib
+    find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/bin/ \;
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${BASE_DIR}/CI_BUILD/obsdeps/include/
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${BASE_DIR}/CI_BUILD/obsdeps/include/
+}
+
+
+build_32_build_dependency_swig() {
+    step "Build dependency swig"
+    trap "caught_error 'Build dependency swig'" ERR
+    ensure_dir ${BASE_DIR}/CI_BUILD
+
+    ${BASE_DIR}/utils/safe_fetch "https://downloads.sourceforge.net/project/swig/swig/swig-${SWIG_VERSION}/swig-${SWIG_VERSION}.tar.gz" "${SWIG_HASH}"
+    tar -xf swig-${SWIG_VERSION}.tar.gz
+    cd swig-${SWIG_VERSION}
+    mkdir build
+    cd build
+    ${BASE_DIR}/utils/safe_fetch "https://ftp.pcre.org/pub/pcre/pcre-${PCRE_VERSION}.tar.bz2" "${PCRE_HASH}"
+    ../Tools/pcre-build.sh
+    ../configure --disable-dependency-tracking --prefix="/tmp/obsdeps"
+    make -j${PARALLELISM}
+}
+
+
+build_33_install_dependency_swig() {
+    step "Install dependency swig"
+    trap "caught_error 'Install dependency swig'" ERR
+    ensure_dir ${BASE_DIR}/CI_BUILD/swig-4.0.2/build
+
+    cp swig ${BASE_DIR}/CI_BUILD/obsdeps/bin/
+    mkdir -p ${BASE_DIR}/CI_BUILD/obsdeps/share/swig/${SWIG_VERSION}
+    rsync -avh --include="*.i" --include="*.swg" --include="python" --include="lua" --include="typemaps" --exclude="*" ../Lib/* ${BASE_DIR}/CI_BUILD/obsdeps/share/swig/${SWIG_VERSION}
+}
+
+
+build_35_build_dependency_libjansson() {
+    step "Build dependency libjansson"
+    trap "caught_error 'Build dependency libjansson'" ERR
+    ensure_dir ${BASE_DIR}/CI_BUILD
+
+    ${BASE_DIR}/utils/safe_fetch "https://digip.org/jansson/releases/jansson-${LIBJANSSON_VERSION}.tar.gz" "${LIBJANSSON_HASH}"
+    tar -xf jansson-${LIBJANSSON_VERSION}.tar.gz
+    cd jansson-${LIBJANSSON_VERSION}
+    mkdir build
+    cd ./build
+    ../configure --libdir="/tmp/obsdeps/bin" --enable-shared --disable-static
+    make -j${PARALLELISM}
+}
+
+
+build_36_install_dependency_libjansson() {
+    step "Install dependency libjansson"
+    trap "caught_error 'Install dependency libjansson'" ERR
+    ensure_dir ${BASE_DIR}/CI_BUILD/jansson-2.13.1/build
+
+    find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/bin/ \;
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ../src/* ${BASE_DIR}/CI_BUILD/obsdeps/include/
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ./src/* ${BASE_DIR}/CI_BUILD/obsdeps/include/
+    cp ./*.h ${BASE_DIR}/CI_BUILD/obsdeps/include/
+}
+
+
+build_38_build_dependency_libluajit() {
     step "Build dependency libluajit"
     trap "caught_error 'Build dependency libluajit'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -553,7 +580,7 @@ build_44_build_dependency_libluajit() {
 }
 
 
-build_45_install_dependency_libluajit() {
+build_39_install_dependency_libluajit() {
     step "Install dependency libluajit"
     trap "caught_error 'Install dependency libluajit'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/LuaJIT-2.1.0-beta3
@@ -565,7 +592,7 @@ build_45_install_dependency_libluajit() {
 }
 
 
-build_47_build_dependency_libfreetype() {
+build_41_build_dependency_libfreetype() {
     step "Build dependency libfreetype"
     trap "caught_error 'Build dependency libfreetype'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -581,7 +608,7 @@ build_47_build_dependency_libfreetype() {
 }
 
 
-build_48_install_dependency_libfreetype() {
+build_42_install_dependency_libfreetype() {
     step "Install dependency libfreetype"
     trap "caught_error 'Install dependency libfreetype'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/freetype-2.10.4/build
@@ -592,7 +619,7 @@ build_48_install_dependency_libfreetype() {
 }
 
 
-build_50_build_dependency_librnnoise() {
+build_44_build_dependency_librnnoise() {
     step "Build dependency librnnoise"
     trap "caught_error 'Build dependency librnnoise'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -608,7 +635,7 @@ build_50_build_dependency_librnnoise() {
 }
 
 
-build_51_install_dependency_librnnoise() {
+build_45_install_dependency_librnnoise() {
     step "Install dependency librnnoise"
     trap "caught_error 'Install dependency librnnoise'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/rnnoise-2020-07-28/build
@@ -619,7 +646,7 @@ build_51_install_dependency_librnnoise() {
 }
 
 
-build_52_package_dependencies() {
+build_46_package_dependencies() {
     step "Package dependencies"
     trap "caught_error 'Package dependencies'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -638,39 +665,41 @@ obs-deps-build-main() {
     build_02_install_homebrew_dependencies
     build_03_get_current_date
     build_04_build_environment_setup
-    build_06_build_dependency_swig
-    build_07_install_dependency_swig
-    build_09_build_dependency_libpng
-    build_10_install_dependency_libpng
-    build_12_build_dependency_libopus
-    build_13_install_dependency_libopus
-    build_15_build_dependency_libogg
-    build_16_install_dependency_libogg
-    build_18_build_dependency_libvorbis
-    build_19_install_dependency_libvorbis
-    build_21_build_dependency_libvpx
-    build_22_install_dependency_libvpx
-    build_24_build_dependency_libjansson
-    build_25_install_dependency_libjansson
-    build_27_build_dependency_libx264
-    build_28_install_dependency_libx264
+    build_06_build_dependency_libpng
+    build_07_install_dependency_libpng
+    build_08_build_dependency_libopus
+    build_09_install_dependency_libopus
+    build_10_build_dependency_libogg
+    build_11_install_dependency_libogg
+    build_12_build_dependency_libvorbis
+    build_13_install_dependency_libvorbis
+    build_14_build_dependency_libvpx
+    build_15_install_dependency_libvpx
+    build_16_build_dependency_libx264
+    build_17_install_dependency_libx264
+    build_18_build_dependency_libtheora
+    build_19_install_dependency_libtheora
+    build_20_build_dependency_liblame
+    build_21_install_dependency_liblame
+    build_22_build_dependency_libmbedtls
+    build_23_install_dependency_libmbedtls
+    build_24_build_dependency_libsrt
+    build_25_install_dependency_libsrt
+    build_27_build_dependency_ffmpeg
+    build_28_install_dependency_ffmpeg
     build_29_build_dependency_libx264__dylib_
     build_30_install_dependency_libx264__dylib_
-    build_32_build_dependency_libmbedtls
-    build_33_install_dependency_libmbedtls
-    build_35_build_dependency_libsrt
-    build_36_install_dependency_libsrt
-    build_38_build_dependency_libtheora
-    build_39_install_dependency_libtheora
-    build_41_build_dependency_ffmpeg
-    build_42_install_dependency_ffmpeg
-    build_44_build_dependency_libluajit
-    build_45_install_dependency_libluajit
-    build_47_build_dependency_libfreetype
-    build_48_install_dependency_libfreetype
-    build_50_build_dependency_librnnoise
-    build_51_install_dependency_librnnoise
-    build_52_package_dependencies
+    build_32_build_dependency_swig
+    build_33_install_dependency_swig
+    build_35_build_dependency_libjansson
+    build_36_install_dependency_libjansson
+    build_38_build_dependency_libluajit
+    build_39_install_dependency_libluajit
+    build_41_build_dependency_libfreetype
+    build_42_install_dependency_libfreetype
+    build_44_build_dependency_librnnoise
+    build_45_install_dependency_librnnoise
+    build_46_package_dependencies
 
     restore_brews
 
