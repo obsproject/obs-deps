@@ -88,47 +88,28 @@ jobs:
           mkdir -p CI_BUILD/obsdeps/share
           echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig" >> $GITHUB_ENV
           echo "PARALLELISM=$(sysctl -n hw.ncpu)" >> $GITHUB_ENV
-          FFMPEG_CHECKSUM="$(echo "${{ env.FFMPEG_VERSION }}-${{ env.LIBOGG_VERSION }}-${{ env.LIBVORBIS_VERSION }}-${{ env.LIBVPX_VERSION }}-${{ env.LIBOPUS_VERSION }}-${{ env.LIBX264_VERSION }}-${{ env.LIBSRT_VERSION }}-${{ env.LIBMBEDTLS_VERSION }}-${{ env.LIBTHEORA_VERSION }}" | sha256sum | cut -d " " -f 1)"
-          echo "FFMPEG_CHECKSUM=$FFMPEG_CHECKSUM" >> $GITHUB_ENV
-      - name: 'Restore swig from cache'
-        id: swig-cache
+          FFMPEG_DEP_HASH="$(echo "${{ env.LIBPNG_VERSION }}-${{ env.LIBLAME_VERSION }}-${{ env.LIBOGG_VERSION }}-${{ env.LIBVORBIS_VERSION }}-${{ env.LIBVPX_VERSION }}-${{ env.LIBOPUS_VERSION }}-${{ env.LIBX264_VERSION }}-${{ env.LIBSRT_VERSION }}-${{ env.LIBMBEDTLS_VERSION }}-${{ env.LIBTHEORA_VERSION }}" | sha256sum | cut -d " " -f 1)"
+          echo "FFMPEG_DEP_HASH=$FFMPEG_DEP_HASH" >> $GITHUB_ENV
+      - name: 'Restore ffmpeg dependencies from cache'
+        id: ffmpeg-deps-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'swig-cache-rev2'
+          CACHE_NAME: 'ffmpeg-deps'
         with:
-          path: ${{ github.workspace }}/CI_BUILD/swig-${{ env.SWIG_VERSION }}
-          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.SWIG_VERSION }}
-      - name: 'Build dependency swig'
-        if: steps.swig-cache.outputs.cache-hit != 'true'
-        shell: bash
-        working-directory: ${{ github.workspace }}/CI_BUILD
-        run: |
-          ${{ github.workspace }}/utils/safe_fetch "https://downloads.sourceforge.net/project/swig/swig/swig-${{ env.SWIG_VERSION }}/swig-${{ env.SWIG_VERSION }}.tar.gz" "${{ env.SWIG_HASH }}"
-          tar -xf swig-${{ env.SWIG_VERSION }}.tar.gz
-          cd swig-${{ env.SWIG_VERSION }}
-          mkdir build
-          cd build
-          ${{ github.workspace }}/utils/safe_fetch "https://ftp.pcre.org/pub/pcre/pcre-${{ env.PCRE_VERSION }}.tar.bz2" "${{ env.PCRE_HASH }}"
-          ../Tools/pcre-build.sh
-          ../configure --disable-dependency-tracking --prefix="/tmp/obsdeps"
-          make -j${{ env.PARALLELISM }}
-      - name: 'Install dependency swig'
-        shell: bash
-        working-directory: ${{ github.workspace }}/CI_BUILD/swig-${{ env.SWIG_VERSION }}/build
-        run: |
-          cp swig ${{ github.workspace }}/CI_BUILD/obsdeps/bin/
-          mkdir -p ${{ github.workspace }}/CI_BUILD/obsdeps/share/swig/${{ env.SWIG_VERSION }}
-          rsync -avh --include="*.i" --include="*.swg" --include="python" --include="lua" --include="typemaps" --exclude="*" ../Lib/* ${{ github.workspace }}/CI_BUILD/obsdeps/share/swig/${{ env.SWIG_VERSION }}
-      - name: 'Restore libpng from cache'
-        id: libpng-cache
-        uses: actions/cache@v2.1.2
-        env:
-          CACHE_NAME: 'libpng-cache-rev2'
-        with:
-          path: ${{ github.workspace }}/CI_BUILD/libpng-${{ env.LIBPNG_VERSION }}
-          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.LIBPNG_VERSION }}
+          path: |
+            ${{ github.workspace }}/CI_BUILD/libpng-${{ env.LIBPNG_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/opus-${{ env.LIBOPUS_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/libogg-${{ env.LIBOGG_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/libvorbis-${{ env.LIBVORBIS_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/libvpx-${{ env.LIBVPX_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/x264-${{ env.LIBX264_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/libtheora-${{ env.LIBTHEORA_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/lame-${{ env.LIBLAME_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/mbedtls-mbedtls-${{ env.LIBMBEDTLS_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/srt-${{ env.LIBSRT_VERSION }}
+          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.FFMPEG_DEP_HASH }}
       - name: 'Build dependency libpng'
-        if: steps.libpng-cache.outputs.cache-hit != 'true'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD
         run: |
@@ -144,16 +125,8 @@ jobs:
         working-directory: ${{ github.workspace }}/CI_BUILD/libpng-${{ env.LIBPNG_VERSION }}/build
         run: |
           make install
-      - name: 'Restore libopus from cache'
-        id: libopus-cache
-        uses: actions/cache@v2.1.2
-        env:
-          CACHE_NAME: 'libopus-cache'
-        with:
-          path: ${{ github.workspace }}/CI_BUILD/opus-${{ env.LIBOPUS_VERSION }}
-          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.LIBOPUS_VERSION }}
       - name: 'Build dependency libopus'
-        if: steps.libopus-cache.outputs.cache-hit != 'true'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD
         run: |
@@ -169,16 +142,8 @@ jobs:
         working-directory: ${{ github.workspace }}/CI_BUILD/opus-${{ env.LIBOPUS_VERSION }}/build
         run: |
           make install
-      - name: 'Restore libogg from cache'
-        id: libogg-cache
-        uses: actions/cache@v2.1.2
-        env:
-          CACHE_NAME: 'libogg-cache'
-        with:
-          path: ${{ github.workspace }}/CI_BUILD/libogg-${{ env.LIBOGG_VERSION }}
-          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.LIBOGG_VERSION }}
       - name: 'Build dependency libogg'
-        if: steps.libogg-cache.outputs.cache-hit != 'true'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD
         run: |
@@ -195,16 +160,8 @@ jobs:
         working-directory: ${{ github.workspace }}/CI_BUILD/libogg-${{ env.LIBOGG_VERSION }}/build
         run: |
           make install
-      - name: 'Restore libvorbis from cache'
-        id: libvorbis-cache
-        uses: actions/cache@v2.1.2
-        env:
-          CACHE_NAME: 'libvorbis-cache'
-        with:
-          path: ${{ github.workspace }}/CI_BUILD/libvorbis-${{ env.LIBVORBIS_VERSION }}
-          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.LIBVORBIS_VERSION }}
       - name: 'Build dependency libvorbis'
-        if: steps.libvorbis-cache.outputs.cache-hit != 'true'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD
         run: |
@@ -220,16 +177,8 @@ jobs:
         working-directory: ${{ github.workspace }}/CI_BUILD/libvorbis-${{ env.LIBVORBIS_VERSION }}/build
         run: |
           make install
-      - name: 'Restore libvpx from cache'
-        id: libvpx-cache
-        uses: actions/cache@v2.1.2
-        env:
-          CACHE_NAME: 'libvpx-cache-rev2'
-        with:
-          path: ${{ github.workspace }}/CI_BUILD/libvpx-${{ env.LIBVPX_VERSION }}
-          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.LIBVPX_VERSION }}
       - name: 'Build dependency libvpx'
-        if: steps.libvpx-cache.outputs.cache-hit != 'true'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD
         run: |
@@ -246,44 +195,8 @@ jobs:
         working-directory: ${{ github.workspace }}/CI_BUILD/libvpx-${{ env.LIBVPX_VERSION }}/build
         run: |
           make install
-      - name: 'Restore libjansson from cache'
-        id: libjansson-cache
-        uses: actions/cache@v2.1.2
-        env:
-          CACHE_NAME: 'libjansson-cache'
-        with:
-          path: ${{ github.workspace }}/CI_BUILD/jansson-${{ env.LIBJANSSON_VERSION }}
-          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.LIBJANSSON_VERSION }}
-      - name: 'Build dependency libjansson'
-        if: steps.libjansson-cache.outputs.cache-hit != 'true'
-        shell: bash
-        working-directory: ${{ github.workspace }}/CI_BUILD
-        run: |
-          ${{ github.workspace }}/utils/safe_fetch "https://digip.org/jansson/releases/jansson-${{ env.LIBJANSSON_VERSION }}.tar.gz" "${{ env.LIBJANSSON_HASH }}"
-          tar -xf jansson-${{ env.LIBJANSSON_VERSION }}.tar.gz
-          cd jansson-${{ env.LIBJANSSON_VERSION }}
-          mkdir build
-          cd ./build
-          ../configure --libdir="/tmp/obsdeps/bin" --enable-shared --disable-static
-          make -j${{ env.PARALLELISM }}
-      - name: 'Install dependency libjansson'
-        shell: bash
-        working-directory: ${{ github.workspace }}/CI_BUILD/jansson-${{ env.LIBJANSSON_VERSION }}/build
-        run: |
-          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
-          rsync -avh --include="*/" --include="*.h" --exclude="*" ../src/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
-          rsync -avh --include="*/" --include="*.h" --exclude="*" ./src/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
-          cp ./*.h ${{ github.workspace }}/CI_BUILD/obsdeps/include/
-      - name: 'Restore libx264 from cache'
-        id: libx264-cache
-        uses: actions/cache@v2.1.2
-        env:
-          CACHE_NAME: 'libx264-cache-rev2'
-        with:
-          path: ${{ github.workspace }}/CI_BUILD/x264-${{ env.LIBX264_VERSION }}
-          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.LIBX264_VERSION }}
       - name: 'Build dependency libx264'
-        if: steps.libx264-cache.outputs.cache-hit != 'true'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD
         run: |
@@ -304,31 +217,25 @@ jobs:
         working-directory: ${{ github.workspace }}/CI_BUILD/x264-${{ env.LIBX264_VERSION }}/build
         run: |
           make install
-      - name: 'Build dependency libx264 (dylib)'
-        if: steps.libx264-cache.outputs.cache-hit != 'true'
+      - name: 'Build dependency libtheora'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
         shell: bash
-        working-directory: ${{ github.workspace }}/CI_BUILD/x264-${{ env.LIBX264_VERSION }}/build
+        working-directory: ${{ github.workspace }}/CI_BUILD
         run: |
-          ../configure --extra-ldflags="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}" ${CONFIG_EXTRA} --enable-shared  --disable-lsmash --disable-swscale --disable-ffms --enable-strip --libdir="/tmp/obsdeps/bin" --prefix="/tmp/obsdeps"
+          ${{ github.workspace }}/utils/safe_fetch "https://downloads.xiph.org/releases/theora/libtheora-${{ env.LIBTHEORA_VERSION }}.tar.bz2" "${{ env.LIBTHEORA_HASH }}"
+          tar -xf libtheora-${{ env.LIBTHEORA_VERSION }}.tar.bz2
+          cd libtheora-${{ env.LIBTHEORA_VERSION }}
+          mkdir build
+          cd ./build
+          ../configure --disable-shared --enable-static --disable-oggtest --disable-vorbistest --disable-examples --prefix="/tmp/obsdeps"
           make -j${{ env.PARALLELISM }}
-      - name: 'Install dependency libx264 (dylib)'
+      - name: 'Install dependency libtheora'
         shell: bash
-        working-directory: ${{ github.workspace }}/CI_BUILD/x264-${{ env.LIBX264_VERSION }}/build
+        working-directory: ${{ github.workspace }}/CI_BUILD/libtheora-${{ env.LIBTHEORA_VERSION }}/build
         run: |
-          ln -f -s libx264.*.dylib libx264.dylib
-          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
-          rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
-          rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
-      - name: 'Restore libmbedtls from cache'
-        id: libmbedtls-cache
-        uses: actions/cache@v2.1.2
-        env:
-          CACHE_NAME: 'libmbedtls-cache-rev2'
-        with:
-          path: ${{ github.workspace }}/CI_BUILD/mbedtls-mbedtls-${{ env.LIBMBEDTLS_VERSION }}
-          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.LIBMBEDTLS_VERSION }}
+          make install
       - name: 'Build dependency libmbedtls'
-        if: steps.libmbedtls-cache.outputs.cache-hit != 'true'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD
         run: |
@@ -396,16 +303,8 @@ jobs:
           Cflags: -I\${includedir}
           Requires.private: mbedcrypto
           EOF
-      - name: 'Restore libsrt from cache'
-        id: libsrt-cache
-        uses: actions/cache@v2.1.2
-        env:
-          CACHE_NAME: 'libsrt-cache'
-        with:
-          path: ${{ github.workspace }}/CI_BUILD/srt-${{ env.LIBSRT_VERSION }}
-          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.LIBSRT_VERSION }}-${{ env.LIBMBEDTLS_VERSION }}
       - name: 'Build dependency libsrt'
-        if: steps.libsrt-cache.outputs.cache-hit != 'true'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD
         run: |
@@ -421,40 +320,14 @@ jobs:
         working-directory: ${{ github.workspace }}/CI_BUILD/srt-${{ env.LIBSRT_VERSION }}/build
         run: |
           make install
-      - name: 'Restore libtheora from cache'
-        id: libtheora-cache
-        uses: actions/cache@v2.1.2
-        env:
-          CACHE_NAME: 'libtheora-cache'
-        with:
-          path: ${{ github.workspace }}/CI_BUILD/libtheora-${{ env.LIBTHEORA_VERSION }}
-          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.LIBTHEORA_VERSION }}
-      - name: 'Build dependency libtheora'
-        if: steps.libtheora-cache.outputs.cache-hit != 'true'
-        shell: bash
-        working-directory: ${{ github.workspace }}/CI_BUILD
-        run: |
-          ${{ github.workspace }}/utils/safe_fetch "https://downloads.xiph.org/releases/theora/libtheora-${{ env.LIBTHEORA_VERSION }}.tar.bz2" "${{ env.LIBTHEORA_HASH }}"
-          tar -xf libtheora-${{ env.LIBTHEORA_VERSION }}.tar.bz2
-          cd libtheora-${{ env.LIBTHEORA_VERSION }}
-          mkdir build
-          cd ./build
-          ../configure --disable-shared --enable-static --disable-oggtest --disable-vorbistest --disable-examples --prefix="/tmp/obsdeps"
-          make -j${{ env.PARALLELISM }}
-      - name: 'Install dependency libtheora'
-        shell: bash
-        working-directory: ${{ github.workspace }}/CI_BUILD/libtheora-${{ env.LIBTHEORA_VERSION }}/build
-        run: |
-          make install
       - name: 'Restore ffmpeg from cache'
         id: ffmpeg-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'ffmpeg-cache-rev2'
-          CACHE_VARIATION: '${{ env.FFMPEG_CHECKSUM }}'
+          CACHE_NAME: 'ffmpeg'
         with:
           path: ${{ github.workspace }}/CI_BUILD/ffmpeg-${{ env.FFMPEG_VERSION }}
-          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.FFMPEG_VERSION }}-${{ env.CACHE_VARIATION }}
+          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.FFMPEG_VERSION }}-${{ env.FFMPEG_DEP_HASH }}
       - name: 'Build dependency ffmpeg'
         if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
         shell: bash
@@ -478,11 +351,83 @@ jobs:
           find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
           rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
           rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+      - name: 'Build dependency libx264 (dylib)'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/x264-${{ env.LIBX264_VERSION }}/build
+        run: |
+          ../configure --extra-ldflags="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}" ${CONFIG_EXTRA} --enable-shared  --disable-lsmash --disable-swscale --disable-ffms --enable-strip --libdir="/tmp/obsdeps/bin" --prefix="/tmp/obsdeps"
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency libx264 (dylib)'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/x264-${{ env.LIBX264_VERSION }}/build
+        run: |
+          ln -f -s libx264.*.dylib libx264.dylib
+          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+      - name: 'Restore swig from cache'
+        id: swig-cache
+        uses: actions/cache@v2.1.2
+        env:
+          CACHE_NAME: 'swig'
+        with:
+          path: ${{ github.workspace }}/CI_BUILD/swig-${{ env.SWIG_VERSION }}
+          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.SWIG_VERSION }}
+      - name: 'Build dependency swig'
+        if: steps.swig-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          ${{ github.workspace }}/utils/safe_fetch "https://downloads.sourceforge.net/project/swig/swig/swig-${{ env.SWIG_VERSION }}/swig-${{ env.SWIG_VERSION }}.tar.gz" "${{ env.SWIG_HASH }}"
+          tar -xf swig-${{ env.SWIG_VERSION }}.tar.gz
+          cd swig-${{ env.SWIG_VERSION }}
+          mkdir build
+          cd build
+          ${{ github.workspace }}/utils/safe_fetch "https://ftp.pcre.org/pub/pcre/pcre-${{ env.PCRE_VERSION }}.tar.bz2" "${{ env.PCRE_HASH }}"
+          ../Tools/pcre-build.sh
+          ../configure --disable-dependency-tracking --prefix="/tmp/obsdeps"
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency swig'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/swig-${{ env.SWIG_VERSION }}/build
+        run: |
+          cp swig ${{ github.workspace }}/CI_BUILD/obsdeps/bin/
+          mkdir -p ${{ github.workspace }}/CI_BUILD/obsdeps/share/swig/${{ env.SWIG_VERSION }}
+          rsync -avh --include="*.i" --include="*.swg" --include="python" --include="lua" --include="typemaps" --exclude="*" ../Lib/* ${{ github.workspace }}/CI_BUILD/obsdeps/share/swig/${{ env.SWIG_VERSION }}
+      - name: 'Restore libjansson from cache'
+        id: libjansson-cache
+        uses: actions/cache@v2.1.2
+        env:
+          CACHE_NAME: 'libjansson'
+        with:
+          path: ${{ github.workspace }}/CI_BUILD/jansson-${{ env.LIBJANSSON_VERSION }}
+          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.LIBJANSSON_VERSION }}
+      - name: 'Build dependency libjansson'
+        if: steps.libjansson-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          ${{ github.workspace }}/utils/safe_fetch "https://digip.org/jansson/releases/jansson-${{ env.LIBJANSSON_VERSION }}.tar.gz" "${{ env.LIBJANSSON_HASH }}"
+          tar -xf jansson-${{ env.LIBJANSSON_VERSION }}.tar.gz
+          cd jansson-${{ env.LIBJANSSON_VERSION }}
+          mkdir build
+          cd ./build
+          ../configure --libdir="/tmp/obsdeps/bin" --enable-shared --disable-static
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency libjansson'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/jansson-${{ env.LIBJANSSON_VERSION }}/build
+        run: |
+          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ../src/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ./src/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+          cp ./*.h ${{ github.workspace }}/CI_BUILD/obsdeps/include/
       - name: 'Restore libluajit from cache'
         id: libluajit-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'libluajit-cache-rev3'
+          CACHE_NAME: 'libluajit'
         with:
           path: ${{ github.workspace }}/CI_BUILD/LuaJIT-${{ env.LIBLUAJIT_VERSION }}
           key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.LIBLUAJIT_VERSION }}
@@ -507,7 +452,7 @@ jobs:
         id: libfreetype-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'libfreetype-cache-rev3'
+          CACHE_NAME: 'libfreetype'
         with:
           path: ${{ github.workspace }}/CI_BUILD/freetype-${{ env.LIBFREETYPE_VERSION }}
           key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.LIBFREETYPE_VERSION }}
@@ -535,7 +480,7 @@ jobs:
         id: librnnoise-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'librnnoise-cache'
+          CACHE_NAME: 'librnnoise'
         with:
           path: ${{ github.workspace }}/CI_BUILD/rnnoise-${{ env.LIBRNNOISE_VERSION }}
           key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.LIBRNNOISE_VERSION }}
