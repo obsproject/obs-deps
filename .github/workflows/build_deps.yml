@@ -21,6 +21,8 @@ jobs:
     name: Build macOS main dependencies (64bit)
     runs-on: [macos-latest]
     env:
+      LIBLAME_VERSION: '3.100'
+      LIBLAME_HASH: 'ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e'
       LIBPNG_VERSION: '1.6.37'
       LIBPNG_HASH: '505e70834d35383537b6491e7ae8641f1a4bed1876dbfe361201fc80868d88ca'
       LIBOPUS_VERSION: '1.3.1'
@@ -234,6 +236,24 @@ jobs:
         working-directory: ${{ github.workspace }}/CI_BUILD/libtheora-${{ env.LIBTHEORA_VERSION }}/build
         run: |
           make install
+      - name: 'Build dependency liblame'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          ${{ github.workspace }}/utils/safe_fetch https://downloads.sourceforge.net/project/lame/lame/${{ env.LIBLAME_VERSION }}/lame-${{ env.LIBLAME_VERSION }}.tar.gz "${{ env.LIBLAME_HASH }}"
+          tar -xf lame-${{ env.LIBLAME_VERSION }}.tar.gz
+          cd lame-${{ env.LIBLAME_VERSION }}
+          sed -i '.orig' '/lame_init_old/d' ./include/libmp3lame.sym
+          mkdir build
+          cd ./build
+          ../configure --disable-shared --disable-dependency-tracking --disable-debug --enable-nasm --prefix="/tmp/obsdeps"
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency liblame'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/lame-${{ env.LIBLAME_VERSION }}/build
+        run: |
+          make install
       - name: 'Build dependency libmbedtls'
         if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
         shell: bash
@@ -342,7 +362,7 @@ jobs:
           ${{ github.workspace }}/utils/apply_patch "https://github.com/FFmpeg/FFmpeg/commit/7c59e1b0f285cd7c7b35fcd71f49c5fd52cf9315.patch?full_index=1" "1cbe1b68d70eadd49080a6e512a35f3e230de26b6e1b1c859d9119906417737f"
           mkdir build
           cd ./build
-          ../configure --host-cflags="-I/tmp/obsdeps/include" --host-ldflags="-L/tmp/obsdeps/lib" --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}" --enable-shared --disable-static --enable-pthreads --enable-version3 --shlibdir="/tmp/obsdeps/bin" --enable-gpl --enable-videotoolbox --disable-libjack --disable-indev=jack --disable-outdev=sdl --disable-programs --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --enable-libtheora
+          ../configure --host-cflags="-I/tmp/obsdeps/include" --host-ldflags="-L/tmp/obsdeps/lib" --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}" --enable-shared --disable-static --enable-pthreads --enable-version3 --shlibdir="/tmp/obsdeps/bin" --enable-gpl --enable-videotoolbox --disable-libjack --disable-indev=jack --disable-outdev=sdl --disable-programs --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --enable-libtheora --enable-libmp3lame
           make -j${{ env.PARALLELISM }}
       - name: 'Install dependency ffmpeg'
         shell: bash
