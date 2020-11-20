@@ -29,8 +29,8 @@ export LIBVPX_VERSION="1.9.0"
 export LIBVPX_HASH="d279c10e4b9316bf11a570ba16c3d55791e1ad6faa4404c67422eb631782c80a"
 export LIBJANSSON_VERSION="2.13.1"
 export LIBJANSSON_HASH="f4f377da17b10201a60c1108613e78ee15df6b12016b116b6de42209f47a474f"
-export LIBX264_VERSION="r3018"
-export LIBX264_HASH="db0d417728460c647ed4a847222a535b00d3dbcb"
+export LIBX264_VERSION="r3027"
+export LIBX264_HASH="4121277b40a667665d4eea1726aefdc55d12d110"
 export LIBMBEDTLS_VERSION="2.24.0"
 export LIBMEDTLS_HASH="b5a779b5f36d5fc4cba55faa410685f89128702423ad07b36c5665441a06a5f3"
 export LIBSRT_VERSION="1.4.2"
@@ -285,25 +285,32 @@ build_16_build_dependency_libx264() {
     trap "caught_error 'Build dependency libx264'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
 
-    CLANG_BUILD_VERSION="$(clang --version | sed -En 's/.+\clang-([0-9]+).+/\1/p')"
-    if [ "${CLANG_BUILD_VERSION}" -ge 1010 ]; then
-      CONFIG_EXTRA="-fno-stack-check"
+    MACOS_VERSION="$(sw_vers -productVersion)"
+    MACOS_MAJOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 1)"
+    MACOS_MINOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 2)"
+    if [ "${MACOS_MAJOR}" -eq 10 ] && [ "${MACOS_MINOR}" -le 12 ]; then
+      brew install gcc || true
+      CC="/usr/local/bin/gcc"
+      LD="/usr/local/bin/gcc"
+      CXX=="/usr/local/bin/g++"
     fi
     mkdir -p x264-${LIBX264_VERSION}
     cd ./x264-${LIBX264_VERSION}
     ${BASE_DIR}/utils/github_fetch mirror x264 "${LIBX264_HASH}"
-    ${BASE_DIR}/utils/apply_patch "https://github.com/mirror/x264/commit/eb95c2965299ba5b8598e2388d71b02e23c9fba7.patch?full_index=1" "a7df326ced312c3aa2ae4c463ab08e43961b2dea63b7b365874fb0d59622e63d"
     mkdir build
     cd ./build
-    ../configure --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" ${CONFIG_EXTRA} --enable-static --disable-lsmash --disable-swscale --disable-ffms --enable-strip --prefix="/tmp/obsdeps"
+    ../configure --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" --enable-static --disable-lsmash --disable-swscale --disable-ffms --enable-strip --prefix="/tmp/obsdeps"
     make -j${PARALLELISM}
+    unset CC
+    unset LD
+    unset CXX
 }
 
 
 build_17_install_dependency_libx264() {
     step "Install dependency libx264"
     trap "caught_error 'Install dependency libx264'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3018/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3027/build
 
     make install
 }
@@ -494,17 +501,29 @@ build_28_install_dependency_ffmpeg() {
 build_29_build_dependency_libx264__dylib_() {
     step "Build dependency libx264 (dylib)"
     trap "caught_error 'Build dependency libx264 (dylib)'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3018/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3027/build
 
-    ../configure --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" ${CONFIG_EXTRA} --enable-shared  --disable-lsmash --disable-swscale --disable-ffms --enable-strip --libdir="/tmp/obsdeps/bin" --prefix="/tmp/obsdeps"
+    MACOS_VERSION="$(sw_vers -productVersion)"
+    MACOS_MAJOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 1)"
+    MACOS_MINOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 2)"
+    if [ "${MACOS_MAJOR}" -eq 10 ] && [ "${MACOS_MINOR}" -le 12 ]; then
+      brew install gcc || true
+      CC="/usr/local/bin/gcc"
+      LD="/usr/local/bin/gcc"
+      CXX=="/usr/local/bin/g++"
+    fi
+    ../configure --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" --enable-shared  --disable-lsmash --disable-swscale --disable-ffms --enable-strip --libdir="/tmp/obsdeps/bin" --prefix="/tmp/obsdeps"
     make -j${PARALLELISM}
+    unset CC
+    unset LD
+    unset CXX
 }
 
 
 build_30_install_dependency_libx264__dylib_() {
     step "Install dependency libx264 (dylib)"
     trap "caught_error 'Install dependency libx264 (dylib)'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3018/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3027/build
 
     ln -f -s libx264.*.dylib libx264.dylib
     find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/bin/ \;
