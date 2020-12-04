@@ -11,8 +11,8 @@ export COLOR_BLUE=$(tput setaf 4)
 export COLOR_ORANGE=$(tput setaf 3)
 export COLOR_RESET=$(tput sgr0)
 
-export MAC_QT_VERSION="5.14.1"
-export MAC_QT_HASH="6f17f488f512b39c2feb57d83a5e0a13dcef32999bea2e2a8f832f54a29badb8"
+export MAC_QT_VERSION="5.15.2"
+export MAC_QT_HASH="3a530d1b243b5dec00bc54937455471aaa3e56849d2593edb8ded07228202240"
 export LIBLAME_VERSION="3.100"
 export LIBLAME_HASH="ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e"
 export LIBPNG_VERSION="1.6.37"
