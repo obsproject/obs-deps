@@ -41,12 +41,12 @@ jobs:
       LIBX264_HASH: '4121277b40a667665d4eea1726aefdc55d12d110'
       LIBMBEDTLS_VERSION: '2.24.0'
       LIBMEDTLS_HASH: 'b5a779b5f36d5fc4cba55faa410685f89128702423ad07b36c5665441a06a5f3'
-      LIBSRT_VERSION: '1.4.2'
-      LIBSRT_HASH: '28a308e72dcbb50eb2f61b50cc4c393c413300333788f3a8159643536684a0c4'
+      LIBSRT_VERSION: '1.4.1'
+      LIBSRT_HASH: 'e80ca1cd0711b9c70882c12ec365cda1ba852e1ce8acd43161a21a04de0cbf14'
       LIBTHEORA_VERSION: '1.1.1'
       LIBTHEORA_HASH: 'b6ae1ee2fa3d42ac489287d3ec34c5885730b1296f0801ae577a35193d3affbc'
-      FFMPEG_VERSION: '4.3.1'
-      FFMPEG_HASH: 'ad009240d46e307b4e03a213a0f49c11b650e445b1f8be0dda2a9212b34d2ffb'
+      FFMPEG_VERSION: '4.2.3'
+      FFMPEG_HASH: '9df6c90aed1337634c1fb026fb01c154c29c82a64ea71291ff2da9aacb9aad31'
       LIBLUAJIT_VERSION: '2.1.0-beta3'
       LIBLUAJIT_HASH: '1ad2e34b111c802f9d0cdf019e986909123237a28c746b21295b63c9e785d9c3'
       LIBFREETYPE_VERSION: '2.10.4'
@@ -366,7 +366,6 @@ jobs:
           ${{ github.workspace }}/utils/safe_fetch "https://ffmpeg.org/releases/ffmpeg-${{ env.FFMPEG_VERSION }}.tar.xz" "${{ env.FFMPEG_HASH }}"
           tar -xf ffmpeg-${{ env.FFMPEG_VERSION }}.tar.xz
           cd ./ffmpeg-${{ env.FFMPEG_VERSION }}
-          ${{ github.workspace }}/utils/apply_patch "https://github.com/FFmpeg/FFmpeg/commit/7c59e1b0f285cd7c7b35fcd71f49c5fd52cf9315.patch?full_index=1" "1cbe1b68d70eadd49080a6e512a35f3e230de26b6e1b1c859d9119906417737f"
           mkdir build
           cd ./build
           ../configure --host-cflags="-I/tmp/obsdeps/include" --host-ldflags="-L/tmp/obsdeps/lib" --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}" --enable-shared --disable-static --enable-pthreads --enable-version3 --shlibdir="/tmp/obsdeps/bin" --enable-gpl --enable-videotoolbox --disable-libjack --disable-indev=jack --disable-outdev=sdl --disable-programs --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --enable-libtheora --enable-libmp3lame
