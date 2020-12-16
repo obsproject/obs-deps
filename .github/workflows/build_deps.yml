@@ -96,7 +96,7 @@ jobs:
         id: ffmpeg-deps-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'ffmpeg-deps'
+          CACHE_NAME: 'ffmpeg-deps_r2'
         with:
           path: |
             ${{ github.workspace }}/CI_BUILD/libpng-${{ env.LIBPNG_VERSION }}
@@ -205,7 +205,7 @@ jobs:
           MACOS_VERSION="$(sw_vers -productVersion)"
           MACOS_MAJOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 1)"
           MACOS_MINOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 2)"
-          if [ "${MACOS_MAJOR}" -eq 10 ] && [ "${MACOS_MINOR}" -le 12 ]; then
+          if [ "${MACOS_MAJOR}" -eq 10 ] && [ "${MACOS_MINOR}" -le 13 ]; then
             brew install gcc || true
             CC="/usr/local/bin/gcc"
             LD="/usr/local/bin/gcc"
@@ -255,7 +255,7 @@ jobs:
           mkdir build
           cd ./build
           ../configure --disable-shared --disable-dependency-tracking --disable-debug --enable-nasm --prefix="/tmp/obsdeps"
-          make -j${{ env.PARALLELISM }}
+          MACOSX_DEPLOYMENT_TARGET="10.13" make -j${{ env.PARALLELISM }}
       - name: 'Install dependency liblame'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD/lame-${{ env.LIBLAME_VERSION }}/build
@@ -385,7 +385,7 @@ jobs:
           MACOS_VERSION="$(sw_vers -productVersion)"
           MACOS_MAJOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 1)"
           MACOS_MINOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 2)"
-          if [ "${MACOS_MAJOR}" -eq 10 ] && [ "${MACOS_MINOR}" -le 12 ]; then
+          if [ "${MACOS_MAJOR}" -eq 10 ] && [ "${MACOS_MINOR}" -le 13 ]; then
             brew install gcc || true
             CC="/usr/local/bin/gcc"
             LD="/usr/local/bin/gcc"
