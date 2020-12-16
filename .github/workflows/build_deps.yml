@@ -90,13 +90,14 @@ jobs:
           mkdir -p CI_BUILD/obsdeps/share
           echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig" >> $GITHUB_ENV
           echo "PARALLELISM=$(sysctl -n hw.ncpu)" >> $GITHUB_ENV
-          FFMPEG_DEP_HASH="$(echo "${{ env.LIBPNG_VERSION }}-${{ env.LIBLAME_VERSION }}-${{ env.LIBOGG_VERSION }}-${{ env.LIBVORBIS_VERSION }}-${{ env.LIBVPX_VERSION }}-${{ env.LIBOPUS_VERSION }}-${{ env.LIBX264_VERSION }}-${{ env.LIBSRT_VERSION }}-${{ env.LIBMBEDTLS_VERSION }}-${{ env.LIBTHEORA_VERSION }}" | sha256sum | cut -d " " -f 1)"
+          FFMPEG_REVISION="02"
+          FFMPEG_DEP_HASH="$(echo "rev$FFMPEG_REVISION-${{ env.LIBPNG_VERSION }}-${{ env.LIBLAME_VERSION }}-${{ env.LIBOGG_VERSION }}-${{ env.LIBVORBIS_VERSION }}-${{ env.LIBVPX_VERSION }}-${{ env.LIBOPUS_VERSION }}-${{ env.LIBX264_VERSION }}-${{ env.LIBSRT_VERSION }}-${{ env.LIBMBEDTLS_VERSION }}-${{ env.LIBTHEORA_VERSION }}" | sha256sum | cut -d " " -f 1)"
           echo "FFMPEG_DEP_HASH=$FFMPEG_DEP_HASH" >> $GITHUB_ENV
       - name: 'Restore ffmpeg dependencies from cache'
         id: ffmpeg-deps-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'ffmpeg-deps_r2'
+          CACHE_NAME: 'ffmpeg-deps'
         with:
           path: |
             ${{ github.workspace }}/CI_BUILD/libpng-${{ env.LIBPNG_VERSION }}
