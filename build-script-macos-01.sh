@@ -288,7 +288,7 @@ build_16_build_dependency_libx264() {
     MACOS_VERSION="$(sw_vers -productVersion)"
     MACOS_MAJOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 1)"
     MACOS_MINOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 2)"
-    if [ "${MACOS_MAJOR}" -eq 10 ] && [ "${MACOS_MINOR}" -le 12 ]; then
+    if [ "${MACOS_MAJOR}" -eq 10 ] && [ "${MACOS_MINOR}" -le 13 ]; then
       brew install gcc || true
       CC="/usr/local/bin/gcc"
       LD="/usr/local/bin/gcc"
@@ -352,7 +352,7 @@ build_20_build_dependency_liblame() {
     mkdir build
     cd ./build
     ../configure --disable-shared --disable-dependency-tracking --disable-debug --enable-nasm --prefix="/tmp/obsdeps"
-    make -j${PARALLELISM}
+    MACOSX_DEPLOYMENT_TARGET="10.13" make -j${PARALLELISM}
 }
 
 
@@ -505,7 +505,7 @@ build_29_build_dependency_libx264__dylib_() {
     MACOS_VERSION="$(sw_vers -productVersion)"
     MACOS_MAJOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 1)"
     MACOS_MINOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 2)"
-    if [ "${MACOS_MAJOR}" -eq 10 ] && [ "${MACOS_MINOR}" -le 12 ]; then
+    if [ "${MACOS_MAJOR}" -eq 10 ] && [ "${MACOS_MINOR}" -le 13 ]; then
       brew install gcc || true
       CC="/usr/local/bin/gcc"
       LD="/usr/local/bin/gcc"
