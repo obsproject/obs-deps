@@ -90,7 +90,7 @@ jobs:
           mkdir -p CI_BUILD/obsdeps/share
           echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig" >> $GITHUB_ENV
           echo "PARALLELISM=$(sysctl -n hw.ncpu)" >> $GITHUB_ENV
-          FFMPEG_REVISION="02"
+          FFMPEG_REVISION="03"
           FFMPEG_DEP_HASH="$(echo "rev$FFMPEG_REVISION-${{ env.LIBPNG_VERSION }}-${{ env.LIBLAME_VERSION }}-${{ env.LIBOGG_VERSION }}-${{ env.LIBVORBIS_VERSION }}-${{ env.LIBVPX_VERSION }}-${{ env.LIBOPUS_VERSION }}-${{ env.LIBX264_VERSION }}-${{ env.LIBSRT_VERSION }}-${{ env.LIBMBEDTLS_VERSION }}-${{ env.LIBTHEORA_VERSION }}" | sha256sum | cut -d " " -f 1)"
           echo "FFMPEG_DEP_HASH=$FFMPEG_DEP_HASH" >> $GITHUB_ENV
       - name: 'Restore ffmpeg dependencies from cache'
@@ -191,7 +191,13 @@ jobs:
           cd ./libvpx-${{ env.LIBVPX_VERSION }}
           mkdir -p build
           cd ./build
-          ../configure --disable-shared --disable-examples --disable-unit-tests --enable-pic --enable-vp9-highbitdepth --prefix="/tmp/obsdeps" --libdir="/tmp/obsdeps/lib"
+          # Assumption is that macOS has switched to proper major version numbering with Big Sur
+          if [ $(echo "${{ env.MACOSX_DEPLOYMENT_TARGET }}" | cut -d "." -f 1) -lt 11 ]; then
+            VPX_TARGET="$(($(echo ${{ env.MACOSX_DEPLOYMENT_TARGET }} | cut -d "." -f 2)+4))";
+          else
+            VPX_TARGET="$(($(echo ${{ env.MACOSX_DEPLOYMENT_TARGET }} | cut -d "." -f 1)+9))";
+          fi
+          ../configure --target="x86_64-darwin$VPX_TARGET-gcc" --disable-shared --disable-examples --disable-unit-tests --enable-pic --enable-vp9-highbitdepth --prefix="/tmp/obsdeps" --libdir="/tmp/obsdeps/lib"
           make -j${{ env.PARALLELISM }}
       - name: 'Install dependency libvpx'
         shell: bash
@@ -256,7 +262,7 @@ jobs:
           mkdir build
           cd ./build
           ../configure --disable-shared --disable-dependency-tracking --disable-debug --enable-nasm --prefix="/tmp/obsdeps"
-          MACOSX_DEPLOYMENT_TARGET="10.13" make -j${{ env.PARALLELISM }}
+          make -j${{ env.PARALLELISM }}
       - name: 'Install dependency liblame'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD/lame-${{ env.LIBLAME_VERSION }}/build
