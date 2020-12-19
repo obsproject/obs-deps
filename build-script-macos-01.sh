@@ -153,7 +153,7 @@ build_04_build_environment_setup() {
     mkdir -p CI_BUILD/obsdeps/share
     
     
-    FFMPEG_REVISION="02"
+    FFMPEG_REVISION="03"
     FFMPEG_DEP_HASH="$(echo "rev$FFMPEG_REVISION-${LIBPNG_VERSION}-${LIBLAME_VERSION}-${LIBOGG_VERSION}-${LIBVORBIS_VERSION}-${LIBVPX_VERSION}-${LIBOPUS_VERSION}-${LIBX264_VERSION}-${LIBSRT_VERSION}-${LIBMBEDTLS_VERSION}-${LIBTHEORA_VERSION}" | sha256sum | cut -d " " -f 1)"
     
 }
@@ -267,7 +267,13 @@ build_14_build_dependency_libvpx() {
     cd ./libvpx-${LIBVPX_VERSION}
     mkdir -p build
     cd ./build
-    ../configure --disable-shared --disable-examples --disable-unit-tests --enable-pic --enable-vp9-highbitdepth --prefix="/tmp/obsdeps" --libdir="/tmp/obsdeps/lib"
+    # Assumption is that macOS has switched to proper major version numbering with Big Sur
+    if [ $(echo "${MACOSX_DEPLOYMENT_TARGET}" | cut -d "." -f 1) -lt 11 ]; then
+      VPX_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 2)+4))";
+    else
+      VPX_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 1)+9))";
+    fi
+    ../configure --target="x86_64-darwin$VPX_TARGET-gcc" --disable-shared --disable-examples --disable-unit-tests --enable-pic --enable-vp9-highbitdepth --prefix="/tmp/obsdeps" --libdir="/tmp/obsdeps/lib"
     make -j${PARALLELISM}
 }
 
@@ -353,7 +359,7 @@ build_20_build_dependency_liblame() {
     mkdir build
     cd ./build
     ../configure --disable-shared --disable-dependency-tracking --disable-debug --enable-nasm --prefix="/tmp/obsdeps"
-    MACOSX_DEPLOYMENT_TARGET="10.13" make -j${PARALLELISM}
+    make -j${PARALLELISM}
 }
 
 
