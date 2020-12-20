@@ -43,6 +43,8 @@ export LIBLUAJIT_VERSION="2.1.0-beta3"
 export LIBLUAJIT_HASH="1ad2e34b111c802f9d0cdf019e986909123237a28c746b21295b63c9e785d9c3"
 export LIBFREETYPE_VERSION="2.10.4"
 export LIBFREETYPE_HASH="86a854d8905b19698bbc8f23b860bc104246ce4854dcea8e3b0fb21284f75784"
+export SPEEXDSP_VERSION="1.2.0"
+export SPEEXDSP_HASH="d7032f607e8913c019b190c2bccc36ea73fc36718ee38b5cdfc4e4c0a04ce9a4"
 export PCRE_VERSION="8.44"
 export PCRE_HASH="19108658b23b3ec5058edc9f66ac545ea19f9537234be1ec62b714c84399366d"
 export SWIG_VERSION="4.0.2"
@@ -97,6 +99,10 @@ caught_error() {
 restore_brews() {
     if [ -d /usr/local/opt/xz ] && [ ! -f /usr/local/lib/liblzma.dylib ]; then
       brew link xz
+    fi
+
+    if [ -d /usr/local/opt/sdl2 ] && ! [ -f /usr/local/lib/libSDL2.dylib ]; then
+      brew link sdl2
     fi
 
     if [ -d /usr/local/opt/zstd ] && [ ! -f /usr/local/lib/libzstd.dylib ]; then

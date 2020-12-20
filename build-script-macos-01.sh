@@ -43,6 +43,8 @@ export LIBLUAJIT_VERSION="2.1.0-beta3"
 export LIBLUAJIT_HASH="1ad2e34b111c802f9d0cdf019e986909123237a28c746b21295b63c9e785d9c3"
 export LIBFREETYPE_VERSION="2.10.4"
 export LIBFREETYPE_HASH="86a854d8905b19698bbc8f23b860bc104246ce4854dcea8e3b0fb21284f75784"
+export SPEEXDSP_VERSION="1.2.0"
+export SPEEXDSP_HASH="d7032f607e8913c019b190c2bccc36ea73fc36718ee38b5cdfc4e4c0a04ce9a4"
 export PCRE_VERSION="8.44"
 export PCRE_HASH="19108658b23b3ec5058edc9f66ac545ea19f9537234be1ec62b714c84399366d"
 export SWIG_VERSION="4.0.2"
@@ -99,6 +101,10 @@ restore_brews() {
       brew link xz
     fi
 
+    if [ -d /usr/local/opt/sdl2 ] && ! [ -f /usr/local/lib/libSDL2.dylib ]; then
+      brew link sdl2
+    fi
+
     if [ -d /usr/local/opt/zstd ] && [ ! -f /usr/local/lib/libzstd.dylib ]; then
       brew link zstd
     fi
@@ -120,6 +126,11 @@ build_02_install_homebrew_dependencies() {
     if [ -d /usr/local/opt/xz ]; then
       brew unlink xz
     fi
+    
+    if [ -d /usr/local/opt/sdl2 ]; then
+      brew unlink sdl2
+    fi
+    
     if [ -d /usr/local/opt/openssl@1.0.2t ]; then
         brew uninstall openssl@1.0.2t
         brew untap local/openssl
@@ -566,7 +577,35 @@ build_33_install_dependency_swig() {
 }
 
 
-build_35_build_dependency_libjansson() {
+build_35_build_depdendency_libspeex() {
+    step "Build depdendency libspeex"
+    trap "caught_error 'Build depdendency libspeex'" ERR
+    ensure_dir ${BASE_DIR}/CI_BUILD
+
+    ${BASE_DIR}/utils/safe_fetch "https://github.com/xiph/speexdsp/archive/SpeexDSP-${SPEEXDSP_VERSION}.tar.gz" "${SPEEXDSP_HASH}"
+    tar -xf speexDSP-${SPEEXDSP_VERSION}.tar.gz
+    cd speexdsp-SpeexDSP-${SPEEXDSP_VERSION}
+    mkdir build
+    sed -i '.orig' "s/CFLAGS='-O3'/CFLAGS='-O3  -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}'/" ./SpeexDSP.spec.in
+    ./autogen.sh
+    cd ./build
+    ../configure --prefix="/tmp/obsdeps" --disable-dependency-tracking
+    make -j${PARALLELISM}
+}
+
+
+build_36_install_dependency_libspeex() {
+    step "Install dependency libspeex"
+    trap "caught_error 'Install dependency libspeex'" ERR
+    ensure_dir ${BASE_DIR}/CI_BUILD/speexdsp-SpeexDSP-1.2.0/build
+
+    find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/lib/ \;
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/* ${BASE_DIR}/CI_BUILD/obsdeps/include/
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ./include/* ${BASE_DIR}/CI_BUILD/obsdeps/include/
+}
+
+
+build_38_build_dependency_libjansson() {
     step "Build dependency libjansson"
     trap "caught_error 'Build dependency libjansson'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -581,7 +620,7 @@ build_35_build_dependency_libjansson() {
 }
 
 
-build_36_install_dependency_libjansson() {
+build_39_install_dependency_libjansson() {
     step "Install dependency libjansson"
     trap "caught_error 'Install dependency libjansson'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/jansson-2.13.1/build
@@ -593,7 +632,7 @@ build_36_install_dependency_libjansson() {
 }
 
 
-build_38_build_dependency_libluajit() {
+build_41_build_dependency_libluajit() {
     step "Build dependency libluajit"
     trap "caught_error 'Build dependency libluajit'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -605,7 +644,7 @@ build_38_build_dependency_libluajit() {
 }
 
 
-build_39_install_dependency_libluajit() {
+build_42_install_dependency_libluajit() {
     step "Install dependency libluajit"
     trap "caught_error 'Install dependency libluajit'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/LuaJIT-2.1.0-beta3
@@ -617,7 +656,7 @@ build_39_install_dependency_libluajit() {
 }
 
 
-build_41_build_dependency_libfreetype() {
+build_44_build_dependency_libfreetype() {
     step "Build dependency libfreetype"
     trap "caught_error 'Build dependency libfreetype'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -633,7 +672,7 @@ build_41_build_dependency_libfreetype() {
 }
 
 
-build_42_install_dependency_libfreetype() {
+build_45_install_dependency_libfreetype() {
     step "Install dependency libfreetype"
     trap "caught_error 'Install dependency libfreetype'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/freetype-2.10.4/build
@@ -644,7 +683,7 @@ build_42_install_dependency_libfreetype() {
 }
 
 
-build_44_build_dependency_librnnoise() {
+build_47_build_dependency_librnnoise() {
     step "Build dependency librnnoise"
     trap "caught_error 'Build dependency librnnoise'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -660,7 +699,7 @@ build_44_build_dependency_librnnoise() {
 }
 
 
-build_45_install_dependency_librnnoise() {
+build_48_install_dependency_librnnoise() {
     step "Install dependency librnnoise"
     trap "caught_error 'Install dependency librnnoise'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/rnnoise-2020-07-28/build
@@ -671,7 +710,7 @@ build_45_install_dependency_librnnoise() {
 }
 
 
-build_46_package_dependencies() {
+build_49_package_dependencies() {
     step "Package dependencies"
     trap "caught_error 'Package dependencies'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -716,15 +755,17 @@ obs-deps-build-main() {
     build_30_install_dependency_libx264__dylib_
     build_32_build_dependency_swig
     build_33_install_dependency_swig
-    build_35_build_dependency_libjansson
-    build_36_install_dependency_libjansson
-    build_38_build_dependency_libluajit
-    build_39_install_dependency_libluajit
-    build_41_build_dependency_libfreetype
-    build_42_install_dependency_libfreetype
-    build_44_build_dependency_librnnoise
-    build_45_install_dependency_librnnoise
-    build_46_package_dependencies
+    build_35_build_depdendency_libspeex
+    build_36_install_dependency_libspeex
+    build_38_build_dependency_libjansson
+    build_39_install_dependency_libjansson
+    build_41_build_dependency_libluajit
+    build_42_install_dependency_libluajit
+    build_44_build_dependency_libfreetype
+    build_45_install_dependency_libfreetype
+    build_47_build_dependency_librnnoise
+    build_48_install_dependency_librnnoise
+    build_49_package_dependencies
 
     restore_brews
 
