@@ -51,6 +51,8 @@ jobs:
       LIBLUAJIT_HASH: '1ad2e34b111c802f9d0cdf019e986909123237a28c746b21295b63c9e785d9c3'
       LIBFREETYPE_VERSION: '2.10.4'
       LIBFREETYPE_HASH: '86a854d8905b19698bbc8f23b860bc104246ce4854dcea8e3b0fb21284f75784'
+      SPEEXDSP_VERSION: '1.2.0'
+      SPEEXDSP_HASH: 'd7032f607e8913c019b190c2bccc36ea73fc36718ee38b5cdfc4e4c0a04ce9a4'
       PCRE_VERSION: '8.44'
       PCRE_HASH: '19108658b23b3ec5058edc9f66ac545ea19f9537234be1ec62b714c84399366d'
       SWIG_VERSION: '4.0.2'
@@ -67,6 +69,11 @@ jobs:
           if [ -d /usr/local/opt/xz ]; then
             brew unlink xz
           fi
+
+          if [ -d /usr/local/opt/sdl2 ]; then
+            brew unlink sdl2
+          fi
+
           if [ -d /usr/local/opt/openssl@1.0.2t ]; then
               brew uninstall openssl@1.0.2t
               brew untap local/openssl
@@ -440,6 +447,35 @@ jobs:
           cp swig ${{ github.workspace }}/CI_BUILD/obsdeps/bin/
           mkdir -p ${{ github.workspace }}/CI_BUILD/obsdeps/share/swig/${{ env.SWIG_VERSION }}
           rsync -avh --include="*.i" --include="*.swg" --include="python" --include="lua" --include="typemaps" --exclude="*" ../Lib/* ${{ github.workspace }}/CI_BUILD/obsdeps/share/swig/${{ env.SWIG_VERSION }}
+      - name: 'Restore SpeexDSP from cache'
+        id: speexdsp-cache
+        uses: actions/cache@v2.1.2
+        env:
+          CACHE_NAME: 'speexdsp'
+        with:
+          path: ${{ github.workspace }}/CI_BUILD/speexdsp-SpeexDSP-${{ env.SPEEXDSP_VERSION }}
+          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.SPEEXDSP_VERSION }}
+      - name: 'Build depdendency libspeex'
+        if: steps.libspeex-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          ${{ github.workspace }}/utils/safe_fetch "https://github.com/xiph/speexdsp/archive/SpeexDSP-${{ env.SPEEXDSP_VERSION }}.tar.gz" "${{ env.SPEEXDSP_HASH }}"
+          tar -xf speexDSP-${{ env.SPEEXDSP_VERSION }}.tar.gz
+          cd speexdsp-SpeexDSP-${{ env.SPEEXDSP_VERSION }}
+          mkdir build
+          sed -i '.orig' "s/CFLAGS='-O3'/CFLAGS='-O3  -mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}'/" ./SpeexDSP.spec.in
+          ./autogen.sh
+          cd ./build
+          ../configure --prefix="/tmp/obsdeps" --disable-dependency-tracking
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency libspeex'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/speexdsp-SpeexDSP-${{ env.SPEEXDSP_VERSION }}/build
+        run: |
+          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ./include/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
       - name: 'Restore libjansson from cache'
         id: libjansson-cache
         uses: actions/cache@v2.1.2

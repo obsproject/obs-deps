@@ -58,6 +58,10 @@ restore_brews() {{
       brew link xz
     fi
 
+    if [ -d /usr/local/opt/sdl2 ] && ! [ -f /usr/local/lib/libSDL2.dylib ]; then
+      brew link sdl2
+    fi
+
     if [ -d /usr/local/opt/zstd ] && [ ! -f /usr/local/lib/libzstd.dylib ]; then
       brew link zstd
     fi
