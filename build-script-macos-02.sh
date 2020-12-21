@@ -50,6 +50,7 @@ export PCRE_HASH="19108658b23b3ec5058edc9f66ac545ea19f9537234be1ec62b714c8439936
 export SWIG_VERSION="4.0.2"
 export SWIG_HASH="d53be9730d8d58a16bf0cbd1f8ac0c0c3e1090573168bfa151b01eb47fa906fc"
 export MACOSX_DEPLOYMENT_TARGET="10.13"
+export FFMPEG_REVISION="05"
 export PATH="/usr/local/opt/ccache/libexec:${PATH}"
 export CURRENT_DATE="$(date +"%Y-%m-%d")"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig"
@@ -163,6 +164,8 @@ build_06_build_dependency_qt() {
     trap "caught_error 'Build dependency Qt'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
 
+    ${BASE_DIR}/utils/safe_fetch "https://download.qt.io/official_releases/qt/$(echo "${MAC_QT_VERSION}" | cut -d "." -f -2)/${MAC_QT_VERSION}/single/qt-everywhere-src-${MAC_QT_VERSION}.tar.xz" "${MAC_QT_HASH}"
+    tar -xf qt-everywhere-src-${MAC_QT_VERSION}.tar.xz
     if [ -d /usr/local/opt/zstd ]; then
       brew unlink zstd
     fi
@@ -174,9 +177,6 @@ build_06_build_dependency_qt() {
     if [ -d /usr/local/opt/webp ]; then
       brew unlink webp
     fi
-    
-    ${BASE_DIR}/utils/safe_fetch "https://download.qt.io/official_releases/qt/$(echo "${MAC_QT_VERSION}" | cut -d "." -f -2)/${MAC_QT_VERSION}/single/qt-everywhere-src-${MAC_QT_VERSION}.tar.xz" "${MAC_QT_HASH}"
-    tar -xf qt-everywhere-src-${MAC_QT_VERSION}.tar.xz
     if [ "${MAC_QT_VERSION}" = "5.14.1" ]; then
         cd qt-everywhere-src-${MAC_QT_VERSION}/qtbase
         ${BASE_DIR}/utils/apply_patch "https://github.com/qt/qtbase/commit/8e5d6b422136dcca51f2c18fddcf28016f5ab99a.patch?full_index=1" "943e5e69160a39bcda0e88289b27c95732db1a195f0cf211601f10f1a067e608"
@@ -205,8 +205,16 @@ build_06_build_dependency_qt() {
     
     mv /tmp/obsdeps ${BASE_DIR}/CI_BUILD/obsdeps
     
-    if [ -d /usr/local/opt/zstd ] && [ ! -f /usr/local/bin/zstd ]; then
+    if [ -d /usr/local/opt/zstd ] && [ ! -f /usr/local/lib/libzstd.dylib ]; then
       brew link zstd
+    fi
+    
+    if [ -d /usr/local/opt/libtiff ] && [ !  -f /usr/local/lib/libtiff.dylib ]; then
+      brew link libtiff
+    fi
+    
+    if [ -d /usr/local/opt/webp ] && [ ! -f /usr/local/lib/libwebp.dylib ]; then
+      brew link webp
     fi
 }
 

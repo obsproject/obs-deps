@@ -50,6 +50,7 @@ export PCRE_HASH="19108658b23b3ec5058edc9f66ac545ea19f9537234be1ec62b714c8439936
 export SWIG_VERSION="4.0.2"
 export SWIG_HASH="d53be9730d8d58a16bf0cbd1f8ac0c0c3e1090573168bfa151b01eb47fa906fc"
 export MACOSX_DEPLOYMENT_TARGET="10.13"
+export FFMPEG_REVISION="05"
 export PATH="/usr/local/opt/ccache/libexec:${PATH}"
 export CURRENT_DATE="$(date +"%Y-%m-%d")"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig"
@@ -123,14 +124,6 @@ build_02_install_homebrew_dependencies() {
     trap "caught_error 'Install Homebrew dependencies'" ERR
     ensure_dir ${BASE_DIR}
 
-    if [ -d /usr/local/opt/xz ]; then
-      brew unlink xz
-    fi
-    
-    if [ -d /usr/local/opt/sdl2 ]; then
-      brew unlink sdl2
-    fi
-    
     if [ -d /usr/local/opt/openssl@1.0.2t ]; then
         brew uninstall openssl@1.0.2t
         brew untap local/openssl
@@ -141,6 +134,7 @@ build_02_install_homebrew_dependencies() {
         brew untap local/python2
     fi
     brew bundle
+    export PATH="$PATH:/usr/local/opt/gnu-tar/libexec/gnubin"
 }
 
 
@@ -164,8 +158,7 @@ build_04_build_environment_setup() {
     mkdir -p CI_BUILD/obsdeps/share
     
     
-    FFMPEG_REVISION="03"
-    FFMPEG_DEP_HASH="$(echo "rev$FFMPEG_REVISION-${LIBPNG_VERSION}-${LIBLAME_VERSION}-${LIBOGG_VERSION}-${LIBVORBIS_VERSION}-${LIBVPX_VERSION}-${LIBOPUS_VERSION}-${LIBX264_VERSION}-${LIBSRT_VERSION}-${LIBMBEDTLS_VERSION}-${LIBTHEORA_VERSION}" | sha256sum | cut -d " " -f 1)"
+    FFMPEG_DEP_HASH="$(echo "rev${FFMPEG_REVISION}-${LIBPNG_VERSION}-${LIBLAME_VERSION}-${LIBOGG_VERSION}-${LIBVORBIS_VERSION}-${LIBVPX_VERSION}-${LIBOPUS_VERSION}-${LIBX264_VERSION}-${LIBSRT_VERSION}-${LIBMBEDTLS_VERSION}-${LIBTHEORA_VERSION}" | sha256sum | cut -d " " -f 1)"
     
 }
 
@@ -317,11 +310,13 @@ build_16_build_dependency_libx264() {
     ${BASE_DIR}/utils/github_fetch mirror x264 "${LIBX264_HASH}"
     mkdir build
     cd ./build
-    ../configure --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" --enable-static --disable-lsmash --disable-swscale --disable-ffms --enable-strip --prefix="/tmp/obsdeps"
+    ../configure --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" --enable-shared --disable-lsmash --disable-swscale --disable-ffms --enable-strip --prefix="/tmp/obsdeps"
     make -j${PARALLELISM}
-    unset CC
-    unset LD
-    unset CXX
+    if [ "${MACOS_MAJOR}" -eq 10 ] && [ "${MACOS_MINOR}" -le 13 ]; then
+      unset CC
+      unset LD
+      unset CXX
+    fi
 }
 
 
@@ -331,6 +326,10 @@ build_17_install_dependency_libx264() {
     ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3027/build
 
     make install
+    ln -f -s libx264.*.dylib libx264.dylib
+    find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/bin/ \;
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${BASE_DIR}/CI_BUILD/obsdeps/include/
+    rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${BASE_DIR}/CI_BUILD/obsdeps/include/
 }
 
 
@@ -496,11 +495,26 @@ build_27_build_dependency_ffmpeg() {
     export LD_LIBRARY_PATH="/tmp/obsdeps/lib"
     ${BASE_DIR}/utils/safe_fetch "https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.xz" "${FFMPEG_HASH}"
     tar -xf ffmpeg-${FFMPEG_VERSION}.tar.xz
+    if [ -d /usr/local/opt/xz ]; then
+      brew unlink xz
+    fi
+    
+    if [ -d /usr/local/opt/sdl2 ]; then
+      brew unlink sdl2
+    fi
     cd ./ffmpeg-${FFMPEG_VERSION}
     mkdir build
     cd ./build
     ../configure --host-cflags="-I/tmp/obsdeps/include" --host-ldflags="-L/tmp/obsdeps/lib" --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" --enable-shared --disable-static --enable-pthreads --enable-version3 --shlibdir="/tmp/obsdeps/bin" --enable-gpl --enable-videotoolbox --disable-libjack --disable-indev=jack --disable-outdev=sdl --disable-programs --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --enable-libtheora --enable-libmp3lame
     make -j${PARALLELISM}
+    
+    if [ -d /usr/local/opt/xz ] && [ ! -f /usr/local/lib/liblzma.dylib ]; then
+      brew link xz
+    fi
+    
+    if [ -d /usr/local/opt/sdl2 ] && ! [ -f /usr/local/lib/libSDL2.dylib ]; then
+      brew link sdl2
+    fi
 }
 
 
@@ -515,41 +529,7 @@ build_28_install_dependency_ffmpeg() {
 }
 
 
-build_29_build_dependency_libx264__dylib_() {
-    step "Build dependency libx264 (dylib)"
-    trap "caught_error 'Build dependency libx264 (dylib)'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3027/build
-
-    MACOS_VERSION="$(sw_vers -productVersion)"
-    MACOS_MAJOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 1)"
-    MACOS_MINOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 2)"
-    if [ "${MACOS_MAJOR}" -eq 10 ] && [ "${MACOS_MINOR}" -le 13 ]; then
-      brew install gcc || true
-      CC="/usr/local/bin/gcc"
-      LD="/usr/local/bin/gcc"
-      CXX=="/usr/local/bin/g++"
-    fi
-    ../configure --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" --enable-shared  --disable-lsmash --disable-swscale --disable-ffms --enable-strip --libdir="/tmp/obsdeps/bin" --prefix="/tmp/obsdeps"
-    make -j${PARALLELISM}
-    unset CC
-    unset LD
-    unset CXX
-}
-
-
-build_30_install_dependency_libx264__dylib_() {
-    step "Install dependency libx264 (dylib)"
-    trap "caught_error 'Install dependency libx264 (dylib)'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3027/build
-
-    ln -f -s libx264.*.dylib libx264.dylib
-    find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/bin/ \;
-    rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${BASE_DIR}/CI_BUILD/obsdeps/include/
-    rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${BASE_DIR}/CI_BUILD/obsdeps/include/
-}
-
-
-build_32_build_dependency_swig() {
+build_30_build_dependency_swig() {
     step "Build dependency swig"
     trap "caught_error 'Build dependency swig'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -566,7 +546,7 @@ build_32_build_dependency_swig() {
 }
 
 
-build_33_install_dependency_swig() {
+build_31_install_dependency_swig() {
     step "Install dependency swig"
     trap "caught_error 'Install dependency swig'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/swig-4.0.2/build
@@ -577,26 +557,26 @@ build_33_install_dependency_swig() {
 }
 
 
-build_35_build_depdendency_libspeex() {
-    step "Build depdendency libspeex"
-    trap "caught_error 'Build depdendency libspeex'" ERR
+build_33_build_depdendency_speexdsp() {
+    step "Build depdendency SpeexDSP"
+    trap "caught_error 'Build depdendency SpeexDSP'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
 
     ${BASE_DIR}/utils/safe_fetch "https://github.com/xiph/speexdsp/archive/SpeexDSP-${SPEEXDSP_VERSION}.tar.gz" "${SPEEXDSP_HASH}"
     tar -xf speexDSP-${SPEEXDSP_VERSION}.tar.gz
     cd speexdsp-SpeexDSP-${SPEEXDSP_VERSION}
-    mkdir build
     sed -i '.orig' "s/CFLAGS='-O3'/CFLAGS='-O3  -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}'/" ./SpeexDSP.spec.in
     ./autogen.sh
+    mkdir -p build
     cd ./build
     ../configure --prefix="/tmp/obsdeps" --disable-dependency-tracking
     make -j${PARALLELISM}
 }
 
 
-build_36_install_dependency_libspeex() {
-    step "Install dependency libspeex"
-    trap "caught_error 'Install dependency libspeex'" ERR
+build_34_install_dependency_speexdsp() {
+    step "Install dependency SpeexDSP"
+    trap "caught_error 'Install dependency SpeexDSP'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/speexdsp-SpeexDSP-1.2.0/build
 
     find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/lib/ \;
@@ -605,7 +585,7 @@ build_36_install_dependency_libspeex() {
 }
 
 
-build_38_build_dependency_libjansson() {
+build_36_build_dependency_libjansson() {
     step "Build dependency libjansson"
     trap "caught_error 'Build dependency libjansson'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -620,7 +600,7 @@ build_38_build_dependency_libjansson() {
 }
 
 
-build_39_install_dependency_libjansson() {
+build_37_install_dependency_libjansson() {
     step "Install dependency libjansson"
     trap "caught_error 'Install dependency libjansson'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/jansson-2.13.1/build
@@ -632,7 +612,7 @@ build_39_install_dependency_libjansson() {
 }
 
 
-build_41_build_dependency_libluajit() {
+build_39_build_dependency_libluajit() {
     step "Build dependency libluajit"
     trap "caught_error 'Build dependency libluajit'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -644,7 +624,7 @@ build_41_build_dependency_libluajit() {
 }
 
 
-build_42_install_dependency_libluajit() {
+build_40_install_dependency_libluajit() {
     step "Install dependency libluajit"
     trap "caught_error 'Install dependency libluajit'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/LuaJIT-2.1.0-beta3
@@ -656,7 +636,7 @@ build_42_install_dependency_libluajit() {
 }
 
 
-build_44_build_dependency_libfreetype() {
+build_42_build_dependency_libfreetype() {
     step "Build dependency libfreetype"
     trap "caught_error 'Build dependency libfreetype'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -672,7 +652,7 @@ build_44_build_dependency_libfreetype() {
 }
 
 
-build_45_install_dependency_libfreetype() {
+build_43_install_dependency_libfreetype() {
     step "Install dependency libfreetype"
     trap "caught_error 'Install dependency libfreetype'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/freetype-2.10.4/build
@@ -683,7 +663,7 @@ build_45_install_dependency_libfreetype() {
 }
 
 
-build_47_build_dependency_librnnoise() {
+build_45_build_dependency_librnnoise() {
     step "Build dependency librnnoise"
     trap "caught_error 'Build dependency librnnoise'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -699,7 +679,7 @@ build_47_build_dependency_librnnoise() {
 }
 
 
-build_48_install_dependency_librnnoise() {
+build_46_install_dependency_librnnoise() {
     step "Install dependency librnnoise"
     trap "caught_error 'Install dependency librnnoise'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/rnnoise-2020-07-28/build
@@ -710,7 +690,7 @@ build_48_install_dependency_librnnoise() {
 }
 
 
-build_49_package_dependencies() {
+build_47_package_dependencies() {
     step "Package dependencies"
     trap "caught_error 'Package dependencies'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -751,21 +731,19 @@ obs-deps-build-main() {
     build_25_install_dependency_libsrt
     build_27_build_dependency_ffmpeg
     build_28_install_dependency_ffmpeg
-    build_29_build_dependency_libx264__dylib_
-    build_30_install_dependency_libx264__dylib_
-    build_32_build_dependency_swig
-    build_33_install_dependency_swig
-    build_35_build_depdendency_libspeex
-    build_36_install_dependency_libspeex
-    build_38_build_dependency_libjansson
-    build_39_install_dependency_libjansson
-    build_41_build_dependency_libluajit
-    build_42_install_dependency_libluajit
-    build_44_build_dependency_libfreetype
-    build_45_install_dependency_libfreetype
-    build_47_build_dependency_librnnoise
-    build_48_install_dependency_librnnoise
-    build_49_package_dependencies
+    build_30_build_dependency_swig
+    build_31_install_dependency_swig
+    build_33_build_depdendency_speexdsp
+    build_34_install_dependency_speexdsp
+    build_36_build_dependency_libjansson
+    build_37_install_dependency_libjansson
+    build_39_build_dependency_libluajit
+    build_40_install_dependency_libluajit
+    build_42_build_dependency_libfreetype
+    build_43_install_dependency_libfreetype
+    build_45_build_dependency_librnnoise
+    build_46_install_dependency_librnnoise
+    build_47_package_dependencies
 
     restore_brews
 
