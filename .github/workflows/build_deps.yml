@@ -58,7 +58,7 @@ jobs:
       SWIG_VERSION: '4.0.2'
       SWIG_HASH: 'd53be9730d8d58a16bf0cbd1f8ac0c0c3e1090573168bfa151b01eb47fa906fc'
       MACOSX_DEPLOYMENT_TARGET: '10.13'
-      FFMPEG_REVISION: '05'
+      FFMPEG_REVISION: '06'
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.3
@@ -236,7 +236,7 @@ jobs:
         run: |
           make install
           ln -f -s libx264.*.dylib libx264.dylib
-          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
+          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
           rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
           rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
       - name: 'Build dependency libtheora'
@@ -388,7 +388,7 @@ jobs:
           cd ./ffmpeg-${{ env.FFMPEG_VERSION }}
           mkdir build
           cd ./build
-          ../configure --host-cflags="-I/tmp/obsdeps/include" --host-ldflags="-L/tmp/obsdeps/lib" --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}" --enable-shared --disable-static --enable-pthreads --enable-version3 --shlibdir="/tmp/obsdeps/bin" --enable-gpl --enable-videotoolbox --disable-libjack --disable-indev=jack --disable-outdev=sdl --disable-programs --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --enable-libtheora --enable-libmp3lame
+          ../configure --host-cflags="-I/tmp/obsdeps/include" --host-ldflags="-L/tmp/obsdeps/lib" --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}" --enable-shared --disable-static --enable-pthreads --enable-version3 --shlibdir="/tmp/obsdeps/lib" --enable-gpl --enable-videotoolbox --disable-libjack --disable-indev=jack --disable-outdev=sdl --disable-programs --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --enable-libtheora --enable-libmp3lame
           make -j${{ env.PARALLELISM }}
 
           if [ -d /usr/local/opt/xz ] && [ ! -f /usr/local/lib/liblzma.dylib ]; then
@@ -402,7 +402,7 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD/ffmpeg-${{ env.FFMPEG_VERSION }}/build
         run: |
-          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
+          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
           rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
           rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
       - name: 'Restore swig from cache'
@@ -481,13 +481,13 @@ jobs:
           cd jansson-${{ env.LIBJANSSON_VERSION }}
           mkdir build
           cd ./build
-          ../configure --libdir="/tmp/obsdeps/bin" --enable-shared --disable-static
+          ../configure --libdir="/tmp/obsdeps/lib" --enable-shared --disable-static
           make -j${{ env.PARALLELISM }}
       - name: 'Install dependency libjansson'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD/jansson-${{ env.LIBJANSSON_VERSION }}/build
         run: |
-          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
+          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
           rsync -avh --include="*/" --include="*.h" --exclude="*" ../src/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
           rsync -avh --include="*/" --include="*.h" --exclude="*" ./src/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
           cp ./*.h ${{ github.workspace }}/CI_BUILD/obsdeps/include/
