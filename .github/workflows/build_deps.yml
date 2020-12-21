@@ -58,6 +58,7 @@ jobs:
       SWIG_VERSION: '4.0.2'
       SWIG_HASH: 'd53be9730d8d58a16bf0cbd1f8ac0c0c3e1090573168bfa151b01eb47fa906fc'
       MACOSX_DEPLOYMENT_TARGET: '10.13'
+      FFMPEG_REVISION: '05'
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.3
@@ -66,14 +67,6 @@ jobs:
       - name: Install Homebrew dependencies
         shell: bash
         run: |
-          if [ -d /usr/local/opt/xz ]; then
-            brew unlink xz
-          fi
-
-          if [ -d /usr/local/opt/sdl2 ]; then
-            brew unlink sdl2
-          fi
-
           if [ -d /usr/local/opt/openssl@1.0.2t ]; then
               brew uninstall openssl@1.0.2t
               brew untap local/openssl
@@ -84,6 +77,7 @@ jobs:
               brew untap local/python2
           fi
           brew bundle
+          echo "/usr/local/opt/gnu-tar/libexec/gnubin" >> $GITHUB_PATH
       - name: Get Current Date
         shell: bash
         id: get_date
@@ -97,8 +91,7 @@ jobs:
           mkdir -p CI_BUILD/obsdeps/share
           echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig" >> $GITHUB_ENV
           echo "PARALLELISM=$(sysctl -n hw.ncpu)" >> $GITHUB_ENV
-          FFMPEG_REVISION="03"
-          FFMPEG_DEP_HASH="$(echo "rev$FFMPEG_REVISION-${{ env.LIBPNG_VERSION }}-${{ env.LIBLAME_VERSION }}-${{ env.LIBOGG_VERSION }}-${{ env.LIBVORBIS_VERSION }}-${{ env.LIBVPX_VERSION }}-${{ env.LIBOPUS_VERSION }}-${{ env.LIBX264_VERSION }}-${{ env.LIBSRT_VERSION }}-${{ env.LIBMBEDTLS_VERSION }}-${{ env.LIBTHEORA_VERSION }}" | sha256sum | cut -d " " -f 1)"
+          FFMPEG_DEP_HASH="$(echo "rev${{ env.FFMPEG_REVISION }}-${{ env.LIBPNG_VERSION }}-${{ env.LIBLAME_VERSION }}-${{ env.LIBOGG_VERSION }}-${{ env.LIBVORBIS_VERSION }}-${{ env.LIBVPX_VERSION }}-${{ env.LIBOPUS_VERSION }}-${{ env.LIBX264_VERSION }}-${{ env.LIBSRT_VERSION }}-${{ env.LIBMBEDTLS_VERSION }}-${{ env.LIBTHEORA_VERSION }}" | sha256sum | cut -d " " -f 1)"
           echo "FFMPEG_DEP_HASH=$FFMPEG_DEP_HASH" >> $GITHUB_ENV
       - name: 'Restore ffmpeg dependencies from cache'
         id: ffmpeg-deps-cache
@@ -230,16 +223,22 @@ jobs:
           ${{ github.workspace }}/utils/github_fetch mirror x264 "${{ env.LIBX264_HASH }}"
           mkdir build
           cd ./build
-          ../configure --extra-ldflags="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}" --enable-static --disable-lsmash --disable-swscale --disable-ffms --enable-strip --prefix="/tmp/obsdeps"
+          ../configure --extra-ldflags="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}" --enable-shared --disable-lsmash --disable-swscale --disable-ffms --enable-strip --prefix="/tmp/obsdeps"
           make -j${{ env.PARALLELISM }}
-          unset CC
-          unset LD
-          unset CXX
+          if [ "${MACOS_MAJOR}" -eq 10 ] && [ "${MACOS_MINOR}" -le 13 ]; then
+            unset CC
+            unset LD
+            unset CXX
+          fi
       - name: 'Install dependency libx264'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD/x264-${{ env.LIBX264_VERSION }}/build
         run: |
           make install
+          ln -f -s libx264.*.dylib libx264.dylib
+          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
       - name: 'Build dependency libtheora'
         if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
         shell: bash
@@ -379,42 +378,30 @@ jobs:
           export LD_LIBRARY_PATH="/tmp/obsdeps/lib"
           ${{ github.workspace }}/utils/safe_fetch "https://ffmpeg.org/releases/ffmpeg-${{ env.FFMPEG_VERSION }}.tar.xz" "${{ env.FFMPEG_HASH }}"
           tar -xf ffmpeg-${{ env.FFMPEG_VERSION }}.tar.xz
+          if [ -d /usr/local/opt/xz ]; then
+            brew unlink xz
+          fi
+
+          if [ -d /usr/local/opt/sdl2 ]; then
+            brew unlink sdl2
+          fi
           cd ./ffmpeg-${{ env.FFMPEG_VERSION }}
           mkdir build
           cd ./build
           ../configure --host-cflags="-I/tmp/obsdeps/include" --host-ldflags="-L/tmp/obsdeps/lib" --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}" --enable-shared --disable-static --enable-pthreads --enable-version3 --shlibdir="/tmp/obsdeps/bin" --enable-gpl --enable-videotoolbox --disable-libjack --disable-indev=jack --disable-outdev=sdl --disable-programs --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --enable-libtheora --enable-libmp3lame
           make -j${{ env.PARALLELISM }}
+
+          if [ -d /usr/local/opt/xz ] && [ ! -f /usr/local/lib/liblzma.dylib ]; then
+            brew link xz
+          fi
+
+          if [ -d /usr/local/opt/sdl2 ] && ! [ -f /usr/local/lib/libSDL2.dylib ]; then
+            brew link sdl2
+          fi
       - name: 'Install dependency ffmpeg'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD/ffmpeg-${{ env.FFMPEG_VERSION }}/build
         run: |
-          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
-          rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
-          rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
-      - name: 'Build dependency libx264 (dylib)'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
-        shell: bash
-        working-directory: ${{ github.workspace }}/CI_BUILD/x264-${{ env.LIBX264_VERSION }}/build
-        run: |
-          MACOS_VERSION="$(sw_vers -productVersion)"
-          MACOS_MAJOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 1)"
-          MACOS_MINOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 2)"
-          if [ "${MACOS_MAJOR}" -eq 10 ] && [ "${MACOS_MINOR}" -le 13 ]; then
-            brew install gcc || true
-            CC="/usr/local/bin/gcc"
-            LD="/usr/local/bin/gcc"
-            CXX=="/usr/local/bin/g++"
-          fi
-          ../configure --extra-ldflags="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}" --enable-shared  --disable-lsmash --disable-swscale --disable-ffms --enable-strip --libdir="/tmp/obsdeps/bin" --prefix="/tmp/obsdeps"
-          make -j${{ env.PARALLELISM }}
-          unset CC
-          unset LD
-          unset CXX
-      - name: 'Install dependency libx264 (dylib)'
-        shell: bash
-        working-directory: ${{ github.workspace }}/CI_BUILD/x264-${{ env.LIBX264_VERSION }}/build
-        run: |
-          ln -f -s libx264.*.dylib libx264.dylib
           find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/bin/ \;
           rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
           rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
@@ -455,21 +442,21 @@ jobs:
         with:
           path: ${{ github.workspace }}/CI_BUILD/speexdsp-SpeexDSP-${{ env.SPEEXDSP_VERSION }}
           key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.SPEEXDSP_VERSION }}
-      - name: 'Build depdendency libspeex'
-        if: steps.libspeex-cache.outputs.cache-hit != 'true'
+      - name: 'Build depdendency SpeexDSP'
+        if: steps.speexdsp-cache.outputs.cache-hit != 'true'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD
         run: |
           ${{ github.workspace }}/utils/safe_fetch "https://github.com/xiph/speexdsp/archive/SpeexDSP-${{ env.SPEEXDSP_VERSION }}.tar.gz" "${{ env.SPEEXDSP_HASH }}"
           tar -xf speexDSP-${{ env.SPEEXDSP_VERSION }}.tar.gz
           cd speexdsp-SpeexDSP-${{ env.SPEEXDSP_VERSION }}
-          mkdir build
           sed -i '.orig' "s/CFLAGS='-O3'/CFLAGS='-O3  -mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}'/" ./SpeexDSP.spec.in
           ./autogen.sh
+          mkdir -p build
           cd ./build
           ../configure --prefix="/tmp/obsdeps" --disable-dependency-tracking
           make -j${{ env.PARALLELISM }}
-      - name: 'Install dependency libspeex'
+      - name: 'Install dependency SpeexDSP'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD/speexdsp-SpeexDSP-${{ env.SPEEXDSP_VERSION }}/build
         run: |
@@ -649,6 +636,8 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD
         run: |
+          ${{ github.workspace }}/utils/safe_fetch "https://download.qt.io/official_releases/qt/$(echo "${{ env.MAC_QT_VERSION }}" | cut -d "." -f -2)/${{ env.MAC_QT_VERSION }}/single/qt-everywhere-src-${{ env.MAC_QT_VERSION }}.tar.xz" "${{ env.MAC_QT_HASH }}"
+          tar -xf qt-everywhere-src-${{ env.MAC_QT_VERSION }}.tar.xz
           if [ -d /usr/local/opt/zstd ]; then
             brew unlink zstd
           fi
@@ -660,9 +649,6 @@ jobs:
           if [ -d /usr/local/opt/webp ]; then
             brew unlink webp
           fi
-
-          ${{ github.workspace }}/utils/safe_fetch "https://download.qt.io/official_releases/qt/$(echo "${{ env.MAC_QT_VERSION }}" | cut -d "." -f -2)/${{ env.MAC_QT_VERSION }}/single/qt-everywhere-src-${{ env.MAC_QT_VERSION }}.tar.xz" "${{ env.MAC_QT_HASH }}"
-          tar -xf qt-everywhere-src-${{ env.MAC_QT_VERSION }}.tar.xz
           if [ "${{ env.MAC_QT_VERSION }}" = "5.14.1" ]; then
               cd qt-everywhere-src-${{ env.MAC_QT_VERSION }}/qtbase
               ${{ github.workspace }}/utils/apply_patch "https://github.com/qt/qtbase/commit/8e5d6b422136dcca51f2c18fddcf28016f5ab99a.patch?full_index=1" "943e5e69160a39bcda0e88289b27c95732db1a195f0cf211601f10f1a067e608"
@@ -691,8 +677,16 @@ jobs:
 
           mv /tmp/obsdeps ${{ github.workspace }}/CI_BUILD/obsdeps
 
-          if [ -d /usr/local/opt/zstd ] && [ ! -f /usr/local/bin/zstd ]; then
+          if [ -d /usr/local/opt/zstd ] && [ ! -f /usr/local/lib/libzstd.dylib ]; then
             brew link zstd
+          fi
+
+          if [ -d /usr/local/opt/libtiff ] && [ !  -f /usr/local/lib/libtiff.dylib ]; then
+            brew link libtiff
+          fi
+
+          if [ -d /usr/local/opt/webp ] && [ ! -f /usr/local/lib/libwebp.dylib ]; then
+            brew link webp
           fi
       - name: Package dependencies
         if: success()
