@@ -50,7 +50,7 @@ export PCRE_HASH="19108658b23b3ec5058edc9f66ac545ea19f9537234be1ec62b714c8439936
 export SWIG_VERSION="4.0.2"
 export SWIG_HASH="d53be9730d8d58a16bf0cbd1f8ac0c0c3e1090573168bfa151b01eb47fa906fc"
 export MACOSX_DEPLOYMENT_TARGET="10.13"
-export FFMPEG_REVISION="05"
+export FFMPEG_REVISION="06"
 export PATH="/usr/local/opt/ccache/libexec:${PATH}"
 export CURRENT_DATE="$(date +"%Y-%m-%d")"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig"
@@ -327,7 +327,7 @@ build_17_install_dependency_libx264() {
 
     make install
     ln -f -s libx264.*.dylib libx264.dylib
-    find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/bin/ \;
+    find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/lib/ \;
     rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${BASE_DIR}/CI_BUILD/obsdeps/include/
     rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${BASE_DIR}/CI_BUILD/obsdeps/include/
 }
@@ -505,7 +505,7 @@ build_27_build_dependency_ffmpeg() {
     cd ./ffmpeg-${FFMPEG_VERSION}
     mkdir build
     cd ./build
-    ../configure --host-cflags="-I/tmp/obsdeps/include" --host-ldflags="-L/tmp/obsdeps/lib" --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" --enable-shared --disable-static --enable-pthreads --enable-version3 --shlibdir="/tmp/obsdeps/bin" --enable-gpl --enable-videotoolbox --disable-libjack --disable-indev=jack --disable-outdev=sdl --disable-programs --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --enable-libtheora --enable-libmp3lame
+    ../configure --host-cflags="-I/tmp/obsdeps/include" --host-ldflags="-L/tmp/obsdeps/lib" --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" --enable-shared --disable-static --enable-pthreads --enable-version3 --shlibdir="/tmp/obsdeps/lib" --enable-gpl --enable-videotoolbox --disable-libjack --disable-indev=jack --disable-outdev=sdl --disable-programs --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --enable-libtheora --enable-libmp3lame
     make -j${PARALLELISM}
     
     if [ -d /usr/local/opt/xz ] && [ ! -f /usr/local/lib/liblzma.dylib ]; then
@@ -523,7 +523,7 @@ build_28_install_dependency_ffmpeg() {
     trap "caught_error 'Install dependency ffmpeg'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/ffmpeg-4.2.3/build
 
-    find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/bin/ \;
+    find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/lib/ \;
     rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${BASE_DIR}/CI_BUILD/obsdeps/include/
     rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${BASE_DIR}/CI_BUILD/obsdeps/include/
 }
@@ -595,7 +595,7 @@ build_36_build_dependency_libjansson() {
     cd jansson-${LIBJANSSON_VERSION}
     mkdir build
     cd ./build
-    ../configure --libdir="/tmp/obsdeps/bin" --enable-shared --disable-static
+    ../configure --libdir="/tmp/obsdeps/lib" --enable-shared --disable-static
     make -j${PARALLELISM}
 }
 
@@ -605,7 +605,7 @@ build_37_install_dependency_libjansson() {
     trap "caught_error 'Install dependency libjansson'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/jansson-2.13.1/build
 
-    find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/bin/ \;
+    find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/lib/ \;
     rsync -avh --include="*/" --include="*.h" --exclude="*" ../src/* ${BASE_DIR}/CI_BUILD/obsdeps/include/
     rsync -avh --include="*/" --include="*.h" --exclude="*" ./src/* ${BASE_DIR}/CI_BUILD/obsdeps/include/
     cp ./*.h ${BASE_DIR}/CI_BUILD/obsdeps/include/
