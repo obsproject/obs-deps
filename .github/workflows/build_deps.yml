@@ -467,7 +467,7 @@ jobs:
         id: libjansson-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'libjansson'
+          CACHE_NAME: 'libjansson-rev2'
         with:
           path: ${{ github.workspace }}/CI_BUILD/jansson-${{ env.LIBJANSSON_VERSION }}
           key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.LIBJANSSON_VERSION }}
