@@ -49,7 +49,11 @@ export PCRE_VERSION="8.44"
 export PCRE_HASH="19108658b23b3ec5058edc9f66ac545ea19f9537234be1ec62b714c84399366d"
 export SWIG_VERSION="4.0.2"
 export SWIG_HASH="d53be9730d8d58a16bf0cbd1f8ac0c0c3e1090573168bfa151b01eb47fa906fc"
-export MACOSX_DEPLOYMENT_TARGET="10.13"
+if [ `arch` = "arm64" ]; then
+    export MACOSX_DEPLOYMENT_TARGET="11.0"
+else
+    export MACOSX_DEPLOYMENT_TARGET="10.13"
+fi
 export FFMPEG_REVISION="06"
 export PATH="/usr/local/opt/ccache/libexec:${PATH}"
 export CURRENT_DATE="$(date +"%Y-%m-%d")"
@@ -265,19 +269,34 @@ build_14_build_dependency_libvpx() {
     trap "caught_error 'Build dependency libvpx'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
 
-    ${BASE_DIR}/utils/safe_fetch "https://github.com/webmproject/libvpx/archive/v${LIBVPX_VERSION}.tar.gz" "${LIBVPX_HASH}"
-    mkdir -p ./libvpx-v${LIBVPX_VERSION}
-    tar -xf v${LIBVPX_VERSION}.tar.gz
-    cd ./libvpx-${LIBVPX_VERSION}
+    # Note: libvpx 1.9.0, which is the most current release when this was written,
+    # doesn't support building for arm64 on macOS, but the latest development code
+    # supports building for arm64 on macOS. So, on Apple Silicon Macs, we have to clone
+    # the latest code instead of downloading an archive. This can be revised when the
+    # next version of libvpx comes out.
+    if [ `arch` = "arm64" ]; then
+        git clone "https://chromium.googlesource.com/webm/libvpx"
+        cd ./libvpx
+    else
+        ${BASE_DIR}/utils/safe_fetch "https://github.com/webmproject/libvpx/archive/v${LIBVPX_VERSION}.tar.gz" "${LIBVPX_HASH}"
+        mkdir -p ./libvpx-v${LIBVPX_VERSION}
+        tar -xf v${LIBVPX_VERSION}.tar.gz
+        cd ./libvpx-${LIBVPX_VERSION}
+    fi
+
     mkdir -p build
     cd ./build
-    # Assumption is that macOS has switched to proper major version numbering with Big Sur
-    if [ $(echo "${MACOSX_DEPLOYMENT_TARGET}" | cut -d "." -f 1) -lt 11 ]; then
-      VPX_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 2)+4))";
+    if [ `arch` = "arm64" ]; then
+        ../configure --target="arm64-darwin20-gcc" --disable-shared --disable-examples --disable-unit-tests --enable-pic --enable-vp9-highbitdepth --prefix="/tmp/obsdeps" --libdir="/tmp/obsdeps/lib"
     else
-      VPX_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 1)+9))";
+        # Assumption is that macOS has switched to proper major version numbering with Big Sur
+        if [ $(echo "${MACOSX_DEPLOYMENT_TARGET}" | cut -d "." -f 1) -lt 11 ]; then
+            VPX_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 2)+4))";
+        else
+            VPX_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 1)+9))";
+        fi
+        ../configure --target="x86_64-darwin$VPX_TARGET-gcc" --disable-shared --disable-examples --disable-unit-tests --enable-pic --enable-vp9-highbitdepth --prefix="/tmp/obsdeps" --libdir="/tmp/obsdeps/lib"
     fi
-    ../configure --target="x86_64-darwin$VPX_TARGET-gcc" --disable-shared --disable-examples --disable-unit-tests --enable-pic --enable-vp9-highbitdepth --prefix="/tmp/obsdeps" --libdir="/tmp/obsdeps/lib"
     make -j${PARALLELISM}
 }
 
@@ -285,8 +304,14 @@ build_14_build_dependency_libvpx() {
 build_15_install_dependency_libvpx() {
     step "Install dependency libvpx"
     trap "caught_error 'Install dependency libvpx'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/libvpx-1.9.0/build
-
+    # See the comment in build_14_build_dependency_libvpx() above. When a future source
+    # distribution of libvpx supports Apple Silicon, then this if statement can be
+    # removed as well.
+    if [ `arch` = "arm64" ]; then
+        ensure_dir ${BASE_DIR}/CI_BUILD/libvpx/build
+    else
+        ensure_dir ${BASE_DIR}/CI_BUILD/libvpx-${LIBVPX_VERSION}/build
+    fi
     make install
 }
 

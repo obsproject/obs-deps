@@ -49,7 +49,11 @@ export PCRE_VERSION="8.44"
 export PCRE_HASH="19108658b23b3ec5058edc9f66ac545ea19f9537234be1ec62b714c84399366d"
 export SWIG_VERSION="4.0.2"
 export SWIG_HASH="d53be9730d8d58a16bf0cbd1f8ac0c0c3e1090573168bfa151b01eb47fa906fc"
-export MACOSX_DEPLOYMENT_TARGET="10.13"
+if [ `arch` = "arm64" ]; then
+    export MACOSX_DEPLOYMENT_TARGET="11.0"
+else
+    export MACOSX_DEPLOYMENT_TARGET="10.13"
+fi
 export FFMPEG_REVISION="06"
 export PATH="/usr/local/opt/ccache/libexec:${PATH}"
 export CURRENT_DATE="$(date +"%Y-%m-%d")"
@@ -199,7 +203,8 @@ build_06_build_dependency_qt() {
       -skip qtquickcontrols -skip qtquickcontrols2 -skip qtquicktimeline -skip qtremoteobjects \
       -skip qtscript -skip qtscxml -skip qtsensors -skip qtserialbus -skip qtspeech \
       -skip qttranslations -skip qtwayland -skip qtwebchannel -skip qtwebengine -skip qtwebglplugin \
-      -skip qtwebsockets -skip qtwebview -skip qtwinextras -skip qtx11extras -skip qtxmlpatterns
+      -skip qtwebsockets -skip qtwebview -skip qtwinextras -skip qtx11extras -skip qtxmlpatterns \
+      QMAKE_APPLE_DEVICE_ARCHS=`arch`
     make -j${PARALLELISM}
     make install
     
