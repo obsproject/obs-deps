@@ -49,11 +49,7 @@ export PCRE_VERSION="8.44"
 export PCRE_HASH="19108658b23b3ec5058edc9f66ac545ea19f9537234be1ec62b714c84399366d"
 export SWIG_VERSION="4.0.2"
 export SWIG_HASH="d53be9730d8d58a16bf0cbd1f8ac0c0c3e1090573168bfa151b01eb47fa906fc"
-if [ `arch` = "arm64" ]; then
-    export MACOSX_DEPLOYMENT_TARGET="11.0"
-else
-    export MACOSX_DEPLOYMENT_TARGET="10.13"
-fi
+export MACOSX_DEPLOYMENT_TARGET="10.13"
 export FFMPEG_REVISION="06"
 export PATH="/usr/local/opt/ccache/libexec:${PATH}"
 export CURRENT_DATE="$(date +"%Y-%m-%d")"
