@@ -47,8 +47,8 @@ jobs:
       LIBTHEORA_HASH: 'b6ae1ee2fa3d42ac489287d3ec34c5885730b1296f0801ae577a35193d3affbc'
       FFMPEG_VERSION: '4.2.3'
       FFMPEG_HASH: '9df6c90aed1337634c1fb026fb01c154c29c82a64ea71291ff2da9aacb9aad31'
-      LIBLUAJIT_VERSION: '2.1.0-beta3'
-      LIBLUAJIT_HASH: '1ad2e34b111c802f9d0cdf019e986909123237a28c746b21295b63c9e785d9c3'
+      LIBLUAJIT_VERSION: '2.1'
+      LIBLUAJIT_HASH: 'ec6edc5c39c25e4eb3fca51b753f9995e97215da'
       LIBFREETYPE_VERSION: '2.10.4'
       LIBFREETYPE_HASH: '86a854d8905b19698bbc8f23b860bc104246ce4854dcea8e3b0fb21284f75784'
       SPEEXDSP_VERSION: '1.2.0'
@@ -504,9 +504,9 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD
         run: |
-          ${{ github.workspace }}/utils/safe_fetch "https://luajit.org/download/LuaJIT-${{ env.LIBLUAJIT_VERSION }}.tar.gz" "${{ env.LIBLUAJIT_HASH }}"
-          tar -xf LuaJIT-${{ env.LIBLUAJIT_VERSION }}.tar.gz
+          mkdir -p LuaJIT-${{ env.LIBLUAJIT_VERSION }}
           cd LuaJIT-${{ env.LIBLUAJIT_VERSION }}
+          ${{ github.workspace }}/utils/github_fetch LuaJIT LuaJIT "${{ env.LIBLUAJIT_HASH }}"          
           make PREFIX="/tmp/obsdeps" -j${{ env.PARALLELISM }}
       - name: 'Install dependency libluajit'
         shell: bash
