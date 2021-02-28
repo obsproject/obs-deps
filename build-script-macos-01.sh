@@ -39,8 +39,8 @@ export LIBTHEORA_VERSION="1.1.1"
 export LIBTHEORA_HASH="b6ae1ee2fa3d42ac489287d3ec34c5885730b1296f0801ae577a35193d3affbc"
 export FFMPEG_VERSION="4.2.3"
 export FFMPEG_HASH="9df6c90aed1337634c1fb026fb01c154c29c82a64ea71291ff2da9aacb9aad31"
-export LIBLUAJIT_VERSION="2.1.0-beta3"
-export LIBLUAJIT_HASH="1ad2e34b111c802f9d0cdf019e986909123237a28c746b21295b63c9e785d9c3"
+export LIBLUAJIT_VERSION="2.1"
+export LIBLUAJIT_HASH="ec6edc5c39c25e4eb3fca51b753f9995e97215da"
 export LIBFREETYPE_VERSION="2.10.4"
 export LIBFREETYPE_HASH="86a854d8905b19698bbc8f23b860bc104246ce4854dcea8e3b0fb21284f75784"
 export SPEEXDSP_VERSION="1.2.0"
@@ -617,9 +617,9 @@ build_39_build_dependency_libluajit() {
     trap "caught_error 'Build dependency libluajit'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
 
-    ${BASE_DIR}/utils/safe_fetch "https://luajit.org/download/LuaJIT-${LIBLUAJIT_VERSION}.tar.gz" "${LIBLUAJIT_HASH}"
-    tar -xf LuaJIT-${LIBLUAJIT_VERSION}.tar.gz
+    mkdir -p LuaJIT-${LIBLUAJIT_VERSION}
     cd LuaJIT-${LIBLUAJIT_VERSION}
+    ${BASE_DIR}/utils/github_fetch LuaJIT LuaJIT "${LIBLUAJIT_HASH}"          
     make PREFIX="/tmp/obsdeps" -j${PARALLELISM}
 }
 
@@ -627,7 +627,7 @@ build_39_build_dependency_libluajit() {
 build_40_install_dependency_libluajit() {
     step "Install dependency libluajit"
     trap "caught_error 'Install dependency libluajit'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/LuaJIT-2.1.0-beta3
+    ensure_dir ${BASE_DIR}/CI_BUILD/LuaJIT-2.1
 
     make PREFIX="/tmp/obsdeps" install
     find /tmp/obsdeps/lib -name libluajit\*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/lib/ \;
