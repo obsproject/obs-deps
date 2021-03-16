@@ -265,19 +265,32 @@ build_14_build_dependency_libvpx() {
     trap "caught_error 'Build dependency libvpx'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
 
-    ${BASE_DIR}/utils/safe_fetch "https://github.com/webmproject/libvpx/archive/v${LIBVPX_VERSION}.tar.gz" "${LIBVPX_HASH}"
-    mkdir -p ./libvpx-v${LIBVPX_VERSION}
-    tar -xf v${LIBVPX_VERSION}.tar.gz
+    # Note: libvpx 1.9.0, which is the most current release when this was written,
+    # doesn't support building for arm64 on macOS, but the latest development code
+    # supports building for arm64 on macOS. So, on Apple Silicon Macs, we have to clone
+    # the latest code instead of downloading an archive. This can be revised when the
+    # next version of libvpx comes out.
+    if [ `arch` = "arm64" ]; then
+      git clone "https://chromium.googlesource.com/webm/libvpx" libvpx-${LIBVPX_VERSION}
+    else
+      ${BASE_DIR}/utils/safe_fetch "https://github.com/webmproject/libvpx/archive/v${LIBVPX_VERSION}.tar.gz" "${LIBVPX_HASH}"
+      mkdir -p ./libvpx-v${LIBVPX_VERSION}
+      tar -xf v${LIBVPX_VERSION}.tar.gz
+    fi
     cd ./libvpx-${LIBVPX_VERSION}
     mkdir -p build
     cd ./build
-    # Assumption is that macOS has switched to proper major version numbering with Big Sur
-    if [ $(echo "${MACOSX_DEPLOYMENT_TARGET}" | cut -d "." -f 1) -lt 11 ]; then
-      VPX_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 2)+4))";
+    if [ `arch` = "arm64" ]; then
+      ../configure --target="arm64-darwin20-gcc" --disable-shared --disable-examples --disable-unit-tests --enable-pic --enable-vp9-highbitdepth --prefix="/tmp/obsdeps" --libdir="/tmp/obsdeps/lib"
     else
-      VPX_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 1)+9))";
+      # Assumption is that macOS has switched to proper major version numbering with Big Sur
+      if [ $(echo "${MACOSX_DEPLOYMENT_TARGET}" | cut -d "." -f 1) -lt 11 ]; then
+          VPX_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 2)+4))";
+      else
+          VPX_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 1)+9))";
+      fi
+      ../configure --target="x86_64-darwin$VPX_TARGET-gcc" --disable-shared --disable-examples --disable-unit-tests --enable-pic --enable-vp9-highbitdepth --prefix="/tmp/obsdeps" --libdir="/tmp/obsdeps/lib"
     fi
-    ../configure --target="x86_64-darwin$VPX_TARGET-gcc" --disable-shared --disable-examples --disable-unit-tests --enable-pic --enable-vp9-highbitdepth --prefix="/tmp/obsdeps" --libdir="/tmp/obsdeps/lib"
     make -j${PARALLELISM}
 }
 
