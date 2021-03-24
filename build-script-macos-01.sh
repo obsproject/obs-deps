@@ -316,7 +316,7 @@ build_16_build_dependency_libx264() {
       brew install gcc || true
       CC="/usr/local/bin/gcc"
       LD="/usr/local/bin/gcc"
-      CXX=="/usr/local/bin/g++"
+      CXX="/usr/local/bin/g++"
     fi
     mkdir -p x264-${LIBX264_VERSION}
     cd ./x264-${LIBX264_VERSION}
