@@ -728,14 +728,21 @@ jobs:
         shell: bash
         id: get_date
         run: echo "CURRENT_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: Get Current Arch
+        shell: bash
+        id: get_arch
+        run: echo "CURRENT_ARCH=$(uname -m)" >> $GITHUB_ENV
       - name: 'Create Release'
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.CURRENT_DATE }}
-          release_name: OBS Deps build ${{ env.CURRENT_DATE }}
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          release_name: OBS Deps build ${{ steps.get_version.outputs.VERSION }}
           draft: false
           prerelease: false
       - name: 'Download release artifacts'
@@ -747,7 +754,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/macos-deps-${{ env.CURRENT_DATE }}/macos-deps-${{ env.CURRENT_DATE }}.tar.gz
-          asset_name: macos-deps-${{ env.CURRENT_DATE }}.tar.gz
+          asset_name: macos-deps-${{ env.CURRENT_ARCH }}-${{ steps.get_version.outputs.VERSION }}.tar.gz
           asset_content_type: application/octet-stream
       - name: 'Upload macOS Qt dependency to release'
         uses: actions/upload-release-asset@v1
@@ -756,5 +763,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_DATE }}/macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_DATE }}.tar.gz
-          asset_name: macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_DATE }}.tar.gz
+          asset_name: macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_ARCH }}-${{ steps.get_version.outputs.VERSION }}.tar.gz
           asset_content_type: application/octet-stream
