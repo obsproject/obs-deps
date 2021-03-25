@@ -78,7 +78,7 @@ exists() {
 }
 
 ensure_dir() {
-    [[ -n ${1} ]] && /bin/mkdir -p ${1} && builtin cd ${1}
+    [[ -n "${1}" ]] && /bin/mkdir -p "${1}" && builtin cd "${1}"
 }
 
 cleanup() {
@@ -93,7 +93,7 @@ trap cleanup EXIT
 
 caught_error() {
     error "ERROR during build step: ${1}"
-    cleanup $${BASE_DIR}
+    cleanup ${BASE_DIR}
     exit 1
 }
 
