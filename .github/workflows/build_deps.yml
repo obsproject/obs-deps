@@ -82,6 +82,10 @@ jobs:
         shell: bash
         id: get_date
         run: echo "CURRENT_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
+      - name: Get Current Arch
+        shell: bash
+        id: get_arch
+        run: echo "CURRENT_ARCH=$(uname -m)" >> $GITHUB_ENV
       - name: Build environment setup
         shell: bash
         run: |
@@ -590,16 +594,16 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD
         run: |
-          tar -czf macos-deps-${{ env.CURRENT_DATE }}.tar.gz obsdeps
+          tar -czf macos-deps-${{ env.CURRENT_ARCH }}-${{ env.CURRENT_DATE }}.tar.gz obsdeps
           if [ ! -d "${{ github.workspace }}/macos" ]; then
             mkdir ${{ github.workspace }}/macos
           fi
-          mv ./macos-deps-${{ env.CURRENT_DATE }}.tar.gz ${{ github.workspace }}/macos
+          mv ./macos-deps-${{ env.CURRENT_ARCH }}-${{ env.CURRENT_DATE }}.tar.gz ${{ github.workspace }}/macos
       - name: PublishBuildArtifacts
         if: success() && github.event_name != 'pull_request'
         uses: actions/upload-artifact@v2.2.0
         with:
-          name: 'macos-deps-${{ env.CURRENT_DATE }}'
+          name: 'macos-deps-${{ env.CURRENT_ARCH }}-${{ env.CURRENT_DATE }}'
           path: ./macos/*.tar.gz
   macos64-qt:
     name: Build macOS Qt dependency (64bit)
@@ -628,6 +632,10 @@ jobs:
         shell: bash
         id: get_date
         run: echo "CURRENT_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
+      - name: Get Current Arch
+        shell: bash
+        id: get_arch
+        run: echo "CURRENT_ARCH=$(uname -m)" >> $GITHUB_ENV
       - name: Build environment setup
         shell: bash
         run: |
@@ -707,16 +715,16 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD/obsdeps
         run: |
-          tar -czf macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_DATE }}.tar.gz obsdeps
+          tar -czf macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_ARCH }}-${{ env.CURRENT_DATE }}.tar.gz obsdeps
           if [ ! -d "${{ github.workspace }}/macos" ]; then
             mkdir ${{ github.workspace }}/macos
           fi
-          mv macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_DATE }}.tar.gz ${{ github.workspace }}/macos
+          mv macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_ARCH }}-${{ env.CURRENT_DATE }}.tar.gz ${{ github.workspace }}/macos
       - name: PublishBuildArtifacts
         if: success() && github.event_name != 'pull_request'
         uses: actions/upload-artifact@v2.2.0
         with:
-          name: 'macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_DATE }}'
+          name: 'macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_ARCH }}-${{ env.CURRENT_DATE }}'
           path: ./macos/*.tar.gz
   make-release:
     name: 'Create and upload release'
@@ -753,7 +761,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/macos-deps-${{ env.CURRENT_DATE }}/macos-deps-${{ env.CURRENT_DATE }}.tar.gz
+          asset_path: ${{ github.workspace }}/macos-deps-${{ env.CURRENT_ARCH }}-${{ env.CURRENT_DATE }}/macos-deps-${{ env.CURRENT_ARCH }}-${{ env.CURRENT_DATE }}.tar.gz
           asset_name: macos-deps-${{ env.CURRENT_ARCH }}-${{ steps.get_version.outputs.VERSION }}.tar.gz
           asset_content_type: application/octet-stream
       - name: 'Upload macOS Qt dependency to release'
@@ -762,6 +770,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_DATE }}/macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_DATE }}.tar.gz
+          asset_path: ${{ github.workspace }}/macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_ARCH }}-${{ env.CURRENT_DATE }}/macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_ARCH }}-${{ env.CURRENT_DATE }}.tar.gz
           asset_name: macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_ARCH }}-${{ steps.get_version.outputs.VERSION }}.tar.gz
           asset_content_type: application/octet-stream
