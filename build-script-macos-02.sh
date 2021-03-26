@@ -53,6 +53,7 @@ export MACOSX_DEPLOYMENT_TARGET="10.13"
 export FFMPEG_REVISION="06"
 export PATH="/usr/local/opt/ccache/libexec:${PATH}"
 export CURRENT_DATE="$(date +"%Y-%m-%d")"
+export CURRENT_ARCH="$(uname -m)"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig"
 export PARALLELISM="$(sysctl -n hw.ncpu)"
 export FFMPEG_DEP_HASH="$FFMPEG_DEP_HASH"
@@ -146,7 +147,16 @@ build_03_get_current_date() {
 }
 
 
-build_04_build_environment_setup() {
+build_04_get_current_arch() {
+    step "Get Current Arch"
+    trap "caught_error 'Get Current Arch'" ERR
+    ensure_dir ${BASE_DIR}
+
+
+}
+
+
+build_05_build_environment_setup() {
     step "Build environment setup"
     trap "caught_error 'Build environment setup'" ERR
     ensure_dir ${BASE_DIR}
@@ -159,7 +169,7 @@ build_04_build_environment_setup() {
 }
 
 
-build_06_build_dependency_qt() {
+build_07_build_dependency_qt() {
     step "Build dependency Qt"
     trap "caught_error 'Build dependency Qt'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -220,16 +230,16 @@ build_06_build_dependency_qt() {
 }
 
 
-build_07_package_dependencies() {
+build_08_package_dependencies() {
     step "Package dependencies"
     trap "caught_error 'Package dependencies'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/obsdeps
 
-    tar -czf macos-qt-${MAC_QT_VERSION}-${CURRENT_DATE}.tar.gz obsdeps
+    tar -czf macos-qt-${MAC_QT_VERSION}-${CURRENT_ARCH}-${CURRENT_DATE}.tar.gz obsdeps
     if [ ! -d "${BASE_DIR}/macos" ]; then
       mkdir ${BASE_DIR}/macos
     fi
-    mv macos-qt-${MAC_QT_VERSION}-${CURRENT_DATE}.tar.gz ${BASE_DIR}/macos
+    mv macos-qt-${MAC_QT_VERSION}-${CURRENT_ARCH}-${CURRENT_DATE}.tar.gz ${BASE_DIR}/macos
 }
 
 
@@ -238,9 +248,10 @@ obs-deps-build-main() {
 
     build_02_install_homebrew_dependencies
     build_03_get_current_date
-    build_04_build_environment_setup
-    build_06_build_dependency_qt
-    build_07_package_dependencies
+    build_04_get_current_arch
+    build_05_build_environment_setup
+    build_07_build_dependency_qt
+    build_08_package_dependencies
 
     restore_brews
 
