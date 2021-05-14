@@ -39,7 +39,7 @@ git clone https://github.com/obsproject/obs-deps.git
 ```
 
 * Enter the `obs-deps` directory
-* (*Optional*) Create the build scripts by running `./build_script_generator.py .github/workflows/build_deps.yml`
+* (*Optional*) Create the build scripts by running `./utils/build_script_generator.py .github/workflows/build_deps.yml`
 * Run `bash ./build-script-macos-01.sh` to build main dependencies
 * Run `bash ./build-script-macos-02.sh` to build Qt dependency
 
