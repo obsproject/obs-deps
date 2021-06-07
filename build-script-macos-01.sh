@@ -17,30 +17,30 @@ export LIBLAME_VERSION="3.100"
 export LIBLAME_HASH="ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e"
 export LIBPNG_VERSION="1.6.37"
 export LIBPNG_HASH="505e70834d35383537b6491e7ae8641f1a4bed1876dbfe361201fc80868d88ca"
-export LIBOPUS_VERSION="1.3.1"
-export LIBOPUS_HASH="65b58e1e25b2a114157014736a3d9dfeaad8d41be1c8179866f144a2fb44ff9d"
+export LIBOPUS_VERSION="2021-05-12"
+export LIBOPUS_HASH="dfd6c88aaa54a03a61434c413e30c217eb98f1d5"
 export LIBOGG_VERSION="1.3.4"
 export LIBOGG_HASH="fe5670640bd49e828d64d2879c31cb4dde9758681bb664f9bdbf159a01b0c76e"
 export LIBRNNOISE_VERSION="2020-07-28"
 export LIBRNNOISE_HASH="90ec41ef659fd82cfec2103e9bb7fc235e9ea66c"
 export LIBVORBIS_VERSION="1.3.7"
 export LIBVORBIS_HASH="b33cc4934322bcbf6efcbacf49e3ca01aadbea4114ec9589d1b1e9d20f72954b"
-export LIBVPX_VERSION="1.9.0"
-export LIBVPX_HASH="d279c10e4b9316bf11a570ba16c3d55791e1ad6faa4404c67422eb631782c80a"
+export LIBVPX_VERSION="1.10.0"
+export LIBVPX_HASH="85803ccbdbdd7a3b03d930187cb055f1353596969c1f92ebec2db839fa4f834a"
 export LIBJANSSON_VERSION="2.13.1"
 export LIBJANSSON_HASH="f4f377da17b10201a60c1108613e78ee15df6b12016b116b6de42209f47a474f"
-export LIBX264_VERSION="r3027"
-export LIBX264_HASH="4121277b40a667665d4eea1726aefdc55d12d110"
+export LIBX264_VERSION="2021-05-05"
+export LIBX264_HASH="b684ebe04a6f80f8207a57940a1fa00e25274f81"
 export LIBMBEDTLS_VERSION="2.24.0"
 export LIBMEDTLS_HASH="b5a779b5f36d5fc4cba55faa410685f89128702423ad07b36c5665441a06a5f3"
-export LIBSRT_VERSION="1.4.1"
-export LIBSRT_HASH="e80ca1cd0711b9c70882c12ec365cda1ba852e1ce8acd43161a21a04de0cbf14"
+export LIBSRT_VERSION="1.4.3"
+export LIBSRT_HASH="c06e05664c71d635c37207a2b5a444f2c4a95950a3548402b3e0c524f735b33d"
 export LIBTHEORA_VERSION="1.1.1"
 export LIBTHEORA_HASH="b6ae1ee2fa3d42ac489287d3ec34c5885730b1296f0801ae577a35193d3affbc"
-export FFMPEG_VERSION="4.2.3"
-export FFMPEG_HASH="9df6c90aed1337634c1fb026fb01c154c29c82a64ea71291ff2da9aacb9aad31"
+export FFMPEG_VERSION="4.4"
+export FFMPEG_HASH="06b10a183ce5371f915c6bb15b7b1fffbe046e8275099c96affc29e17645d909"
 export LIBLUAJIT_VERSION="2.1"
-export LIBLUAJIT_HASH="ec6edc5c39c25e4eb3fca51b753f9995e97215da"
+export LIBLUAJIT_HASH="aa7ac6606872e4e21f92400d8491564ace10f259"
 export LIBFREETYPE_VERSION="2.10.4"
 export LIBFREETYPE_HASH="86a854d8905b19698bbc8f23b860bc104246ce4854dcea8e3b0fb21284f75784"
 export SPEEXDSP_VERSION="1.2.0"
@@ -51,12 +51,13 @@ export SWIG_VERSION="4.0.2"
 export SWIG_HASH="d53be9730d8d58a16bf0cbd1f8ac0c0c3e1090573168bfa151b01eb47fa906fc"
 export MACOSX_DEPLOYMENT_TARGET="10.13"
 export FFMPEG_REVISION="06"
+export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig"
 export PATH="/usr/local/opt/ccache/libexec:${PATH}"
 export CURRENT_DATE="$(date +"%Y-%m-%d")"
 export CURRENT_ARCH="$(uname -m)"
-export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig"
 export PARALLELISM="$(sysctl -n hw.ncpu)"
 export FFMPEG_DEP_HASH="$FFMPEG_DEP_HASH"
+export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
 
 hr() {
      echo -e "${COLOR_BLUE}[${PRODUCT_NAME}] ${1}${COLOR_RESET}"
@@ -136,6 +137,8 @@ build_02_install_homebrew_dependencies() {
     fi
     brew bundle
     export PATH="$PATH:/usr/local/opt/gnu-tar/libexec/gnubin"
+    export PATH="$PATH:/usr/local/opt/curl/bin"
+    export PATH="/usr/local/opt/curl/bin:$PATH"
 }
 
 
@@ -170,6 +173,13 @@ build_05_build_environment_setup() {
     
     FFMPEG_DEP_HASH="$(echo "rev${FFMPEG_REVISION}-${LIBPNG_VERSION}-${LIBLAME_VERSION}-${LIBOGG_VERSION}-${LIBVORBIS_VERSION}-${LIBVPX_VERSION}-${LIBOPUS_VERSION}-${LIBX264_VERSION}-${LIBSRT_VERSION}-${LIBMBEDTLS_VERSION}-${LIBTHEORA_VERSION}" | sha256sum | cut -d " " -f 1)"
     
+    if [ $(echo "${MACOSX_DEPLOYMENT_TARGET}" | cut -d "." -f 1) -lt 11 ]; then
+      DARWIN_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 2)+4))";
+    else
+      DARWIN_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 1)+9))";
+    fi
+    export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+    
 }
 
 
@@ -181,10 +191,14 @@ build_07_build_dependency_libpng() {
     ${BASE_DIR}/utils/safe_fetch "https://downloads.sourceforge.net/project/libpng/libpng16/${LIBPNG_VERSION}/libpng-${LIBPNG_VERSION}.tar.xz" "${LIBPNG_HASH}"
     tar -xf libpng-${LIBPNG_VERSION}.tar.xz
     cd libpng-${LIBPNG_VERSION}
-    mkdir build
+    # hacks to let us build with neon png implementation with CMAKE_OSX_ARCHITECTURES
+    sed -i '.orig' "s/#ifdef PNG_READ_SUPPORTED/#if defined(__ARM_NEON__) \&\& defined(PNG_READ_SUPPORTED)/" ./arm/arm_init.c
+    gsed -i'.orig' -e "s/#  define PNG_FILTER_OPTIMIZATIONS png_init_filter_functions_neon/#if defined(__ARM_NEON__)\n#define PNG_FILTER_OPTIMIZATIONS png_init_filter_functions_neon\n#endif/" ./pngpriv.h
+    sed -i '.orig' "s/CMAKE_SYSTEM_PROCESSOR MATCHES \"\^aarch64\")/CMAKE_OSX_ARCHITECTURES MATCHES \".*arm64.*\" OR &/" CMakeLists.txt
+    cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/tmp/obsdeps -DCMAKE_PREFIX_PATH=/tmp/obsdeps -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DPNG_SHARED=OFF -DPNG_TESTS=OFF -DPNG_STATIC=ON -DPNG_ARM_NEON=on
     cd build
-    ../configure --enable-static --disable-shared --prefix="/tmp/obsdeps"
-    make -j${PARALLELISM}
+    mkdir arm64 # some config expects this to be here and fails otherwise
+    make -j${PARALLELISM} ASM_DEFINES="-DPNG_ARM_NEON_IMPLEMENTATION=1"
 }
 
 
@@ -202,12 +216,11 @@ build_09_build_dependency_libopus() {
     trap "caught_error 'Build dependency libopus'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
 
-    ${BASE_DIR}/utils/safe_fetch "https://ftp.osuosl.org/pub/xiph/releases/opus/opus-${LIBOPUS_VERSION}.tar.gz" "${LIBOPUS_HASH}"
-    tar -xf opus-${LIBOPUS_VERSION}.tar.gz
-    cd ./opus-${LIBOPUS_VERSION}
-    mkdir build
-    cd ./build
-    ../configure --disable-shared --enable-static --disable-doc --prefix="/tmp/obsdeps"
+    mkdir opus-${LIBOPUS_VERSION}
+    cd opus-${LIBOPUS_VERSION}
+    ${BASE_DIR}/utils/github_fetch xiph opus ${LIBOPUS_HASH}
+    cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/tmp/obsdeps -DCMAKE_PREFIX_PATH=/tmp/obsdeps -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF -DOPUS_BUILD_PROGRAMS=OFF
+    cd build
     make -j${PARALLELISM}
 }
 
@@ -215,7 +228,7 @@ build_09_build_dependency_libopus() {
 build_10_install_dependency_libopus() {
     step "Install dependency libopus"
     trap "caught_error 'Install dependency libopus'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/opus-1.3.1/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/opus-2021-05-12/build
 
     make install
 }
@@ -230,9 +243,8 @@ build_11_build_dependency_libogg() {
     tar -xf libogg-${LIBOGG_VERSION}.tar.gz
     cd ./libogg-${LIBOGG_VERSION}
     ${BASE_DIR}/utils/apply_patch "https://github.com/xiph/ogg/commit/c8fca6b4a02d695b1ceea39b330d4406001c03ed.patch?full_index=1" "0f4d289aecb3d5f7329d51f1a72ab10c04c336b25481a40d6d841120721be485"
-    mkdir build
-    cd ./build
-    ../configure --disable-shared --enable-static --prefix="/tmp/obsdeps"
+    cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/tmp/obsdeps -DCMAKE_PREFIX_PATH=/tmp/obsdeps -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DBUILD_SHARED_LIBS=OFF -DINSTALL_DOCS=OFF
+    cd build
     make -j${PARALLELISM}
 }
 
@@ -254,9 +266,8 @@ build_13_build_dependency_libvorbis() {
     ${BASE_DIR}/utils/safe_fetch "https://downloads.xiph.org/releases/vorbis/libvorbis-${LIBVORBIS_VERSION}.tar.xz" "${LIBVORBIS_HASH}"
     tar -xf libvorbis-${LIBVORBIS_VERSION}.tar.xz
     cd ./libvorbis-${LIBVORBIS_VERSION}
-    mkdir build
-    cd ./build
-    ../configure --disable-shared --enable-static --prefix="/tmp/obsdeps"
+    cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/tmp/obsdeps -DCMAKE_PREFIX_PATH=/tmp/obsdeps -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DBUILD_SHARED_LIBS=OFF
+    cd build
     make -j${PARALLELISM}
 }
 
@@ -275,40 +286,32 @@ build_15_build_dependency_libvpx() {
     trap "caught_error 'Build dependency libvpx'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
 
-    # Note: libvpx 1.9.0, which is the most current release when this was written,
-    # doesn't support building for arm64 on macOS, but the latest development code
-    # supports building for arm64 on macOS. So, on Apple Silicon Macs, we have to clone
-    # the latest code instead of downloading an archive. This can be revised when the
-    # next version of libvpx comes out.
-    if [ `arch` = "arm64" ]; then
-      git clone "https://chromium.googlesource.com/webm/libvpx" libvpx-${LIBVPX_VERSION}
-    else
-      ${BASE_DIR}/utils/safe_fetch "https://github.com/webmproject/libvpx/archive/v${LIBVPX_VERSION}.tar.gz" "${LIBVPX_HASH}"
-      mkdir -p ./libvpx-v${LIBVPX_VERSION}
-      tar -xf v${LIBVPX_VERSION}.tar.gz
-    fi
-    cd ./libvpx-${LIBVPX_VERSION}
-    mkdir -p build
-    cd ./build
-    if [ `arch` = "arm64" ]; then
-      ../configure --target="arm64-darwin20-gcc" --disable-shared --disable-examples --disable-unit-tests --enable-pic --enable-vp9-highbitdepth --prefix="/tmp/obsdeps" --libdir="/tmp/obsdeps/lib"
-    else
-      # Assumption is that macOS has switched to proper major version numbering with Big Sur
-      if [ $(echo "${MACOSX_DEPLOYMENT_TARGET}" | cut -d "." -f 1) -lt 11 ]; then
-        VPX_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 2)+4))";
-      else
-        VPX_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 1)+9))";
-      fi
-      ../configure --target="x86_64-darwin$VPX_TARGET-gcc" --disable-shared --disable-examples --disable-unit-tests --enable-pic --enable-vp9-highbitdepth --prefix="/tmp/obsdeps" --libdir="/tmp/obsdeps/lib"
-    fi
+    ${BASE_DIR}/utils/safe_fetch "https://github.com/webmproject/libvpx/archive/v${LIBVPX_VERSION}.tar.gz" "${LIBVPX_HASH}"
+    tar -xf v${LIBVPX_VERSION}.tar.gz
+    cd libvpx-${LIBVPX_VERSION}
+    mkdir -p build_arm64
+    mkdir -p build_x86_64
+    cd build_arm64
+    ../configure --target="arm64-darwin20-gcc" --disable-shared --disable-examples --disable-unit-tests --enable-pic --enable-vp9-highbitdepth --prefix="/tmp/obsdeps"
     make -j${PARALLELISM}
+    cd ..
+    cd build_x86_64
+    ../configure --target="x86_64-darwin${DARWIN_TARGET}-gcc" --disable-shared --disable-examples --disable-unit-tests --enable-pic --enable-vp9-highbitdepth --prefix="/tmp/obsdeps"
+    make -j${PARALLELISM}
+    cd ..
+    cp -R build_x86_64 build_universal
+    cd build_universal
+    lipo -create ../build_x86_64/libvpx.a ../build_arm64/libvpx.a -output ./libvpx.a
+    lipo -create ../build_x86_64/libvpx_g.a ../build_arm64/libvpx_g.a -output ./libvpx_g.a
+    lipo -create ../build_x86_64/libvp9rc.a ../build_arm64/libvp9rc.a -output ./libvp9rc.a
+    lipo -create ../build_x86_64/libvp9rc_g.a ../build_arm64/libvp9rc_g.a -output ./libvp9rc_g.a
 }
 
 
 build_16_install_dependency_libvpx() {
     step "Install dependency libvpx"
     trap "caught_error 'Install dependency libvpx'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/libvpx-1.9.0/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/libvpx-1.10.0/build_universal
 
     make install
 }
@@ -331,10 +334,25 @@ build_17_build_dependency_libx264() {
     mkdir -p x264-${LIBX264_VERSION}
     cd ./x264-${LIBX264_VERSION}
     ${BASE_DIR}/utils/github_fetch mirror x264 "${LIBX264_HASH}"
-    mkdir build
-    cd ./build
-    ../configure --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" --enable-shared --disable-lsmash --disable-swscale --disable-ffms --enable-strip --prefix="/tmp/obsdeps"
+    
+    mkdir build_x86_64
+    cd ./build_x86_64
+    ../configure --extra-ldflags="-mmacosx-version-min=10.13" --enable-shared --enable-static --disable-lsmash --disable-swscale --disable-ffms --enable-strip --enable-pic --prefix="/tmp/obsdeps" --host="x86_64-apple-darwin${DARWIN_TARGET}"
     make -j${PARALLELISM}
+    cd ..
+    mkdir build_arm64
+    cd ./build_arm64
+    ../configure --enable-shared --enable-static --disable-lsmash --disable-swscale --disable-ffms --enable-strip --enable-pic --prefix="/tmp/obsdeps" --host="aarch64-apple-darwin20"
+    make -j${PARALLELISM}
+    cd ..
+    cp -R build_x86_64 build_universal
+    cd build_universal
+    lipo -create ../build_x86_64/libx264.a ../build_arm64/libx264.a -output ./libx264.a
+    lipo -create ../build_x86_64/x264 ../build_arm64/x264 -output ./x264
+    DYLIB_NAME=$(basename $(find . -maxdepth 1 -type f -name "*.dylib"))
+    lipo -create ../build_x86_64/${DYLIB_NAME} ../build_arm64/${DYLIB_NAME} -output ./${DYLIB_NAME}
+    unset DYLIB_NAME
+    
     if [ "${MACOS_MAJOR}" -eq 10 ] && [ "${MACOS_MINOR}" -le 13 ]; then
       unset CC
       unset LD
@@ -346,7 +364,7 @@ build_17_build_dependency_libx264() {
 build_18_install_dependency_libx264() {
     step "Install dependency libx264"
     trap "caught_error 'Install dependency libx264'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/x264-r3027/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/x264-2021-05-05/build_universal
 
     make install
     ln -f -s libx264.*.dylib libx264.dylib
@@ -364,17 +382,32 @@ build_19_build_dependency_libtheora() {
     ${BASE_DIR}/utils/safe_fetch "https://downloads.xiph.org/releases/theora/libtheora-${LIBTHEORA_VERSION}.tar.bz2" "${LIBTHEORA_HASH}"
     tar -xf libtheora-${LIBTHEORA_VERSION}.tar.bz2
     cd libtheora-${LIBTHEORA_VERSION}
-    mkdir build
-    cd ./build
-    ../configure --disable-shared --enable-static --disable-oggtest --disable-vorbistest --disable-examples --prefix="/tmp/obsdeps"
+    
+    mkdir build_x86_64
+    cd ./build_x86_64
+    ../configure --disable-shared --enable-static --disable-oggtest --disable-vorbistest --disable-examples --prefix="/tmp/obsdeps" --host="x86_64-apple-darwin" CFLAGS="-arch x86_64"
     make -j${PARALLELISM}
+    cd ..
+    
+    mkdir build_arm64
+    cd ./build_arm64
+    ../configure --disable-shared --enable-static --disable-oggtest --disable-vorbistest --disable-examples --prefix="/tmp/obsdeps" --host="arm-apple-darwin20" CFLAGS="-arch arm64"
+    make -j${PARALLELISM}
+    cd ..
+    
+    rm -rf build_universal
+    cp -R build_x86_64 build_universal
+    cd ./build_universal
+    lipo -create ../build_x86_64/lib/.libs/libtheoraenc.a ../build_arm64/lib/.libs/libtheoraenc.a -output ./lib/.libs/libtheoraenc.a
+    lipo -create ../build_x86_64/lib/.libs/libtheora.a ../build_arm64/lib/.libs/libtheora.a -output ./lib/.libs/libtheora.a
+    lipo -create ../build_x86_64/lib/.libs/libtheoradec.a ../build_arm64/lib/.libs/libtheoradec.a -output ./lib/.libs/libtheoradec.a
 }
 
 
 build_20_install_dependency_libtheora() {
     step "Install dependency libtheora"
     trap "caught_error 'Install dependency libtheora'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/libtheora-1.1.1/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/libtheora-1.1.1/build_universal
 
     make install
 }
@@ -389,17 +422,31 @@ build_21_build_dependency_liblame() {
     tar -xf lame-${LIBLAME_VERSION}.tar.gz
     cd lame-${LIBLAME_VERSION}
     sed -i '.orig' '/lame_init_old/d' ./include/libmp3lame.sym
-    mkdir build
-    cd ./build
-    ../configure --disable-shared --disable-dependency-tracking --disable-debug --enable-nasm --prefix="/tmp/obsdeps"
+    
+    mkdir build_x86_64
+    cd ./build_x86_64
+    ../configure --disable-shared --disable-dependency-tracking --disable-debug --enable-nasm --prefix="/tmp/obsdeps" --host="x86_64-apple-darwin${DARWIN_TARGET}" CFLAGS="-arch x86_64"
     make -j${PARALLELISM}
+    cd ..
+    
+    mkdir build_arm64
+    cd ./build_arm64
+    ../configure --disable-shared --disable-dependency-tracking --disable-debug --enable-nasm --prefix="/tmp/obsdeps" --host="arm-apple-darwin" CFLAGS="-arch arm64"
+    make -j${PARALLELISM}
+    cd ..
+    
+    cp -R build_x86_64 build_universal
+    cd ./build_universal
+    lipo -create ../build_x86_64/mpglib/.libs/libmpgdecoder.a ../build_arm64/mpglib/.libs/libmpgdecoder.a -output ./mpglib/.libs/libmpgdecoder.a
+    lipo -create ../build_x86_64/libmp3lame/.libs/libmp3lame.a ../build_arm64/libmp3lame/.libs/libmp3lame.a -output ./libmp3lame/.libs/libmp3lame.a
+    lipo -create ../build_x86_64/./frontend/lame ../build_arm64/./frontend/lame -output ./frontend/lame
 }
 
 
 build_22_install_dependency_liblame() {
     step "Install dependency liblame"
     trap "caught_error 'Install dependency liblame'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/lame-3.100/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/lame-3.100/build_universal
 
     make install
 }
@@ -417,7 +464,7 @@ build_23_build_dependency_libmbedtls() {
     sed -i '.orig' 's/\/\/\#define MBEDTLS_THREADING_C/\#define MBEDTLS_THREADING_C/g' include/mbedtls/config.h
     mkdir build
     cd ./build
-    cmake -DCMAKE_INSTALL_PREFIX="/tmp/obsdeps" -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DENABLE_PROGRAMS=OFF ..
+    cmake -DCMAKE_INSTALL_PREFIX="/tmp/obsdeps" -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DENABLE_PROGRAMS=OFF -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" ..
     make -j${PARALLELISM}
 }
 
@@ -494,7 +541,7 @@ build_25_build_dependency_libsrt() {
     cd srt-${LIBSRT_VERSION}
     mkdir build
     cd ./build
-    cmake -DCMAKE_INSTALL_PREFIX="/tmp/obsdeps" -DENABLE_APPS=OFF -DUSE_ENCLIB="mbedtls" -DENABLE_STATIC=ON -DENABLE_SHARED=OFF -DSSL_INCLUDE_DIRS="/tmp/obsdeps/include" -DSSL_LIBRARY_DIRS="/tmp/obsdeps/lib" -DCMAKE_FIND_FRAMEWORK=LAST ..
+    cmake -DCMAKE_INSTALL_PREFIX="/tmp/obsdeps" -DENABLE_APPS=OFF -DUSE_ENCLIB="mbedtls" -DENABLE_STATIC=ON -DENABLE_SHARED=OFF -DSSL_INCLUDE_DIRS="/tmp/obsdeps/include" -DSSL_LIBRARY_DIRS="/tmp/obsdeps/lib" -DCMAKE_FIND_FRAMEWORK=LAST -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" ..
     make -j${PARALLELISM}
 }
 
@@ -502,7 +549,7 @@ build_25_build_dependency_libsrt() {
 build_26_install_dependency_libsrt() {
     step "Install dependency libsrt"
     trap "caught_error 'Install dependency libsrt'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/srt-1.4.1/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/srt-1.4.3/build
 
     make install
 }
@@ -526,10 +573,35 @@ build_28_build_dependency_ffmpeg() {
       brew unlink sdl2
     fi
     cd ./ffmpeg-${FFMPEG_VERSION}
-    mkdir build
-    cd ./build
-    ../configure --host-cflags="-I/tmp/obsdeps/include" --host-ldflags="-L/tmp/obsdeps/lib" --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" --enable-shared --disable-static --enable-pthreads --enable-version3 --shlibdir="/tmp/obsdeps/lib" --enable-gpl --enable-videotoolbox --disable-libjack --disable-indev=jack --disable-outdev=sdl --disable-programs --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --enable-libtheora --enable-libmp3lame
+    
+    mkdir build_arm64
+    cd ./build_arm64
+    PKG_CONFIG_PATH=/tmp/obsdeps/lib/pkgconfig ../configure --host-cflags="-I/tmp/obsdeps/include" --host-ldflags="-L/tmp/obsdeps/lib" --pkg-config-flags="--static" \
+                --extra-ldflags="-target arm64-apple-macos20 -L/tmp/obsdeps/lib -lstdc++" \
+                --extra-cflags="-fno-stack-check -target arm64-apple-macos20 -I/tmp/obsdeps/include" \
+                --arch=arm64 --enable-cross-compile --enable-shared --disable-static --enable-pthreads \
+                --enable-version3 --shlibdir="/tmp/obsdeps/lib" --enable-gpl --enable-videotoolbox --disable-libjack --disable-indev=jack \
+                --disable-outdev=sdl --disable-programs --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx \
+                --enable-libsrt --enable-libtheora --enable-libmp3lame
     make -j${PARALLELISM}
+    cd ..
+    
+    mkdir build_x86_64
+    cd ./build_x86_64
+    PKG_CONFIG_PATH=/tmp/obsdeps/lib/pkgconfig ../configure --host-cflags="-I/tmp/obsdeps/include" --host-ldflags="-L/tmp/obsdeps/lib" --pkg-config-flags="--static" \
+      --extra-ldflags="-target x86_64-apple-macos${DARWIN_TARGET} -L/tmp/obsdeps/lib -lstdc++" \
+      --extra-cflags="-fno-stack-check -target x86_64-apple-macos${DARWIN_TARGET} -I/tmp/obsdeps/include" \
+      --arch=x86_64 --enable-cross-compile --enable-shared --disable-static --enable-pthreads \
+      --enable-version3 --shlibdir="/tmp/obsdeps/lib" --enable-gpl --enable-videotoolbox --disable-libjack --disable-indev=jack \
+      --disable-outdev=sdl --disable-programs --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx \
+      --enable-libsrt --enable-libtheora --enable-libmp3lame
+    make -j${PARALLELISM}
+    cd ..
+    
+    rm -rf build_universal
+    cp -R build_x86_64 build_universal
+    cd build_universal
+    find . -type f -name "*.dylib" -print0 | xargs -0 -I{} lipo -create "{}" "../build_arm64/{}" -output "{}"
     
     if [ -d /usr/local/opt/xz ] && [ ! -f /usr/local/lib/liblzma.dylib ]; then
       brew link xz
@@ -544,7 +616,7 @@ build_28_build_dependency_ffmpeg() {
 build_29_install_dependency_ffmpeg() {
     step "Install dependency ffmpeg"
     trap "caught_error 'Install dependency ffmpeg'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/ffmpeg-4.2.3/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/ffmpeg-4.4/build_universal
 
     find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/lib/ \;
     rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${BASE_DIR}/CI_BUILD/obsdeps/include/
@@ -560,19 +632,36 @@ build_31_build_dependency_swig() {
     ${BASE_DIR}/utils/safe_fetch "https://downloads.sourceforge.net/project/swig/swig/swig-${SWIG_VERSION}/swig-${SWIG_VERSION}.tar.gz" "${SWIG_HASH}"
     tar -xf swig-${SWIG_VERSION}.tar.gz
     cd swig-${SWIG_VERSION}
-    mkdir build
-    cd build
     ${BASE_DIR}/utils/safe_fetch "https://ftp.pcre.org/pub/pcre/pcre-${PCRE_VERSION}.tar.bz2" "${PCRE_HASH}"
-    ../Tools/pcre-build.sh
-    ../configure --disable-dependency-tracking --prefix="/tmp/obsdeps"
+    
+    mkdir build_arm64
+    cp pcre-${PCRE_VERSION}.tar.bz2 build_arm64
+    cd build_arm64
+    CFLAGS="-arch arm64" LDFLAGS="-arch arm64" CXXFLAGS="-arch arm64" ../Tools/pcre-build.sh --host=aarch64-apple-darwin20
+    ../configure --disable-dependency-tracking --prefix="/tmp/obsdeps" --host=aarch64-apple-darwin20 CFLAGS="-arch arm64" LDFLAGS="-arch arm64" CXXFLAGS="-arch arm64"
     make -j${PARALLELISM}
+    cd ..
+    
+    mkdir build_x86_64
+    cp pcre-${PCRE_VERSION}.tar.bz2 build_x86_64
+    cd build_x86_64
+    CFLAGS="-arch x86_64" LDFLAGS="-arch x86_64" CXXFLAGS="-arch x86_64" ../Tools/pcre-build.sh --host=x86_64-apple-darwin${DARWIN_TARGET}
+    ../configure --disable-dependency-tracking --prefix="/tmp/obsdeps" --host=x86_64-apple-darwin${DARWIN_TARGET} CFLAGS="-arch x86_64" LDFLAGS="-arch x86_64" CXXFLAGS="-arch x86_64"
+    make -j${PARALLELISM}
+    cd ..
+    
+    rm -rf build_universal
+    cp -R build_x86_64 build_universal
+    cd build_universal
+    lipo -create swig ../build_arm64/swig -output ./swig
+    lipo -create CCache/ccache-swig ../build_arm64/CCache/ccache-swig -output CCache/ccache-swig
 }
 
 
 build_32_install_dependency_swig() {
     step "Install dependency swig"
     trap "caught_error 'Install dependency swig'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/swig-4.0.2/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/swig-4.0.2/build_universal
 
     cp swig ${BASE_DIR}/CI_BUILD/obsdeps/bin/
     mkdir -p ${BASE_DIR}/CI_BUILD/obsdeps/share/swig/${SWIG_VERSION}
@@ -590,17 +679,31 @@ build_34_build_depdendency_speexdsp() {
     cd speexdsp-SpeexDSP-${SPEEXDSP_VERSION}
     sed -i '.orig' "s/CFLAGS='-O3'/CFLAGS='-O3  -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}'/" ./SpeexDSP.spec.in
     ./autogen.sh
-    mkdir -p build
-    cd ./build
-    ../configure --prefix="/tmp/obsdeps" --disable-dependency-tracking
+    
+    mkdir build_x86_64
+    cd ./build_x86_64
+    ../configure --prefix="/tmp/obsdeps" --disable-dependency-tracking --host=x86_64-apple-darwin${DARWIN_TARGET} CFLAGS="-arch x86_64"
     make -j${PARALLELISM}
+    cd ..
+    
+    mkdir build_arm64
+    cd ./build_arm64
+    ../configure --prefix="/tmp/obsdeps" --disable-dependency-tracking --host=arm64-apple-darwin${DARWIN_TARGET} CFLAGS="-arch arm64"
+    make -j${PARALLELISM}
+    cd ..
+    
+    cp -R build_x86_64 build_universal
+    cd build_universal
+    lipo -create ../build_x86_64/libspeexdsp/.libs/libspeexdsp.a ../build_arm64/libspeexdsp/.libs/libspeexdsp.a -output ./libspeexdsp/.libs/libspeexdsp.a
+    lipo -create ../build_x86_64/libspeexdsp/.libs/libspeexdsp.dylib ../build_arm64/libspeexdsp/.libs/libspeexdsp.dylib -output ./libspeexdsp/.libs/libspeexdsp.dylib
+    lipo -create ../build_x86_64/libspeexdsp/.libs/libspeexdsp.1.dylib ../build_arm64/libspeexdsp/.libs/libspeexdsp.1.dylib -output ./libspeexdsp/.libs/libspeexdsp.1.dylib
 }
 
 
 build_35_install_dependency_speexdsp() {
     step "Install dependency SpeexDSP"
     trap "caught_error 'Install dependency SpeexDSP'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/speexdsp-SpeexDSP-1.2.0/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/speexdsp-SpeexDSP-1.2.0/build_universal
 
     find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/lib/ \;
     rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/* ${BASE_DIR}/CI_BUILD/obsdeps/include/
@@ -613,20 +716,36 @@ build_37_build_dependency_libjansson() {
     trap "caught_error 'Build dependency libjansson'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
 
-    ${BASE_DIR}/utils/safe_fetch "https://digip.org/jansson/releases/jansson-${LIBJANSSON_VERSION}.tar.gz" "${LIBJANSSON_HASH}"
+    if [ ! -f jansson-${LIBJANSSON_VERSION}.tar.gz ]; then
+      ${BASE_DIR}/utils/safe_fetch "https://digip.org/jansson/releases/jansson-${LIBJANSSON_VERSION}.tar.gz" "${LIBJANSSON_HASH}"
+    fi
+    
     tar -xf jansson-${LIBJANSSON_VERSION}.tar.gz
     cd jansson-${LIBJANSSON_VERSION}
-    mkdir build
-    cd ./build
-    ../configure --libdir="/tmp/obsdeps/lib" --enable-shared --disable-static
+    
+    mkdir build_x86_64
+    cd ./build_x86_64
+    ../configure --libdir="/tmp/obsdeps/lib" --enable-shared --disable-static --host=x86_64-apple-darwin${DARWIN_TARGET} CFLAGS="-arch x86_64"
     make -j${PARALLELISM}
+    cd ..
+    
+    mkdir build_arm64
+    cd ./build_arm64
+    ../configure --libdir="/tmp/obsdeps/lib" --enable-shared --disable-static --host=arm-apple-darwin${DARWIN_TARGET} CFLAGS="-arch arm64"
+    make -j${PARALLELISM}
+    cd ..
+    
+    cp -R build_x86_64 build_universal
+    cd build_universal
+    lipo -create ../build_x86_64/src/.libs/libjansson.dylib ../build_arm64/src/.libs/libjansson.dylib -output ./src/.libs/libjansson.dylib
+    lipo -create ../build_x86_64/src/.libs/libjansson.dylib ../build_arm64/src/.libs/libjansson.dylib -output ./src/.libs/libjansson.dylib
 }
 
 
 build_38_install_dependency_libjansson() {
     step "Install dependency libjansson"
     trap "caught_error 'Install dependency libjansson'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/jansson-2.13.1/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/jansson-2.13.1/build_universal
 
     find . -name \*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/lib/ \;
     rsync -avh --include="*/" --include="*.h" --exclude="*" ../src/* ${BASE_DIR}/CI_BUILD/obsdeps/include/
@@ -642,15 +761,29 @@ build_40_build_dependency_libluajit() {
 
     mkdir -p LuaJIT-${LIBLUAJIT_VERSION}
     cd LuaJIT-${LIBLUAJIT_VERSION}
-    ${BASE_DIR}/utils/github_fetch LuaJIT LuaJIT "${LIBLUAJIT_HASH}"          
-    make PREFIX="/tmp/obsdeps" -j${PARALLELISM}
+    mkdir src
+    cd src
+    ${BASE_DIR}/utils/github_fetch LuaJIT LuaJIT "${LIBLUAJIT_HASH}"
+    cd ..
+    cp -R src build_x86_64
+    cp -R src build_arm64
+    cd build_x86_64
+    make PREFIX="/tmp/obsdeps" TARGET_CFLAGS="-arch x86_64" TARGET_SHLDFLAGS="-arch x86_64" TARGET_LDFLAGS="-arch x86_64" -j${PARALLELISM}
+    cd ..
+    cd build_arm64
+    make PREFIX="/tmp/obsdeps" TARGET_CFLAGS="-arch arm64" TARGET_SHLDFLAGS="-arch arm64" TARGET_LDFLAGS="-arch arm64" -j${PARALLELISM}
+    cd ..
+    cp -R build_x86_64 build_universal
+    cd build_universal
+    lipo -create ../build_x86_64/src/libluajit.so ../build_arm64/src/libluajit.so -output ./src/libluajit.so
+    lipo -create ../build_x86_64/src/libluajit.a ../build_arm64/src/libluajit.a -output ./src/libluajit.a
 }
 
 
 build_41_install_dependency_libluajit() {
     step "Install dependency libluajit"
     trap "caught_error 'Install dependency libluajit'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/LuaJIT-2.1
+    ensure_dir ${BASE_DIR}/CI_BUILD/LuaJIT-2.1/build_universal
 
     make PREFIX="/tmp/obsdeps" install
     find /tmp/obsdeps/lib -name libluajit\*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/lib/ \;
@@ -668,17 +801,31 @@ build_43_build_dependency_libfreetype() {
     ${BASE_DIR}/utils/safe_fetch "https://downloads.sourceforge.net/project/freetype/freetype2/${LIBFREETYPE_VERSION}/freetype-${LIBFREETYPE_VERSION}.tar.xz" "${LIBFREETYPE_HASH}"
     tar -xf freetype-${LIBFREETYPE_VERSION}.tar.xz
     cd freetype-${LIBFREETYPE_VERSION}
-    mkdir build
-    cd build
-    ../configure --enable-shared --disable-static --prefix="/tmp/obsdeps" --without-harfbuzz --without-brotli
+    
+    mkdir build_x86_64
+    cd ./build_x86_64
+    ../configure --enable-shared --disable-static --prefix="/tmp/obsdeps" --without-harfbuzz --without-brotli --host=x86_64-apple-darwin${DARWIN_TARGET} CFLAGS="-arch x86_64" LDFLAGS="-arch x86_64"
     make -j${PARALLELISM}
+    cd ..
+    
+    mkdir build_arm64
+    cd ./build_arm64
+    ../configure --enable-shared --disable-static --prefix="/tmp/obsdeps" --without-harfbuzz --without-brotli --host=arm-apple-darwin${DARWIN_TARGET} CFLAGS="-arch arm64" LDFLAGS="-arch arm64"
+    make -j${PARALLELISM}
+    cd ..
+    
+    cp -R build_x86_64 build_universal
+    cd build_universal
+    sed -i '.orig' "s/build_x86_64/build_universal/" ./Makefile
+    lipo -create ../build_x86_64/.libs/libfreetype.dylib ../build_arm64/.libs/libfreetype.dylib -output ./.libs/libfreetype.dylib
+    lipo -create ../build_x86_64/./.libs/libfreetype.6.dylib ../build_arm64/./.libs/libfreetype.6.dylib -output ./.libs/libfreetype.6.dylib
 }
 
 
 build_44_install_dependency_libfreetype() {
     step "Install dependency libfreetype"
     trap "caught_error 'Install dependency libfreetype'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/freetype-2.10.4/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/freetype-2.10.4/build_universal
 
     make install
     find /tmp/obsdeps/lib -name libfreetype\*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/lib/ \;
@@ -695,17 +842,30 @@ build_46_build_dependency_librnnoise() {
     cd ./rnnoise-${LIBRNNOISE_VERSION}
     ${BASE_DIR}/utils/github_fetch xiph rnnoise "${LIBRNNOISE_HASH}"
     ./autogen.sh
-    mkdir build
-    cd build
-    ../configure --prefix="/tmp/obsdeps"
+    
+    mkdir build_x86_64
+    cd ./build_x86_64
+    ../configure --prefix="/tmp/obsdeps" --host=x86_64-apple-darwin${DARWIN_TARGET} CFLAGS="-arch x86_64" LDFLAGS="-arch x86_64"
     make -j${PARALLELISM}
+    cd ..
+    
+    mkdir build_arm64
+    cd ./build_arm64
+    ../configure --prefix="/tmp/obsdeps" --host=arm-apple-darwin${DARWIN_TARGET} CFLAGS="-arch arm64" LDFLAGS="-arch arm64"
+    make -j${PARALLELISM}
+    cd ..
+    
+    cp -R build_x86_64 build_universal
+    cd build_universal
+    lipo -create ../build_x86_64/.libs/librnnoise.0.dylib ../build_arm64/.libs/librnnoise.0.dylib -output ./.libs/librnnoise.0.dylib
+    lipo -create ../build_x86_64/.libs/librnnoise.dylib ../build_arm64/.libs/librnnoise.dylib -output ./.libs/librnnoise.dylib
 }
 
 
 build_47_install_dependency_librnnoise() {
     step "Install dependency librnnoise"
     trap "caught_error 'Install dependency librnnoise'" ERR
-    ensure_dir ${BASE_DIR}/CI_BUILD/rnnoise-2020-07-28/build
+    ensure_dir ${BASE_DIR}/CI_BUILD/rnnoise-2020-07-28/build_universal
 
     make install
     find /tmp/obsdeps/lib -name librnnoise\*.dylib -exec cp -PR \{\} ${BASE_DIR}/CI_BUILD/obsdeps/lib/ \;
@@ -718,11 +878,11 @@ build_48_package_dependencies() {
     trap "caught_error 'Package dependencies'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
 
-    tar -czf macos-deps-${CURRENT_ARCH}-${CURRENT_DATE}.tar.gz obsdeps
+    tar -czf macos-deps-universal-${CURRENT_DATE}.tar.gz obsdeps
     if [ ! -d "${BASE_DIR}/macos" ]; then
       mkdir ${BASE_DIR}/macos
     fi
-    mv ./macos-deps-${CURRENT_ARCH}-${CURRENT_DATE}.tar.gz ${BASE_DIR}/macos
+    mv ./macos-deps-universal-${CURRENT_DATE}.tar.gz ${BASE_DIR}/macos
 }
 
 
