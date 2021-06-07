@@ -106,6 +106,7 @@ jobs:
             DARWIN_TARGET="$(($(echo ${{ env.MACOSX_DEPLOYMENT_TARGET }} | cut -d "." -f 1)+9))";
           fi
           export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+          echo "DARWIN_TARGET=$(DARWIN_TARGET)" >> $GITHUB_ENV
           echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> $GITHUB_ENV
       - name: 'Restore ffmpeg dependencies from cache'
         id: ffmpeg-deps-cache
