@@ -65,18 +65,19 @@ jobs:
         uses: actions/checkout@v2.3.3
         with:
           submodules: 'recursive'
+
+      - name: 'Check for Github Labels'
+        if: github.event_name == 'pull_request'
+        run: |
+          if test -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')"; then
+            echo "SEEKING_TESTERS=1" >> $GITHUB_ENV
+          else
+            echo "SEEKING_TESTERS=0" >> $GITHUB_ENV
+          fi
+
       - name: Install Homebrew dependencies
         shell: bash
         run: |
-          if [ -d /usr/local/opt/openssl@1.0.2t ]; then
-              brew uninstall openssl@1.0.2t
-              brew untap local/openssl
-          fi
-
-          if [ -d /usr/local/opt/python@2.7.17 ]; then
-              brew uninstall python@2.7.17
-              brew untap local/python2
-          fi
           brew bundle
           echo "/usr/local/opt/gnu-tar/libexec/gnubin" >> $GITHUB_PATH
           echo "/usr/local/opt/curl/bin" >> $GITHUB_PATH
@@ -535,7 +536,6 @@ jobs:
           cd build_universal
           lipo -create swig ../build_arm64/swig -output ./swig
           lipo -create CCache/ccache-swig ../build_arm64/CCache/ccache-swig -output CCache/ccache-swig
-
       - name: 'Install dependency swig'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD/swig-${{ env.SWIG_VERSION }}/build_universal
@@ -623,7 +623,6 @@ jobs:
           cd build_universal
           lipo -create ../build_x86_64/src/.libs/libjansson.dylib ../build_arm64/src/.libs/libjansson.dylib -output ./src/.libs/libjansson.dylib
           lipo -create ../build_x86_64/src/.libs/libjansson.4.dylib ../build_arm64/src/.libs/libjansson.4.dylib -output ./src/.libs/libjansson.4.dylib
-
       - name: 'Install dependency libjansson'
         shell: bash
         working-directory: ${{ github.workspace }}/CI_BUILD/jansson-${{ env.LIBJANSSON_VERSION }}/build_universal
@@ -768,7 +767,7 @@ jobs:
           fi
           mv ./macos-deps-universal-${{ env.CURRENT_DATE }}.tar.gz ${{ github.workspace }}/macos
       - name: PublishBuildArtifacts
-        if: success() && github.event_name != 'pull_request'
+        if: ${{ success() && (github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1') }}
         uses: actions/upload-artifact@v2.2.0
         with:
           name: 'macos-deps-universal-${{ env.CURRENT_DATE }}'
@@ -783,6 +782,16 @@ jobs:
         uses: actions/checkout@v2.3.3
         with:
           submodules: 'recursive'
+
+      - name: 'Check for Github Labels'
+        if: github.event_name == 'pull_request'
+        run: |
+          if test -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')"; then
+            echo "SEEKING_TESTERS=1" >> $GITHUB_ENV
+          else
+            echo "SEEKING_TESTERS=0" >> $GITHUB_ENV
+          fi
+
       - name: Install Homebrew dependencies
         shell: bash
         run: |
@@ -951,7 +960,7 @@ jobs:
           fi
           mv macos-qt-${{ env.MAC_QT_VERSION }}-universal-${{ env.CURRENT_DATE }}.tar.gz ${{ github.workspace }}/macos
       - name: PublishBuildArtifacts
-        if: success() && github.event_name != 'pull_request'
+        if: ${{ success() && (github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1') }}
         uses: actions/upload-artifact@v2.2.0
         with:
           name: 'macos-qt-${{ env.MAC_QT_VERSION }}-universal-${{ env.CURRENT_DATE }}'
