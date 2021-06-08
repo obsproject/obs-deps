@@ -107,7 +107,7 @@ jobs:
             DARWIN_TARGET="$(($(echo ${{ env.MACOSX_DEPLOYMENT_TARGET }} | cut -d "." -f 1)+9))";
           fi
           export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
-          echo "DARWIN_TARGET=$(DARWIN_TARGET)" >> $GITHUB_ENV
+          echo "DARWIN_TARGET=${DARWIN_TARGET}" >> $GITHUB_ENV
           echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> $GITHUB_ENV
       - name: 'Restore ffmpeg dependencies from cache'
         id: ffmpeg-deps-cache
@@ -135,7 +135,7 @@ jobs:
           ${{ github.workspace }}/utils/safe_fetch "https://downloads.sourceforge.net/project/libpng/libpng16/${{ env.LIBPNG_VERSION }}/libpng-${{ env.LIBPNG_VERSION }}.tar.xz" "${{ env.LIBPNG_HASH }}"
           tar -xf libpng-${{ env.LIBPNG_VERSION }}.tar.xz
           cd libpng-${{ env.LIBPNG_VERSION }}
-          # hacks to let us build with neon png implementation with CMAKE_OSX_ARCHITECTURES
+          # Let us build with neon png implementation with CMAKE_OSX_ARCHITECTURES
           sed -i '.orig' "s/#ifdef PNG_READ_SUPPORTED/#if defined(__ARM_NEON__) \&\& defined(PNG_READ_SUPPORTED)/" ./arm/arm_init.c
           gsed -i'.orig' -e "s/#  define PNG_FILTER_OPTIMIZATIONS png_init_filter_functions_neon/#if defined(__ARM_NEON__)\n#define PNG_FILTER_OPTIMIZATIONS png_init_filter_functions_neon\n#endif/" ./pngpriv.h
           sed -i '.orig' "s/CMAKE_SYSTEM_PROCESSOR MATCHES \"\^aarch64\")/CMAKE_OSX_ARCHITECTURES MATCHES \".*arm64.*\" OR &/" CMakeLists.txt
