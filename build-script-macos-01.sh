@@ -121,20 +121,11 @@ restore_brews() {
     fi
 }
 
-build_02_install_homebrew_dependencies() {
+build_03_install_homebrew_dependencies() {
     step "Install Homebrew dependencies"
     trap "caught_error 'Install Homebrew dependencies'" ERR
     ensure_dir ${BASE_DIR}
 
-    if [ -d /usr/local/opt/openssl@1.0.2t ]; then
-        brew uninstall openssl@1.0.2t
-        brew untap local/openssl
-    fi
-    
-    if [ -d /usr/local/opt/python@2.7.17 ]; then
-        brew uninstall python@2.7.17
-        brew untap local/python2
-    fi
     brew bundle
     export PATH="$PATH:/usr/local/opt/gnu-tar/libexec/gnubin"
     export PATH="$PATH:/usr/local/opt/curl/bin"
@@ -142,7 +133,7 @@ build_02_install_homebrew_dependencies() {
 }
 
 
-build_03_get_current_date() {
+build_04_get_current_date() {
     step "Get Current Date"
     trap "caught_error 'Get Current Date'" ERR
     ensure_dir ${BASE_DIR}
@@ -151,7 +142,7 @@ build_03_get_current_date() {
 }
 
 
-build_04_get_current_arch() {
+build_05_get_current_arch() {
     step "Get Current Arch"
     trap "caught_error 'Get Current Arch'" ERR
     ensure_dir ${BASE_DIR}
@@ -160,7 +151,7 @@ build_04_get_current_arch() {
 }
 
 
-build_05_build_environment_setup() {
+build_06_build_environment_setup() {
     step "Build environment setup"
     trap "caught_error 'Build environment setup'" ERR
     ensure_dir ${BASE_DIR}
@@ -183,7 +174,7 @@ build_05_build_environment_setup() {
 }
 
 
-build_07_build_dependency_libpng() {
+build_08_build_dependency_libpng() {
     step "Build dependency libpng"
     trap "caught_error 'Build dependency libpng'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -202,7 +193,7 @@ build_07_build_dependency_libpng() {
 }
 
 
-build_08_install_dependency_libpng() {
+build_09_install_dependency_libpng() {
     step "Install dependency libpng"
     trap "caught_error 'Install dependency libpng'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/libpng-1.6.37/build
@@ -211,7 +202,7 @@ build_08_install_dependency_libpng() {
 }
 
 
-build_09_build_dependency_libopus() {
+build_10_build_dependency_libopus() {
     step "Build dependency libopus"
     trap "caught_error 'Build dependency libopus'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -225,7 +216,7 @@ build_09_build_dependency_libopus() {
 }
 
 
-build_10_install_dependency_libopus() {
+build_11_install_dependency_libopus() {
     step "Install dependency libopus"
     trap "caught_error 'Install dependency libopus'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/opus-2021-05-12/build
@@ -234,7 +225,7 @@ build_10_install_dependency_libopus() {
 }
 
 
-build_11_build_dependency_libogg() {
+build_12_build_dependency_libogg() {
     step "Build dependency libogg"
     trap "caught_error 'Build dependency libogg'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -249,7 +240,7 @@ build_11_build_dependency_libogg() {
 }
 
 
-build_12_install_dependency_libogg() {
+build_13_install_dependency_libogg() {
     step "Install dependency libogg"
     trap "caught_error 'Install dependency libogg'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/libogg-1.3.4/build
@@ -258,7 +249,7 @@ build_12_install_dependency_libogg() {
 }
 
 
-build_13_build_dependency_libvorbis() {
+build_14_build_dependency_libvorbis() {
     step "Build dependency libvorbis"
     trap "caught_error 'Build dependency libvorbis'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -272,7 +263,7 @@ build_13_build_dependency_libvorbis() {
 }
 
 
-build_14_install_dependency_libvorbis() {
+build_15_install_dependency_libvorbis() {
     step "Install dependency libvorbis"
     trap "caught_error 'Install dependency libvorbis'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/libvorbis-1.3.7/build
@@ -281,7 +272,7 @@ build_14_install_dependency_libvorbis() {
 }
 
 
-build_15_build_dependency_libvpx() {
+build_16_build_dependency_libvpx() {
     step "Build dependency libvpx"
     trap "caught_error 'Build dependency libvpx'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -308,7 +299,7 @@ build_15_build_dependency_libvpx() {
 }
 
 
-build_16_install_dependency_libvpx() {
+build_17_install_dependency_libvpx() {
     step "Install dependency libvpx"
     trap "caught_error 'Install dependency libvpx'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/libvpx-1.10.0/build_universal
@@ -317,7 +308,7 @@ build_16_install_dependency_libvpx() {
 }
 
 
-build_17_build_dependency_libx264() {
+build_18_build_dependency_libx264() {
     step "Build dependency libx264"
     trap "caught_error 'Build dependency libx264'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -361,7 +352,7 @@ build_17_build_dependency_libx264() {
 }
 
 
-build_18_install_dependency_libx264() {
+build_19_install_dependency_libx264() {
     step "Install dependency libx264"
     trap "caught_error 'Install dependency libx264'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/x264-2021-05-05/build_universal
@@ -374,7 +365,7 @@ build_18_install_dependency_libx264() {
 }
 
 
-build_19_build_dependency_libtheora() {
+build_20_build_dependency_libtheora() {
     step "Build dependency libtheora"
     trap "caught_error 'Build dependency libtheora'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -404,7 +395,7 @@ build_19_build_dependency_libtheora() {
 }
 
 
-build_20_install_dependency_libtheora() {
+build_21_install_dependency_libtheora() {
     step "Install dependency libtheora"
     trap "caught_error 'Install dependency libtheora'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/libtheora-1.1.1/build_universal
@@ -413,7 +404,7 @@ build_20_install_dependency_libtheora() {
 }
 
 
-build_21_build_dependency_liblame() {
+build_22_build_dependency_liblame() {
     step "Build dependency liblame"
     trap "caught_error 'Build dependency liblame'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -443,7 +434,7 @@ build_21_build_dependency_liblame() {
 }
 
 
-build_22_install_dependency_liblame() {
+build_23_install_dependency_liblame() {
     step "Install dependency liblame"
     trap "caught_error 'Install dependency liblame'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/lame-3.100/build_universal
@@ -452,7 +443,7 @@ build_22_install_dependency_liblame() {
 }
 
 
-build_23_build_dependency_libmbedtls() {
+build_24_build_dependency_libmbedtls() {
     step "Build dependency libmbedtls"
     trap "caught_error 'Build dependency libmbedtls'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -469,7 +460,7 @@ build_23_build_dependency_libmbedtls() {
 }
 
 
-build_24_install_dependency_libmbedtls() {
+build_25_install_dependency_libmbedtls() {
     step "Install dependency libmbedtls"
     trap "caught_error 'Install dependency libmbedtls'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/mbedtls-mbedtls-2.24.0/build
@@ -531,7 +522,7 @@ EOF
 }
 
 
-build_25_build_dependency_libsrt() {
+build_26_build_dependency_libsrt() {
     step "Build dependency libsrt"
     trap "caught_error 'Build dependency libsrt'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -546,7 +537,7 @@ build_25_build_dependency_libsrt() {
 }
 
 
-build_26_install_dependency_libsrt() {
+build_27_install_dependency_libsrt() {
     step "Install dependency libsrt"
     trap "caught_error 'Install dependency libsrt'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/srt-1.4.3/build
@@ -555,7 +546,7 @@ build_26_install_dependency_libsrt() {
 }
 
 
-build_28_build_dependency_ffmpeg() {
+build_29_build_dependency_ffmpeg() {
     step "Build dependency ffmpeg"
     trap "caught_error 'Build dependency ffmpeg'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -613,7 +604,7 @@ build_28_build_dependency_ffmpeg() {
 }
 
 
-build_29_install_dependency_ffmpeg() {
+build_30_install_dependency_ffmpeg() {
     step "Install dependency ffmpeg"
     trap "caught_error 'Install dependency ffmpeg'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/ffmpeg-4.4/build_universal
@@ -624,7 +615,7 @@ build_29_install_dependency_ffmpeg() {
 }
 
 
-build_31_build_dependency_swig() {
+build_32_build_dependency_swig() {
     step "Build dependency swig"
     trap "caught_error 'Build dependency swig'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -658,7 +649,7 @@ build_31_build_dependency_swig() {
 }
 
 
-build_32_install_dependency_swig() {
+build_33_install_dependency_swig() {
     step "Install dependency swig"
     trap "caught_error 'Install dependency swig'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/swig-4.0.2/build_universal
@@ -669,7 +660,7 @@ build_32_install_dependency_swig() {
 }
 
 
-build_34_build_depdendency_speexdsp() {
+build_35_build_depdendency_speexdsp() {
     step "Build depdendency SpeexDSP"
     trap "caught_error 'Build depdendency SpeexDSP'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -700,7 +691,7 @@ build_34_build_depdendency_speexdsp() {
 }
 
 
-build_35_install_dependency_speexdsp() {
+build_36_install_dependency_speexdsp() {
     step "Install dependency SpeexDSP"
     trap "caught_error 'Install dependency SpeexDSP'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/speexdsp-SpeexDSP-1.2.0/build_universal
@@ -711,7 +702,7 @@ build_35_install_dependency_speexdsp() {
 }
 
 
-build_37_build_dependency_libjansson() {
+build_38_build_dependency_libjansson() {
     step "Build dependency libjansson"
     trap "caught_error 'Build dependency libjansson'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -742,7 +733,7 @@ build_37_build_dependency_libjansson() {
 }
 
 
-build_38_install_dependency_libjansson() {
+build_39_install_dependency_libjansson() {
     step "Install dependency libjansson"
     trap "caught_error 'Install dependency libjansson'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/jansson-2.13.1/build_universal
@@ -754,7 +745,7 @@ build_38_install_dependency_libjansson() {
 }
 
 
-build_40_build_dependency_libluajit() {
+build_41_build_dependency_libluajit() {
     step "Build dependency libluajit"
     trap "caught_error 'Build dependency libluajit'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -780,7 +771,7 @@ build_40_build_dependency_libluajit() {
 }
 
 
-build_41_install_dependency_libluajit() {
+build_42_install_dependency_libluajit() {
     step "Install dependency libluajit"
     trap "caught_error 'Install dependency libluajit'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/LuaJIT-2.1/build_universal
@@ -792,7 +783,7 @@ build_41_install_dependency_libluajit() {
 }
 
 
-build_43_build_dependency_libfreetype() {
+build_44_build_dependency_libfreetype() {
     step "Build dependency libfreetype"
     trap "caught_error 'Build dependency libfreetype'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -822,7 +813,7 @@ build_43_build_dependency_libfreetype() {
 }
 
 
-build_44_install_dependency_libfreetype() {
+build_45_install_dependency_libfreetype() {
     step "Install dependency libfreetype"
     trap "caught_error 'Install dependency libfreetype'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/freetype-2.10.4/build_universal
@@ -833,7 +824,7 @@ build_44_install_dependency_libfreetype() {
 }
 
 
-build_46_build_dependency_librnnoise() {
+build_47_build_dependency_librnnoise() {
     step "Build dependency librnnoise"
     trap "caught_error 'Build dependency librnnoise'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -862,7 +853,7 @@ build_46_build_dependency_librnnoise() {
 }
 
 
-build_47_install_dependency_librnnoise() {
+build_48_install_dependency_librnnoise() {
     step "Install dependency librnnoise"
     trap "caught_error 'Install dependency librnnoise'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/rnnoise-2020-07-28/build_universal
@@ -873,7 +864,7 @@ build_47_install_dependency_librnnoise() {
 }
 
 
-build_48_package_dependencies() {
+build_49_package_dependencies() {
     step "Package dependencies"
     trap "caught_error 'Package dependencies'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -889,45 +880,45 @@ build_48_package_dependencies() {
 obs-deps-build-main() {
     ensure_dir ${BASE_DIR}
 
-    build_02_install_homebrew_dependencies
-    build_03_get_current_date
-    build_04_get_current_arch
-    build_05_build_environment_setup
-    build_07_build_dependency_libpng
-    build_08_install_dependency_libpng
-    build_09_build_dependency_libopus
-    build_10_install_dependency_libopus
-    build_11_build_dependency_libogg
-    build_12_install_dependency_libogg
-    build_13_build_dependency_libvorbis
-    build_14_install_dependency_libvorbis
-    build_15_build_dependency_libvpx
-    build_16_install_dependency_libvpx
-    build_17_build_dependency_libx264
-    build_18_install_dependency_libx264
-    build_19_build_dependency_libtheora
-    build_20_install_dependency_libtheora
-    build_21_build_dependency_liblame
-    build_22_install_dependency_liblame
-    build_23_build_dependency_libmbedtls
-    build_24_install_dependency_libmbedtls
-    build_25_build_dependency_libsrt
-    build_26_install_dependency_libsrt
-    build_28_build_dependency_ffmpeg
-    build_29_install_dependency_ffmpeg
-    build_31_build_dependency_swig
-    build_32_install_dependency_swig
-    build_34_build_depdendency_speexdsp
-    build_35_install_dependency_speexdsp
-    build_37_build_dependency_libjansson
-    build_38_install_dependency_libjansson
-    build_40_build_dependency_libluajit
-    build_41_install_dependency_libluajit
-    build_43_build_dependency_libfreetype
-    build_44_install_dependency_libfreetype
-    build_46_build_dependency_librnnoise
-    build_47_install_dependency_librnnoise
-    build_48_package_dependencies
+    build_03_install_homebrew_dependencies
+    build_04_get_current_date
+    build_05_get_current_arch
+    build_06_build_environment_setup
+    build_08_build_dependency_libpng
+    build_09_install_dependency_libpng
+    build_10_build_dependency_libopus
+    build_11_install_dependency_libopus
+    build_12_build_dependency_libogg
+    build_13_install_dependency_libogg
+    build_14_build_dependency_libvorbis
+    build_15_install_dependency_libvorbis
+    build_16_build_dependency_libvpx
+    build_17_install_dependency_libvpx
+    build_18_build_dependency_libx264
+    build_19_install_dependency_libx264
+    build_20_build_dependency_libtheora
+    build_21_install_dependency_libtheora
+    build_22_build_dependency_liblame
+    build_23_install_dependency_liblame
+    build_24_build_dependency_libmbedtls
+    build_25_install_dependency_libmbedtls
+    build_26_build_dependency_libsrt
+    build_27_install_dependency_libsrt
+    build_29_build_dependency_ffmpeg
+    build_30_install_dependency_ffmpeg
+    build_32_build_dependency_swig
+    build_33_install_dependency_swig
+    build_35_build_depdendency_speexdsp
+    build_36_install_dependency_speexdsp
+    build_38_build_dependency_libjansson
+    build_39_install_dependency_libjansson
+    build_41_build_dependency_libluajit
+    build_42_install_dependency_libluajit
+    build_44_build_dependency_libfreetype
+    build_45_install_dependency_libfreetype
+    build_47_build_dependency_librnnoise
+    build_48_install_dependency_librnnoise
+    build_49_package_dependencies
 
     restore_brews
 

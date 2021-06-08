@@ -121,7 +121,7 @@ restore_brews() {
     fi
 }
 
-build_02_install_homebrew_dependencies() {
+build_03_install_homebrew_dependencies() {
     step "Install Homebrew dependencies"
     trap "caught_error 'Install Homebrew dependencies'" ERR
     ensure_dir ${BASE_DIR}
@@ -139,7 +139,7 @@ build_02_install_homebrew_dependencies() {
 }
 
 
-build_03_get_current_date() {
+build_04_get_current_date() {
     step "Get Current Date"
     trap "caught_error 'Get Current Date'" ERR
     ensure_dir ${BASE_DIR}
@@ -148,7 +148,7 @@ build_03_get_current_date() {
 }
 
 
-build_04_get_current_arch() {
+build_05_get_current_arch() {
     step "Get Current Arch"
     trap "caught_error 'Get Current Arch'" ERR
     ensure_dir ${BASE_DIR}
@@ -157,7 +157,7 @@ build_04_get_current_arch() {
 }
 
 
-build_05_build_environment_setup() {
+build_06_build_environment_setup() {
     step "Build environment setup"
     trap "caught_error 'Build environment setup'" ERR
     ensure_dir ${BASE_DIR}
@@ -170,7 +170,7 @@ build_05_build_environment_setup() {
 }
 
 
-build_07_build_dependency_qt() {
+build_08_build_dependency_qt() {
     step "Build dependency Qt"
     trap "caught_error 'Build dependency Qt'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD
@@ -293,7 +293,7 @@ build_07_build_dependency_qt() {
 }
 
 
-build_08_package_dependencies() {
+build_09_package_dependencies() {
     step "Package dependencies"
     trap "caught_error 'Package dependencies'" ERR
     ensure_dir ${BASE_DIR}/CI_BUILD/obsdeps
@@ -309,12 +309,12 @@ build_08_package_dependencies() {
 obs-deps-build-main() {
     ensure_dir ${BASE_DIR}
 
-    build_02_install_homebrew_dependencies
-    build_03_get_current_date
-    build_04_get_current_arch
-    build_05_build_environment_setup
-    build_07_build_dependency_qt
-    build_08_package_dependencies
+    build_03_install_homebrew_dependencies
+    build_04_get_current_date
+    build_05_get_current_arch
+    build_06_build_environment_setup
+    build_08_build_dependency_qt
+    build_09_package_dependencies
 
     restore_brews
 
