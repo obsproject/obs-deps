@@ -222,6 +222,8 @@ jobs:
         working-directory: ${{ github.workspace }}/CI_BUILD/libvpx-${{ env.LIBVPX_VERSION }}/build_universal
         run: |
           make install
+          # Azure is re-building this locally thin?
+          lipo -create ../build_x86_64/libvpx.a ../build_arm64/libvpx.a -output /tmp/obsdeps/lib/libvpx.a
       - name: 'Build dependency libx264'
         if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
         shell: bash
@@ -620,7 +622,7 @@ jobs:
           cp -R build_x86_64 build_universal
           cd build_universal
           lipo -create ../build_x86_64/src/.libs/libjansson.dylib ../build_arm64/src/.libs/libjansson.dylib -output ./src/.libs/libjansson.dylib
-          lipo -create ../build_x86_64/src/.libs/libjansson.dylib ../build_arm64/src/.libs/libjansson.dylib -output ./src/.libs/libjansson.dylib
+          lipo -create ../build_x86_64/src/.libs/libjansson.4.dylib ../build_arm64/src/.libs/libjansson.4.dylib -output ./src/.libs/libjansson.4.dylib
 
       - name: 'Install dependency libjansson'
         shell: bash
@@ -902,7 +904,7 @@ jobs:
           # Modify Makefiles so we can specify ARCHS
           sed -i '.orig' "s/EXPORT_VALID_ARCHS =/EXPORT_VALID_ARCHS +=/" Makefile ./tools/bootstrap/Makefile ./tools/moc/Makefile ./tools/qvkgen/Makefile ./tools/rcc/Makefile ./tools/uic/Makefile
           ARCHS="arm64 x86_64" EXPORT_VALID_ARCHS="arm64 x86_64" make -j${{ env.PARALLELISM }} sub-moc-all
-          # QtCore sadly does not build universal so we build it arm64 and then lipo it then continue building all of the other tools we need
+          # QtCore does not build universal so we build it arm64 and then lipo it then continue building all of the other tools we need
           make sub-corelib
           lipo -create  ../../../build_x86_64/qtbase/lib/QtCore.framework/QtCore ../lib/QtCore.framework/QtCore -output ../lib/QtCore.framework/QtCore
           ARCHS="arm64 x86_64" EXPORT_VALID_ARCHS="arm64 x86_64" make -j${{ env.PARALLELISM }} sub-qvkgen-all sub-rcc sub-uic
@@ -918,7 +920,7 @@ jobs:
           cp -R qt_arm64 qt_universal
           cd qt_universal
           # We find all the binary files that we need to lipo by using a perl one liner to read the first four bytes of each non-zero file and match the magic header for arm64 thin (cffaedfe)
-          # Somehow qmake still ends up thin in the install step, so I give up and just copy in the universal one we made earlier
+          # qmake still ends up thin in the install step, just copy in the universal one we made earlier
           find . -type f ! -size 0 | perl -ne '$test=`xxd -ps -l 4 $_`; $test =~ s/^\s+|\s+$//g; print $_ if ($test eq "cffaedfe")' | grep -v '.bin/qmake$' | xargs -I{} lipo -create "../qt_x86_64/{}" "../qt_arm64/{}" -output "{}"
           cp $WD/build_arm64/qtbase/bin/qmake ./bin/qmake
 
