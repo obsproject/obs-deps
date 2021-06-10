@@ -501,7 +501,7 @@ jobs:
         id: swig-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'swig'
+          CACHE_NAME: 'swig-rev2'
         with:
           path: ${{ github.workspace }}/CI_BUILD/swig-${{ env.SWIG_VERSION }}
           key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.SWIG_VERSION }}
