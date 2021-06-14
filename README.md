@@ -2,60 +2,72 @@
 
 Scripts to build and package dependencies for OBS on CI
 
-## macOS (10.13+)
+## macOS (10.13+ for x86_64, 11.0 for arm64)
 
 | lib | git commit | version |
 | :--- | :---: | :---: |
 |libpng|[Sourceforge](https://downloads.sourceforge.net/project/libpng/libpng16/1.6.37/libpng-1.6.37.tar.xz)|1.6.37|
-|libopus|[Oregon State University FTP](https://ftp.osuosl.org/pub/xiph/releases/opus/opus-1.3.1.tar.gz)|1.3.1|
-|libogg|[xiph.org](https://downloads.xiph.org/releases/ogg/libogg-1.3.4.tar.gz)|1.3.4|
-|librnnoise|[90ec41e](https://github.com/xiph/rnnoise/commit/90ec41ef659fd82cfec2103e9bb7fc235e9ea66c)||
+|libopus|[GitHub](https://github.com/xiph/opus/tree/dfd6c88aaa54a03a61434c413e30c217eb98f1d5)|1.3.1-93-gdfd6c88a|
+|libogg|[GitHub](https://github.com/xiph/ogg/releases/download/v1.3.5/libogg-1.3.5.tar.xz)|1.3.5|
+|librnnoise|[90ec41e](https://github.com/xiph/rnnoise/commit/90ec41ef659fd82cfec2103e9bb7fc235e9ea66c)|Master branch|
 |libvorbis|[xiph.org](https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.7.tar.xz)|1.3.7|
-|libvpx|[Github](https://github.com/webmproject/libvpx/archive/v1.9.0.tar.gz)|1.9.0 (x86_64), latest master branch (arm64)|
+|libvpx|[GitHub](https://github.com/webmproject/libvpx/archive/v1.10.0.tar.gz)|1.10.0|
 |libjansson|[Petri Lehtinen](https://digip.org/jansson/releases/jansson-2.13.1.tar.gz)|2.13.1|
-|libx264|[4121277](https://github.com/mirror/x264/commit/4121277b40a667665d4eea1726aefdc55d12d110)|r3027|
-|libmbedtls|[Github](https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.24.0.tar.gz)|2.24.0|
-|libsrt|[Github](https://github.com/Haivision/srt/archive/v1.4.2.tar.gz)|1.4.2|
+|libx264|[GitHub](https://github.com/mirror/x264/commit/b684ebe04a6f80f8207a57940a1fa00e25274f81)|r3059|
+|libmbedtls|[GitHub](https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.24.0.tar.gz)|2.24.0|
+|libsrt|[GitHub](https://github.com/Haivision/srt/archive/v1.4.1.tar.gz)|1.4.1|
 |libtheora|[xiph.org](https://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2)|1.1.1|
 |ffmpeg|[ffmpeg.org](https://ffmpeg.org/releases/ffmpeg-4.2.3.tar.xz)|4.2.3|
-|libluajit|[ec6edc5](https://github.com/LuaJIT/LuaJIT/commit/ec6edc5c39c25e4eb3fca51b753f9995e97215da)|2.1|
+|libluajit|[GitHub](https://github.com/LuaJIT/LuaJIT/commit/ec6edc5c39c25e4eb3fca51b753f9995e97215da)|2.1|
 |libfreetype|[Sourceforge](https://downloads.sourceforge.net/project/freetype/freetype2/2.10.4/freetype-2.10.4.tar.xz)|2.10.4|
-|libpcre|[pcre.org](https://ftp.pcre.org/pub/pcre/pcre-8.44.tar.bz2)|8.44|
-|swig|[Sourceforge](https://downloads.sourceforge.net/project/swig/swig/swig-4.0.2/swig-4.0.2.tar.gz)|4.0.2|
 |Qt|[Qt.io](https://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz)|5.15.2|
+
+### Notes
+
+* FFmpeg is pinned to 4.2.3 as there was a bug introduced to HLS streaming functionality after that release, breaking important functionality for OBS
+* libpng is patched for Apple M1 compatibility
+* mbedtls is patched to enable `pthread` functionality
+* SpeexDSP is patched to allow macOS 10.13 compatibility
+* Qt is patched to cross-compile ARM64 on x86_64 hosts
+* Qt is patched to fix https://bugreports.qt.io/browse/QTBUG-74606
+* Qt is patched to fix https://bugreports.qt.io/browse/QTBUG-90370
 
 ### Prerequisites
 
 * Homebrew (https://brew.sh)
-* Python 3 - either installed via homebrew (`brew install python`) or system-provided (macOS 10.15 Catalina)
-* PyYAML - installed via `pip3 install pyyaml`
 
 ### Build steps
 
-* Checkout `obs-deps` from Github:
+* Checkout `obs-deps` from GitHub:
 
 ```
 git clone https://github.com/obsproject/obs-deps.git
 ```
 
 * Enter the `obs-deps` directory
-* (*Optional*) Create the build scripts by running `./build_script_generator.py .github/workflows/build_deps.yml`
-* Run `bash ./build-script-macos-01.sh` to build main dependencies
-* Run `bash ./build-script-macos-02.sh` to build Qt dependency
+* Run `bash ./CI/build-deps-macos.sh` to build main dependencies
+* Run `bash ./CI/build-qt-macos.sh` to build Qt dependency
 
 ### Usage
 
-* Common directory to place obs-deps is `/tmp/obsdeps/`, but a custom path can be used
-* Unpack pre-built dependencies to `/tmp` by running `tar -xf ./macos-deps-VERSION.tar.gz -C /tmp` (replace `VERSION` with the downloaded/desired version)
-* Unpack pre-built Qt dependency to `/tmp` by running `tar -xf ./macos-qt-QT_VERSION-VERSION.tar.gz -C /tmp` (replace `QT_VERSION` and `VERSION` with the downloaded/desired versions)
-* **IMPORTANT:** Remove the quarantine attribute from the downloaded Qt dependencies by running `xattr -r -d com.apple.quarantine /tmp/obsdeps`
-* Use `/tmp/obsdeps` as `QTDIR`, `SWIGDIR`, and `DepsPath` when invoking `cmake` for OBS:
+* Create a destination directory for the dependencies (e.g. `obs-deps`)
+* Unpack the dependencies into this directory (e.g. via `XZ_OPT=-T0 tar -xf macos-deps-VERSION-universal.tar.xz -C obs-deps` - replace `VERSION` with the downloaded/desired version)
+* Repeat the same for the Qt dependencies
+* **IMPORTANT:** Remove the quarantine attribute from the downloaded Qt dependencies by running `xattr -r -d com.apple.quarantine obs-deps`
+* Use `obs-deps` as part of `CMAKE_PREFIX_PATH` when running `cmake` for OBS:
 
 ```
-cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13 -DQTDIR="/tmp/obsdeps" -DSWIGDIR="/tmp/obsdeps" -DDepsPath="/tmp/obsdeps" [..]
+cmake -DCMAKE_PREFIX_PATH="some_other_path;obs-deps" [..]
 ```
 
 ## Contributing
 
-* Do not make changes to the `build-script-{macos/ubuntu/windows}-{num}.sh` scripts, which are generated by `.github/workflows/create_scripts.yml`
-* Instead, edit `.github/workflows/build_deps.yml`
+* Add/edit seperate build scripts for every dependency in the `CI/[OPERATING SYSTEM/` directory
+* For new dependencies:
+    * Create the `sha256sum` of the downloaded dependency archive
+    * Add the dependency version as `[DEPENDENCY_NAME]_VERSION` and the downloaded archive hash as `[DEPENDENCY_NAME]_HASH` to the GitHub actions workflow in `.github/workflows/main.yml` as well as the main build script in `CI/build-deps-macos.sh`.
+* For existing dependencies:
+    * Always update the `sha256sum` of the updated dependency archive as well as the version
+* Patches need to be placed either in the patches directory (if applied for all OS) or inside the patches directory for a specific OS
+    * Generate patches by running `diff -Naur [OLD_FILE] [NEW_FILE]`
+    * Fixup paths in the patch file to a path relative from the dependency's source directory, e.g `./src/FILE.c` (the `./` is important)

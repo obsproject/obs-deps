@@ -1,0 +1,20 @@
+--- ./include/mbedtls/config.h    2020-08-27 12:31:49.000000000 +0200
++++ ./include/mbedtls/config.h    2021-06-11 15:43:35.000000000 +0200
+@@ -1982,7 +1982,7 @@
+  *
+  * Uncomment this to enable pthread mutexes.
+  */
+-//#define MBEDTLS_THREADING_PTHREAD
++#define MBEDTLS_THREADING_PTHREAD
+ 
+ /**
+  * \def MBEDTLS_USE_PSA_CRYPTO
+@@ -3286,7 +3286,7 @@
+  *
+  * Enable this layer to allow use of mutexes within mbed TLS
+  */
+-//#define MBEDTLS_THREADING_C
++#define MBEDTLS_THREADING_C
+ 
+ /**
+  * \def MBEDTLS_TIMING_C

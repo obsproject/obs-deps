@@ -3,10 +3,9 @@ name: build_macos
 on:
   push:
     paths:
-      - '.github/workflows/build_deps.yml'
+      - '.github/workflows/main.yml'
       - '.github/workflows/create_scripts.yml'
-      - '!build-script-macos-01.sh'
-      - '!build-script-macos-02.sh'
+      - '!CI/build-deps-macos.sh'
     branches:
       - master
 
@@ -45,7 +44,7 @@ jobs:
           git checkout ${CHECKOUT_REF/refs\/heads\//}
 
           python -m pip install pyyaml
-          python ./utils/build_script_generator.py ./.github/workflows/build_deps.yml
+          python ./utils/build_script_generator.py
 
           echo "  + Build scripts successfully generated"
 
