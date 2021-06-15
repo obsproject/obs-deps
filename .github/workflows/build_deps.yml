@@ -113,7 +113,7 @@ jobs:
         id: ffmpeg-deps-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'ffmpeg-deps'
+          CACHE_NAME: 'ffmpeg-deps-universal'
         with:
           path: |
             ${{ github.workspace }}/CI_BUILD/libpng-${{ env.LIBPNG_VERSION }}
@@ -431,7 +431,7 @@ jobs:
         id: ffmpeg-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'ffmpeg'
+          CACHE_NAME: 'ffmpeg-universal'
         with:
           path: ${{ github.workspace }}/CI_BUILD/ffmpeg-${{ env.FFMPEG_VERSION }}
           key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.FFMPEG_VERSION }}-${{ env.FFMPEG_DEP_HASH }}
@@ -501,7 +501,7 @@ jobs:
         id: swig-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'swig-rev2'
+          CACHE_NAME: 'swig-universal'
         with:
           path: ${{ github.workspace }}/CI_BUILD/swig-${{ env.SWIG_VERSION }}
           key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.SWIG_VERSION }}
@@ -547,7 +547,7 @@ jobs:
         id: speexdsp-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'speexdsp'
+          CACHE_NAME: 'speexdsp-universal'
         with:
           path: ${{ github.workspace }}/CI_BUILD/speexdsp-SpeexDSP-${{ env.SPEEXDSP_VERSION }}
           key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.SPEEXDSP_VERSION }}
@@ -591,7 +591,7 @@ jobs:
         id: libjansson-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'libjansson-rev2'
+          CACHE_NAME: 'libjansson-universal'
         with:
           path: ${{ github.workspace }}/CI_BUILD/jansson-${{ env.LIBJANSSON_VERSION }}
           key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.LIBJANSSON_VERSION }}
@@ -635,7 +635,7 @@ jobs:
         id: libluajit-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'libluajit'
+          CACHE_NAME: 'libluajit-universal'
         with:
           path: ${{ github.workspace }}/CI_BUILD/LuaJIT-${{ env.LIBLUAJIT_VERSION }}
           key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.LIBLUAJIT_VERSION }}
@@ -675,7 +675,7 @@ jobs:
         id: libfreetype-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'libfreetype'
+          CACHE_NAME: 'libfreetype-universal'
         with:
           path: ${{ github.workspace }}/CI_BUILD/freetype-${{ env.LIBFREETYPE_VERSION }}
           key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.LIBFREETYPE_VERSION }}
@@ -718,7 +718,7 @@ jobs:
         id: librnnoise-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'librnnoise'
+          CACHE_NAME: 'librnnoise-universal'
         with:
           path: ${{ github.workspace }}/CI_BUILD/rnnoise-${{ env.LIBRNNOISE_VERSION }}
           key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.LIBRNNOISE_VERSION }}
@@ -825,7 +825,7 @@ jobs:
         id: qt-cache
         uses: actions/cache@v2.1.2
         env:
-          CACHE_NAME: 'qt-build-cache-rev6'
+          CACHE_NAME: 'qt-build-cache-universal'
         with:
           path: ${{ github.workspace }}/CI_BUILD/obsdeps
           key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.MAC_QT_VERSION }}
