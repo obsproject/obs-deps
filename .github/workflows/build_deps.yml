@@ -838,6 +838,7 @@ jobs:
             ${{ github.workspace }}/utils/safe_fetch "https://download.qt.io/official_releases/qt/$(echo "${{ env.MAC_QT_VERSION }}" | cut -d "." -f -2)/${{ env.MAC_QT_VERSION }}/single/qt-everywhere-src-${{ env.MAC_QT_VERSION }}.tar.xz" "${{ env.MAC_QT_HASH }}"
           fi
           tar -xf qt-everywhere-src-${{ env.MAC_QT_VERSION }}.tar.xz
+          brew unlink llvm
           if [ -d /usr/local/opt/zstd ]; then
             brew unlink zstd
           fi
