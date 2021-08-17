@@ -61,7 +61,7 @@ jobs:
           git config user.email "${{ github.event.pusher.email }}"
           git config pull.rebase false
 
-          git add build-script-*
+          git add CI/build-deps-*
           git pull
           git commit -m "CI: Update build scripts - $(git rev-parse --short HEAD)"
           git push -q $GITHUB_REPO
