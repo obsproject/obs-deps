@@ -470,7 +470,7 @@ jobs:
         if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
         uses: actions/upload-artifact@v2.2.0
         with:
-          name: 'macos-deps-universal'
+          name: ${{ env.FILE_NAME }}
           path: ${{ github.workspace }}/macos/${{ env.FILE_NAME }}
 
   macos-qt-package:
@@ -534,7 +534,7 @@ jobs:
         if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
         uses: actions/upload-artifact@v2.2.0
         with:
-          name: 'macos-deps-qt-universal'
+          name: ${{ env.FILE_NAME }}
           path: ${{ github.workspace }}/macos/${{ env.FILE_NAME }}
 
   make-release:
