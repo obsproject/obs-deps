@@ -343,7 +343,7 @@ jobs:
       QT_REVISION: '03'
       QT_VERSION: '5.15.2'
       QT_HASH: '3a530d1b243b5dec00bc54937455471aaa3e56849d2593edb8ded07228202240'
-      BLOCKED_FORMULAS: 'ant gradle maven selenium-server-standalone llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile libogg php gd freetype fontconfig webp libpng lame libtiff opus'
+      BLOCKED_FORMULAS: 'ant gradle maven selenium-server-standalone llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile libogg php gd freetype fontconfig webp libpng lame libtiff opus kotlin'
     defaults:
       run:
         shell: bash
