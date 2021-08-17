@@ -23,8 +23,9 @@ set -eE
 _RUN_OBS_BUILD_SCRIPT=TRUE
 PRODUCT_NAME="obs-deps"
 REQUIRED_DEPS=(
+    "cache  "
     "libpng 1.6.37 505e70834d35383537b6491e7ae8641f1a4bed1876dbfe361201fc80868d88ca"
-    "libopus 2021-05-12 dfd6c88aaa54a03a61434c413e30c217eb98f1d5"
+    "libopus 1.3.1-93-gdfd6c88a dfd6c88aaa54a03a61434c413e30c217eb98f1d5"
     "libogg 1.3.5 c4d91be36fc8e54deae7575241e03f4211eb102afb3fc0775fbbc1b740016705"
     "libvorbis 1.3.7 b33cc4934322bcbf6efcbacf49e3ca01aadbea4114ec9589d1b1e9d20f72954b"
     "libvpx 1.10.0 85803ccbdbdd7a3b03d930187cb055f1353596969c1f92ebec2db839fa4f834a"
