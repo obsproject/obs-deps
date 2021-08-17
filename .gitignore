@@ -4,12 +4,12 @@
 # Ignore Brew bundle files
 Brewfile.lock.json
 # Ignore CI build directory
-CI_BUILD
-CI_BUiLD/*
+/*_build_temp
+/*_build_temp/*
 # Ignore artifact output directory
-macos
-macos/*
-linux
-linux/*
-windows
-windows/*
+/macos
+/macos/*
+/linux
+/linux/*
+/windows
+/windows/*
