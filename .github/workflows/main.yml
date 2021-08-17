@@ -417,6 +417,11 @@ jobs:
       run:
         shell: bash
     steps:
+      - name: Get Current Date
+        shell: bash
+        id: get_date
+        run: echo "CURRENT_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
+
       - name: 'Check for Github Labels'
         if: github.event_name == 'pull_request'
         run: |
@@ -434,14 +439,14 @@ jobs:
         if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
         uses: actions/download-artifact@v2
         with:
-          name: 'macos-deps-x86_64'
+          name: 'macos-deps-${{ env.CURRENT_DATE }}-x86_64.tar.xz'
           path: ${{ github.workspace }}/macos
 
       - name: 'Download arm64 artifact'
         if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
         uses: actions/download-artifact@v2
         with:
-          name: 'macos-deps-arm64'
+          name: 'macos-deps-${{ env.CURRENT_DATE }}-arm64.tar.xz'
           path: ${{ github.workspace }}/macos
 
       - name: 'Extract artifacts'
@@ -481,6 +486,11 @@ jobs:
       run:
         shell: bash
     steps:
+      - name: Get Current Date
+        shell: bash
+        id: get_date
+        run: echo "CURRENT_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
+
       - name: 'Check for Github Labels'
         if: github.event_name == 'pull_request'
         run: |
@@ -498,14 +508,14 @@ jobs:
         if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
         uses: actions/download-artifact@v2
         with:
-          name: 'macos-deps-qt-x86_64'
+          name: 'macos-deps-qt-${{ env.CURRENT_DATE }}-x86_64.tar.xz'
           path: ${{ github.workspace }}/macos
 
       - name: 'Download arm64 Qt artifact'
         if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
         uses: actions/download-artifact@v2
         with:
-          name: 'macos-deps-qt-arm64'
+          name: 'macos-deps-qt-${{ env.CURRENT_DATE }}-arm64.tar.xz'
           path: ${{ github.workspace }}/macos
 
       - name: 'Extract artifacts'
@@ -563,8 +573,15 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: 'Download x86_64 Qt artifact'
+      - name: 'Download deps artifact'
         uses: actions/download-artifact@v2
+        with:
+          name: macos-deps-${{ env.CURRENT_DATE }}-universal.tar.xz
+
+      - name: 'Download Qt artifact'
+        uses: actions/download-artifact@v2
+        with:
+          name: macos-deps-qt-${{ env.CURRENT_DATE }}-universal.tar.xz
 
       - name: 'Upload macOS universal package to release'
         uses: actions/upload-release-asset@v1
