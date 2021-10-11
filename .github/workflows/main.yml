@@ -60,7 +60,7 @@ jobs:
         shell: bash
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.3
+        uses: actions/checkout@v2.3.4
 
       - name: 'Check for Github Labels'
         if: github.event_name == 'pull_request'
@@ -75,7 +75,7 @@ jobs:
 
       - name: 'Restore ccache from cache'
         id: ccache-cache
-        uses: actions/cache@v2.1.2
+        uses: actions/cache@v2.1.6
         env:
           CACHE_NAME: 'ccache-cache'
         with:
@@ -108,7 +108,7 @@ jobs:
 
       - name: 'Restore ffmpeg dependencies from cache'
         id: ffmpeg-deps-cache
-        uses: actions/cache@v2.1.2
+        uses: actions/cache@v2.1.6
         env:
           CACHE_NAME: 'ffmpeg-deps-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
         with:
@@ -207,7 +207,7 @@ jobs:
 
       - name: 'Restore ffmpeg from cache'
         id: ffmpeg-cache
-        uses: actions/cache@v2.1.2
+        uses: actions/cache@v2.1.6
         env:
           CACHE_NAME: 'ffmpeg-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
         with:
@@ -224,7 +224,7 @@ jobs:
 
       - name: 'Restore SpeexDSP from cache'
         id: speexdsp-cache
-        uses: actions/cache@v2.1.2
+        uses: actions/cache@v2.1.6
         env:
           CACHE_NAME: 'speexdsp-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
         with:
@@ -241,7 +241,7 @@ jobs:
 
       - name: 'Restore libjansson from cache'
         id: libjansson-cache
-        uses: actions/cache@v2.1.2
+        uses: actions/cache@v2.1.6
         env:
           CACHE_NAME: 'libjansson-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
         with:
@@ -258,7 +258,7 @@ jobs:
 
       - name: 'Restore libluajit from cache'
         id: libluajit-cache
-        uses: actions/cache@v2.1.2
+        uses: actions/cache@v2.1.6
         env:
           CACHE_NAME: 'libluajit-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
         with:
@@ -275,7 +275,7 @@ jobs:
 
       - name: 'Restore libfreetype from cache'
         id: libfreetype-cache
-        uses: actions/cache@v2.1.2
+        uses: actions/cache@v2.1.6
         env:
           CACHE_NAME: 'libfreetype-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
         with:
@@ -292,7 +292,7 @@ jobs:
 
       - name: 'Restore librnnoise from cache'
         id: librnnoise-cache
-        uses: actions/cache@v2.1.2
+        uses: actions/cache@v2.1.6
         env:
           CACHE_NAME: 'librnnoise-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
         with:
@@ -327,7 +327,7 @@ jobs:
 
       - name: 'Publish Build Artifacts'
         if: ${{ success() && (github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1') }}
-        uses: actions/upload-artifact@v2.2.0
+        uses: actions/upload-artifact@v2.2.4
         with:
           name: ${{ env.FILE_NAME }}
           path: ${{ github.workspace }}/macos/${{ env.FILE_NAME }}
@@ -349,7 +349,7 @@ jobs:
         shell: bash
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.3
+        uses: actions/checkout@v2.3.4
 
       - name: 'Check for Github Labels'
         if: github.event_name == 'pull_request'
@@ -378,7 +378,7 @@ jobs:
 
       - name: 'Restore Qt from cache'
         id: qt-cache
-        uses: actions/cache@v2.1.2
+        uses: actions/cache@v2.1.6
         env:
           CACHE_NAME: 'qt-cache-${{ matrix.arch }}-${{ env.QT_REVISION }}'
         with:
@@ -404,7 +404,7 @@ jobs:
 
       - name: 'Publish Build Artifacts'
         if: ${{ success() && (github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1') }}
-        uses: actions/upload-artifact@v2.2.0
+        uses: actions/upload-artifact@v2.2.4
         with:
           name: ${{ env.FILE_NAME }}
           path: ${{ github.workspace }}/macos/${{ env.FILE_NAME }}
@@ -433,7 +433,7 @@ jobs:
 
       - name: 'Checkout'
         if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
-        uses: actions/checkout@v2.3.3
+        uses: actions/checkout@v2.3.4
 
       - name: 'Download x86_64 artifact'
         if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
@@ -473,7 +473,7 @@ jobs:
 
       - name: 'Publish Build Artifacts'
         if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
-        uses: actions/upload-artifact@v2.2.0
+        uses: actions/upload-artifact@v2.2.4
         with:
           name: ${{ env.FILE_NAME }}
           path: ${{ github.workspace }}/macos/${{ env.FILE_NAME }}
@@ -502,7 +502,7 @@ jobs:
 
       - name: 'Checkout'
         if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
-        uses: actions/checkout@v2.3.3
+        uses: actions/checkout@v2.3.4
 
       - name: 'Download x86_64 Qt artifact'
         if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
@@ -542,7 +542,7 @@ jobs:
 
       - name: 'Publish Build Artifacts'
         if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
-        uses: actions/upload-artifact@v2.2.0
+        uses: actions/upload-artifact@v2.2.4
         with:
           name: ${{ env.FILE_NAME }}
           path: ${{ github.workspace }}/macos/${{ env.FILE_NAME }}
