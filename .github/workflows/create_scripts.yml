@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/main.yml'
       - '.github/workflows/create_scripts.yml'
+      - 'utils/build_script_generator.py'
       - '!CI/build-deps-macos.sh'
     branches:
       - master

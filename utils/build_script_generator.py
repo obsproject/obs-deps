@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import sys
 import os
 import re
@@ -30,6 +28,7 @@ def main() -> int:
                     for key, value in environment_data.items()
                     if key
                     not in [
+                        "CACHE_REVISION",
                         "MACOSX_DEPLOYMENT_TARGET",
                         "FFMPEG_REVISION",
                         "BLOCKED_FORMULAS",
@@ -41,11 +40,8 @@ def main() -> int:
                     [key.split("_")[0] for key in filtered_data.keys()]
                 ).keys()
                 dependency_strings = [
-                    (
-                        f'    "{key.lower()}'
-                        f" {environment_data.get(f'{key}_VERSION', '')}"
-                        f" {environment_data.get(f'{key}_HASH', '')}\""
-                    )
+                    f"    \"{key.lower()} {environment_data.get(f'{key}_VERSION', '')}"
+                    f" {environment_data.get(f'{key}_HASH', '')}\""
                     for key in dependencies
                 ]
 
