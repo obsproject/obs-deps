@@ -97,4 +97,3 @@ obs-deps-build-main() {
 }
 
 obs-deps-build-main $*
-build-main $*
