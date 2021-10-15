@@ -137,8 +137,11 @@ _print_usage() {
             "-q, --quiet                    : Suppress most build process output\n" \
             "-v, --verbose                  : Enable more verbose build process output\n" \
             "-a, --architecture             : Specify build architecture (default: host arch, alternatives: universal,x86_64, arm64)\n" \
-            "-s, --skip-dependency-checks   : Skip Homebrew dependency checks (default: off)\n" \
-            "-i, --install                  : Run installation (default: off)\n"
+            "-s, --skip-dependency-checks   : Skip Homebrew dependency checks (default: off)\n"
+
+    if [ -z _RUN_OBS_BUILD_SCRIPT ]; then
+        echo -e "-i, --install                  : Run installation (default: off)\n"
+    fi
 }
 
 _check_parameters() {
