@@ -72,8 +72,8 @@ _build_product() {
             --enable-cross-compile --enable-shared --disable-static --enable-pthreads \
             --shlibdir="${BUILD_DIR}/lib" --pkg-config-flags="--static" --prefix="${BUILD_DIR}" --enable-rpath \
             --host-cflags="-I${BUILD_DIR}/include" --host-ldflags="-L${BUILD_DIR}/lib"  \
-            --extra-ldflags="-target x86_64-apple-macos${DARWIN_TARGET} -L${BUILD_DIR}/lib -lstdc++" \
-            --extra-cflags="-fno-stack-check -target x86_64-apple-macos${DARWIN_TARGET} -I${BUILD_DIR}/include" \
+            --extra-ldflags="-target x86_64-apple-macos10.13 -L${BUILD_DIR}/lib -lstdc++" \
+            --extra-cflags="-fno-stack-check -target x86_64-apple-macos10.13 -I${BUILD_DIR}/include" \
             --arch=x86_64
 
         step "Build (x86_64)..."
@@ -91,8 +91,8 @@ _build_product() {
             --enable-cross-compile --enable-shared --disable-static --enable-pthreads --enable-rpath \
             --shlibdir="${BUILD_DIR}/lib" --pkg-config-flags="--static" --prefix="${BUILD_DIR}" \
             --host-cflags="-I${BUILD_DIR}/include" --host-ldflags="-L${BUILD_DIR}/lib"  \
-            --extra-ldflags="-target arm64-apple-macos20 -L${BUILD_DIR}/lib -lstdc++" \
-            --extra-cflags="-fno-stack-check -target arm64-apple-macos20 -I${BUILD_DIR}/include" \
+            --extra-ldflags="-target arm64-apple-macos11 -L${BUILD_DIR}/lib -lstdc++" \
+            --extra-cflags="-fno-stack-check -target arm64-apple-macos11 -I${BUILD_DIR}/include" \
             --arch=arm64
 
         step "Build (arm64)..."
