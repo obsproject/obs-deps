@@ -130,6 +130,20 @@ cleanup() {
 }
 
 ## DEFINE TEMPLATES ##
+_add_ccache_to_path() {
+    if [ "${CMAKE_CCACHE_OPTIONS}" ]; then
+        if [ "${CURRENT_ARCH}" == "arm64" ]; then
+            PATH="/opt/homebrew/opt/ccache/libexec:${PATH}"
+        else
+            PATH="/usr/local/opt/ccache/libexec:${PATH}"
+        fi
+        status "Compiler Info:"
+        local IFS=$'\n'
+        for COMPILER_INFO in $(type cc c++ gcc g++ clang clang++ || true); do
+            info "${COMPILER_INFO}"
+        done
+    fi
+}
 
 _print_usage() {
     echo -e "Usage: ${0}\n" \
