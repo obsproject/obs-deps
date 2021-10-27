@@ -573,15 +573,75 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: 'Download deps artifact'
+      - name: 'Download x86_64 deps artifact'
+        uses: actions/download-artifact@v2
+        with:
+          name: macos-deps-${{ env.CURRENT_DATE }}-x86_64.tar.xz
+
+      - name: 'Download x86_64 Qt artifact'
+        uses: actions/download-artifact@v2
+        with:
+          name: macos-deps-qt-${{ env.CURRENT_DATE }}-x86_64.tar.xz
+
+      - name: 'Download arm64 deps artifact'
+        uses: actions/download-artifact@v2
+        with:
+          name: macos-deps-${{ env.CURRENT_DATE }}-arm64.tar.xz
+
+      - name: 'Download arm64 Qt artifact'
+        uses: actions/download-artifact@v2
+        with:
+          name: macos-deps-qt-${{ env.CURRENT_DATE }}-arm64.tar.xz
+
+      - name: 'Download universal deps artifact'
         uses: actions/download-artifact@v2
         with:
           name: macos-deps-${{ env.CURRENT_DATE }}-universal.tar.xz
 
-      - name: 'Download Qt artifact'
+      - name: 'Download universal Qt artifact'
         uses: actions/download-artifact@v2
         with:
           name: macos-deps-qt-${{ env.CURRENT_DATE }}-universal.tar.xz
+
+      - name: 'Upload macOS x86_64 package to release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/macos-deps-${{ env.CURRENT_DATE }}-x86_64.tar.xz
+          asset_name: macos-deps-${{ steps.get_version.outputs.VERSION }}-x86_64.tar.xz
+          asset_content_type: application/octet-stream
+
+      - name: 'Upload macOS Qt x86_64 package to release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/macos-deps-qt-${{ env.CURRENT_DATE }}-x86_64.tar.xz
+          asset_name: macos-deps-qt-${{ steps.get_version.outputs.VERSION }}-x86_64.tar.xz
+          asset_content_type: application/octet-stream
+
+      - name: 'Upload macOS arm64 package to release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/macos-deps-${{ env.CURRENT_DATE }}-arm64.tar.xz
+          asset_name: macos-deps-${{ steps.get_version.outputs.VERSION }}-arm64.tar.xz
+          asset_content_type: application/octet-stream
+
+      - name: 'Upload macOS Qt arm64 package to release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/macos-deps-qt-${{ env.CURRENT_DATE }}-arm64.tar.xz
+          asset_name: macos-deps-qt-${{ steps.get_version.outputs.VERSION }}-arm64.tar.xz
+          asset_content_type: application/octet-stream
 
       - name: 'Upload macOS universal package to release'
         uses: actions/upload-release-asset@v1
