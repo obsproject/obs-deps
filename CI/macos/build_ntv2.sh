@@ -12,7 +12,7 @@
 set -eE
 
 _fixup_libs() {
-    LIBS=$(find "${BUILD_DIR}/ajalibraries/ajantv2" -type f -name "libajantv2shared*.dylib")
+    LIBS=$(find "${BUILD_DIR}/" -type f -name "libajantv2shared*.dylib")
 
     for LIB in ${LIBS}; do
         LIB_BASENAME="$(basename ${LIB})"
