@@ -151,13 +151,13 @@ jobs:
           key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.FFMPEG_DEP_HASH }}
 
       - name: 'Restore ntv2 from cache'
-        id: libluajit-cache
+        id: ntv2-cache
         uses: actions/cache@v2.1.6
         env:
           CACHE_NAME: 'ntv2-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
         with:
-          path: ${{ github.workspace }}/macos_build_temp/LuaJIT-${{ env.LIBLUAJIT_VERSION }}
-          key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.LIBLUAJIT_VERSION }}
+          path: ${{ github.workspace }}/macos_build_temp/ntv2-${{ env.NTV2_VERSION }}
+          key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.NTV2_VERSION }}
 
       - name: 'Build dependency ntv2'
         if: steps.ntv2-cache.outputs.cache-hit != 'true'
