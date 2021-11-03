@@ -11,17 +11,8 @@
 # Setup build environment
 
 # Get fallback macOS deployment target from default workflow
-CI_MACOSX_DEPLOYMENT_TARGET=$(/bin/cat "${CI_WORKFLOW}" | /usr/bin/sed -En "s/[ ]+MACOSX_DEPLOYMENT_TARGET: '([0-9\.]+)'/\1/p" | head -1)
-
-# Export MACOSX_DEPLOYMENT_TARGET which is picked up by some build scripts
-export MACOSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET:-${CI_MACOSX_DEPLOYMENT_TARGET}}"
-
-# Set Darwin version identifier based on MACOSX_DEPLOYMENT_TARGET
-if [ $(echo "${MACOSX_DEPLOYMENT_TARGET}" | cut -d "." -f 1) -lt 11 ]; then
-    DARWIN_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 2)+4))"
-else
-    DARWIN_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 1)+9))"
-fi
+CI_MACOSX_DEPLOYMENT_TARGET_X86_64=$(/bin/cat "${CI_WORKFLOW}" | /usr/bin/sed -En "s/[ ]+MACOSX_DEPLOYMENT_TARGET_X86_64: '([0-9\.]+)'/\1/p" | head -1)
+CI_MACOSX_DEPLOYMENT_TARGET_ARM64=$(/bin/cat "${CI_WORKFLOW}" | /usr/bin/sed -En "s/[ ]+MACOSX_DEPLOYMENT_TARGET_ARM64: '([0-9\.]+)'/\1/p" | head -1)
 
 # Ensure using the most recent macOS SDK
 export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
@@ -47,6 +38,24 @@ fi
 
 ## DEFINE UTILITIES ##
 check_macos_version() {
+    ARCH="${ARCH:-${CURRENT_ARCH}}"
+    if [ "${ARCH}" = "x86_64" -o "${ARCH}" = "universal" ]; then
+        CI_MACOSX_DEPLOYMENT_TARGET="${CI_MACOSX_DEPLOYMENT_TARGET_X86_64}"
+    elif [ "${ARCH}" = "arm64" ]; then
+        CI_MACOSX_DEPLOYMENT_TARGET="${CI_MACOSX_DEPLOYMENT_TARGET_ARM64}"
+    else
+        caught_error "Unsupported architecture '${ARCH}' provided"
+    fi
+
+    export MACOSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET:-${CI_MACOSX_DEPLOYMENT_TARGET}}"
+
+    # Set Darwin version identifier based on MACOSX_DEPLOYMENT_TARGET
+    if [ $(echo "${MACOSX_DEPLOYMENT_TARGET}" | cut -d "." -f 1) -lt 11 ]; then
+        DARWIN_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 2)+4))"
+    else
+        DARWIN_TARGET="$(($(echo ${MACOSX_DEPLOYMENT_TARGET} | cut -d "." -f 1)+9))"
+    fi
+
     step "Check macOS version..."
     MIN_VERSION=${MACOSX_DEPLOYMENT_TARGET}
     MIN_MAJOR=$(echo ${MIN_VERSION} | /usr/bin/cut -d '.' -f 1)
@@ -178,8 +187,8 @@ _build_checks() {
     CI_PRODUCT_VERSION=$(/bin/cat "${CI_WORKFLOW}" | /usr/bin/sed -En "s/[ ]+${PRODUCT_NAME_U}_VERSION: '(.+)'/\1/p")
     CI_PRODUCT_HASH=$(/bin/cat "${CI_WORKFLOW}" | /usr/bin/sed -En "s/[ ]+${PRODUCT_NAME_U}_HASH: '([0-9a-f]+)'/\1/p")
 
-    check_macos_version
     check_archs
+    check_macos_version
 
     if [ -z "${INSTALL}" ]; then
         check_ccache
