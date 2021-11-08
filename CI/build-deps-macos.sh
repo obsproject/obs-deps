@@ -23,18 +23,19 @@ set -eE
 _RUN_OBS_BUILD_SCRIPT=TRUE
 PRODUCT_NAME="obs-deps"
 REQUIRED_DEPS=(
-    "macosx  "
     "libpng 1.6.37 505e70834d35383537b6491e7ae8641f1a4bed1876dbfe361201fc80868d88ca"
     "libopus 1.3.1-93-gdfd6c88a dfd6c88aaa54a03a61434c413e30c217eb98f1d5"
     "libogg 1.3.5 c4d91be36fc8e54deae7575241e03f4211eb102afb3fc0775fbbc1b740016705"
     "libvorbis 1.3.7 b33cc4934322bcbf6efcbacf49e3ca01aadbea4114ec9589d1b1e9d20f72954b"
     "libvpx 1.10.0 85803ccbdbdd7a3b03d930187cb055f1353596969c1f92ebec2db839fa4f834a"
+    "libaom 3.2.0 287164de79516c25c8c84fd544f67752c170082a"
     "libx264 r3059 b684ebe04a6f80f8207a57940a1fa00e25274f81"
     "libtheora 1.1.1 f36da409947aa2b3dcc6af0a8c2e3144bc19db2ed547d64e9171c59c66561c61"
     "liblame 3.100 ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e"
     "mbedtls 2.26.0 35d8d87509cd0d002bddbd5508b9d2b931c5e83747d087234cc7ad551d53fe05"
     "libsrt 1.4.1 e80ca1cd0711b9c70882c12ec365cda1ba852e1ce8acd43161a21a04de0cbf14"
-    "ffmpeg 4.2.3 9df6c90aed1337634c1fb026fb01c154c29c82a64ea71291ff2da9aacb9aad31"
+    "librist 0.2.6 88b35b86af1ef3d306f33674f2d9511a27d3ff4ec76f20d3a3b3273b79a4521d"
+    "ffmpeg 4.4.1 eadbad9e9ab30b25f5520fbfde99fae4a92a1ae3c0257a8d68569a4651e30e02"
     "speexdsp 1.2.0 d7032f607e8913c019b190c2bccc36ea73fc36718ee38b5cdfc4e4c0a04ce9a4"
     "libjansson 2.13.1 f4f377da17b10201a60c1108613e78ee15df6b12016b116b6de42209f47a474f"
     "libluajit 2.1 ec6edc5c39c25e4eb3fca51b753f9995e97215da"
@@ -44,7 +45,6 @@ REQUIRED_DEPS=(
 
 ## MAIN SCRIPT FUNCTIONS ##
 obs-deps-build-main() {
-    QMAKE_QUIET=TRUE
     CHECKOUT_DIR="$(/usr/bin/git rev-parse --show-toplevel)"
     BUILD_DIR="${CHECKOUT_DIR}/../obs-prebuilt-dependencies"
     source "${CHECKOUT_DIR}/CI/include/build_support.sh"
