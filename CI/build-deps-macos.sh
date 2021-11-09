@@ -44,7 +44,6 @@ REQUIRED_DEPS=(
 
 ## MAIN SCRIPT FUNCTIONS ##
 obs-deps-build-main() {
-    QMAKE_QUIET=TRUE
     CHECKOUT_DIR="$(/usr/bin/git rev-parse --show-toplevel)"
     BUILD_DIR="${CHECKOUT_DIR}/../obs-prebuilt-dependencies"
     source "${CHECKOUT_DIR}/CI/include/build_support.sh"
