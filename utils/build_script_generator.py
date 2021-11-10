@@ -30,6 +30,8 @@ def main() -> int:
                     not in [
                         "CACHE_REVISION",
                         "MACOSX_DEPLOYMENT_TARGET",
+                        "MACOSX_DEPLOYMENT_TARGET_ARM64",
+                        "MACOSX_DEPLOYMENT_TARGET_X86_64",
                         "FFMPEG_REVISION",
                         "BLOCKED_FORMULAS",
                     ]

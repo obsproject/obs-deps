@@ -27,6 +27,7 @@ _build_product() {
         -DCMAKE_OSX_ARCHITECTURES="${CMAKE_ARCHS}" \
         -DUSE_SHARED_MBEDTLS_LIBRARY=ON \
         -DENABLE_PROGRAMS=OFF \
+        -DENABLE_TESTING=OFF \
         -DCMAKE_MACOSX_RPATH=ON \
         ${QUIET:+-Wno-deprecated -Wno-dev --log-level=ERROR}
 

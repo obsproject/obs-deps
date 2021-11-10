@@ -6,20 +6,22 @@ Scripts to build and package dependencies for OBS on CI
 
 | lib | git commit | version |
 | :--- | :---: | :---: |
-|libpng|[Sourceforge](https://downloads.sourceforge.net/project/libpng/libpng16/1.6.37/libpng-1.6.37.tar.xz)|1.6.37|
-|libopus|[GitHub](https://github.com/xiph/opus/tree/dfd6c88aaa54a03a61434c413e30c217eb98f1d5)|1.3.1-93-gdfd6c88a|
-|libogg|[GitHub](https://github.com/xiph/ogg/releases/download/v1.3.5/libogg-1.3.5.tar.xz)|1.3.5|
-|librnnoise|[90ec41e](https://github.com/xiph/rnnoise/commit/90ec41ef659fd82cfec2103e9bb7fc235e9ea66c)|Master branch|
-|libvorbis|[xiph.org](https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.7.tar.xz)|1.3.7|
-|libvpx|[GitHub](https://github.com/webmproject/libvpx/archive/v1.10.0.tar.gz)|1.10.0|
+|aom|[Google Source](https://aomedia.googlesource.com/aom.git)|3.2.0|
+|ffmpeg|[ffmpeg.org](https://ffmpeg.org/releases/ffmpeg-4.4.1.tar.xz)|4.4.1|
+|libfreetype|[Sourceforge](https://downloads.sourceforge.net/project/freetype/freetype2/2.10.4/freetype-2.10.4.tar.xz)|2.10.4|
 |libjansson|[Petri Lehtinen](https://digip.org/jansson/releases/jansson-2.13.1.tar.gz)|2.13.1|
-|libx264|[GitHub](https://github.com/mirror/x264/commit/b684ebe04a6f80f8207a57940a1fa00e25274f81)|r3059|
+|libluajit|[GitHub](https://github.com/LuaJIT/LuaJIT/commit/ec6edc5c39c25e4eb3fca51b753f9995e97215da)|2.1|
 |libmbedtls|[GitHub](https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.24.0.tar.gz)|2.24.0|
+|libogg|[GitHub](https://github.com/xiph/ogg/releases/download/v1.3.5/libogg-1.3.5.tar.xz)|1.3.5|
+|libopus|[GitHub](https://github.com/xiph/opus/tree/dfd6c88aaa54a03a61434c413e30c217eb98f1d5)|1.3.1-93-gdfd6c88a|
+|libpng|[Sourceforge](https://downloads.sourceforge.net/project/libpng/libpng16/1.6.37/libpng-1.6.37.tar.xz)|1.6.37|
+|librist|[Videolan](https://code.videolan.org/rist/librist/-/archive/v0.2.6/librist-v0.2.6.tar.gz)|0.2.6|
+|librnnoise|[90ec41e](https://github.com/xiph/rnnoise/commit/90ec41ef659fd82cfec2103e9bb7fc235e9ea66c)|Master branch|
 |libsrt|[GitHub](https://github.com/Haivision/srt/archive/v1.4.1.tar.gz)|1.4.1|
 |libtheora|[xiph.org](https://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2)|1.1.1|
-|ffmpeg|[ffmpeg.org](https://ffmpeg.org/releases/ffmpeg-4.2.3.tar.xz)|4.2.3|
-|libluajit|[GitHub](https://github.com/LuaJIT/LuaJIT/commit/ec6edc5c39c25e4eb3fca51b753f9995e97215da)|2.1|
-|libfreetype|[Sourceforge](https://downloads.sourceforge.net/project/freetype/freetype2/2.10.4/freetype-2.10.4.tar.xz)|2.10.4|
+|libvorbis|[xiph.org](https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.7.tar.xz)|1.3.7|
+|libvpx|[GitHub](https://github.com/webmproject/libvpx/archive/v1.10.0.tar.gz)|1.10.0|
+|libx264|[GitHub](https://github.com/mirror/x264/commit/b684ebe04a6f80f8207a57940a1fa00e25274f81)|r3059|
 |Qt|[Qt.io](https://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz)|5.15.2|
 
 ### Notes
@@ -60,7 +62,7 @@ git clone https://github.com/obsproject/obs-deps.git
 cmake -DCMAKE_PREFIX_PATH="some_other_path;obs-deps" [..]
 ```
 
-## Contributing
+### Contributing
 
 * Add/edit seperate build scripts for every dependency in the `CI/[OPERATING SYSTEM/` directory
 * For new dependencies:

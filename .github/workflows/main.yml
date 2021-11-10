@@ -22,7 +22,7 @@ jobs:
     env:
       MACOSX_DEPLOYMENT_TARGET_X86_64: '10.13'
       MACOSX_DEPLOYMENT_TARGET_ARM64: '11.0'
-      CACHE_REVISION: '05'
+      CACHE_REVISION: '09'
       LIBPNG_VERSION: '1.6.37'
       LIBPNG_HASH: '505e70834d35383537b6491e7ae8641f1a4bed1876dbfe361201fc80868d88ca'
       LIBOPUS_VERSION: '1.3.1-93-gdfd6c88a'
@@ -33,6 +33,8 @@ jobs:
       LIBVORBIS_HASH: 'b33cc4934322bcbf6efcbacf49e3ca01aadbea4114ec9589d1b1e9d20f72954b'
       LIBVPX_VERSION: '1.10.0'
       LIBVPX_HASH: '85803ccbdbdd7a3b03d930187cb055f1353596969c1f92ebec2db839fa4f834a'
+      LIBAOM_VERSION: '3.2.0'
+      LIBAOM_HASH: '287164de79516c25c8c84fd544f67752c170082a'
       LIBX264_VERSION: 'r3059'
       LIBX264_HASH: 'b684ebe04a6f80f8207a57940a1fa00e25274f81'
       LIBTHEORA_VERSION: '1.1.1'
@@ -43,8 +45,10 @@ jobs:
       MBEDTLS_HASH: '35d8d87509cd0d002bddbd5508b9d2b931c5e83747d087234cc7ad551d53fe05'
       LIBSRT_VERSION: '1.4.1'
       LIBSRT_HASH: 'e80ca1cd0711b9c70882c12ec365cda1ba852e1ce8acd43161a21a04de0cbf14'
-      FFMPEG_VERSION: '4.2.3'
-      FFMPEG_HASH: '9df6c90aed1337634c1fb026fb01c154c29c82a64ea71291ff2da9aacb9aad31'
+      LIBRIST_VERSION: '0.2.6'
+      LIBRIST_HASH: '88b35b86af1ef3d306f33674f2d9511a27d3ff4ec76f20d3a3b3273b79a4521d'
+      FFMPEG_VERSION: '4.4.1'
+      FFMPEG_HASH: 'eadbad9e9ab30b25f5520fbfde99fae4a92a1ae3c0257a8d68569a4651e30e02'
       SPEEXDSP_VERSION: '1.2.0'
       SPEEXDSP_HASH: 'd7032f607e8913c019b190c2bccc36ea73fc36718ee38b5cdfc4e4c0a04ce9a4'
       LIBJANSSON_VERSION: '2.13.1'
@@ -104,7 +108,22 @@ jobs:
           brew bundle --file "CI/include/Brewfile"
           echo "/usr/local/opt/gnu-tar/libexec/gnubin" >> $GITHUB_PATH
 
-          FFMPEG_DEP_HASH="$(echo "${{ env.LIBPNG_VERSION }}-${{ env.LIBLAME_VERSION }}-${{ env.LIBOGG_VERSION }}-${{ env.LIBVORBIS_VERSION }}-${{ env.LIBVPX_VERSION }}-${{ env.LIBOPUS_VERSION }}-${{ env.LIBX264_VERSION }}-${{ env.LIBSRT_VERSION }}-${{ env.LIBMBEDTLS_VERSION }}-${{ env.LIBTHEORA_VERSION }}" | sha256sum | cut -d " " -f 1)"
+          FFMPEG_DEPS=(\
+            "${{ env.LIBPNG_VERSION }}" \
+            "${{ env.LIBLAME_VERSION }}" \
+            "${{ env.LIBOGG_VERSION }}" \
+            "${{ env.LIBVORBIS_VERSION }}" \
+            "${{ env.LIBVPX_VERSION }}" \
+            "${{ env.LIBOPUS_VERSION }}" \
+            "${{ env.LIBAOM_VERSION }}" \
+            "${{ env.LIBX264_VERSION }}" \
+            "${{ env.LIBSRT_VERSION }}" \
+            "${{ env.LIBRIST_VERSION }}" \
+            "${{ env.MBEDTLS_VERSION }}" \
+            "${{ env.LIBTHEORA_VERSION }}"
+          )
+
+          FFMPEG_DEP_HASH="$(echo "${FFMPEG_DEPS}" | sha256sum | cut -d " " -f 1)"
           echo "FFMPEG_DEP_HASH=$FFMPEG_DEP_HASH" >> $GITHUB_ENV
 
       - name: 'Restore ffmpeg dependencies from cache'
@@ -119,20 +138,22 @@ jobs:
             ${{ github.workspace }}/macos_build_temp/libogg-${{ env.LIBOGG_VERSION }}
             ${{ github.workspace }}/macos_build_temp/libvorbis-${{ env.LIBVORBIS_VERSION }}
             ${{ github.workspace }}/macos_build_temp/libvpx-${{ env.LIBVPX_VERSION }}
+            ${{ github.workspace }}/macos_build_temp/aom-${{ env.LIBAOM_VERSION }}
             ${{ github.workspace }}/macos_build_temp/x264-${{ env.LIBX264_VERSION }}
             ${{ github.workspace }}/macos_build_temp/libtheora-${{ env.LIBTHEORA_VERSION }}
             ${{ github.workspace }}/macos_build_temp/lame-${{ env.LIBLAME_VERSION }}
             ${{ github.workspace }}/macos_build_temp/mbedtls-mbedtls-${{ env.MBEDTLS_VERSION }}
+            ${{ github.workspace }}/macos_build_temp/librist-v${{ env.LIBRIST_VERSION }}
             ${{ github.workspace }}/macos_build_temp/srt-${{ env.LIBSRT_VERSION }}
           key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.FFMPEG_DEP_HASH }}
 
       - name: 'Build dependency libpng'
         if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_libpng.sh -a ${{ matrix.arch }}
+        run: CI/macos/build_libpng.sh -s -a ${{ matrix.arch }}
 
       - name: 'Install dependency libpng'
         if: steps.ffmpeg-deps-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_libpng.sh -a ${{ matrix.arch }} --install
+        run: CI/macos/build_libpng.sh -s -a ${{ matrix.arch }} --install
 
       - name: 'Build dependency libopus'
         if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
@@ -174,6 +195,14 @@ jobs:
         if: steps.ffmpeg-deps-cache.outputs.cache-hit == 'true'
         run: CI/macos/build_libx264.sh -s -a ${{ matrix.arch }} --install
 
+      - name: 'Build dependency libaom'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
+        run: CI/macos/build_libaom.sh -s -a ${{ matrix.arch }}
+
+      - name: 'Install dependency libaom'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit == 'true'
+        run: CI/macos/build_libaom.sh -s -a ${{ matrix.arch }} --install
+
       - name: 'Build dependency libtheora'
         if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
         run: CI/macos/build_libtheora.sh -s -a ${{ matrix.arch }}
@@ -205,6 +234,14 @@ jobs:
       - name: 'Install dependency libsrt'
         if: steps.ffmpeg-deps-cache.outputs.cache-hit == 'true'
         run: CI/macos/build_libsrt.sh -s -a ${{ matrix.arch }} --install
+
+      - name: 'Build dependency librist'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
+        run: CI/macos/build_librist.sh -s -a ${{ matrix.arch }}
+
+      - name: 'Install dependency librist'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit == 'true'
+        run: CI/macos/build_librist.sh -s -a ${{ matrix.arch }} --install
 
       - name: 'Restore ffmpeg from cache'
         id: ffmpeg-cache

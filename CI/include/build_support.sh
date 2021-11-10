@@ -11,27 +11,39 @@
 
 ## DEFINE UTILITIES ##
 
-status() {
-    script_output "${COLOR_BLUE}[${PRODUCT_NAME}] ${1}${COLOR_RESET}"
-}
+if [ -z "${QUIET}" ]; then
+    status() {
+        echo -e "${COLOR_BLUE}[${PRODUCT_NAME}] ${1}${COLOR_RESET}"
+    }
 
-step() {
-    script_output "${COLOR_GREEN}  + ${1}${COLOR_RESET}"
-}
+    step() {
+        echo -e "${COLOR_GREEN}  + ${1}${COLOR_RESET}"
+    }
 
-info() {
-    script_output "${COLOR_ORANGE}  + ${1}${COLOR_RESET}"
-}
+    info() {
+        echo -e "${COLOR_ORANGE}  + ${1}${COLOR_RESET}"
+    }
 
-error() {
-    echo -e "${COLOR_RED}  + ${1}${COLOR_RESET}"
-}
+    error() {
+        echo -e "${COLOR_RED}  + ${1}${COLOR_RESET}"
+    }
+else
+    status() {
+        :
+    }
 
-script_output() {
-    if [ -z "${QUIET}" ]; then
-        echo -e "${1}"
-    fi
-}
+    step() {
+        :
+    }
+
+    info() {
+        :
+    }
+
+    error() {
+        echo -e "${COLOR_RED}  + ${1}${COLOR_RESET}"
+    }
+fi
 
 exists() {
   /usr/bin/command -v "$1" >/dev/null 2>&1
@@ -153,7 +165,7 @@ github_fetch() {
         git config remote.origin.fetch "+refs/heads/master:refs/remotes/origin/master"
         git config remote.origin.tapOpt --no-tags
 
-        if ! git rev-parse -q --verify "${GH_COMMIT}^{commit}"; then
+        if ! git rev-parse -q --verify "${GH_REF}^{commit}"; then
             git fetch origin
         fi
 

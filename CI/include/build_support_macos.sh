@@ -76,6 +76,8 @@ install_homebrew_deps() {
     fi
 
     brew bundle --file "${CHECKOUT_DIR}/CI/include/Brewfile" ${QUIET:+--quiet}
+
+    check_curl
 }
 
 check_curl() {

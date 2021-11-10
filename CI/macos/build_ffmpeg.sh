@@ -11,6 +11,14 @@
 # Halt on errors
 set -eE
 
+_patch_product() {
+    cd "${PRODUCT_FOLDER}"
+
+    step "Apply patches..."
+    apply_patch "${CHECKOUT_DIR}/CI/patches/FFmpeg-9010.patch" "97ac6385c2b7a682360c0cfb3e311ef4f3a48041d3f097d6b64f8c13653b6450"
+    apply_patch "${CHECKOUT_DIR}/CI/patches/FFmpeg-4.4.1-OBS.patch" "710fb5a381f7b68c95dcdf865af4f3c63a9405c305abef55d24c7ab54e90b182"
+}
+
 _fixup_ffmpeg_libs() {
     LIBS=$(find "${BUILD_DIR}/lib" -type f \( -name "libav*.dylib" -o -name "libsw*.dylib" -o -name "libpostproc*.dylib" \))
 
@@ -67,7 +75,7 @@ _build_product() {
         step "Configure (x86_64)..."
 
         PKG_CONFIG_PATH="${BUILD_DIR}/lib/pkgconfig" ../configure \
-            --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --enable-libtheora --enable-libmp3lame --enable-version3 --enable-gpl --enable-videotoolbox \
+            --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --enable-librist --enable-libtheora --enable-libmp3lame --enable-libaom --enable-version3 --enable-gpl --enable-videotoolbox \
             --disable-libjack --disable-indev=jack --disable-outdev=sdl --disable-programs --disable-doc  \
             --enable-cross-compile --enable-shared --disable-static --enable-pthreads \
             --shlibdir="${BUILD_DIR}/lib" --pkg-config-flags="--static" --prefix="${BUILD_DIR}" --enable-rpath \
@@ -86,7 +94,7 @@ _build_product() {
 
         step "Configure (arm64)..."
         PKG_CONFIG_PATH="${BUILD_DIR}/lib/pkgconfig" ../configure \
-            --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --enable-libtheora --enable-libmp3lame --enable-version3 --enable-gpl --enable-videotoolbox \
+            --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --enable-librist --enable-libtheora --enable-libmp3lame --enable-libaom --enable-version3 --enable-gpl --enable-videotoolbox \
             --disable-libjack --disable-indev=jack --disable-outdev=sdl --disable-programs --disable-doc  \
             --enable-cross-compile --enable-shared --disable-static --enable-pthreads --enable-rpath \
             --shlibdir="${BUILD_DIR}/lib" --pkg-config-flags="--static" --prefix="${BUILD_DIR}" \
