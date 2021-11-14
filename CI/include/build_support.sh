@@ -69,8 +69,21 @@ BUILD_CONFIG="${BUILD_CONFIG:-RelWithDebInfo}"
 CI_WORKFLOW="${CHECKOUT_DIR}/.github/workflows/main.yml"
 CURRENT_ARCH="$(uname -m)"
 CURRENT_DATE="$(date +"%Y-%m-%d")"
+GIT_VERSION=""
 
 ## Utility functions ##
+
+is_gte() {
+    if [ "$(echo $@ | tr ' ' '\n' | sort -rV | head -n1)" = "$1" ]; then
+        echo "true"
+    fi
+}
+
+git_has_sparse_checkout() {
+    if [ "$(is_gte $GIT_VERSION 2.25)" ]; then
+        echo "true"
+    fi
+}
 
 check_ccache() {
     step "Check CCache..."
@@ -92,7 +105,8 @@ check_ccache() {
 check_git() {
     step "Check git..."
     if git --version >/dev/null 2>&1; then
-        info "Git available"
+        GIT_VERSION="$(git --version | sed -e 's/git version //')"
+        info "Git version $GIT_VERSION available"
 
         info "Check git config for user..."
         git_user_email=$(git config --get user.email)
@@ -175,7 +189,7 @@ check_and_fetch() {
 }
 
 github_fetch() {
-    if [ $# -ne 3 ]; then
+    if [ $# -le 3 ]; then
         error "Usage: github_fetch GITHUB_USER GITHUB_REPOSITORY GITHUB_COMMIT_HASH"
         return 1
     fi
@@ -183,6 +197,7 @@ github_fetch() {
     GH_USER="${1}"
     GH_REPO="${2}"
     GH_REF="${3}"
+    GIT_OPT_SPARSE="${4}"
 
     if [ -d "./.git" ]; then
         info "Repository ${GH_USER}/${GH_REPO} already exists, updating..."
@@ -203,7 +218,12 @@ github_fetch() {
         fi
 
     else
-        git clone "https://github.com/${GH_USER}/${GH_REPO}.git" "$(pwd)"
+        if [ "${CI}" ] && [ "$(git_has_sparse_checkout)" ] && [ "${GIT_OPT_SPARSE}" ]; then
+            git clone --filter=blob:none --no-checkout "https://github.com/${GH_USER}/${GH_REPO}.git" "$(pwd)"
+            git sparse-checkout ${GIT_OPT_SPARSE}
+        else
+            git clone "https://github.com/${GH_USER}/${GH_REPO}.git" "$(pwd)"
+        fi
         git config advice.detachedHead false
         info "Checking out commit ${GH_REF}..."
         git checkout -f "${GH_REF}" --
