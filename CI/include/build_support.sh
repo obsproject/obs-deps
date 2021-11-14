@@ -80,7 +80,7 @@ is_gte() {
 }
 
 git_has_sparse_checkout() {
-    if [ "$(is_gte $GIT_VERSION 2.25)" ]; then
+    if [ "$(is_gte ${GIT_VERSION} 2.25)" ]; then
         echo "true"
     fi
 }
@@ -106,7 +106,7 @@ check_git() {
     step "Check git..."
     if git --version >/dev/null 2>&1; then
         GIT_VERSION="$(git --version | sed -e 's/git version //')"
-        info "Git version $GIT_VERSION available"
+        info "Git version ${GIT_VERSION} available"
 
         info "Check git config for user..."
         git_user_email=$(git config --get user.email)
