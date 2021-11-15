@@ -625,8 +625,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.get_version.outputs.VERSION }}
-          release_name: OBS Deps build ${{ steps.get_version.outputs.VERSION }}
+          tag_name: win-${{ steps.get_version.outputs.VERSION }}
+          release_name: OBS Windows Deps build ${{ steps.get_version.outputs.VERSION }}
           draft: false
           prerelease: false
 
