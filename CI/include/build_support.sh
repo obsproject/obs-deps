@@ -189,7 +189,7 @@ check_and_fetch() {
 }
 
 github_fetch() {
-    if [ $# -le 3 ]; then
+    if [ $# -lt 3 ]; then
         error "Usage: github_fetch GITHUB_USER GITHUB_REPOSITORY GITHUB_COMMIT_HASH"
         return 1
     fi
