@@ -11,22 +11,6 @@
 # Halt on errors
 set -eE
 
-_fixup_libs() {
-    LIBS=$(find "${BUILD_DIR}/" -type f -name "libajantv2*.a")
-
-    for LIB in ${LIBS}; do
-        LIB_BASENAME="$(basename ${LIB})"
-        LIB_NAME=${LIB_BASENAME%%.*}
-        for LINKED_LIB in $(otool -L ${LIB} | grep "obs-dependencies-${ARCH}" | grep -v ${LIB_NAME} | cut -d " " -f 1 | sed -e 's/^[[:space:]]*//'); do
-            info "Fix library path ${LINKED_LIB} in ${LIB}"
-            install_name_tool -change "${LINKED_LIB}" "@rpath/$(basename "${LINKED_LIB}")" "${LIB}"
-        done
-
-        info "Fix id of ${LIB}"
-        install_name_tool -id "@rpath/${LIB_BASENAME}" "${LIB}"
-    done
-}
-
 _build_product() {
     cd ${PRODUCT_FOLDER}
 
@@ -48,8 +32,6 @@ _install_product() {
 
     step "Install ("${ARCH}").."
     cmake --install build_${ARCH} --config "Release"
-
-    _fixup_libs
 }
 
 build-ntv2-main() {
