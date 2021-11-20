@@ -52,7 +52,7 @@ package-universal-main() {
     cd "${CHECKOUT_DIR}/macos/obs-dependencies-universal"
 
     step "Cleanup unnecessary files..."
-    find . \( -type f -or -type l \) \( -name "*.la" -or -name "*.a" \) | xargs rm
+    find . \( -type f -or -type l \) \( -name "*.la" -or -name "*.a" -and ! -name "libajantv2*.a" \) | xargs rm
     find ./lib -mindepth 1 -maxdepth 1 -type d | xargs rm -rf
     rm -rf ./bin
     rm -rf ./share
