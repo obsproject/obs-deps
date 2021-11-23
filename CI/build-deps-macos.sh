@@ -83,7 +83,7 @@ obs-deps-build-main() {
     cd "${CHECKOUT_DIR}/macos/obs-dependencies-${ARCH}"
 
     step "Cleanup unnecessary files..."
-    find . \( -type f -or -type l \) \( -name "*.la" -or -name "*.a" \) | xargs rm
+    find . \( -type f -or -type l \) \( -name "*.la" -or -name "*.a" -and ! -name "libajantv2*.a" \) | xargs rm
     rm -rf ./bin
     rm -rf ./share
     find ./lib -mindepth 1 -maxdepth 1 -type d | xargs rm -rf
