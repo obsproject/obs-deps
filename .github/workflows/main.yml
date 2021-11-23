@@ -149,23 +149,6 @@ jobs:
             ${{ github.workspace }}/macos_build_temp/srt-${{ env.LIBSRT_VERSION }}
           key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.FFMPEG_DEP_HASH }}
 
-      - name: 'Restore ntv2 from cache'
-        id: ntv2-cache
-        uses: actions/cache@v2.1.6
-        env:
-          CACHE_NAME: 'ntv2-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
-        with:
-          path: ${{ github.workspace }}/macos_build_temp/ntv2-${{ env.NTV2_VERSION }}
-          key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.NTV2_VERSION }}
-
-      - name: 'Build dependency ntv2'
-        if: steps.ntv2-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_ntv2.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency ntv2'
-        if: steps.ntv2-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_ntv2.sh -s -a ${{ matrix.arch }} --install
-
       - name: 'Build dependency libpng'
         if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
         run: CI/macos/build_libpng.sh -s -a ${{ matrix.arch }}
@@ -287,6 +270,23 @@ jobs:
         with:
           path: ${{ github.workspace }}/macos_build_temp/speexdsp-SpeexDSP-${{ env.SPEEXDSP_VERSION }}
           key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.SPEEXDSP_VERSION }}
+
+      - name: 'Restore ntv2 from cache'
+        id: ntv2-cache
+        uses: actions/cache@v2.1.6
+        env:
+          CACHE_NAME: 'ntv2-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
+        with:
+          path: ${{ github.workspace }}/macos_build_temp/ntv2-${{ env.NTV2_VERSION }}
+          key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.NTV2_VERSION }}
+
+      - name: 'Build dependency ntv2'
+        if: steps.ntv2-cache.outputs.cache-hit != 'true'
+        run: CI/macos/build_ntv2.sh -s -a ${{ matrix.arch }}
+
+      - name: 'Install dependency ntv2'
+        if: steps.ntv2-cache.outputs.cache-hit == 'true'
+        run: CI/macos/build_ntv2.sh -s -a ${{ matrix.arch }} --install
 
       - name: 'Build dependency SpeexDSP'
         if: steps.speexdsp-cache.outputs.cache-hit != 'true'
@@ -619,17 +619,6 @@ jobs:
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
 
-      - name: 'Create Release'
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.get_version.outputs.VERSION }}
-          release_name: OBS Deps build ${{ steps.get_version.outputs.VERSION }}
-          draft: false
-          prerelease: false
-
       - name: 'Download x86_64 deps artifact'
         uses: actions/download-artifact@v2
         with:
@@ -660,62 +649,24 @@ jobs:
         with:
           name: macos-deps-qt-${{ env.CURRENT_DATE }}-universal.tar.xz
 
-      - name: 'Upload macOS x86_64 package to release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/macos-deps-${{ env.CURRENT_DATE }}-x86_64.tar.xz
-          asset_name: macos-deps-${{ steps.get_version.outputs.VERSION }}-x86_64.tar.xz
-          asset_content_type: application/octet-stream
+      - name: 'Generate checksums'
+        run: |
+          echo "### Checksums\n" > ${{ github.workspace }}/RELEASE.txt
+          find . -name "macos-deps-*.tar.xz" -print0 | sort -z | xargs -0 -n 1 -P 1 -I {} sh -c "echo \"    \$(basename {}): \$(sha256sum {} | cut -c 1-64)\" >> ${{ github.workspace }}/RELEASE.txt"
 
-      - name: 'Upload macOS Qt x86_64 package to release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Create Release'
+        id: create_release
+        uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/macos-deps-qt-${{ env.CURRENT_DATE }}-x86_64.tar.xz
-          asset_name: macos-deps-qt-${{ steps.get_version.outputs.VERSION }}-x86_64.tar.xz
-          asset_content_type: application/octet-stream
-
-      - name: 'Upload macOS arm64 package to release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/macos-deps-${{ env.CURRENT_DATE }}-arm64.tar.xz
-          asset_name: macos-deps-${{ steps.get_version.outputs.VERSION }}-arm64.tar.xz
-          asset_content_type: application/octet-stream
-
-      - name: 'Upload macOS Qt arm64 package to release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/macos-deps-qt-${{ env.CURRENT_DATE }}-arm64.tar.xz
-          asset_name: macos-deps-qt-${{ steps.get_version.outputs.VERSION }}-arm64.tar.xz
-          asset_content_type: application/octet-stream
-
-      - name: 'Upload macOS universal package to release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/macos-deps-${{ env.CURRENT_DATE }}-universal.tar.xz
-          asset_name: macos-deps-${{ steps.get_version.outputs.VERSION }}-universal.tar.xz
-          asset_content_type: application/octet-stream
-
-      - name: 'Upload macOS Qt universal package to release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/macos-deps-qt-${{ env.CURRENT_DATE }}-universal.tar.xz
-          asset_name: macos-deps-qt-${{ steps.get_version.outputs.VERSION }}-universal.tar.xz
-          asset_content_type: application/octet-stream
+          draft: false
+          prerelease: false
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          name: "OBS macOS Deps Build ${{ steps.get_version.outputs.VERSION }}"
+          body_path: ${{ github.workspace }}/RELEASE.txt
+          files: |
+            ${{ github.workspace }}/macos-deps-${{ env.CURRENT_DATE }}-x86_64.tar.xz
+            ${{ github.workspace }}/macos-deps-${{ env.CURRENT_DATE }}-arm64.tar.xz
+            ${{ github.workspace }}/macos-deps-${{ env.CURRENT_DATE }}-universal.tar.xz
+            ${{ github.workspace }}/macos-deps-qt-${{ env.CURRENT_DATE }}-x86_64.tar.xz
+            ${{ github.workspace }}/macos-deps-qt-${{ env.CURRENT_DATE }}-arm64.tar.xz
+            ${{ github.workspace }}/macos-deps-qt-${{ env.CURRENT_DATE }}-universal.tar.xz
