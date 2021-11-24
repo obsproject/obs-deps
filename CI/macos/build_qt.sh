@@ -17,6 +17,7 @@ _patch_product() {
     if [ -z "${SKIP_UNPACK}" ]; then
         step "Apply patches..."
         apply_patch "${CHECKOUT_DIR}/CI/patches/QTBUG-74606.patch" "6ba73e94301505214b85e6014db23b042ae908f2439f0c18214e92644a356638"
+        apply_patch "${CHECKOUT_DIR}/CI/macos/patches/QTBUG-97855.patch" "d8620262ad3f689fdfe6b6e277ddfdd3594db3de9dbc65810a871f142faa9966"
         apply_patch "${CHECKOUT_DIR}/CI/macos/patches/QTBUG-90370.patch" "277b16f02f113e60579b07ad93c35154d7738a296e3bf3452182692b53d29b85"
         find . -type f -name "*.pro" -print0 | xargs -0 -I{} sh -c "echo '\n\nCONFIG += sdk_no_version_check' >> {}"
     fi
