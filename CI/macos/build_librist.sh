@@ -75,6 +75,37 @@ _install_product() {
     meson install -C build_${ARCH}
 }
 
+_build_setup_rist() {
+    trap "caught_error 'build-librist'" ERR
+
+    ensure_dir "${CHECKOUT_DIR}/macos_build_temp"
+
+    step "Git checkout..."
+    mkdir -p "${PRODUCT_REPO}-v${PRODUCT_VERSION:-${CI_PRODUCT_VERSION}}"
+    cd "${PRODUCT_REPO}-v${PRODUCT_VERSION:-${CI_PRODUCT_VERSION}}"
+
+    if [ -d "./.git" ]; then
+        info "Repository ${PRODUCT_REPO} already exists, updating..."
+        git config advice.detachedHead false
+        git config remote.origin.url "https://code.videolan.org/rist/librist.git"
+        git config remote.origin.fetch "+refs/heads/master:refs/remotes/origin/master"
+        git config remote.origin.tapOpt --no-tags
+
+        if ! git rev-parse -q --verify "${PRODUCT_HASH:-${CI_PRODUCT_HASH}}^{commit}"; then
+            git fetch origin
+        fi
+
+        git checkout -f "${PRODUCT_HASH:-${CI_PRODUCT_HASH}}" --
+        git reset --hard "${PRODUCT_HASH:-${CI_PRODUCT_HASH}}" --
+    else
+        git clone "https://code.videolan.org/rist/librist.git" "$(pwd)"
+        git config advice.detachedHead false
+        info "Checking out commit ${PRODUCT_HASH:-${CI_PRODUCT_HASH}}..."
+        git checkout -f "${PRODUCT_HASH:-${CI_PRODUCT_HASH}}" --
+
+    fi
+}
+
 build-librist-main() {
     PRODUCT_NAME="${PRODUCT_NAME:-librist}"
 
@@ -88,12 +119,14 @@ build-librist-main() {
     fi
 
     NOCONTINUE=TRUE
-    PRODUCT_URL="https://code.videolan.org/rist/librist/-/archive/v${PRODUCT_VERSION:-${CI_PRODUCT_VERSION}}/librist-v${PRODUCT_VERSION:-${CI_PRODUCT_VERSION}}.tar.gz"
-    PRODUCT_FILENAME="$(basename "${PRODUCT_URL}")"
+    PRODUCT_REPO="librist"
+    PRODUCT_PROJECT="librist"
     PRODUCT_FOLDER="librist-v${PRODUCT_VERSION:-${CI_PRODUCT_VERSION}}"
 
     if [ -z "${INSTALL}" ]; then
-        _build_setup
+# instead of downloading librist release 0.26, build master; revert back when librist will have a new release for v0.27
+#      _build_setup
+        _build_setup_rist
         _build
     else
         _install_product
