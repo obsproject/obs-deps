@@ -651,7 +651,7 @@ jobs:
 
       - name: 'Generate checksums'
         run: |
-          echo "### Checksums\n" > ${{ github.workspace }}/RELEASE.txt
+          echo "### Checksums" > ${{ github.workspace }}/RELEASE.txt
           find . -name "macos-deps-*.tar.xz" -print0 | sort -z | xargs -0 -n 1 -P 1 -I {} sh -c "echo \"    \$(basename {}): \$(sha256sum {} | cut -c 1-64)\" >> ${{ github.workspace }}/RELEASE.txt"
 
       - name: 'Create Release'

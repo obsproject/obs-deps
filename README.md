@@ -27,13 +27,13 @@ Scripts to build and package dependencies for OBS on CI
 
 ### Notes
 
-* FFmpeg is pinned to 4.2.3 as there was a bug introduced to HLS streaming functionality after that release, breaking important functionality for OBS
 * libpng is patched for Apple M1 compatibility
 * mbedtls is patched to enable `pthread` functionality
 * SpeexDSP is patched to allow macOS 10.13 compatibility
 * Qt is patched to cross-compile ARM64 on x86_64 hosts
 * Qt is patched to fix https://bugreports.qt.io/browse/QTBUG-74606
 * Qt is patched to fix https://bugreports.qt.io/browse/QTBUG-90370
+* Qt is patched to fix https://bugreports.qt.io/browse/QTBUG-97855
 
 ### Prerequisites
 
