@@ -17,6 +17,15 @@ _patch_product() {
     step "Apply patches..."
     apply_patch "${CHECKOUT_DIR}/CI/patches/FFmpeg-9010.patch" "97ac6385c2b7a682360c0cfb3e311ef4f3a48041d3f097d6b64f8c13653b6450"
     apply_patch "${CHECKOUT_DIR}/CI/patches/FFmpeg-4.4.1-OBS.patch" "710fb5a381f7b68c95dcdf865af4f3c63a9405c305abef55d24c7ab54e90b182"
+    # The librist patch consists in these 2 commits which haven't been backported to FFmpeg 4.1 :
+    # [1] avformat/librist: replace deprecated functions
+    # https://github.com/FFmpeg/FFmpeg/commit/5274f2f7f8c5e40d18b84055fbb232752bd24f2f#diff-bc82665cda5e82b13bcd3e1ee74d820952d80acba839ac46ffed3f0785644200
+    # [2] avformat/librist: correctly initialize logging_settings
+    # https://github.com/FFmpeg/FFmpeg/commit/9b15f43cf8c7976fba115da686a990377f7b5ab9
+    # The following is an important patch submitted by librist devs, but not yet merged into FFmpeg master
+    # [3] avformat/librist: allow setting fifo size and fail on overflow.
+    # http://ffmpeg.org/pipermail/ffmpeg-devel/2021-November/287914.html
+    apply_patch "${CHECKOUT_DIR}/CI/patches/FFmpeg-4.4.1-librist.patch" "1B95F21375421830263A73C74B80852E60EFE10991513CFCC8FB7CBE066887F5"
 }
 
 _fixup_ffmpeg_libs() {
