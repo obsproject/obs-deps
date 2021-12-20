@@ -24,7 +24,10 @@ PRODUCT_NAME="obs-deps"
 REQUIRED_DEPS=(
     "mbedtls 2.24.0 523f0554b6cdc7ace5d360885c3f5bbcc73ec0e8"
     "pthread-win32 2.10.0.0 19fd5054b29af1b4e3b3278bfffbb6274c6c89f5"
+    "libaom 3.2.0 287164de79516c25c8c84fd544f67752c170082a"
+    "svt-av1 0.8.6 a5ec26c0f0bd6e872a0b2bb340b4a777f4847020"
     "libsrt 1.4.2 50b7af06f3a0a456c172b4cb3aceafa8a5cc0036"
+    "librist 0.27 0b1aaf995c4cad83d562ec7887180cc6ee132c84"
     "libx264 r3020 d198931a63049db1f2c92d96c34904c69fde8117"
     "libopus 1.3.1 e85ed7726db5d677c9c0677298ea0cb9c65bdd23"
     "zlib 1.2.11 cacf7f1d4e3d44d871b605da3b647f07d718623f"
@@ -32,9 +35,9 @@ REQUIRED_DEPS=(
     "libogg 1.3.4 31bd3f2707fb7dbae539a7093ba1fc4b2b37d84e"
     "libvorbis 1.3.7 83a82dd9296400d811b78c06e9ca429e24dd1e5c"
     "libvpx 1.8.1 8ae686757b708cd8df1d10c71586aff5355cfe1e"
-    "nv-codec-headers 9.0.18.2 96a6db017b096ad48612890083464a7214902afa"
+    "nv-codec-headers 11.1.5.0 e81e2ba5e8f365d47d91c8c8688769f62614b644"
     "amf 1.4.16.1 802f92ee52b9efa77bf0d3ea8bfaed6040cdd35e"
-    "ffmpeg 4.2.4 f9f95ceebfbd7b7f43c1b7ad34e25d366e6e2d2b"
+    "ffmpeg 4.4.1 cc33e73618a981de7fd96385ecb34719de031f16"
 )
 
 ## MAIN SCRIPT FUNCTIONS ##
@@ -51,6 +54,12 @@ obs-deps-build-main() {
 
     FILE_NAME="windows-cross-deps-${CURRENT_DATE}-${ARCH:-${CURRENT_ARCH}}.tar.xz"
     ORIG_PATH="${PATH}"
+
+    # for x86 arch disable aom and svt-av1
+    if [ "${ARCH}" = "x86" ]; then
+        unset REQUIRED_DEPS[2]
+        unset REQUIRED_DEPS[3]
+    fi
 
     for DEPENDENCY in "${REQUIRED_DEPS[@]}"; do
         unset -f _build_product

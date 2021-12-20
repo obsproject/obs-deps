@@ -46,7 +46,7 @@ _build_product() {
         --disable-examples \
         --enable-shared \
         --disable-static \
-        --disable-multithread \
+        --enable-multithread \
         --enable-runtime-cpu-detect \
         --enable-realtime-only \
         --disable-install-bins \

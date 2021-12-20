@@ -65,6 +65,15 @@ index 472e7de..3dc602f 100644
  }
  
  post_process_cmdline() {
+@@ -1495,6 +1495,8 @@
+   # Almost every platform uses pthreads.
+   if enabled multithread; then
+     case ${toolchain} in
++      *-win*-gcc)
++        ;;
+       *-win*-vs*)
+         ;;
+       *-android-gcc)
 diff --git a/configure b/configure
 index d29e00a..379a2e3 100755
 --- a/configure
@@ -93,6 +102,23 @@ index d29e00a..379a2e3 100755
              fi
              ;;
          esac
+@@ -590,11 +590,14 @@
+ 
+     # Use both check_header and check_lib here, since check_lib
+     # could be a stub that always returns true.
+-    check_header pthread.h && check_lib -lpthread <<EOF || disable_feature pthread_h
++    if ! enabled win32 && ! enabled win64; then
++        check_header pthread.h && check_lib -lpthread <<EOF || disable_feature pthread_h
+ #include <pthread.h>
+ #include <stddef.h>
+ int main(void) { return pthread_create(NULL, NULL, NULL, NULL); }
+ EOF
++    fi
++    
+     check_header unistd.h # for sysconf(3) and friends.
+ 
+     check_header vpx/vpx_integer.h -I${source_path} && enable_feature vpx_ports
+
 diff --git a/examples.mk b/examples.mk
 index 758ca7f..23f8690 100644
 --- a/examples.mk
