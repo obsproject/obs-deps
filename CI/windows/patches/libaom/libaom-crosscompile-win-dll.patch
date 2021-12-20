@@ -1,0 +1,12 @@
+diff --git a/build/cmake/aom_configure.cmake b/build/cmake/aom_configure.cmake
+@@ -15,7 +15,9 @@
+ 
+ include(FindGit)
+ include(FindPerl)
+-include(FindThreads)
++if(NOT CROSS STREQUAL "x86_64-w64-mingw32-")
++  include(FindThreads)
++endif()
+ 
+ include("${AOM_ROOT}/build/cmake/aom_config_defaults.cmake")
+ include("${AOM_ROOT}/build/cmake/aom_experiment_deps.cmake")
