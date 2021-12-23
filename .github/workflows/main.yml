@@ -652,7 +652,8 @@ jobs:
       - name: 'Generate checksums'
         run: |
           echo "### Checksums" > ${{ github.workspace }}/RELEASE.txt
-          find . -name "macos-deps-*.tar.xz" -print0 | sort -z | xargs -0 -n 1 -P 1 -I {} sh -c "echo \"    \$(basename {}): \$(sha256sum {} | cut -c 1-64)\" >> ${{ github.workspace }}/RELEASE.txt"
+          find . -name "macos-deps-*.tar.xz" -print0 | sort -z | xargs -0 -n 1 -P 1 -I {} sh -c "sha256sum {} > ${{ github.workspace }}/$(basename {}).sha256"
+          find . -name "macos-deps-*.tar.xz.sha256" -print0 | sort -z | xargs -0 -I {} sh -c "cat {} >> ${{ github.workspace }}/RELEASE.txt"
 
       - name: 'Create Release'
         id: create_release
@@ -664,9 +665,15 @@ jobs:
           name: "OBS macOS Deps Build ${{ steps.get_version.outputs.VERSION }}"
           body_path: ${{ github.workspace }}/RELEASE.txt
           files: |
-            ${{ github.workspace }}/macos-deps-${{ env.CURRENT_DATE }}-x86_64.tar.xz
-            ${{ github.workspace }}/macos-deps-${{ env.CURRENT_DATE }}-arm64.tar.xz
-            ${{ github.workspace }}/macos-deps-${{ env.CURRENT_DATE }}-universal.tar.xz
-            ${{ github.workspace }}/macos-deps-qt-${{ env.CURRENT_DATE }}-x86_64.tar.xz
-            ${{ github.workspace }}/macos-deps-qt-${{ env.CURRENT_DATE }}-arm64.tar.xz
-            ${{ github.workspace }}/macos-deps-qt-${{ env.CURRENT_DATE }}-universal.tar.xz
+            ${{ github.workspace }}/macos-deps-${{ steps.get_version.outputs.VERSION }}-x86_64.tar.xz
+            ${{ github.workspace }}/macos-deps-${{ steps.get_version.outputs.VERSION }}-x86_64.tar.xz.sha256
+            ${{ github.workspace }}/macos-deps-${{ steps.get_version.outputs.VERSION }}-arm64.tar.xz
+            ${{ github.workspace }}/macos-deps-${{ steps.get_version.outputs.VERSION }}-arm64.tar.xz.sha256
+            ${{ github.workspace }}/macos-deps-${{ steps.get_version.outputs.VERSION }}-universal.tar.xz
+            ${{ github.workspace }}/macos-deps-${{ steps.get_version.outputs.VERSION }}-universal.tar.xz.sha256
+            ${{ github.workspace }}/macos-deps-qt-${{ steps.get_version.outputs.VERSION }}-x86_64.tar.xz
+            ${{ github.workspace }}/macos-deps-qt-${{ steps.get_version.outputs.VERSION }}-x86_64.tar.xz.sha256
+            ${{ github.workspace }}/macos-deps-qt-${{ steps.get_version.outputs.VERSION }}-arm64.tar.xz
+            ${{ github.workspace }}/macos-deps-qt-${{ steps.get_version.outputs.VERSION }}-arm64.tar.xz.sha256
+            ${{ github.workspace }}/macos-deps-qt-${{ steps.get_version.outputs.VERSION }}-universal.tar.xz
+            ${{ github.workspace }}/macos-deps-qt-${{ steps.get_version.outputs.VERSION }}-universal.tar.xz.sha256
