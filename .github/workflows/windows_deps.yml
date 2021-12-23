@@ -265,6 +265,8 @@ jobs:
       NASM_HASH: ''
       SWIG_VERSION: '3.0.12'
       SWIG_HASH: '21ce6cbe297a56b697ef6e7e92a83e75ca41dedc87e48282ab444591986c35f5'
+      NTV2_VERSION: '16.1'
+      NTV2_HASH: 'abf17cc1e7aadd9f3e4972774a3aba2812c51b75'
     defaults:
       run:
         shell: pwsh
@@ -494,6 +496,23 @@ jobs:
       - name: 'Install dependency swig'
         if: steps.swig-cache.outputs.cache-hit == 'true'
         run: CI/windows/build_swig.ps1 -SkipDependencyChecks -BuildArch ${{ matrix.arch }}-bit -Install
+
+      - name: 'Restore ntv2 from cache'
+        id: ntv2-cache
+        uses: actions/cache@v2.1.6
+        env:
+          CACHE_NAME: 'ntv2-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
+        with:
+          path: ${{ github.workspace }}/windows_native_build_temp/ntv2*
+          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.NTV2_VERSION }}
+
+      - name: 'Build dependency ntv2'
+        if: steps.ntv2-cache.outputs.cache-hit != 'true'
+        run: CI/windows/build_ntv2.ps1 -SkipDependencyChecks -BuildArch ${{ matrix.arch }}-bit
+
+      - name: 'Install dependency ntv2'
+        if: steps.ntv2-cache.outputs.cache-hit == 'true'
+        run: CI/windows/build_ntv2.ps1 -SkipDependencyChecks -BuildArch ${{ matrix.arch }}-bit -Install
 
       - name: 'Package dependencies'
         if: success()
