@@ -33,7 +33,7 @@ _build_product() {
         -Dbuiltin_cjson=true \
         -Dtest=false \
         -Dbuilt_tools=false \
-        -Dc_link_args="-static-libgcc -Wl,-Bstatic -pthread" \
+        -Dc_link_args="-static-libgcc" \
         -Dhave_mingw_pthreads=false \
         -Dpkg_config_path="${BUILD_DIR}/lib/pkgconfig"
     step "Build (${ARCH})..."
