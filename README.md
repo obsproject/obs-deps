@@ -15,7 +15,7 @@ Scripts to build and package dependencies for OBS on CI
 |libogg|[GitHub](https://github.com/xiph/ogg/releases/download/v1.3.5/libogg-1.3.5.tar.xz)|1.3.5|
 |libopus|[GitHub](https://github.com/xiph/opus/tree/dfd6c88aaa54a03a61434c413e30c217eb98f1d5)|1.3.1-93-gdfd6c88a|
 |libpng|[Sourceforge](https://downloads.sourceforge.net/project/libpng/libpng16/1.6.37/libpng-1.6.37.tar.xz)|1.6.37|
-|librist|[0b1aaf9](https://code.videolan.org/rist/librist/-/commit/0b1aaf995c4cad83d562ec7887180cc6ee132c84)|Master branch|
+|librist|[419f09e](https://code.videolan.org/rist/librist/-/commit/419f09ea9aa9bf15f9c43b7752ca878521543679)|Master branch|
 |librnnoise|[90ec41e](https://github.com/xiph/rnnoise/commit/90ec41ef659fd82cfec2103e9bb7fc235e9ea66c)|Master branch|
 |libsrt|[GitHub](https://github.com/Haivision/srt/archive/v1.4.1.tar.gz)|1.4.1|
 |libtheora|[xiph.org](https://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2)|1.1.1|
