@@ -1,0 +1,746 @@
+name: build_macos
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - '20[2-9][0-9]-[0-9][0-9]-[0-9][0-9]'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+    branches:
+      - master
+
+env:
+  MAC_QT_VERSION: '5.15.2'
+  MAC_QT_HASH: '3a530d1b243b5dec00bc54937455471aaa3e56849d2593edb8ded07228202240'
+
+jobs:
+  macos64-main:
+    name: Build macOS main dependencies (64bit)
+    runs-on: [macos-latest]
+    env:
+      LIBLAME_VERSION: '3.100'
+      LIBLAME_HASH: 'ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e'
+      LIBPNG_VERSION: '1.6.37'
+      LIBPNG_HASH: '505e70834d35383537b6491e7ae8641f1a4bed1876dbfe361201fc80868d88ca'
+      LIBOPUS_VERSION: '1.3.1'
+      LIBOPUS_HASH: '65b58e1e25b2a114157014736a3d9dfeaad8d41be1c8179866f144a2fb44ff9d'
+      LIBOGG_VERSION: '1.3.4'
+      LIBOGG_HASH: 'fe5670640bd49e828d64d2879c31cb4dde9758681bb664f9bdbf159a01b0c76e'
+      LIBRNNOISE_VERSION: '2020-07-28'
+      LIBRNNOISE_HASH: '90ec41ef659fd82cfec2103e9bb7fc235e9ea66c'
+      LIBVORBIS_VERSION: '1.3.7'
+      LIBVORBIS_HASH: 'b33cc4934322bcbf6efcbacf49e3ca01aadbea4114ec9589d1b1e9d20f72954b'
+      LIBVPX_VERSION: '1.9.0'
+      LIBVPX_HASH: 'd279c10e4b9316bf11a570ba16c3d55791e1ad6faa4404c67422eb631782c80a'
+      LIBJANSSON_VERSION: '2.13.1'
+      LIBJANSSON_HASH: 'f4f377da17b10201a60c1108613e78ee15df6b12016b116b6de42209f47a474f'
+      LIBX264_VERSION: 'r3027'
+      LIBX264_HASH: '4121277b40a667665d4eea1726aefdc55d12d110'
+      LIBMBEDTLS_VERSION: '2.24.0'
+      LIBMEDTLS_HASH: 'b5a779b5f36d5fc4cba55faa410685f89128702423ad07b36c5665441a06a5f3'
+      LIBSRT_VERSION: '1.4.1'
+      LIBSRT_HASH: 'e80ca1cd0711b9c70882c12ec365cda1ba852e1ce8acd43161a21a04de0cbf14'
+      LIBTHEORA_VERSION: '1.1.1'
+      LIBTHEORA_HASH: 'b6ae1ee2fa3d42ac489287d3ec34c5885730b1296f0801ae577a35193d3affbc'
+      FFMPEG_VERSION: '4.2.3'
+      FFMPEG_HASH: '9df6c90aed1337634c1fb026fb01c154c29c82a64ea71291ff2da9aacb9aad31'
+      LIBLUAJIT_VERSION: '2.1'
+      LIBLUAJIT_HASH: 'ec6edc5c39c25e4eb3fca51b753f9995e97215da'
+      LIBFREETYPE_VERSION: '2.10.4'
+      LIBFREETYPE_HASH: '86a854d8905b19698bbc8f23b860bc104246ce4854dcea8e3b0fb21284f75784'
+      SPEEXDSP_VERSION: '1.2.0'
+      SPEEXDSP_HASH: 'd7032f607e8913c019b190c2bccc36ea73fc36718ee38b5cdfc4e4c0a04ce9a4'
+      PCRE_VERSION: '8.44'
+      PCRE_HASH: '19108658b23b3ec5058edc9f66ac545ea19f9537234be1ec62b714c84399366d'
+      SWIG_VERSION: '4.0.2'
+      SWIG_HASH: 'd53be9730d8d58a16bf0cbd1f8ac0c0c3e1090573168bfa151b01eb47fa906fc'
+      MACOSX_DEPLOYMENT_TARGET: '10.13'
+      FFMPEG_REVISION: '06'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.3
+        with:
+          submodules: 'recursive'
+      - name: Install Homebrew dependencies
+        shell: bash
+        run: |
+          if [ -d /usr/local/opt/openssl@1.0.2t ]; then
+              brew uninstall openssl@1.0.2t
+              brew untap local/openssl
+          fi
+
+          if [ -d /usr/local/opt/python@2.7.17 ]; then
+              brew uninstall python@2.7.17
+              brew untap local/python2
+          fi
+          brew bundle
+          echo "/usr/local/opt/gnu-tar/libexec/gnubin" >> $GITHUB_PATH
+      - name: Get Current Date
+        shell: bash
+        id: get_date
+        run: echo "CURRENT_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
+      - name: Build environment setup
+        shell: bash
+        run: |
+          mkdir -p CI_BUILD/obsdeps/bin
+          mkdir -p CI_BUILD/obsdeps/include
+          mkdir -p CI_BUILD/obsdeps/lib
+          mkdir -p CI_BUILD/obsdeps/share
+          echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig" >> $GITHUB_ENV
+          echo "PARALLELISM=$(sysctl -n hw.ncpu)" >> $GITHUB_ENV
+          FFMPEG_DEP_HASH="$(echo "rev${{ env.FFMPEG_REVISION }}-${{ env.LIBPNG_VERSION }}-${{ env.LIBLAME_VERSION }}-${{ env.LIBOGG_VERSION }}-${{ env.LIBVORBIS_VERSION }}-${{ env.LIBVPX_VERSION }}-${{ env.LIBOPUS_VERSION }}-${{ env.LIBX264_VERSION }}-${{ env.LIBSRT_VERSION }}-${{ env.LIBMBEDTLS_VERSION }}-${{ env.LIBTHEORA_VERSION }}" | sha256sum | cut -d " " -f 1)"
+          echo "FFMPEG_DEP_HASH=$FFMPEG_DEP_HASH" >> $GITHUB_ENV
+      - name: 'Restore ffmpeg dependencies from cache'
+        id: ffmpeg-deps-cache
+        uses: actions/cache@v2.1.2
+        env:
+          CACHE_NAME: 'ffmpeg-deps'
+        with:
+          path: |
+            ${{ github.workspace }}/CI_BUILD/libpng-${{ env.LIBPNG_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/opus-${{ env.LIBOPUS_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/libogg-${{ env.LIBOGG_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/libvorbis-${{ env.LIBVORBIS_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/libvpx-${{ env.LIBVPX_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/x264-${{ env.LIBX264_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/libtheora-${{ env.LIBTHEORA_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/lame-${{ env.LIBLAME_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/mbedtls-mbedtls-${{ env.LIBMBEDTLS_VERSION }}
+            ${{ github.workspace }}/CI_BUILD/srt-${{ env.LIBSRT_VERSION }}
+          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.FFMPEG_DEP_HASH }}
+      - name: 'Build dependency libpng'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          ${{ github.workspace }}/utils/safe_fetch "https://downloads.sourceforge.net/project/libpng/libpng16/${{ env.LIBPNG_VERSION }}/libpng-${{ env.LIBPNG_VERSION }}.tar.xz" "${{ env.LIBPNG_HASH }}"
+          tar -xf libpng-${{ env.LIBPNG_VERSION }}.tar.xz
+          cd libpng-${{ env.LIBPNG_VERSION }}
+          mkdir build
+          cd build
+          ../configure --enable-static --disable-shared --prefix="/tmp/obsdeps"
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency libpng'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/libpng-${{ env.LIBPNG_VERSION }}/build
+        run: |
+          make install
+      - name: 'Build dependency libopus'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          ${{ github.workspace }}/utils/safe_fetch "https://ftp.osuosl.org/pub/xiph/releases/opus/opus-${{ env.LIBOPUS_VERSION }}.tar.gz" "${{ env.LIBOPUS_HASH }}"
+          tar -xf opus-${{ env.LIBOPUS_VERSION }}.tar.gz
+          cd ./opus-${{ env.LIBOPUS_VERSION }}
+          mkdir build
+          cd ./build
+          ../configure --disable-shared --enable-static --disable-doc --prefix="/tmp/obsdeps"
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency libopus'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/opus-${{ env.LIBOPUS_VERSION }}/build
+        run: |
+          make install
+      - name: 'Build dependency libogg'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          ${{ github.workspace }}/utils/safe_fetch "https://downloads.xiph.org/releases/ogg/libogg-${{ env.LIBOGG_VERSION }}.tar.gz" "${{ env.LIBOGG_HASH }}"
+          tar -xf libogg-${{ env.LIBOGG_VERSION }}.tar.gz
+          cd ./libogg-${{ env.LIBOGG_VERSION }}
+          ${{ github.workspace }}/utils/apply_patch "https://github.com/xiph/ogg/commit/c8fca6b4a02d695b1ceea39b330d4406001c03ed.patch?full_index=1" "0f4d289aecb3d5f7329d51f1a72ab10c04c336b25481a40d6d841120721be485"
+          mkdir build
+          cd ./build
+          ../configure --disable-shared --enable-static --prefix="/tmp/obsdeps"
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency libogg'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/libogg-${{ env.LIBOGG_VERSION }}/build
+        run: |
+          make install
+      - name: 'Build dependency libvorbis'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          ${{ github.workspace }}/utils/safe_fetch "https://downloads.xiph.org/releases/vorbis/libvorbis-${{ env.LIBVORBIS_VERSION }}.tar.xz" "${{ env.LIBVORBIS_HASH }}"
+          tar -xf libvorbis-${{ env.LIBVORBIS_VERSION }}.tar.xz
+          cd ./libvorbis-${{ env.LIBVORBIS_VERSION }}
+          mkdir build
+          cd ./build
+          ../configure --disable-shared --enable-static --prefix="/tmp/obsdeps"
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency libvorbis'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/libvorbis-${{ env.LIBVORBIS_VERSION }}/build
+        run: |
+          make install
+      - name: 'Build dependency libvpx'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          ${{ github.workspace }}/utils/safe_fetch "https://github.com/webmproject/libvpx/archive/v${{ env.LIBVPX_VERSION }}.tar.gz" "${{ env.LIBVPX_HASH }}"
+          mkdir -p ./libvpx-v${{ env.LIBVPX_VERSION }}
+          tar -xf v${{ env.LIBVPX_VERSION }}.tar.gz
+          cd ./libvpx-${{ env.LIBVPX_VERSION }}
+          mkdir -p build
+          cd ./build
+          # Assumption is that macOS has switched to proper major version numbering with Big Sur
+          if [ $(echo "${{ env.MACOSX_DEPLOYMENT_TARGET }}" | cut -d "." -f 1) -lt 11 ]; then
+            VPX_TARGET="$(($(echo ${{ env.MACOSX_DEPLOYMENT_TARGET }} | cut -d "." -f 2)+4))";
+          else
+            VPX_TARGET="$(($(echo ${{ env.MACOSX_DEPLOYMENT_TARGET }} | cut -d "." -f 1)+9))";
+          fi
+          ../configure --target="x86_64-darwin$VPX_TARGET-gcc" --disable-shared --disable-examples --disable-unit-tests --enable-pic --enable-vp9-highbitdepth --prefix="/tmp/obsdeps" --libdir="/tmp/obsdeps/lib"
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency libvpx'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/libvpx-${{ env.LIBVPX_VERSION }}/build
+        run: |
+          make install
+      - name: 'Build dependency libx264'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          MACOS_VERSION="$(sw_vers -productVersion)"
+          MACOS_MAJOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 1)"
+          MACOS_MINOR="$(echo ${MACOS_VERSION} | cut -d '.' -f 2)"
+          if [ "${MACOS_MAJOR}" -eq 10 ] && [ "${MACOS_MINOR}" -le 13 ]; then
+            brew install gcc || true
+            CC="/usr/local/bin/gcc"
+            LD="/usr/local/bin/gcc"
+            CXX=="/usr/local/bin/g++"
+          fi
+          mkdir -p x264-${{ env.LIBX264_VERSION }}
+          cd ./x264-${{ env.LIBX264_VERSION }}
+          ${{ github.workspace }}/utils/github_fetch mirror x264 "${{ env.LIBX264_HASH }}"
+          mkdir build
+          cd ./build
+          ../configure --extra-ldflags="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}" --enable-shared --disable-lsmash --disable-swscale --disable-ffms --enable-strip --prefix="/tmp/obsdeps"
+          make -j${{ env.PARALLELISM }}
+          if [ "${MACOS_MAJOR}" -eq 10 ] && [ "${MACOS_MINOR}" -le 13 ]; then
+            unset CC
+            unset LD
+            unset CXX
+          fi
+      - name: 'Install dependency libx264'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/x264-${{ env.LIBX264_VERSION }}/build
+        run: |
+          make install
+          ln -f -s libx264.*.dylib libx264.dylib
+          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+      - name: 'Build dependency libtheora'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          ${{ github.workspace }}/utils/safe_fetch "https://downloads.xiph.org/releases/theora/libtheora-${{ env.LIBTHEORA_VERSION }}.tar.bz2" "${{ env.LIBTHEORA_HASH }}"
+          tar -xf libtheora-${{ env.LIBTHEORA_VERSION }}.tar.bz2
+          cd libtheora-${{ env.LIBTHEORA_VERSION }}
+          mkdir build
+          cd ./build
+          ../configure --disable-shared --enable-static --disable-oggtest --disable-vorbistest --disable-examples --prefix="/tmp/obsdeps"
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency libtheora'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/libtheora-${{ env.LIBTHEORA_VERSION }}/build
+        run: |
+          make install
+      - name: 'Build dependency liblame'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          ${{ github.workspace }}/utils/safe_fetch https://downloads.sourceforge.net/project/lame/lame/${{ env.LIBLAME_VERSION }}/lame-${{ env.LIBLAME_VERSION }}.tar.gz "${{ env.LIBLAME_HASH }}"
+          tar -xf lame-${{ env.LIBLAME_VERSION }}.tar.gz
+          cd lame-${{ env.LIBLAME_VERSION }}
+          sed -i '.orig' '/lame_init_old/d' ./include/libmp3lame.sym
+          mkdir build
+          cd ./build
+          ../configure --disable-shared --disable-dependency-tracking --disable-debug --enable-nasm --prefix="/tmp/obsdeps"
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency liblame'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/lame-${{ env.LIBLAME_VERSION }}/build
+        run: |
+          make install
+      - name: 'Build dependency libmbedtls'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          ${{ github.workspace }}/utils/safe_fetch "https://github.com/ARMmbed/mbedtls/archive/mbedtls-${{ env.LIBMBEDTLS_VERSION }}.tar.gz" "${{ env.LIBMEDTLS_HASH }}"
+          tar -xf mbedtls-${{ env.LIBMBEDTLS_VERSION }}.tar.gz
+          cd mbedtls-mbedtls-${{ env.LIBMBEDTLS_VERSION }}
+          sed -i '.orig' 's/\/\/\#define MBEDTLS_THREADING_PTHREAD/\#define MBEDTLS_THREADING_PTHREAD/g' include/mbedtls/config.h
+          sed -i '.orig' 's/\/\/\#define MBEDTLS_THREADING_C/\#define MBEDTLS_THREADING_C/g' include/mbedtls/config.h
+          mkdir build
+          cd ./build
+          cmake -DCMAKE_INSTALL_PREFIX="/tmp/obsdeps" -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DENABLE_PROGRAMS=OFF ..
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency libmbedtls'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/mbedtls-mbedtls-${{ env.LIBMBEDTLS_VERSION }}/build
+        run: |
+          make install
+          install_name_tool -id /tmp/obsdeps/lib/libmbedtls.${{ env.LIBMBEDTLS_VERSION }}.dylib /tmp/obsdeps/lib/libmbedtls.${{ env.LIBMBEDTLS_VERSION }}.dylib
+          install_name_tool -id /tmp/obsdeps/lib/libmbedcrypto.${{ env.LIBMBEDTLS_VERSION }}.dylib /tmp/obsdeps/lib/libmbedcrypto.${{ env.LIBMBEDTLS_VERSION }}.dylib
+          install_name_tool -id /tmp/obsdeps/lib/libmbedx509.${{ env.LIBMBEDTLS_VERSION }}.dylib /tmp/obsdeps/lib/libmbedx509.${{ env.LIBMBEDTLS_VERSION }}.dylib
+          install_name_tool -change libmbedx509.1.dylib /tmp/obsdeps/lib/libmbedx509.1.dylib /tmp/obsdeps/lib/libmbedtls.${{ env.LIBMBEDTLS_VERSION }}.dylib
+          install_name_tool -change libmbedcrypto.5.dylib /tmp/obsdeps/lib/libmbedcrypto.5.dylib /tmp/obsdeps/lib/libmbedtls.${{ env.LIBMBEDTLS_VERSION }}.dylib
+          install_name_tool -change libmbedcrypto.5.dylib /tmp/obsdeps/lib/libmbedcrypto.5.dylib /tmp/obsdeps/lib/libmbedx509.${{ env.LIBMBEDTLS_VERSION }}.dylib
+          find /tmp/obsdeps/lib -name libmbed\*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ./include/mbedtls/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/mbedtls
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/mbedtls/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/mbedtls
+          if [ ! -d /tmp/obsdeps/lib/pkgconfig ]; then
+              mkdir -p /tmp/obsdeps/lib/pkgconfig
+          fi
+          cat <<EOF > /tmp/obsdeps/lib/pkgconfig/mbedcrypto.pc
+          prefix=/tmp/obsdeps
+          libdir=\${prefix}/lib
+          includedir=\${prefix}/include
+
+          Name: mbedcrypto
+          Description: lightweight crypto and SSL/TLS library.
+          Version: ${{ env.LIBMBEDTLS_VERSION }}
+
+          Libs: -L\${libdir} -lmbedcrypto
+          Cflags: -I\${includedir}
+          EOF
+          cat <<EOF > /tmp/obsdeps/lib/pkgconfig/mbedtls.pc
+          prefix=/tmp/obsdeps
+          libdir=\${prefix}/lib
+          includedir=\${prefix}/include
+
+          Name: mbedtls
+          Description: lightweight crypto and SSL/TLS library.
+          Version: ${{ env.LIBMBEDTLS_VERSION }}
+
+          Libs: -L\${libdir} -lmbedtls
+          Cflags: -I\${includedir}
+          Requires.private: mbedx509
+          EOF
+          cat <<EOF > /tmp/obsdeps/lib/pkgconfig/mbedx509.pc
+          prefix=/tmp/obsdeps
+          libdir=\${prefix}/lib
+          includedir=\${prefix}/include
+
+          Name: mbedx509
+          Description: The mbedTLS X.509 library
+          Version: ${{ env.LIBMBEDTLS_VERSION }}
+
+          Libs: -L\${libdir} -lmbedx509
+          Cflags: -I\${includedir}
+          Requires.private: mbedcrypto
+          EOF
+      - name: 'Build dependency libsrt'
+        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          ${{ github.workspace }}/utils/safe_fetch "https://github.com/Haivision/srt/archive/v${{ env.LIBSRT_VERSION }}.tar.gz" "${{ env.LIBSRT_HASH }}"
+          tar -xf v${{ env.LIBSRT_VERSION }}.tar.gz
+          cd srt-${{ env.LIBSRT_VERSION }}
+          mkdir build
+          cd ./build
+          cmake -DCMAKE_INSTALL_PREFIX="/tmp/obsdeps" -DENABLE_APPS=OFF -DUSE_ENCLIB="mbedtls" -DENABLE_STATIC=ON -DENABLE_SHARED=OFF -DSSL_INCLUDE_DIRS="/tmp/obsdeps/include" -DSSL_LIBRARY_DIRS="/tmp/obsdeps/lib" -DCMAKE_FIND_FRAMEWORK=LAST ..
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency libsrt'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/srt-${{ env.LIBSRT_VERSION }}/build
+        run: |
+          make install
+      - name: 'Restore ffmpeg from cache'
+        id: ffmpeg-cache
+        uses: actions/cache@v2.1.2
+        env:
+          CACHE_NAME: 'ffmpeg'
+        with:
+          path: ${{ github.workspace }}/CI_BUILD/ffmpeg-${{ env.FFMPEG_VERSION }}
+          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.FFMPEG_VERSION }}-${{ env.FFMPEG_DEP_HASH }}
+      - name: 'Build dependency ffmpeg'
+        if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          export LDFLAGS="-L/tmp/obsdeps/lib"
+          export CFLAGS="-I/tmp/obsdeps/include"
+          export LD_LIBRARY_PATH="/tmp/obsdeps/lib"
+          ${{ github.workspace }}/utils/safe_fetch "https://ffmpeg.org/releases/ffmpeg-${{ env.FFMPEG_VERSION }}.tar.xz" "${{ env.FFMPEG_HASH }}"
+          tar -xf ffmpeg-${{ env.FFMPEG_VERSION }}.tar.xz
+          if [ -d /usr/local/opt/xz ]; then
+            brew unlink xz
+          fi
+
+          if [ -d /usr/local/opt/sdl2 ]; then
+            brew unlink sdl2
+          fi
+          cd ./ffmpeg-${{ env.FFMPEG_VERSION }}
+          mkdir build
+          cd ./build
+          ../configure --host-cflags="-I/tmp/obsdeps/include" --host-ldflags="-L/tmp/obsdeps/lib" --pkg-config-flags="--static" --extra-ldflags="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}" --enable-shared --disable-static --enable-pthreads --enable-version3 --shlibdir="/tmp/obsdeps/lib" --enable-gpl --enable-videotoolbox --disable-libjack --disable-indev=jack --disable-outdev=sdl --disable-programs --disable-doc --enable-libx264 --enable-libopus --enable-libvorbis --enable-libvpx --enable-libsrt --enable-libtheora --enable-libmp3lame
+          make -j${{ env.PARALLELISM }}
+
+          if [ -d /usr/local/opt/xz ] && [ ! -f /usr/local/lib/liblzma.dylib ]; then
+            brew link xz
+          fi
+
+          if [ -d /usr/local/opt/sdl2 ] && ! [ -f /usr/local/lib/libSDL2.dylib ]; then
+            brew link sdl2
+          fi
+      - name: 'Install dependency ffmpeg'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/ffmpeg-${{ env.FFMPEG_VERSION }}/build
+        run: |
+          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ../* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ./* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+      - name: 'Restore swig from cache'
+        id: swig-cache
+        uses: actions/cache@v2.1.2
+        env:
+          CACHE_NAME: 'swig'
+        with:
+          path: ${{ github.workspace }}/CI_BUILD/swig-${{ env.SWIG_VERSION }}
+          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.SWIG_VERSION }}
+      - name: 'Build dependency swig'
+        if: steps.swig-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          ${{ github.workspace }}/utils/safe_fetch "https://downloads.sourceforge.net/project/swig/swig/swig-${{ env.SWIG_VERSION }}/swig-${{ env.SWIG_VERSION }}.tar.gz" "${{ env.SWIG_HASH }}"
+          tar -xf swig-${{ env.SWIG_VERSION }}.tar.gz
+          cd swig-${{ env.SWIG_VERSION }}
+          mkdir build
+          cd build
+          ${{ github.workspace }}/utils/safe_fetch "https://ftp.pcre.org/pub/pcre/pcre-${{ env.PCRE_VERSION }}.tar.bz2" "${{ env.PCRE_HASH }}"
+          ../Tools/pcre-build.sh
+          ../configure --disable-dependency-tracking --prefix="/tmp/obsdeps"
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency swig'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/swig-${{ env.SWIG_VERSION }}/build
+        run: |
+          cp swig ${{ github.workspace }}/CI_BUILD/obsdeps/bin/
+          mkdir -p ${{ github.workspace }}/CI_BUILD/obsdeps/share/swig/${{ env.SWIG_VERSION }}
+          rsync -avh --include="*.i" --include="*.swg" --include="python" --include="lua" --include="typemaps" --exclude="*" ../Lib/* ${{ github.workspace }}/CI_BUILD/obsdeps/share/swig/${{ env.SWIG_VERSION }}
+      - name: 'Restore SpeexDSP from cache'
+        id: speexdsp-cache
+        uses: actions/cache@v2.1.2
+        env:
+          CACHE_NAME: 'speexdsp'
+        with:
+          path: ${{ github.workspace }}/CI_BUILD/speexdsp-SpeexDSP-${{ env.SPEEXDSP_VERSION }}
+          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.SPEEXDSP_VERSION }}
+      - name: 'Build depdendency SpeexDSP'
+        if: steps.speexdsp-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          ${{ github.workspace }}/utils/safe_fetch "https://github.com/xiph/speexdsp/archive/SpeexDSP-${{ env.SPEEXDSP_VERSION }}.tar.gz" "${{ env.SPEEXDSP_HASH }}"
+          tar -xf speexDSP-${{ env.SPEEXDSP_VERSION }}.tar.gz
+          cd speexdsp-SpeexDSP-${{ env.SPEEXDSP_VERSION }}
+          sed -i '.orig' "s/CFLAGS='-O3'/CFLAGS='-O3  -mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}'/" ./SpeexDSP.spec.in
+          ./autogen.sh
+          mkdir -p build
+          cd ./build
+          ../configure --prefix="/tmp/obsdeps" --disable-dependency-tracking
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency SpeexDSP'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/speexdsp-SpeexDSP-${{ env.SPEEXDSP_VERSION }}/build
+        run: |
+          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ./include/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+      - name: 'Restore libjansson from cache'
+        id: libjansson-cache
+        uses: actions/cache@v2.1.2
+        env:
+          CACHE_NAME: 'libjansson-rev2'
+        with:
+          path: ${{ github.workspace }}/CI_BUILD/jansson-${{ env.LIBJANSSON_VERSION }}
+          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.LIBJANSSON_VERSION }}
+      - name: 'Build dependency libjansson'
+        if: steps.libjansson-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          ${{ github.workspace }}/utils/safe_fetch "https://digip.org/jansson/releases/jansson-${{ env.LIBJANSSON_VERSION }}.tar.gz" "${{ env.LIBJANSSON_HASH }}"
+          tar -xf jansson-${{ env.LIBJANSSON_VERSION }}.tar.gz
+          cd jansson-${{ env.LIBJANSSON_VERSION }}
+          mkdir build
+          cd ./build
+          ../configure --libdir="/tmp/obsdeps/lib" --enable-shared --disable-static
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency libjansson'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/jansson-${{ env.LIBJANSSON_VERSION }}/build
+        run: |
+          find . -name \*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ../src/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ./src/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+          cp ./*.h ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+      - name: 'Restore libluajit from cache'
+        id: libluajit-cache
+        uses: actions/cache@v2.1.2
+        env:
+          CACHE_NAME: 'libluajit'
+        with:
+          path: ${{ github.workspace }}/CI_BUILD/LuaJIT-${{ env.LIBLUAJIT_VERSION }}
+          key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.LIBLUAJIT_VERSION }}
+      - name: 'Build dependency libluajit'
+        if: steps.libluajit-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          mkdir -p LuaJIT-${{ env.LIBLUAJIT_VERSION }}
+          cd LuaJIT-${{ env.LIBLUAJIT_VERSION }}
+          ${{ github.workspace }}/utils/github_fetch LuaJIT LuaJIT "${{ env.LIBLUAJIT_HASH }}"          
+          make PREFIX="/tmp/obsdeps" -j${{ env.PARALLELISM }}
+      - name: 'Install dependency libluajit'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/LuaJIT-${{ env.LIBLUAJIT_VERSION }}
+        run: |
+          make PREFIX="/tmp/obsdeps" install
+          find /tmp/obsdeps/lib -name libluajit\*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
+          rsync -avh --include="*/" --include="*.h" --exclude="*" src/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+          make PREFIX="/tmp/obsdeps" uninstall
+      - name: 'Restore libfreetype from cache'
+        id: libfreetype-cache
+        uses: actions/cache@v2.1.2
+        env:
+          CACHE_NAME: 'libfreetype'
+        with:
+          path: ${{ github.workspace }}/CI_BUILD/freetype-${{ env.LIBFREETYPE_VERSION }}
+          key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.LIBFREETYPE_VERSION }}
+      - name: 'Build dependency libfreetype'
+        if: steps.libfreetype-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          export CFLAGS="-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}"
+          ${{ github.workspace }}/utils/safe_fetch "https://downloads.sourceforge.net/project/freetype/freetype2/${{ env.LIBFREETYPE_VERSION }}/freetype-${{ env.LIBFREETYPE_VERSION }}.tar.xz" "${{ env.LIBFREETYPE_HASH }}"
+          tar -xf freetype-${{ env.LIBFREETYPE_VERSION }}.tar.xz
+          cd freetype-${{ env.LIBFREETYPE_VERSION }}
+          mkdir build
+          cd build
+          ../configure --enable-shared --disable-static --prefix="/tmp/obsdeps" --without-harfbuzz --without-brotli
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency libfreetype'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/freetype-${{ env.LIBFREETYPE_VERSION }}/build
+        run: |
+          make install
+          find /tmp/obsdeps/lib -name libfreetype\*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+      - name: 'Restore librnnoise from cache'
+        id: librnnoise-cache
+        uses: actions/cache@v2.1.2
+        env:
+          CACHE_NAME: 'librnnoise'
+        with:
+          path: ${{ github.workspace }}/CI_BUILD/rnnoise-${{ env.LIBRNNOISE_VERSION }}
+          key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.LIBRNNOISE_VERSION }}
+      - name: 'Build dependency librnnoise'
+        if: steps.librnnoise-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          mkdir -p rnnoise-${{ env.LIBRNNOISE_VERSION }}
+          cd ./rnnoise-${{ env.LIBRNNOISE_VERSION }}
+          ${{ github.workspace }}/utils/github_fetch xiph rnnoise "${{ env.LIBRNNOISE_HASH }}"
+          ./autogen.sh
+          mkdir build
+          cd build
+          ../configure --prefix="/tmp/obsdeps"
+          make -j${{ env.PARALLELISM }}
+      - name: 'Install dependency librnnoise'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/rnnoise-${{ env.LIBRNNOISE_VERSION }}/build
+        run: |
+          make install
+          find /tmp/obsdeps/lib -name librnnoise\*.dylib -exec cp -PR \{\} ${{ github.workspace }}/CI_BUILD/obsdeps/lib/ \;
+          rsync -avh --include="*/" --include="*.h" --exclude="*" ../include/* ${{ github.workspace }}/CI_BUILD/obsdeps/include/
+      - name: Package dependencies
+        if: success()
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          tar -czf macos-deps-${{ env.CURRENT_DATE }}.tar.gz obsdeps
+          if [ ! -d "${{ github.workspace }}/macos" ]; then
+            mkdir ${{ github.workspace }}/macos
+          fi
+          mv ./macos-deps-${{ env.CURRENT_DATE }}.tar.gz ${{ github.workspace }}/macos
+      - name: PublishBuildArtifacts
+        if: success() && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v2.2.0
+        with:
+          name: 'macos-deps-${{ env.CURRENT_DATE }}'
+          path: ./macos/*.tar.gz
+  macos64-qt:
+    name: Build macOS Qt dependency (64bit)
+    runs-on: [macos-latest]
+    env:
+      MACOSX_DEPLOYMENT_TARGET: '10.13'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.3
+        with:
+          submodules: 'recursive'
+      - name: Install Homebrew dependencies
+        shell: bash
+        run: |
+          if [ -d /usr/local/opt/openssl@1.0.2t ]; then
+              brew uninstall openssl@1.0.2t
+              brew untap local/openssl
+          fi
+
+          if [ -d /usr/local/opt/python@2.7.17 ]; then
+              brew uninstall python@2.7.17
+              brew untap local/python2
+          fi
+          brew bundle
+      - name: Get Current Date
+        shell: bash
+        id: get_date
+        run: echo "CURRENT_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
+      - name: Build environment setup
+        shell: bash
+        run: |
+          mkdir -p CI_BUILD/obsdeps/bin
+          mkdir -p CI_BUILD/obsdeps/include
+          mkdir -p CI_BUILD/obsdeps/lib
+          echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/tmp/obsdeps/lib/pkgconfig" >> $GITHUB_ENV
+          echo "PARALLELISM=$(sysctl -n hw.ncpu)" >> $GITHUB_ENV
+      - name: 'Restore qt from cache'
+        id: qt-cache
+        uses: actions/cache@v2.1.2
+        env:
+          CACHE_NAME: 'qt-build-cache-rev6'
+        with:
+          path: ${{ github.workspace }}/CI_BUILD/obsdeps
+          key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.MAC_QT_VERSION }}
+      - name: 'Build dependency Qt'
+        if: steps.qt-cache.outputs.cache-hit != 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD
+        run: |
+          ${{ github.workspace }}/utils/safe_fetch "https://download.qt.io/official_releases/qt/$(echo "${{ env.MAC_QT_VERSION }}" | cut -d "." -f -2)/${{ env.MAC_QT_VERSION }}/single/qt-everywhere-src-${{ env.MAC_QT_VERSION }}.tar.xz" "${{ env.MAC_QT_HASH }}"
+          tar -xf qt-everywhere-src-${{ env.MAC_QT_VERSION }}.tar.xz
+          if [ -d /usr/local/opt/zstd ]; then
+            brew unlink zstd
+          fi
+
+          if [ -d /usr/local/opt/libtiff ]; then
+            brew unlink libtiff
+          fi
+
+          if [ -d /usr/local/opt/webp ]; then
+            brew unlink webp
+          fi
+          if [ "${{ env.MAC_QT_VERSION }}" = "5.14.1" ]; then
+              cd qt-everywhere-src-${{ env.MAC_QT_VERSION }}/qtbase
+              ${{ github.workspace }}/utils/apply_patch "https://github.com/qt/qtbase/commit/8e5d6b422136dcca51f2c18fddcf28016f5ab99a.patch?full_index=1" "943e5e69160a39bcda0e88289b27c95732db1a195f0cf211601f10f1a067e608"
+              cd ..
+          else
+              cd qt-everywhere-src-${{ env.MAC_QT_VERSION }}/qtbase
+              ${{ github.workspace }}/utils/apply_patch "https://gist.githubusercontent.com/PatTheMav/e296886af7485d8cc85857ea4e99706b/raw/efa9f697c3b6332eeb58ce49aaccec2bb4a1674b/obs-issue-3799-qt.patch" "234ee6b21a008a233382c872ac097707ce83e401d3bcd5f1b244c09c0817f3aa"
+              cd ..
+          fi
+          mkdir build
+          cd build
+          if [ ! -n "${CI}" ]; then
+            WITH_CCACHE=" -ccache"
+          fi
+          ../configure ${WITH_CCACHE} --prefix="/tmp/obsdeps" -release -opensource -confirm-license -system-zlib \
+            -qt-libpng -qt-libjpeg -qt-freetype -qt-pcre -nomake examples -nomake tests -no-rpath -no-glib -pkg-config -dbus-runtime \
+            -skip qt3d -skip qtactiveqt -skip qtandroidextras -skip qtcharts -skip qtconnectivity -skip qtdatavis3d \
+            -skip qtdeclarative -skip qtdoc -skip qtgamepad -skip qtgraphicaleffects -skip qtlocation \
+            -skip qtlottie -skip qtmultimedia -skip qtnetworkauth -skip qtpurchasing -skip qtquick3d \
+            -skip qtquickcontrols -skip qtquickcontrols2 -skip qtquicktimeline -skip qtremoteobjects \
+            -skip qtscript -skip qtscxml -skip qtsensors -skip qtserialbus -skip qtspeech \
+            -skip qttranslations -skip qtwayland -skip qtwebchannel -skip qtwebengine -skip qtwebglplugin \
+            -skip qtwebsockets -skip qtwebview -skip qtwinextras -skip qtx11extras -skip qtxmlpatterns
+          make -j${{ env.PARALLELISM }}
+          make install
+
+          mv /tmp/obsdeps ${{ github.workspace }}/CI_BUILD/obsdeps
+
+          if [ -d /usr/local/opt/zstd ] && [ ! -f /usr/local/lib/libzstd.dylib ]; then
+            brew link zstd
+          fi
+
+          if [ -d /usr/local/opt/libtiff ] && [ !  -f /usr/local/lib/libtiff.dylib ]; then
+            brew link libtiff
+          fi
+
+          if [ -d /usr/local/opt/webp ] && [ ! -f /usr/local/lib/libwebp.dylib ]; then
+            brew link webp
+          fi
+      - name: Package dependencies
+        if: success()
+        shell: bash
+        working-directory: ${{ github.workspace }}/CI_BUILD/obsdeps
+        run: |
+          tar -czf macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_DATE }}.tar.gz obsdeps
+          if [ ! -d "${{ github.workspace }}/macos" ]; then
+            mkdir ${{ github.workspace }}/macos
+          fi
+          mv macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_DATE }}.tar.gz ${{ github.workspace }}/macos
+      - name: PublishBuildArtifacts
+        if: success() && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v2.2.0
+        with:
+          name: 'macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_DATE }}'
+          path: ./macos/*.tar.gz
+  make-release:
+    name: 'Create and upload release'
+    runs-on: [ubuntu-latest]
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    needs: [macos64-main, macos64-qt]
+    steps:
+      - name: Get Current Date
+        shell: bash
+        id: get_date
+        run: echo "CURRENT_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
+      - name: 'Create Release'
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.CURRENT_DATE }}
+          release_name: OBS Deps build ${{ env.CURRENT_DATE }}
+          draft: false
+          prerelease: false
+      - name: 'Download release artifacts'
+        uses: actions/download-artifact@v2-preview
+      - name: 'Upload macOS deps to release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/macos-deps-${{ env.CURRENT_DATE }}/macos-deps-${{ env.CURRENT_DATE }}.tar.gz
+          asset_name: macos-deps-${{ env.CURRENT_DATE }}.tar.gz
+          asset_content_type: application/octet-stream
+      - name: 'Upload macOS Qt dependency to release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_DATE }}/macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_DATE }}.tar.gz
+          asset_name: macos-qt-${{ env.MAC_QT_VERSION }}-${{ env.CURRENT_DATE }}.tar.gz
+          asset_content_type: application/octet-stream
