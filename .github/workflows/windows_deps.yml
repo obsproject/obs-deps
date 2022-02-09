@@ -270,7 +270,7 @@ jobs:
       matrix:
         arch: ['32', '64']
     env:
-      CACHE_REVISION: '01'
+      CACHE_REVISION: '02'
       MBEDTLS_VERSION: '2.24.0'
       MBEDTLS_HASH: '523f0554b6cdc7ace5d360885c3f5bbcc73ec0e8'
       CMOCKA_VERSION: '1.1.5-git'
@@ -536,13 +536,21 @@ jobs:
           path: ${{ github.workspace }}/windows_native_build_temp/ntv2*
           key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.NTV2_VERSION }}
 
-      - name: 'Build dependency ntv2'
+      - name: 'Build dependency ntv2 Release'
         if: steps.ntv2-cache.outputs.cache-hit != 'true'
         run: CI/windows/build_ntv2.ps1 -SkipDependencyChecks -BuildArch ${{ matrix.arch }}-bit
 
-      - name: 'Install dependency ntv2'
+      - name: 'Install dependency ntv2 Release'
         if: steps.ntv2-cache.outputs.cache-hit == 'true'
         run: CI/windows/build_ntv2.ps1 -SkipDependencyChecks -BuildArch ${{ matrix.arch }}-bit -Install
+
+      - name: 'Build dependency ntv2 Debug'
+        if: steps.ntv2-cache.outputs.cache-hit != 'true'
+        run: CI/windows/build_ntv2.ps1 -SkipDependencyChecks -BuildArch ${{ matrix.arch }}-bit -BuildConfiguration Debug
+
+      - name: 'Install dependency ntv2 Debug'
+        if: steps.ntv2-cache.outputs.cache-hit == 'true'
+        run: CI/windows/build_ntv2.ps1 -SkipDependencyChecks -BuildArch ${{ matrix.arch }}-bit -Install -BuildConfiguration Debug
 
       - name: 'Package dependencies'
         if: success()
