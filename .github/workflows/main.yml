@@ -61,7 +61,7 @@ jobs:
       LIBFREETYPE_HASH: '86a854d8905b19698bbc8f23b860bc104246ce4854dcea8e3b0fb21284f75784'
       LIBRNNOISE_VERSION: '2020-07-28'
       LIBRNNOISE_HASH: '90ec41ef659fd82cfec2103e9bb7fc235e9ea66c'
-      BLOCKED_FORMULAS: 'ant gradle maven selenium-server selenium-server-standalone llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile libogg composer php gd freetype fontconfig webp libpng lame libtiff opus kotlin sbt libxft'
+      BLOCKED_FORMULAS: 'ant gradle maven selenium-server selenium-server-standalone llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile libogg composer php gd freetype fontconfig webp libpng lame libtiff opus kotlin sbt libxft libxcb'
     defaults:
       run:
         shell: bash
