@@ -114,6 +114,7 @@ Usage: %B${functrace[1]%:*}%b <option> [<options>]
       -s|--shared) shared_libs=1; shift ;;
       -q|--quiet) (( _verbosity -= 1 )) || true; shift ;;
       -v|--verbose) (( _verbosity += 1 )); shift ;;
+      --static) shared_libs=0; shift ;;
       --clean) clean_build=1; shift ;;
       --skip-*)
         local _skip="${${(s:-:)1}[-1]}"
