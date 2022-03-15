@@ -42,7 +42,7 @@ function Package-OBS-Deps-Main {
     if (!$CurrentDate) {
         $CurrentDate = Get-Date -UFormat "%Y-%m-%d"
     }
-    $FileName = "${ProductName}-${CurrentDate}.tar.gz"
+    $FileName = "${ProductName}-${CurrentDate}"
     $CrossDirBase = "${CheckoutDir}\windows\obs-cross-deps"
     $NativeDirBase = ""
 
@@ -82,11 +82,14 @@ function Package-OBS-Deps-Main {
             $FinalDir = "${DepsBuildDir}\win64"
         }
 
+        $ArchSuffix = "$(if ($Package.Arch -eq 'x86_64') { 'x64' } else { 'x86' })"
+
         Write-Step "Copy $($Package.WinArch)/$($Package.Arch) files..."
 
         # Copy cross-compiled deps first
         Write-Step "Copy cross-compiled $($Package.WinArch)/$($Package.Arch) files..."
         Copy-Item -Path "${CrossDir}\bin" -Destination "${FinalDir}" -Recurse
+        Copy-Item -Path "${CrossDir}\lib" -Destination "${FinalDir}" -Recurse
         Copy-Item -Path "${CrossDir}\include" -Destination "${FinalDir}" -Recurse
         Copy-Item -Path "${CrossDir}\licenses" -Destination "${FinalDir}" -Recurse
 
@@ -97,22 +100,24 @@ function Package-OBS-Deps-Main {
         Remove-Item -Path "${FinalDir}\bin\libmbedx509.dll" -Force
         Remove-ItemIfExists "${FinalDir}\bin\libpng16-config"
         Remove-ItemIfExists "${FinalDir}\bin\libpng-config"
-        Remove-Item -Path "${FinalDir}\bin\mbedcrypto.lib" -Force
-        Remove-Item -Path "${FinalDir}\bin\mbedtls.lib" -Force
-        Remove-Item -Path "${FinalDir}\bin\mbedx509.lib" -Force
+        Remove-Item -Path "${FinalDir}\lib\mbedcrypto.lib" -Force
+        Remove-Item -Path "${FinalDir}\lib\mbedtls.lib" -Force
+        Remove-Item -Path "${FinalDir}\lib\mbedx509.lib" -Force
         Remove-Item -Path "${FinalDir}\bin\pngfix.exe" -Force
         Remove-Item -Path "${FinalDir}\bin\png-fix-itxt.exe" -Force
         Remove-ItemIfExists "${FinalDir}\bin\srt-ffplay"
         Remove-Item -Path "${FinalDir}\bin\x264.def" -Force
         Remove-Item -Path "${FinalDir}\bin\x264.exe" -Force
         Remove-Item -Path "${FinalDir}\bin\zlib.def" -Force
+        Move-Item -Path "${FinalDir}\bin\*.lib" -Destination "${FinalDir}\lib" -Force
+        Remove-Item -Path "${FinalDir}\lib\*.def" -Force
 
         # Copy native-compiled deps
         Write-Step "Copy native-compiled $($Package.WinArch)/$($Package.Arch) files..."
         Copy-Item -Path "${NativeDir}\bin\*" "${FinalDir}\bin" -Recurse -Force
         Copy-Item -Path "${NativeDir}\include\*" "${FinalDir}\include" -Recurse -Force
         #Copy-Item -Path "${NativeDir}\licenses\*" "${FinalDir}\licenses" -Recurse -Force
-        Copy-Item -Path "${NativeDir}\lib\*.lib" "${FinalDir}\bin"
+        Copy-Item -Path "${NativeDir}\lib\*.lib" "${FinalDir}\lib"
         Copy-Item -Path "${NativeDir}\lib\cmake" "${FinalDir}\cmake" -Recurse
         Copy-Item -Path "${NativeDir}\nasm" "${FinalDir}\nasm" -Recurse
         Copy-Item -Path "${NativeDir}\swig" "${FinalDir}\swig" -Recurse
@@ -121,20 +126,17 @@ function Package-OBS-Deps-Main {
         Write-Step "Clean up native-compiled $($Package.WinArch)/$($Package.Arch) files..."
         New-Item -Path "${FinalDir}\include\cmocka" -ItemType Directory
         Move-Item -Path "${FinalDir}\include\cmocka*.h" -Destination "${FinalDir}\include\cmocka"
-        Rename-Item -Path "${FinalDir}\bin\libcurl_imp.lib" -NewName "libcurl.lib"
-        Remove-Item -Path "${FinalDir}\bin\luajit.lib"
-        Rename-Item -Path "${FinalDir}\bin\lua51.lib" -NewName "luajit.lib"
+        Remove-Item -Path "${FinalDir}\lib\luajit.lib"
+        Rename-Item -Path "${FinalDir}\lib\lua51.lib" -NewName "luajit.lib"
 
         # Remove unneeded items
         Remove-Item -Path "${FinalDir}\bin\curl-config"
-        Remove-Item -Path "${FinalDir}\cmake\CURL" -Recurse -Force
-        Remove-Item -Path "${FinalDir}\cmake\freetype" -Recurse -Force
-    }
 
-    # Create dependencies archive
-    Write-Step "Create pre-built dependency archive ${FileName}..."
-    cd "${DepsBuildDir}\.."
-    tar -czf "${FileName}" -C "${DepsBuildDir}" *
+        # Create dependencies archive
+        Write-Step "Create pre-built dependency archive ${FileName}-${ArchSuffix}.tar.gz..."
+        cd "${FinalDir}"
+        tar -czf "${DepsBuildDir}\..\${FileName}-${ArchSuffix}.tar.gz" -- *
+    }
 
     Write-Info "All done!"
 }
