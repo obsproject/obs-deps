@@ -18,7 +18,7 @@ _fixup_libs() {
     grep "EXPORTS\|x264" "${BUILD_DIR}"/bin/x264.orig.def > "${BUILD_DIR}"/bin/x264.def
     rm -f "${BUILD_DIR}"/bin/x264.orig.def
     sed -i -e "/\\t.*DATA/d" -e "/\\t\".*/d" -e "s/\s@.*//" "${BUILD_DIR}"/bin/x264.def
-    $WIN_CROSS_TOOL_PREFIX-w64-mingw32-dlltool -m $WIN_CROSS_MVAL -d "${BUILD_DIR}"/bin/x264.def -l "${BUILD_DIR}"/bin/x264.lib -D "${BUILD_DIR}"/bin/$x264name
+    $WIN_CROSS_TOOL_PREFIX-w64-mingw32-dlltool -m $WIN_CROSS_MVAL -d "${BUILD_DIR}"/bin/x264.def -l "${BUILD_DIR}"/lib/x264.lib -D "${BUILD_DIR}"/bin/$x264name
 }
 
 _build_product() {
