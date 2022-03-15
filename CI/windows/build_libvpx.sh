@@ -17,7 +17,7 @@ _fixup_libs() {
     $WIN_CROSS_TOOL_PREFIX-w64-mingw32-dlltool \
         -m $WIN_CROSS_MVAL \
         -d libvpx.def \
-        -l "${BUILD_DIR}"/bin/vpx.lib \
+        -l "${BUILD_DIR}"/lib/vpx.lib \
         -D "${BUILD_DIR}"/bin/$vpxname
 }
 

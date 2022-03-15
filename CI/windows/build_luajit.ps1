@@ -38,7 +38,8 @@ function Install-Product {
 
     Write-Step "Install (${ARCH})..."
     New-Item -Path "${CMAKE_INSTALL_DIR}\include\luajit" -ItemType Directory -Force
-    Copy-Item -Path @("${DepsBuildDir}\${ProductFolder}\src\lua51.dll", "${DepsBuildDir}\${ProductFolder}\src\lua51.lib", "${DepsBuildDir}\${ProductFolder}\src\luajit.lib") -Destination "${CMAKE_INSTALL_DIR}\bin"
+    Copy-Item -Path @("${DepsBuildDir}\${ProductFolder}\src\lua51.dll") -Destination "${CMAKE_INSTALL_DIR}\bin"
+    Copy-Item -Path @("${DepsBuildDir}\${ProductFolder}\src\lua51.lib", "${DepsBuildDir}\${ProductFolder}\src\luajit.lib") -Destination "${CMAKE_INSTALL_DIR}\lib"
     Copy-Item -Path "${DepsBuildDir}\${ProductFolder}\src\*.h" -Destination "${CMAKE_INSTALL_DIR}\include\luajit"
 }
 

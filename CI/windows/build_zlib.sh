@@ -15,7 +15,7 @@ _fixup_libs() {
     mv "${BUILD_DIR}"/lib/libzlib.dll.a "${BUILD_DIR}"/lib/libz.dll.a
     mv "${BUILD_DIR}"/lib/libzlibstatic.a "${BUILD_DIR}"/lib/libz.a
     cp ../win32/zlib.def "${BUILD_DIR}"/bin
-    $WIN_CROSS_TOOL_PREFIX-w64-mingw32-dlltool -m $WIN_CROSS_MVAL -d ../win32/zlib.def -l "${BUILD_DIR}"/bin/zlib.lib -D "${BUILD_DIR}"/bin/zlib.dll
+    $WIN_CROSS_TOOL_PREFIX-w64-mingw32-dlltool -m $WIN_CROSS_MVAL -d ../win32/zlib.def -l "${BUILD_DIR}"/lib/zlib.lib -D "${BUILD_DIR}"/bin/zlib.dll
 
     cd "${BUILD_DIR}"
     apply_patch "${CHECKOUT_DIR}/CI/windows/patches/zlib/zlib-include-zconf.patch" "e7534bbf425d4670757b329eebb7c997e4ab928030c7479bdd8fc872e3c6e728"

@@ -55,9 +55,9 @@ _install_product() {
     sed -i -e "/\\t.*DATA/d" -e "/\\t\".*/d" -e "s/\s@.*//" mbedtls.def
     sed -i -e "/\\t.*DATA/d" -e "/\\t\".*/d" -e "s/\s@.*//" mbedcrypto.def
     sed -i -e "/\\t.*DATA/d" -e "/\\t\".*/d" -e "s/\s@.*//" mbedx509.def
-    $WIN_CROSS_TOOL_PREFIX-w64-mingw32-dlltool -m $WIN_CROSS_MVAL -d mbedtls.def -l ${BUILD_DIR}/bin/mbedtls.lib -D library/libmbedtls.dll
-    $WIN_CROSS_TOOL_PREFIX-w64-mingw32-dlltool -m $WIN_CROSS_MVAL -d mbedcrypto.def -l ${BUILD_DIR}/bin/mbedcrypto.lib -D library/libmbedcrypto.dll
-    $WIN_CROSS_TOOL_PREFIX-w64-mingw32-dlltool -m $WIN_CROSS_MVAL -d mbedx509.def -l ${BUILD_DIR}/bin/mbedx509.lib -D library/libmbedx509.dll
+    $WIN_CROSS_TOOL_PREFIX-w64-mingw32-dlltool -m $WIN_CROSS_MVAL -d mbedtls.def -l ${BUILD_DIR}/lib/mbedtls.lib -D library/libmbedtls.dll
+    $WIN_CROSS_TOOL_PREFIX-w64-mingw32-dlltool -m $WIN_CROSS_MVAL -d mbedcrypto.def -l ${BUILD_DIR}/lib/mbedcrypto.lib -D library/libmbedcrypto.dll
+    $WIN_CROSS_TOOL_PREFIX-w64-mingw32-dlltool -m $WIN_CROSS_MVAL -d mbedx509.def -l ${BUILD_DIR}/lib/mbedx509.lib -D library/libmbedx509.dll
 
     make install
     mv "${BUILD_DIR}"/lib/*.dll "${BUILD_DIR}"/bin
