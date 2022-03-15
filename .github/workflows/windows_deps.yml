@@ -692,8 +692,15 @@ jobs:
         with:
           name: windows-deps-${{ env.CURRENT_DATE }}
 
-      - name: 'Zip Windows deps artifact'
-        run: 7z a windows-deps-${{ env.CURRENT_DATE }}.zip win32 win64 -mx9
+      - name: 'Zip Windows deps artifacts'
+        run: |
+          pushd win64 > /dev/null
+          zip -r ../windows-deps-${{ env.CURRENT_DATE }}-x64.zip *
+          popd
+          pushd win32 > /dev/null
+          zip -r ../windows-deps-${{ env.CURRENT_DATE }}-x86.zip *
+          popd
+          zip -r windows-deps-${{ env.CURRENT_DATE }}.zip win32 win64
 
       - name: 'Upload Windows deps package to release'
         uses: actions/upload-release-asset@v1
@@ -703,4 +710,24 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/windows-deps-${{ env.CURRENT_DATE }}.zip
           asset_name: windows-deps-${{ steps.get_version.outputs.VERSION }}.zip
+          asset_content_type: application/octet-stream
+
+      - name: 'Upload 64-bit Windows deps package to release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/windows-deps-${{ env.CURRENT_DATE }}-x64.zip
+          asset_name: windows-deps-${{ steps.get_version.outputs.VERSION }}-x64.zip
+          asset_content_type: application/octet-stream
+
+      - name: 'Upload 32-bit Windows deps package to release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/windows-deps-${{ env.CURRENT_DATE }}-x86.zip
+          asset_name: windows-deps-${{ steps.get_version.outputs.VERSION }}-x86.zip
           asset_content_type: application/octet-stream
