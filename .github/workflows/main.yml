@@ -427,3 +427,117 @@ jobs:
         with:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}\windows\${{ steps.setup.outputs.artifactFileName }}
+
+  make-release:
+    name: 'Create and upload release'
+    runs-on: ubuntu-20.04
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    needs: [ffmpeg-package-universal, macos-package-universal, macos-qt-package-universal, windows-build]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Get Metadata
+        id: metadata
+        run: |
+          echo "::set-output name=version::${GITHUB_REF/refs\/tags\//}"
+          echo "::set-output name=date::$(date +"%Y-%m-%d")"
+
+      - name: 'Download build artifacts'
+        uses: actions/download-artifact@v2
+
+      - name: 'Package Windows dependencies'
+        run: |
+          shopt -s extglob
+
+          for arch in x64 x86; do
+            _temp=$(mktemp -d)
+            pushd "${_temp}" > /dev/null
+
+            for artifact in ${{ github.workspace }}/**/windows-*-${arch}.*; do
+              case ${artifact} in
+                *.zip) unzip ${artifact} > /dev/null ;;
+                *.tar.xz) XZ_OPT=-T0 tar -xJf ${artifact} ;;
+                *.tar.gz) tar -xzf ${artifact} ;;
+              esac
+            done
+
+            cp -R ${{ github.workspace }}/licenses .
+            zip -r windows-deps-${{ steps.metadata.outputs.version }}-${arch}.zip -- *
+            mv windows-deps-${{ steps.metadata.outputs.version }}-${arch}.zip ${{ github.workspace }}
+
+            popd > /dev/null
+          done
+
+      - name: 'Package Linux dependencies'
+        run: |
+          shopt -s extglob
+
+          for arch in x86_64; do
+            _temp=$(mktemp -d)
+            pushd "${_temp}" > /dev/null
+
+            for artifact in ${{ github.workspace }}/**/linux-*-${arch}.*; do
+              case ${artifact} in
+                *.zip) unzip ${artifact} > /dev/null ;;
+                *.tar.xz) XZ_OPT=-T0 tar -xvJf ${artifact} ;;
+                *.tar.gz) tar -xvzf ${artifact} ;;
+              esac
+            done
+
+            cp -R ${{ github.workspace }}/licenses .
+            XZ_OPT=-T0 tar -cvJf linux-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz -- *
+            mv linux-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz ${{ github.workspace }}
+
+            popd > /dev/null
+          done
+
+      - name: 'Package macOS dependencies'
+        run: |
+          shopt -s extglob
+
+          for arch in arm64 x86_64 universal; do
+            _temp=$(mktemp -d)
+            pushd "${_temp}" > /dev/null
+
+            for artifact in ${{ github.workspace }}/**/macos-@(deps|ffmpeg)-*-${arch}.*; do
+              case ${artifact} in
+                *.zip) unzip ${artifact} > /dev/null ;;
+                *.tar.xz) XZ_OPT=-T0 tar -xvJf ${artifact} ;;
+                *.tar.gz) tar -xvzf ${artifact} ;;
+              esac
+            done
+
+            cp -R ${{ github.workspace }}/licenses .
+            XZ_OPT=-T0 tar -cvJf macos-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz -- *
+            mv macos-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz ${{ github.workspace }}
+
+            popd > /dev/null
+          done
+
+          mv ${{ github.workspace }}/qt-macos-*/*.tar.xz ${{ github.workspace }}
+
+      - name: 'Generate Checksums'
+        run: |
+          shopt -s extglob
+          echo "### Checksums" > ${{ github.workspace }}/CHECKSUMS.txt
+          for file in ${{ github.workspace }}/@(*.tar.xz|*.zip); do
+            echo "    ${file##*/}: $(sha256sum "${file}" | cut -d " " -f 1)" >> ${{ github.workspace }}/CHECKSUMS.txt
+          done
+
+      - name: 'Create Release'
+        id: create_release
+        uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5
+        with:
+          draft: false
+          prerelease: false
+          tag_name: ${{ steps.metadata.outputs.version }}
+          name: "OBS Deps Build ${{ steps.metadata.outputs.version }}"
+          body_path: ${{ github.workspace }}/CHECKSUMS.txt
+          files: |
+            ${{ github.workspace }}/windows-*-x64.zip
+            ${{ github.workspace }}/windows-*-x86.zip
+            ${{ github.workspace }}/macos-*-arm64.tar.xz
+            ${{ github.workspace }}/macos-*-x86_64.tar.xz
+            ${{ github.workspace }}/macos-*-universal.tar.xz
+            ${{ github.workspace }}/linux-*-x86_64.tar.xz
