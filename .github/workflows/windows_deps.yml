@@ -700,6 +700,9 @@ jobs:
           pushd win32 > /dev/null
           zip -r ../windows-deps-${{ env.CURRENT_DATE }}-x86.zip *
           popd
+          # Fix libcurl naming for custom OBS finder on obs-studio master
+          mv win32/lib/libcurl_imp.lib win32/lib/libcurl.lib
+          mv win64/lib/libcurl_imp.lib win64/lib/libcurl.lib
           zip -r windows-deps-${{ env.CURRENT_DATE }}.zip win32 win64
 
       - name: 'Upload Windows deps package to release'
