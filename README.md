@@ -22,7 +22,7 @@ Scripts to build and package dependencies for OBS on CI
 |libvorbis|[xiph.org](https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.7.tar.xz)|1.3.7|
 |libvpx|[GitHub](https://github.com/webmproject/libvpx/archive/v1.10.0.tar.gz)|1.10.0|
 |libx264|[GitHub](https://github.com/mirror/x264/commit/b684ebe04a6f80f8207a57940a1fa00e25274f81)|r3059|
-|ntv2|[GitHub](https://github.com/aja-video/ntv2/commit/abf17cc1e7aadd9f3e4972774a3aba2812c51b75)|16.1|
+|ntv2|[GitHub](https://github.com/aja-video/ntv2/commit/0acbac70a0b5e6509cca78cfbf69974c73c10db9)|16.2|
 |Qt|[Qt.io](https://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz)|5.15.2|
 
 ### Notes

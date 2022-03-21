@@ -295,8 +295,8 @@ jobs:
       NASM_HASH: ''
       SWIG_VERSION: '3.0.12'
       SWIG_HASH: '21ce6cbe297a56b697ef6e7e92a83e75ca41dedc87e48282ab444591986c35f5'
-      NTV2_VERSION: '16.1'
-      NTV2_HASH: 'abf17cc1e7aadd9f3e4972774a3aba2812c51b75'
+      NTV2_VERSION: '16.2'
+      NTV2_HASH: '0acbac70a0b5e6509cca78cfbf69974c73c10db9'
     defaults:
       run:
         shell: pwsh
