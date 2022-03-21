@@ -23,7 +23,7 @@ set -eE
 _RUN_OBS_BUILD_SCRIPT=TRUE
 PRODUCT_NAME="obs-deps"
 REQUIRED_DEPS=(
-    "ntv2 16.1 abf17cc1e7aadd9f3e4972774a3aba2812c51b75"
+    "ntv2 16.2 0acbac70a0b5e6509cca78cfbf69974c73c10db9"
     "libpng 1.6.37 505e70834d35383537b6491e7ae8641f1a4bed1876dbfe361201fc80868d88ca"
     "libopus 1.3.1-93-gdfd6c88a dfd6c88aaa54a03a61434c413e30c217eb98f1d5"
     "libogg 1.3.5 c4d91be36fc8e54deae7575241e03f4211eb102afb3fc0775fbbc1b740016705"

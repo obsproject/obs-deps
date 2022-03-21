@@ -17,9 +17,12 @@ _build_product() {
     step "Configure ("${ARCH}")..."
     cmake -S . -B build_${ARCH} -G Ninja ${CMAKE_CCACHE_OPTIONS} \
         -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}" \
+        -DCMAKE_INSTALL_LIBDIR="${BUILD_DIR}" \
         -DCMAKE_PREFIX_PATH="${BUILD_DIR}" \
         -DCMAKE_OSX_ARCHITECTURES="${CMAKE_ARCHS}" \
         -DAJA_BUILD_OPENSOURCE=ON \
+        -DAJA_BUILD_APPS=OFF \
+        -DAJA_INSTALL_HEADERS=ON \
         ${QUIET:+-Wno-deprecated -Wno-dev --log-level=ERROR}
 
     mkdir -p build_${ARCH}/arm64

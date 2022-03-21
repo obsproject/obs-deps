@@ -32,7 +32,10 @@ function Build-Product {
     Write-Step "Configure (${ARCH})..."
     cmake -G "Visual Studio 16 2019" `
         -A "${CMAKE_ARCH}" `
+        -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}" `
         -DAJA_BUILD_OPENSOURCE=ON `
+        -DAJA_BUILD_APPS=OFF `
+        -DAJA_INSTALL_HEADERS=ON `
         "${CMAKE_OPTS}" `
         -S "ntv2" `
         -B "ntv2_build\${CMAKE_BITNESS}"
