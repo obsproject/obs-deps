@@ -17,6 +17,9 @@ _patch_product() {
     if [ -z "${SKIP_UNPACK}" ]; then
         step "Apply patches..."
         apply_patch "${CHECKOUT_DIR}/CI/patches/QTBUG-74606.patch" "6ba73e94301505214b85e6014db23b042ae908f2439f0c18214e92644a356638"
+        apply_patch "${CHECKOUT_DIR}/CI/macos/patches/QTBUG-70137-1.patch" "216be72245a80b7762dc2e2bd720a4ea9b9c423ce9d006cce3985b63c0269ba3"
+        apply_patch "${CHECKOUT_DIR}/CI/macos/patches/QTBUG-70137-2.patch" "92d49352c321c653d6f5377e64603e48b38a9c1ec87a8956acba42459c151e42"
+        apply_patch "${CHECKOUT_DIR}/CI/macos/patches/QTBUG-70137-3.patch" "f8b220a444fcd0e121b8643e7526af33a4f30e0c85d11c28d40fcc7072d56783"
         apply_patch "${CHECKOUT_DIR}/CI/macos/patches/QTBUG-88495.patch" "d60d663d2d940aa21cbcda65b1e60c4ecb1ec1900736e896367e5436d121206e"
         apply_patch "${CHECKOUT_DIR}/CI/macos/patches/QTBUG-97855.patch" "d8620262ad3f689fdfe6b6e277ddfdd3594db3de9dbc65810a871f142faa9966"
         apply_patch "${CHECKOUT_DIR}/CI/macos/patches/QTBUG-90370.patch" "277b16f02f113e60579b07ad93c35154d7738a296e3bf3452182692b53d29b85"
