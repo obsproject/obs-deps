@@ -1,0 +1,66 @@
+From 6d306a0e3755258beb11d7f488c2bb1bf66bec19 Mon Sep 17 00:00:00 2001
+From: Eskil Abrahamsen Blomfeldt <eskil.abrahamsen-blomfeldt@qt.io>
+Date: Tue, 17 Nov 2020 09:23:39 +0100
+Subject: [PATCH 1/1] Fix shaping problems on iOS 14 / macOS 11
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf8
+Content-Transfer-Encoding: 8bit
+
+Detection of AAT fonts was exclusively based on the existence
+of tables mort, morx and kerx. In the SF font (the UI default)
+on iOS 14 and Big Sur, none of these tables actually exist, so
+we would accidentally use the OpenType shaper for it. But there
+are plenty of other AAT tables in the font and the OT shaper
+canÂ´t handle it. In particular, this caused us to get the wrong
+advance for comma when it was followed by a space.
+
+Looking at all the affected SF fonts on Big Sur, they all have
+the trak table, so we expand the detection to include this.
+This is possibly also the table used to determine the correct
+glyph positions in this case.
+
+In Qt 6, this already works as expected, because Harfbuzz has
+built-in support for AAT and does not require the CoreText
+fallback. Therefore, this is just a hotfix for the 5.15 series
+and there is no need to upstream this patch.
+
+[ChangeLog][macOS] Fixed shaping of default UI font on macOS 11
+and iOS 14.
+
+Fixes: QTBUG-88495
+Change-Id: Ia2b3f45cbc0c32b93864760cb427ede6b0566e8f
+Reviewed-by: Tor Arne VestbÃ¸ <tor.arne.vestbo@qt.io>
+Reviewed-by: Lars Knoll <lars.knoll@qt.io>
+---
+ src/3rdparty/harfbuzz-ng/src/hb-coretext.cc | 2 +-
+ src/3rdparty/harfbuzz-ng/src/hb-coretext.h  | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/3rdparty/harfbuzz-ng/src/hb-coretext.cc b/src/3rdparty/harfbuzz-ng/src/hb-coretext.cc
+index d64cb7edbd81..11b6deee045a 100644
+--- ./qtbase/src/3rdparty/harfbuzz-ng/src/hb-coretext.cc
++++ ./qtbase/src/3rdparty/harfbuzz-ng/src/hb-coretext.cc
+@@ -1322,7 +1322,7 @@ struct hb_coretext_aat_shaper_face_data_t {};
+ hb_coretext_aat_shaper_face_data_t *
+ _hb_coretext_aat_shaper_face_data_create (hb_face_t *face)
+ {
+-  static const hb_tag_t tags[] = {HB_CORETEXT_TAG_MORX, HB_CORETEXT_TAG_MORT, HB_CORETEXT_TAG_KERX};
++  static const hb_tag_t tags[] = {HB_CORETEXT_TAG_MORX, HB_CORETEXT_TAG_MORT, HB_CORETEXT_TAG_KERX, HB_CORETEXT_TAG_TRAK};
+ 
+   for (unsigned int i = 0; i < ARRAY_LENGTH (tags); i++)
+   {
+diff --git a/src/3rdparty/harfbuzz-ng/src/hb-coretext.h b/src/3rdparty/harfbuzz-ng/src/hb-coretext.h
+index 4b0a6f01b6f6..12f7d2515bd2 100644
+--- ./qtbase/src/3rdparty/harfbuzz-ng/src/hb-coretext.h
++++ ./qtbase/src/3rdparty/harfbuzz-ng/src/hb-coretext.h
+@@ -43,7 +43,7 @@ HB_BEGIN_DECLS
+ #define HB_CORETEXT_TAG_MORT HB_TAG('m','o','r','t')
+ #define HB_CORETEXT_TAG_MORX HB_TAG('m','o','r','x')
+ #define HB_CORETEXT_TAG_KERX HB_TAG('k','e','r','x')
+-
++#define HB_CORETEXT_TAG_TRAK HB_TAG('t','r','a','k')
+ 
+ HB_EXTERN hb_face_t *
+ hb_coretext_face_create (CGFontRef cg_font);
+-- 
+2.16.3
