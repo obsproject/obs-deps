@@ -104,13 +104,22 @@ _configure_qt_x86_64() {
     ../configure ${CMAKE_CCACHE_OPTIONS:+-ccache} ${QMAKE_QUIET:+-silent}  \
         -release -opensource -confirm-license -system-zlib \
         -qt-libpng -qt-libjpeg -qt-freetype -qt-pcre \
-        -nomake examples -nomake tests -no-glib \
+        -nomake examples -nomake tests \
+        -no-compile-examples -no-dbus -no-glib \
+        -no-feature-itemmodeltester -no-feature-printdialog -no-feature-printer \
+        -no-feature-printpreviewdialog -no-feature-printpreviewwidget -no-feature-sql -no-feature-sqlmodel \
+        -no-feature-testlib \
+        -no-sql-db2 -no-sql-ibase -no-sql-mysql -no-sql-oci -no-sql-odbc -no-sql-psql -no-sql-sqlite2 \
+        -no-sql-sqlite -no-sql-tds \
+        -DQT_NO_PDF -DQT_NO_PRINTER \
         -skip qt3d -skip qtactiveqt -skip qtandroidextras -skip qtcharts -skip qtconnectivity -skip qtdatavis3d \
-        -skip qtdeclarative -skip qtdoc -skip qtgamepad -skip qtgraphicaleffects -skip qtlocation \
-        -skip qtscript -skip qtscxml -skip qtsensors -skip qtserialbus -skip qtspeech \
-        -skip qttranslations -skip qtwayland -skip qtwebchannel -skip qtwebengine -skip qtwebglplugin \
+        -skip qtdeclarative -skip qtdoc -skip qtgamepad -skip qtgraphicaleffects -skip qtlocation -skip qtlottie \
+        -skip qtnetworkauth -skip qtpurchasing -skip qtquick3d -skip qtquickcontrols -skip qtquickcontrols2 \
+        -skip qtquicktimeline -skip qtremoteobjects -skip qtscript -skip qtscxml -skip qtsensors -skip qtserialbus \
+        -skip qtserialport -skip qtspeech -skip qttools -skip qttranslations -skip qtvirtualkeyboard \
+        -skip qtwayland -skip qtwebchannel -skip qtwebengine -skip qtwebglplugin \
         -skip qtwebsockets -skip qtwebview -skip qtwinextras -skip qtx11extras -skip qtxmlpatterns \
-        --prefix="${BUILD_DIR}" -pkg-config -dbus-runtime QMAKE_APPLE_DEVICE_ARCHS="x86_64"
+        --prefix="${BUILD_DIR}" -pkg-config QMAKE_APPLE_DEVICE_ARCHS="x86_64"
 }
 
 _build_qt_arm64() {
@@ -128,13 +137,22 @@ _configure_qt_arm64() {
     ../configure ${CMAKE_CCACHE_OPTIONS:+-ccache} ${QMAKE_QUIET:+-silent} \
         -release -opensource -confirm-license -system-zlib \
         -qt-libpng -qt-libjpeg -qt-freetype -qt-pcre \
-        -nomake examples -nomake tests -no-glib \
+        -nomake examples -nomake tests \
+        -no-compile-examples -no-dbus -no-glib \
+        -no-feature-itemmodeltester -no-feature-printdialog -no-feature-printer \
+        -no-feature-printpreviewdialog -no-feature-printpreviewwidget -no-feature-sql -no-feature-sqlmodel \
+        -no-feature-testlib \
+        -no-sql-db2 -no-sql-ibase -no-sql-mysql -no-sql-oci -no-sql-odbc -no-sql-psql -no-sql-sqlite2 \
+        -no-sql-sqlite -no-sql-tds \
+        -DQT_NO_PDF -DQT_NO_PRINTER \
         -skip qt3d -skip qtactiveqt -skip qtandroidextras -skip qtcharts -skip qtconnectivity -skip qtdatavis3d \
-        -skip qtdeclarative -skip qtdoc -skip qtgamepad -skip qtgraphicaleffects -skip qtlocation \
-        -skip qtscript -skip qtscxml -skip qtsensors -skip qtserialbus -skip qtspeech \
-        -skip qttranslations -skip qtwayland -skip qtwebchannel -skip qtwebengine -skip qtwebglplugin \
+        -skip qtdeclarative -skip qtdoc -skip qtgamepad -skip qtgraphicaleffects -skip qtlocation -skip qtlottie \
+        -skip qtnetworkauth -skip qtpurchasing -skip qtquick3d -skip qtquickcontrols -skip qtquickcontrols2 \
+        -skip qtquicktimeline -skip qtremoteobjects -skip qtscript -skip qtscxml -skip qtsensors -skip qtserialbus \
+        -skip qtserialport -skip qtspeech -skip qttools -skip qttranslations -skip qtvirtualkeyboard \
+        -skip qtwayland -skip qtwebchannel -skip qtwebengine -skip qtwebglplugin \
         -skip qtwebsockets -skip qtwebview -skip qtwinextras -skip qtx11extras -skip qtxmlpatterns \
-        --prefix="${BUILD_DIR}" -pkg-config -dbus-runtime QMAKE_APPLE_DEVICE_ARCHS="arm64"
+        --prefix="${BUILD_DIR}" -pkg-config QMAKE_APPLE_DEVICE_ARCHS="arm64"
 }
 
 _prepare_cross_compile() {
