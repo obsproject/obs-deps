@@ -1,0 +1,63 @@
+name: 'Build macOS Dependencies'
+description: 'Builds macOS dependencies for obs-deps with specified architecture, type, and build config'
+inputs:
+  target:
+    description: 'Build target for dependencies'
+    required: true
+  type:
+    description: 'Build type (shared or static libraries)'
+    required: false
+    default: 'static'
+  config:
+    description: 'Build configuration'
+    required: false
+    default: 'Release'
+  cacheRevision:
+    description: 'Cache revision number to force creation of new cache generation'
+    required: false
+    default: '01'
+runs:
+  using: 'composite'
+  steps:
+    - name: Environment Setup
+      id: deps-env-setup
+      shell: bash
+      run: |
+        case "${{ runner.os }}" in
+          Linux)
+            if ! type zsh > /dev/null 2>&1; then
+              sudo apt update
+              sudo apt install zsh
+            fi
+            ;;
+          macOS)
+            if ! type sha256sum > /dev/null 2>&1; then
+              brew install coreutils
+            fi
+        esac
+
+        deps_hash=$(cat ${{ github.workspace }}/deps.macos/*.zsh | sha256sum | cut -d " " -f 1)
+        echo "::set-output name=hash::${deps_hash}"
+
+    - name: Restore macOS Dependencies from Cache
+      id: deps-cache
+      uses: actions/cache@v2.1.6
+      with:
+        path: |
+          ${{ github.workspace }}/*_build_temp/*
+          !${{ github.workspace }}/*_build_temp/**/.git
+          !${{ github.workspace }}/*_build_temp/*.tar.gz
+          !${{ github.workspace }}/*_build_temp/*.tar.xz
+          !${{ github.workspace }}/*_build_temp/*.zip
+          !${{ github.workspace }}/*_build_temp/qt*
+        key: ${{ inputs.target }}-deps-${{ inputs.type }}-${{ steps.deps-env-setup.outputs.hash }}-${{ inputs.cacheRevision }}
+
+    - name: Install macOS Dependencies
+      if: ${{ steps.deps-cache.outputs.cache-hit == 'true' }}
+      shell: zsh {0}
+      run: ./build-deps.zsh --skip-build --skip-unpack --target ${{ inputs.target }} --config ${{ inputs.config }} --${{ inputs.type }}
+
+    - name: Build and Install macOS Dependencies
+      if: ${{ steps.deps-cache.outputs.cache-hit != 'true' }}
+      shell: zsh {0}
+      run: ./build-deps.zsh --target ${{ inputs.target }} --config ${{ inputs.config }} --${{ inputs.type }}
