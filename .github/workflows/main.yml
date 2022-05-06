@@ -141,6 +141,107 @@ jobs:
         if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
         uses: ./.github/actions/create-universal
         with:
-          arm64: 'ffmpeg-macos-arm64-${{ matrix.type }}-${{ github.sha }}'
-          x86_64: 'ffmpeg-macos-x86_64-${{ matrix.type }}-${{ github.sha }}'
-          outputName: 'ffmpeg-macos-universal-${{ matrix.type }}-${{ github.sha }}'
+          arm64: 'ffmpeg-macos-arm64-${{ github.sha }}'
+          x86_64: 'ffmpeg-macos-x86_64-${{ github.sha }}'
+          outputName: 'ffmpeg-macos-universal-${{ github.sha }}'
+
+  macos-build:
+    name: 'Build macOS Dependencies'
+    runs-on: macos-12
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [macos-arm64, macos-x86_64]
+        include:
+          - target: macos-arm64
+            config: 'Release'
+            type: 'shared'
+          - target: macos-x86_64
+            config: 'Release'
+            type: 'shared'
+    env:
+      CACHE_REVISION: '2'
+    defaults:
+      run:
+        shell: zsh {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+
+      - name: Setup Environment
+        id: setup
+        run: |
+          to_remove=()
+
+          for formula (llvm gcc) {
+            if [[ -d /usr/local/opt/"${formula}" ]] to_remove+=(${formula})
+          }
+
+          if (( #to_remove )) brew uninstall --ignore-dependencies ${to_remove}
+
+          target='${{ matrix.target }}'
+          artifact_name="deps-${target}-${{ github.sha }}"
+          file_name="${target%%-*}-deps-$(date +"%Y-%m-%d")-${target##*-}.tar.xz"
+
+          echo "::set-output name=artifactName::${artifact_name}"
+          echo "::set-output name=artifactFileName::${file_name}"
+          echo "::set-output name=ccacheDate::$(date +"%Y-%m-%d")"
+
+      - name: Restore Compilation Cache
+        id: ccache-cache
+        uses: actions/cache@v2.1.6
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: ${{ matrix.target }}-ccache-deps-${{ steps.setup.outputs.ccacheDate }}
+
+      - name: Check for GitHub Labels
+        id: seekingTesters
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
+            echo "::set-output name=found::true"
+          else
+            echo "::set-output name=found::false"
+          fi
+
+      - name: Build macOS Dependencies
+        uses: ./.github/actions/build-macos-deps
+        with:
+          target: ${{ matrix.target }}
+          type: ${{ matrix.type }}
+          config: ${{ matrix.config }}
+          cacheRevision: ${{ env.CACHE_REVISION }}
+
+      - name: Publish Build Artifacts
+        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: ${{ steps.setup.outputs.artifactName }}
+          path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.artifactFileName }}
+
+  macos-package-universal:
+    name: 'Build macOS Dependencies (Universal)'
+    runs-on: macos-12
+    needs: [macos-build]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+
+      - name: Check for GitHub Labels
+        id: seekingTesters
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
+            echo "::set-output name=found::true"
+          else
+            echo "::set-output name=found::false"
+          fi
+
+      - name: Create universal binary package
+        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
+        uses: ./.github/actions/create-universal
+        with:
+          arm64: 'deps-macos-arm64-${{ github.sha }}'
+          x86_64: 'deps-macos-x86_64-${{ github.sha }}'
+          outputName: 'deps-macos-universal-${{ github.sha }}'
+
