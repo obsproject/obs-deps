@@ -440,7 +440,8 @@ jobs:
           CACHE_NAME: 'qt-cache-${{ matrix.arch }}-${{ env.QT_REVISION }}'
         with:
           path: ${{ github.workspace }}/macos/obs-dependencies-qt-${{ matrix.arch }}
-          key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.QT_VERSION }}
+          key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.QT_VERSION }}-${{ hashFiles('CI/patches/QTBUG-*.patch', 'CI/macos/patches/QTBUG-*.patch', 'CI/macos/patches/qmake.patch') }}
+          restore-keys: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.QT_VERSION }}
 
       - name: 'Build Qt'
         if: steps.qt-cache.outputs.cache-hit != 'true'
