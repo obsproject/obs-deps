@@ -1,0 +1,92 @@
+name: 'Create Universal macOS Build'
+description: 'Takes the contents of an arm64 macOS build artifact and x86_64 macOS build artifact and creates matching universal macOS binaries'
+inputs:
+  arm64:
+    description: 'Name of the arm64-based macOS artifact'
+    required: true
+  x86_64:
+    description: 'Name of the x86_64-based macOS artifact'
+    required: true
+  outputName:
+    description: 'Name for created universal macOS artifact'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Download arm64 macOS artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{ inputs.arm64 }}
+
+    - name: Download x86_64 macOS artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{ inputs.x86_64 }}
+
+    - name: Combine macOS architectures
+      id: combineArchs
+      shell: zsh {0}
+      run: |
+        setopt ERR_EXIT
+        setopt ERR_RETURN
+        setopt PIPE_FAIL
+        setopt EXTENDED_GLOB
+
+        extract() {
+          case ${1} {
+            *.tar.xz) XZ_OPT=-T0 tar -xJf ${1} ;;
+            *.tar.gz) tar -xjf ${1} ;;
+            *.zip) unzip ${1} ;;
+            *.tar) tar -xf ${1} ;;
+            *) print -u2 "${0}: archive type unsupported ${1}"
+          }
+        }
+
+        artifact_arm64=(*arm64*(.))
+        artifact_x86_64=(*x86_64*(.))
+
+        mkdir -p ${artifact_arm64:r:r}
+        pushd ${artifact_arm64:r:r}
+        extract ../${artifact_arm64}
+        popd
+
+        mkdir -p ${artifact_x86_64:r:r}
+        pushd ${artifact_x86_64:r:r}
+        extract ../${artifact_x86_64}
+        popd
+
+        target_dir="${${artifact_arm64:r:r}//arm64/universal}"
+
+        cp -cpR ${artifact_arm64:r:r} ${target_dir}
+        cd ${target_dir}
+
+        typeset -a fixups=(**/(*.a|*.dylib)(.))
+
+        for file (**/*~(*.a|*.dylib)(.)) {
+          magic=$(xxd -ps -l 4 ${file})
+
+          if [[ ${magic} == "cffaedfe" ]] fixups+=(${file})
+        }
+
+        for file (${fixups}) {
+          lipo -create \
+            "../${artifact_arm64:r:r}/${file}" \
+            "../${artifact_x86_64:r:r}/${file}" \
+            -output ${file}
+        }
+
+        artifact_name="${{ inputs.outputName }}"
+        file_name="${artifact_arm64//arm64/universal}"
+
+        XZ_OPT=-T0 tar -cJf ${file_name} -- *
+
+        mv ${file_name} ${{ github.workspace }}/${file_name}
+
+        print "::set-output name=artifactName::${artifact_name}"
+        print "::set-output name=artifactFileName::${file_name}"
+
+    - name: Publish Build Artifacts
+      uses: actions/upload-artifact@v2.2.4
+      with:
+        name: ${{ steps.combineArchs.outputs.artifactName }}
+        path: ${{ github.workspace }}/${{ steps.combineArchs.outputs.artifactFileName }}

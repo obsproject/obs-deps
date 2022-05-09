@@ -52,11 +52,7 @@ function Package-OBS-Deps-Main {
         $NativeDirBase = "${CheckoutDir}\windows_native_build_temp"
     }
 
-    if (!(Test-Path "${CrossDirBase}\x86" -PathType "Container")) {
-        Caught-Error "Missing cross-compiled build in ${CrossDirBase}\x86"
-    } elseif (!(Test-Path "${CrossDirBase}\x86_64" -PathType "Container")) {
-        Caught-Error "Missing cross-compiled build in ${CrossDirBase}\x86_64"
-    } elseif (!(Test-Path "${NativeDirBase}\win32" -PathType "Container")) {
+    if (!(Test-Path "${NativeDirBase}\win32" -PathType "Container")) {
         Caught-Error "Missing native build in ${NativeDirBase}\win32"
     } elseif (!(Test-Path "${NativeDirBase}\win64" -PathType "Container")) {
         Caught-Error "Missing native build in ${NativeDirBase}\win64"
@@ -73,11 +69,9 @@ function Package-OBS-Deps-Main {
     )
     Foreach ($Package in $Packages) {
         if ($Package.Arch -eq "x86") {
-            $CrossDir = "${CrossDirBase}\x86"
             $NativeDir = "${NativeDirBase}\win32"
             $FinalDir = "${DepsBuildDir}\win32"
         } elseif ($Package.Arch -eq "x86_64") {
-            $CrossDir = "${CrossDirBase}\x86_64"
             $NativeDir = "${NativeDirBase}\win64"
             $FinalDir = "${DepsBuildDir}\win64"
         }

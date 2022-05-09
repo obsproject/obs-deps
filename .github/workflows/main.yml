@@ -1,4 +1,4 @@
-name: build_macos
+name: build_deps
 
 on:
   push:
@@ -13,55 +13,41 @@ on:
       - master
 
 jobs:
-  macos-deps-build:
-    name: '01 - Build macOS dependencies'
-    runs-on: [macos-11]
+  ffmpeg-build:
+    name: 'Build FFmpeg'
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: true
       matrix:
-        arch: ['x86_64', 'arm64']
+        target: [macos-arm64, macos-x86_64, linux-x86_64, windows-x64, windows-x86]
+        include:
+          - target: macos-arm64
+            os: 'macos-12'
+            config: 'Release'
+            type: 'static'
+            revision: 5
+          - target: macos-x86_64
+            os: 'macos-12'
+            config: 'Release'
+            type: 'static'
+            revision: 5
+          - target: linux-x86_64
+            os: 'ubuntu-20.04'
+            config: 'Release'
+            type: 'static'
+            revision: 6
+          - target: windows-x64
+            os: 'ubuntu-20.04'
+            config: 'Release'
+            type: 'static'
+            revision: 5
+          - target: windows-x86
+            os: 'ubuntu-20.04'
+            config: 'Release'
+            type: 'static'
+            revision: 5
     env:
-      MACOSX_DEPLOYMENT_TARGET_X86_64: '10.13'
-      MACOSX_DEPLOYMENT_TARGET_ARM64: '11.0'
-      CACHE_REVISION: '12'
-      NTV2_VERSION: '16.2'
-      NTV2_HASH: '0acbac70a0b5e6509cca78cfbf69974c73c10db9'
-      LIBPNG_VERSION: '1.6.37'
-      LIBPNG_HASH: '505e70834d35383537b6491e7ae8641f1a4bed1876dbfe361201fc80868d88ca'
-      LIBOPUS_VERSION: '1.3.1-93-gdfd6c88a'
-      LIBOPUS_HASH: 'dfd6c88aaa54a03a61434c413e30c217eb98f1d5'
-      LIBOGG_VERSION: '1.3.5'
-      LIBOGG_HASH: 'c4d91be36fc8e54deae7575241e03f4211eb102afb3fc0775fbbc1b740016705'
-      LIBVORBIS_VERSION: '1.3.7'
-      LIBVORBIS_HASH: 'b33cc4934322bcbf6efcbacf49e3ca01aadbea4114ec9589d1b1e9d20f72954b'
-      LIBVPX_VERSION: '1.10.0'
-      LIBVPX_HASH: '85803ccbdbdd7a3b03d930187cb055f1353596969c1f92ebec2db839fa4f834a'
-      LIBAOM_VERSION: '3.2.0'
-      LIBAOM_HASH: '402e264b94fd74bdf66837da216b6251805b4ae4'
-      LIBX264_VERSION: 'r3059'
-      LIBX264_HASH: 'b684ebe04a6f80f8207a57940a1fa00e25274f81'
-      LIBTHEORA_VERSION: '1.1.1'
-      LIBTHEORA_HASH: 'f36da409947aa2b3dcc6af0a8c2e3144bc19db2ed547d64e9171c59c66561c61'
-      LIBLAME_VERSION: '3.100'
-      LIBLAME_HASH: 'ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e'
-      MBEDTLS_VERSION: '2.26.0'
-      MBEDTLS_HASH: '35d8d87509cd0d002bddbd5508b9d2b931c5e83747d087234cc7ad551d53fe05'
-      LIBSRT_VERSION: '1.4.1'
-      LIBSRT_HASH: 'e80ca1cd0711b9c70882c12ec365cda1ba852e1ce8acd43161a21a04de0cbf14'
-      LIBRIST_VERSION: '0.2.7'
-      LIBRIST_HASH: '419f09ea9aa9bf15f9c43b7752ca878521543679'
-      FFMPEG_VERSION: '4.4.1'
-      FFMPEG_HASH: 'cc33e73618a981de7fd96385ecb34719de031f16'
-      SPEEXDSP_VERSION: '1.2.0'
-      SPEEXDSP_HASH: 'd7032f607e8913c019b190c2bccc36ea73fc36718ee38b5cdfc4e4c0a04ce9a4'
-      LIBJANSSON_VERSION: '2.13.1'
-      LIBJANSSON_HASH: 'f4f377da17b10201a60c1108613e78ee15df6b12016b116b6de42209f47a474f'
-      LIBLUAJIT_VERSION: '2.1'
-      LIBLUAJIT_HASH: 'ec6edc5c39c25e4eb3fca51b753f9995e97215da'
-      LIBFREETYPE_VERSION: '2.10.4'
-      LIBFREETYPE_HASH: '86a854d8905b19698bbc8f23b860bc104246ce4854dcea8e3b0fb21284f75784'
-      LIBRNNOISE_VERSION: '2020-07-28'
-      LIBRNNOISE_HASH: '90ec41ef659fd82cfec2103e9bb7fc235e9ea66c'
-      BLOCKED_FORMULAS: 'llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile libogg composer php gd freetype fontconfig webp libpng lame libtiff opus kotlin sbt libxft libxcb jasper'
+      CACHE_REVISION: ${{ matrix.revision }}
     defaults:
       run:
         shell: bash
@@ -69,605 +55,92 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2.3.4
 
-      - name: 'Check for Github Labels'
-        if: github.event_name == 'pull_request'
+      - name: Setup Environment
+        id: setup
         run: |
-          if test -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')"; then
-            echo "SEEKING_TESTERS=1" >> $GITHUB_ENV
-          else
-            echo "SEEKING_TESTERS=0" >> $GITHUB_ENV
-          fi
+          case "${{ runner.os }}" in
+            Linux)
+              sudo apt update
+              sudo apt install zsh
+              ;;
+            macOS)
+              to_remove=()
 
-          echo "CACHE_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
+              for formula in llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile \
+                libogg composer php gd freetype fontconfig webp libpng lame libtiff opus kotlin \
+                sbt libxft libxcb; do
+                if [[ -d /usr/local/opt/"${formula}" ]]; then
+                  to_remove+=(${formula})
+                fi
+              done
+              if [[ ${#to_remove} -gt 0 ]]; then
+                brew uninstall --ignore-dependencies ${to_remove[@]}
+              fi
+              ;;
+          esac
 
-      - name: 'Restore ccache from cache'
+          target='${{ matrix.target }}'
+          artifact_name="ffmpeg-${target}-${{ github.sha }}"
+          file_name="${target%%-*}-ffmpeg-$(date +"%Y-%m-%d")-${target##*-}.tar.xz"
+
+          echo "::set-output name=artifactName::${artifact_name}"
+          echo "::set-output name=artifactFileName::${file_name}"
+          echo "::set-output name=ccacheDate::$(date +"%Y-%m-%d")"
+
+      - name: Restore Compilation Cache
         id: ccache-cache
         uses: actions/cache@v2.1.6
-        env:
-          CACHE_NAME: 'ccache-cache'
         with:
           path: ${{ github.workspace }}/.ccache
-          key: ${{ runner.os }}-pr-${{ env.CACHE_NAME }}-${{ matrix.arch }}-${{ env.CACHE_DATE }}
+          key: ${{ matrix.target }}-ccache-ffmpeg-${{ steps.setup.outputs.ccacheDate }}
 
-      - name: 'Setup build environment'
+      - name: Check for GitHub Labels
+        id: seekingTesters
+        if: ${{ github.event_name == 'pull_request' }}
         run: |
-          mkdir -p macos/obs-dependencies-${{ matrix.arch }}/bin
-          mkdir -p macos/obs-dependencies-${{ matrix.arch }}/include
-          mkdir -p macos/obs-dependencies-${{ matrix.arch }}/lib
-          mkdir -p macos/obs-dependencies-${{ matrix.arch }}/share
-
-          REMOVE_FORMULAS=""
-          for FORMULA in ${{ env.BLOCKED_FORMULAS }}; do
-            if [ -d "/usr/local/Cellar/${FORMULA}" ]; then
-              REMOVE_FORMULAS="${REMOVE_FORMULAS}${FORMULA} "
-            fi
-          done
-
-          if [ -n "${REMOVE_FORMULAS}" ]; then
-            brew uninstall --ignore-dependencies ${REMOVE_FORMULAS}
+          if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
+            echo "::set-output name=found::true"
+          else
+            echo "::set-output name=found::false"
           fi
 
-          brew bundle --file "CI/include/Brewfile"
-          echo "/usr/local/opt/gnu-tar/libexec/gnubin" >> $GITHUB_PATH
-
-          FFMPEG_DEPS=(\
-            "${{ env.LIBPNG_VERSION }}" \
-            "${{ env.LIBLAME_VERSION }}" \
-            "${{ env.LIBOGG_VERSION }}" \
-            "${{ env.LIBVORBIS_VERSION }}" \
-            "${{ env.LIBVPX_VERSION }}" \
-            "${{ env.LIBOPUS_VERSION }}" \
-            "${{ env.LIBAOM_VERSION }}" \
-            "${{ env.LIBX264_VERSION }}" \
-            "${{ env.LIBSRT_VERSION }}" \
-            "${{ env.LIBRIST_VERSION }}" \
-            "${{ env.MBEDTLS_VERSION }}" \
-            "${{ env.LIBTHEORA_VERSION }}"
-          )
-
-          FFMPEG_DEP_HASH="$(echo "${FFMPEG_DEPS}" | sha256sum | cut -d " " -f 1)"
-          echo "FFMPEG_DEP_HASH=$FFMPEG_DEP_HASH" >> $GITHUB_ENV
-
-      - name: 'Restore ffmpeg dependencies from cache'
-        id: ffmpeg-deps-cache
-        uses: actions/cache@v2.1.6
-        env:
-          CACHE_NAME: 'ffmpeg-deps-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
+      - name: Build FFmpeg
+        uses: ./.github/actions/build-ffmpeg
         with:
-          path: |
-            ${{ github.workspace }}/macos_build_temp/libpng-${{ env.LIBPNG_VERSION }}
-            ${{ github.workspace }}/macos_build_temp/opus-${{ env.LIBOPUS_VERSION }}
-            ${{ github.workspace }}/macos_build_temp/libogg-${{ env.LIBOGG_VERSION }}
-            ${{ github.workspace }}/macos_build_temp/libvorbis-${{ env.LIBVORBIS_VERSION }}
-            ${{ github.workspace }}/macos_build_temp/libvpx-${{ env.LIBVPX_VERSION }}
-            ${{ github.workspace }}/macos_build_temp/aom-${{ env.LIBAOM_VERSION }}
-            ${{ github.workspace }}/macos_build_temp/x264-${{ env.LIBX264_VERSION }}
-            ${{ github.workspace }}/macos_build_temp/libtheora-${{ env.LIBTHEORA_VERSION }}
-            ${{ github.workspace }}/macos_build_temp/lame-${{ env.LIBLAME_VERSION }}
-            ${{ github.workspace }}/macos_build_temp/mbedtls-mbedtls-${{ env.MBEDTLS_VERSION }}
-            ${{ github.workspace }}/macos_build_temp/librist-v${{ env.LIBRIST_VERSION }}
-            ${{ github.workspace }}/macos_build_temp/srt-${{ env.LIBSRT_VERSION }}
-          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.FFMPEG_DEP_HASH }}
+          target: ${{ matrix.target }}
+          type: ${{ matrix.type }}
+          config: ${{ matrix.config }}
+          cacheRevision: ${{ env.CACHE_REVISION }}
 
-      - name: 'Build dependency libpng'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_libpng.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency libpng'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_libpng.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Build dependency libopus'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_libopus.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency libopus'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_libopus.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Build dependency libogg'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_libogg.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency libogg'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_libogg.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Build dependency libvorbis'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_libvorbis.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency libvorbis'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_libvorbis.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Build dependency libvpx'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_libvpx.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency libvpx'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_libvpx.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Build dependency libx264'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_libx264.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency libx264'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_libx264.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Build dependency libaom'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_libaom.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency libaom'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_libaom.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Build dependency libtheora'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_libtheora.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency libtheora'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_libtheora.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Build dependency liblame'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_liblame.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency liblame'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_liblame.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Build dependency mbedtls'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_mbedtls.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency libmbedtls'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_mbedtls.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Build dependency libsrt'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_libsrt.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency libsrt'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_libsrt.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Build dependency librist'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_librist.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency librist'
-        if: steps.ffmpeg-deps-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_librist.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Restore ffmpeg from cache'
-        id: ffmpeg-cache
-        uses: actions/cache@v2.1.6
-        env:
-          CACHE_NAME: 'ffmpeg-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
-        with:
-          path: ${{ github.workspace }}/macos_build_temp/ffmpeg-${{ env.FFMPEG_VERSION }}
-          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.FFMPEG_VERSION }}-${{ env.FFMPEG_DEP_HASH }}
-
-      - name: 'Build dependency ffmpeg'
-        if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_ffmpeg.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency ffmpeg'
-        if: steps.ffmpeg-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_ffmpeg.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Restore SpeexDSP from cache'
-        id: speexdsp-cache
-        uses: actions/cache@v2.1.6
-        env:
-          CACHE_NAME: 'speexdsp-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
-        with:
-          path: ${{ github.workspace }}/macos_build_temp/speexdsp-SpeexDSP-${{ env.SPEEXDSP_VERSION }}
-          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.SPEEXDSP_VERSION }}
-
-      - name: 'Restore ntv2 from cache'
-        id: ntv2-cache
-        uses: actions/cache@v2.1.6
-        env:
-          CACHE_NAME: 'ntv2-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
-        with:
-          path: ${{ github.workspace }}/macos_build_temp/ntv2-${{ env.NTV2_VERSION }}
-          key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.NTV2_VERSION }}
-
-      - name: 'Build dependency ntv2'
-        if: steps.ntv2-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_ntv2.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency ntv2'
-        if: steps.ntv2-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_ntv2.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Build dependency SpeexDSP'
-        if: steps.speexdsp-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_speexdsp.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency SpeexDSP'
-        if: steps.speexdsp-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_speexdsp.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Restore libjansson from cache'
-        id: libjansson-cache
-        uses: actions/cache@v2.1.6
-        env:
-          CACHE_NAME: 'libjansson-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
-        with:
-          path: ${{ github.workspace }}/macos_build_temp/jansson-${{ env.LIBJANSSON_VERSION }}
-          key: ${{ runner.os }}-${{ env.CACHE_NAME }}-${{ env.LIBJANSSON_VERSION }}
-
-      - name: 'Build dependency libjansson'
-        if: steps.libjansson-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_libjansson.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency libjansson'
-        if: steps.libjansson-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_libjansson.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Restore libluajit from cache'
-        id: libluajit-cache
-        uses: actions/cache@v2.1.6
-        env:
-          CACHE_NAME: 'libluajit-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
-        with:
-          path: ${{ github.workspace }}/macos_build_temp/LuaJIT-${{ env.LIBLUAJIT_VERSION }}
-          key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.LIBLUAJIT_VERSION }}
-
-      - name: 'Build dependency libluajit'
-        if: steps.libluajit-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_libluajit.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency libluajit'
-        if: steps.libluajit-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_libluajit.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Restore libfreetype from cache'
-        id: libfreetype-cache
-        uses: actions/cache@v2.1.6
-        env:
-          CACHE_NAME: 'libfreetype-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
-        with:
-          path: ${{ github.workspace }}/macos_build_temp/freetype-${{ env.LIBFREETYPE_VERSION }}
-          key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.LIBFREETYPE_VERSION }}
-
-      - name: 'Build dependency libfreetype'
-        if: steps.libfreetype-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_libfreetype.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency libfreetype'
-        if: steps.libfreetype-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_libfreetype.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Restore librnnoise from cache'
-        id: librnnoise-cache
-        uses: actions/cache@v2.1.6
-        env:
-          CACHE_NAME: 'librnnoise-${{ matrix.arch }}-${{ env.CACHE_REVISION }}'
-        with:
-          path: ${{ github.workspace }}/macos_build_temp/rnnoise-${{ env.LIBRNNOISE_VERSION }}
-          key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.LIBRNNOISE_VERSION }}
-
-      - name: 'Build dependency librnnoise'
-        if: steps.librnnoise-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_librnnoise.sh -s -a ${{ matrix.arch }}
-
-      - name: 'Install dependency librnnoise'
-        if: steps.librnnoise-cache.outputs.cache-hit == 'true'
-        run: CI/macos/build_librnnoise.sh -s -a ${{ matrix.arch }} --install
-
-      - name: 'Package dependencies'
-        if: success()
-        working-directory: ${{ github.workspace }}/macos/obs-dependencies-${{ matrix.arch }}
-        run: |
-          CURRENT_DATE=$(date +"%Y-%m-%d")
-          FILE_NAME="macos-deps-${CURRENT_DATE}-${{ matrix.arch }}.tar.xz"
-          echo "FILE_NAME=${FILE_NAME}" >> $GITHUB_ENV
-
-          find . \( -type f -or -type l \) \( -name "*.la" -or -name "*.a" -and ! -name "libajantv2*.a" \) | xargs rm
-          find ./lib -mindepth 1 -maxdepth 1 -type d | xargs rm -rf
-          rm -rf ./bin
-          rm -rf ./share
-          cp -R ${{ github.workspace }}/licenses .
-
-          XZ_OPT=-T0 tar -cJf "${FILE_NAME}" *
-
-          mv ${FILE_NAME} ..
-
-      - name: 'Publish Build Artifacts'
-        if: ${{ success() && (github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1') }}
+      - name: Publish Build Artifacts
+        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
         uses: actions/upload-artifact@v2.2.4
         with:
-          name: ${{ env.FILE_NAME }}
-          path: ${{ github.workspace }}/macos/${{ env.FILE_NAME }}
+          name: ${{ steps.setup.outputs.artifactName }}
+          path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.artifactFileName }}
 
-  macos-qt-build:
-    name: '01 - Build Qt for macOS'
-    runs-on: [macos-11]
-    strategy:
-      matrix:
-        arch: ['x86_64', 'arm64']
-    env:
-      MACOSX_DEPLOYMENT_TARGET: '10.13'
-      QT_REVISION: '05'
-      QT_VERSION: '5.15.2'
-      QT_HASH: '3a530d1b243b5dec00bc54937455471aaa3e56849d2593edb8ded07228202240'
-      BLOCKED_FORMULAS: 'llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile libogg composer php gd freetype fontconfig webp libpng lame libtiff opus kotlin sbt libxft libxcb jasper'
-    defaults:
-      run:
-        shell: bash
+  ffmpeg-package-universal:
+    name: 'Build FFmpeg (Universal)'
+    runs-on: macos-12
+    needs: [ffmpeg-build]
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.4
 
-      - name: 'Check for Github Labels'
-        if: github.event_name == 'pull_request'
+      - name: Check for GitHub Labels
+        id: seekingTesters
+        if: ${{ github.event_name == 'pull_request' }}
         run: |
-          if test -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')"; then
-            echo "SEEKING_TESTERS=1" >> $GITHUB_ENV
+          if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
+            echo "::set-output name=found::true"
           else
-            echo "SEEKING_TESTERS=0" >> $GITHUB_ENV
+            echo "::set-output name=found::false"
           fi
 
-      - name: 'Setup build environment'
-        run: |
-          REMOVE_FORMULAS=""
-          for FORMULA in ${{ env.BLOCKED_FORMULAS }}; do
-            if [ -d "/usr/local/Cellar/${FORMULA}" ]; then
-              REMOVE_FORMULAS="${REMOVE_FORMULAS}${FORMULA} "
-            fi
-          done
-
-          if [ -n "${REMOVE_FORMULAS}" ]; then
-            brew uninstall --ignore-dependencies ${REMOVE_FORMULAS}
-          fi
-
-          brew bundle --file "CI/include/Brewfile"
-          echo "/usr/local/opt/gnu-tar/libexec/gnubin" >> $GITHUB_PATH
-
-      - name: 'Restore Qt from cache'
-        id: qt-cache
-        uses: actions/cache@v2.1.6
-        env:
-          CACHE_NAME: 'qt-cache-${{ matrix.arch }}-${{ env.QT_REVISION }}'
+      - name: Create universal binary package
+        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
+        uses: ./.github/actions/create-universal
         with:
-          path: ${{ github.workspace }}/macos/obs-dependencies-qt-${{ matrix.arch }}
-          key: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.QT_VERSION }}-${{ hashFiles('CI/patches/QTBUG-*.patch', 'CI/macos/patches/QTBUG-*.patch', 'CI/macos/patches/qmake.patch') }}
-          restore-keys: ${{ runner.os }}-deps-${{ env.CACHE_NAME }}-${{ env.QT_VERSION }}
-
-      - name: 'Build Qt'
-        if: steps.qt-cache.outputs.cache-hit != 'true'
-        run: CI/macos/build_qt.sh -a ${{ matrix.arch }}
-
-      - name: 'Package dependencies'
-        if: success()
-        working-directory: ${{ github.workspace }}/macos/obs-dependencies-qt-${{ matrix.arch }}
-        run: |
-          CURRENT_DATE=$(date +"%Y-%m-%d")
-          FILE_NAME="macos-deps-qt-${CURRENT_DATE}-${{ matrix.arch }}.tar.xz"
-          echo "FILE_NAME=${FILE_NAME}" >> $GITHUB_ENV
-          cp -R ${{ github.workspace }}/licenses .
-
-          XZ_OPT=-T0 tar -cJf "${FILE_NAME}" *
-
-          mv ${FILE_NAME} ..
-
-      - name: 'Publish Build Artifacts'
-        if: ${{ success() && (github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1') }}
-        uses: actions/upload-artifact@v2.2.4
-        with:
-          name: ${{ env.FILE_NAME }}
-          path: ${{ github.workspace }}/macos/${{ env.FILE_NAME }}
-
-  macos-deps-package:
-    name: '02 - Generate universal package'
-    runs-on: [macos-11]
-    needs: [macos-deps-build]
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - name: Get Current Date
-        shell: bash
-        id: get_date
-        run: echo "CURRENT_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
-
-      - name: 'Check for Github Labels'
-        if: github.event_name == 'pull_request'
-        run: |
-          if test -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')"; then
-            echo "SEEKING_TESTERS=1" >> $GITHUB_ENV
-          else
-            echo "SEEKING_TESTERS=0" >> $GITHUB_ENV
-          fi
-
-      - name: 'Checkout'
-        if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
-        uses: actions/checkout@v2.3.4
-
-      - name: 'Download x86_64 artifact'
-        if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
-        uses: actions/download-artifact@v2
-        with:
-          name: 'macos-deps-${{ env.CURRENT_DATE }}-x86_64.tar.xz'
-          path: ${{ github.workspace }}/macos
-
-      - name: 'Download arm64 artifact'
-        if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
-        uses: actions/download-artifact@v2
-        with:
-          name: 'macos-deps-${{ env.CURRENT_DATE }}-arm64.tar.xz'
-          path: ${{ github.workspace }}/macos
-
-      - name: 'Extract artifacts'
-        if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
-        working-directory: ${{ github.workspace }}/macos
-        run: |
-          CURRENT_DATE=$(date +"%Y-%m-%d")
-          FILE_NAME="macos-deps-${CURRENT_DATE}-universal.tar.xz"
-          echo "FILE_NAME=${FILE_NAME}" >> $GITHUB_ENV
-          ARTIFACT_X86_64=$(find . -name "macos-deps-${CURRENT_DATE}-x86_64.tar.xz" | head -1)
-          ARTIFACT_ARM64=$(find . -name "macos-deps-${CURRENT_DATE}-arm64.tar.xz" | head -1)
-
-          XZ_OPT=-T0
-
-          mkdir -p obs-dependencies-x86_64
-          mkdir -p obs-dependencies-arm64
-
-          tar -xJf $(basename ${ARTIFACT_X86_64}) --directory obs-dependencies-x86_64
-          tar -xJf $(basename ${ARTIFACT_ARM64}) --directory obs-dependencies-arm64
-
-      - name: 'Create universal package'
-        if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
-        run: CI/package-universal-macos.sh
-
-      - name: 'Publish Build Artifacts'
-        if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
-        uses: actions/upload-artifact@v2.2.4
-        with:
-          name: ${{ env.FILE_NAME }}
-          path: ${{ github.workspace }}/macos/${{ env.FILE_NAME }}
-
-  macos-qt-package:
-    name: '02 - Generate universal Qt package'
-    runs-on: [macos-11]
-    needs: [macos-qt-build]
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - name: Get Current Date
-        shell: bash
-        id: get_date
-        run: echo "CURRENT_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
-
-      - name: 'Check for Github Labels'
-        if: github.event_name == 'pull_request'
-        run: |
-          if test -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')"; then
-            echo "SEEKING_TESTERS=1" >> $GITHUB_ENV
-          else
-            echo "SEEKING_TESTERS=0" >> $GITHUB_ENV
-          fi
-
-      - name: 'Checkout'
-        if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
-        uses: actions/checkout@v2.3.4
-
-      - name: 'Download x86_64 Qt artifact'
-        if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
-        uses: actions/download-artifact@v2
-        with:
-          name: 'macos-deps-qt-${{ env.CURRENT_DATE }}-x86_64.tar.xz'
-          path: ${{ github.workspace }}/macos
-
-      - name: 'Download arm64 Qt artifact'
-        if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
-        uses: actions/download-artifact@v2
-        with:
-          name: 'macos-deps-qt-${{ env.CURRENT_DATE }}-arm64.tar.xz'
-          path: ${{ github.workspace }}/macos
-
-      - name: 'Extract artifacts'
-        if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
-        working-directory: ${{ github.workspace }}/macos
-        run: |
-          CURRENT_DATE=$(date +"%Y-%m-%d")
-          FILE_NAME="macos-deps-qt-${CURRENT_DATE}-universal.tar.xz"
-          echo "FILE_NAME=${FILE_NAME}" >> $GITHUB_ENV
-          ARTIFACT_X86_64=$(find . -name "macos-deps-qt-${CURRENT_DATE}-x86_64.tar.xz"| head -1)
-          ARTIFACT_ARM64=$(find . -name "macos-deps-qt-${CURRENT_DATE}-arm64.tar.xz"| head -1)
-
-          XZ_OPT=-T0
-
-          mkdir -p obs-dependencies-qt-x86_64
-          mkdir -p obs-dependencies-qt-arm64
-
-          tar -xJf $(basename "${ARTIFACT_X86_64}") --directory obs-dependencies-qt-x86_64
-          tar -xJf $(basename "${ARTIFACT_ARM64}") --directory obs-dependencies-qt-arm64
-
-      - name: 'Create universal package'
-        if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
-        run: CI/package-universal-qt-macos.sh
-
-      - name: 'Publish Build Artifacts'
-        if: ${{ github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1' }}
-        uses: actions/upload-artifact@v2.2.4
-        with:
-          name: ${{ env.FILE_NAME }}
-          path: ${{ github.workspace }}/macos/${{ env.FILE_NAME }}
-
-  make-release:
-    name: 'Create and upload release'
-    runs-on: [ubuntu-latest]
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
-    needs: [macos-deps-package, macos-qt-package]
-    steps:
-      - name: Get Current Date
-        shell: bash
-        id: get_date
-        run: echo "CURRENT_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
-
-      - name: Get the version
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
-
-      - name: 'Download x86_64 deps artifact'
-        uses: actions/download-artifact@v2
-        with:
-          name: macos-deps-${{ env.CURRENT_DATE }}-x86_64.tar.xz
-
-      - name: 'Download x86_64 Qt artifact'
-        uses: actions/download-artifact@v2
-        with:
-          name: macos-deps-qt-${{ env.CURRENT_DATE }}-x86_64.tar.xz
-
-      - name: 'Download arm64 deps artifact'
-        uses: actions/download-artifact@v2
-        with:
-          name: macos-deps-${{ env.CURRENT_DATE }}-arm64.tar.xz
-
-      - name: 'Download arm64 Qt artifact'
-        uses: actions/download-artifact@v2
-        with:
-          name: macos-deps-qt-${{ env.CURRENT_DATE }}-arm64.tar.xz
-
-      - name: 'Download universal deps artifact'
-        uses: actions/download-artifact@v2
-        with:
-          name: macos-deps-${{ env.CURRENT_DATE }}-universal.tar.xz
-
-      - name: 'Download universal Qt artifact'
-        uses: actions/download-artifact@v2
-        with:
-          name: macos-deps-qt-${{ env.CURRENT_DATE }}-universal.tar.xz
-
-      - name: 'Generate checksums'
-        run: |
-          echo "### Checksums" > ${{ github.workspace }}/RELEASE.txt
-          find . -name "macos-deps-*.tar.xz" -print0 | sort -z | xargs -0 -n 1 -P 1 -I {} sh -c "echo \"    \$(basename {}): \$(sha256sum {} | cut -c 1-64)\" >> ${{ github.workspace }}/RELEASE.txt"
-
-      - name: 'Create Release'
-        id: create_release
-        uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5
-        with:
-          draft: false
-          prerelease: false
-          tag_name: ${{ steps.get_version.outputs.VERSION }}
-          name: "OBS macOS Deps Build ${{ steps.get_version.outputs.VERSION }}"
-          body_path: ${{ github.workspace }}/RELEASE.txt
-          files: |
-            ${{ github.workspace }}/macos-deps-${{ env.CURRENT_DATE }}-x86_64.tar.xz
-            ${{ github.workspace }}/macos-deps-${{ env.CURRENT_DATE }}-arm64.tar.xz
-            ${{ github.workspace }}/macos-deps-${{ env.CURRENT_DATE }}-universal.tar.xz
-            ${{ github.workspace }}/macos-deps-qt-${{ env.CURRENT_DATE }}-x86_64.tar.xz
-            ${{ github.workspace }}/macos-deps-qt-${{ env.CURRENT_DATE }}-arm64.tar.xz
-            ${{ github.workspace }}/macos-deps-qt-${{ env.CURRENT_DATE }}-universal.tar.xz
+          arm64: 'ffmpeg-macos-arm64-${{ matrix.type }}-${{ github.sha }}'
+          x86_64: 'ffmpeg-macos-x86_64-${{ matrix.type }}-${{ github.sha }}'
+          outputName: 'ffmpeg-macos-universal-${{ matrix.type }}-${{ github.sha }}'
