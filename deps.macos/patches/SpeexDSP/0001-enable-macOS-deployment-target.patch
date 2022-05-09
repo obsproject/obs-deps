@@ -1,0 +1,11 @@
+--- ./SpeexDSP.spec.in    2019-04-26 05:57:34.000000000 +0200
++++ ./SpeexDSP.spec.in    2021-06-11 19:37:57.000000000 +0200
+@@ -41,7 +41,7 @@
+ %setup
+ 
+ %build
+-export CFLAGS='-O3'
++export CFLAGS="-O3 ${CFLAGS}"
+ ./configure --prefix=/usr --enable-shared --enable-static
+ make
+ 
