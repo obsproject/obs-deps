@@ -29,6 +29,7 @@ _build_product() {
         -DENABLE_PROGRAMS=OFF \
         -DENABLE_TESTING=OFF \
         -DCMAKE_MACOSX_RPATH=ON \
+        -DCMAKE_C_FLAGS="-w" \
         ${QUIET:+-Wno-deprecated -Wno-dev --log-level=ERROR}
 
     step "Build (${ARCH})..."
