@@ -1,0 +1,37 @@
+param(
+    [string] $Name = 'nasm',
+    [string] $Version = '2.15.01',
+    [hashtable] $Uris = @{
+        x86 = 'https://www.nasm.us/pub/nasm/releasebuilds/2.15.01/win32/nasm-2.15.01-win32.zip'
+        x64 = 'https://www.nasm.us/pub/nasm/releasebuilds/2.15.01/win64/nasm-2.15.01-win64.zip'
+    },
+    [hashtable] $Hashes = @{
+        x86 = "${PSScriptRoot}/checksums/nasm-2.15.01-win32.zip.sha256"
+        x64 = "${PSScriptRoot}/checksums/nasm-2.15.01-win64.zip.sha256"
+    }
+)
+
+function Setup {
+    Setup-Dependency -Uri $Uri -Hash $Hash -DestinationPath $Path
+}
+
+function Install {
+    Set-Location $Path
+
+    New-Item -Path "$($ConfigData.OutputPath)/nasm" -ItemType Directory -Force *> $null
+
+    $Items = @(
+        @{
+            Path = "./nasm-${Version}/*"
+            Destination = "$($ConfigData.OutputPath)/nasm/"
+            ErrorAction = "SilentlyContinue"
+            Recurse = $true
+        }
+    )
+
+    $Items | ForEach-Object {
+        $Item = $_
+        Log-Output ('{0} => {1}' -f ($Item.Path -join ", "), $Item.Destination)
+        Copy-Item @Item
+    }
+}

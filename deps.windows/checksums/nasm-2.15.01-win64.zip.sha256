@@ -1,0 +1,14 @@
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.PowerShell.Commands.FileHashInfo</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Microsoft.PowerShell.Commands.FileHashInfo</ToString>
+    <Props>
+      <S N="Algorithm">SHA256</S>
+      <S N="Hash">D054BF8595EB2B31BB673A3CD4A999E61BB39394FEDD07A09F30F75B2524953B</S>
+      <S N="Path">windows_32-bit_build_temp\nasm-2.15.01-win64.zip</S>
+    </Props>
+  </Obj>
+</Objs>
