@@ -400,7 +400,7 @@ jobs:
       QT_REVISION: '04'
       QT_VERSION: '5.15.2'
       QT_HASH: '3a530d1b243b5dec00bc54937455471aaa3e56849d2593edb8ded07228202240'
-      BLOCKED_FORMULAS: 'llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile libogg composer php gd freetype fontconfig webp libpng lame libtiff opus kotlin sbt libxft libxcb'
+      BLOCKED_FORMULAS: 'llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile libogg composer php gd freetype fontconfig webp libpng lame libtiff opus kotlin sbt libxft libxcb jasper'
     defaults:
       run:
         shell: bash
@@ -421,7 +421,7 @@ jobs:
         run: |
           REMOVE_FORMULAS=""
           for FORMULA in ${{ env.BLOCKED_FORMULAS }}; do
-            if [ -d "/usr/local/opt/${FORMULA}" ]; then
+            if [ -d "/usr/local/Cellar/${FORMULA}" ]; then
               REMOVE_FORMULAS="${REMOVE_FORMULAS}${FORMULA} "
             fi
           done
