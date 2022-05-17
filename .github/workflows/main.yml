@@ -98,7 +98,7 @@ jobs:
 
           REMOVE_FORMULAS=""
           for FORMULA in ${{ env.BLOCKED_FORMULAS }}; do
-            if [ -d "/usr/local/opt/${FORMULA}" ]; then
+            if [ -d "/usr/local/Cellar/${FORMULA}" ]; then
               REMOVE_FORMULAS="${REMOVE_FORMULAS}${FORMULA} "
             fi
           done
