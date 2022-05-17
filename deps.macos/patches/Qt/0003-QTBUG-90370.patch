@@ -1,0 +1,10 @@
+--- ./qtbase/src/plugins/platforms/cocoa/qcocoasystemtrayicon.mm  2020-10-27 09:02:11.000000000 +0100
++++ ./qtbase/src/plugins/platforms/cocoa/qcocoasystemtrayicon.mm  2021-06-12 16:15:49.000000000 +0200
+@@ -203,6 +203,7 @@
+         r.moveCenter(fullHeightPixmap.rect().center());
+         p.drawPixmap(r, pixmap);
+     }
++    fullHeightPixmap.setDevicePixelRatio(devicePixelRatio);
+ 
+     auto *nsimage = [NSImage imageFromQImage:fullHeightPixmap.toImage()];
+     [nsimage setTemplate:icon.isMask()];

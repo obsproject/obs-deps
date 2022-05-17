@@ -1,0 +1,10 @@
+--- ./qtbase/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.h     2020-10-27 09:02:11.000000000 +0100
++++ ./qtbase/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.h   2021-11-23 20:32:10.000000000 +0100
+@@ -41,6 +41,7 @@
+ #define QIOSURFACEGRAPHICSBUFFER_H
+ 
+ #include <qpa/qplatformgraphicsbuffer.h>
++#include <CoreGraphics/CGColorSpace.h>
+ #include <private/qcore_mac_p.h>
+ 
+ QT_BEGIN_NAMESPACE
