@@ -347,3 +347,83 @@ jobs:
           arm64: 'qt-macos-arm64-${{ github.sha }}'
           x86_64: 'qt-macos-x86_64-${{ github.sha }}'
           outputName: 'qt-macos-universal-${{ github.sha }}'
+
+  windows-build:
+    name: 'Build Windows Dependencies'
+    runs-on: windows-2019
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [x64, x86]
+        include:
+          - target: x64
+            config: 'Release'
+            type: 'static'
+          - target: x86
+            config: 'Release'
+            type: 'static'
+    env:
+      CACHE_REVISION: '3'
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+
+      - name: Setup Environment
+        id: setup
+        run: |
+          $Target='${{ matrix.target }}'
+          $ArtifactName="deps-windows-${Target}-${{ github.sha }}"
+          $FileName="windows-deps-$(Get-Date -Format 'yyyy-MM-dd')-${Target}.zip"
+
+          Write-Output "::set-output name=artifactName::${ArtifactName}"
+          Write-Output "::set-output name=artifactFileName::${FileName}"
+
+      - name: 'Check for GitHub Labels'
+        id: seekingTesters
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          $LabelFound = try {
+            $Params = @{
+              Authentication = 'Bearer'
+              Token = (ConvertTo-SecureString '${{ secrets.GITHUB_TOKEN }}' -AsPlainText)
+              Uri = '${{ github.event.pull_request.url }}'
+              UseBasicParsing = $true
+            }
+
+            (Invoke-RestMethod @Params).labels.name.contains("Seeking Testers")
+          } catch {
+            $false
+          }
+
+          Write-Output "::set-output name=found::$(([string]${LabelFound}).ToLower())"
+
+      - name: Build ntv2 debug
+        shell: pwsh
+        run: |
+          $Params = @{
+            Target = '${{ matrix.target }}'
+            Configuration = 'Debug'
+            Dependencies = 'ntv2'
+          }
+          if ( '${{ matrix.type }}' -eq 'shared' ) { $Params += @{Shared = $true} }
+
+          ./Build-Dependencies.ps1 @Params
+          Remove-Item -Recurse -Force ${{ github.workspace }}/windows_build_temp
+
+      - name: Build Windows Dependencies
+        uses: ./.github/actions/build-windows-deps
+        with:
+          target: ${{ matrix.target }}
+          type: ${{ matrix.type }}
+          config: ${{ matrix.config }}
+          cacheRevision: ${{ env.CACHE_REVISION }}
+
+      - name: Publish Build Artifacts
+        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: ${{ steps.setup.outputs.artifactName }}
+          path: ${{ github.workspace }}\windows\${{ steps.setup.outputs.artifactFileName }}
