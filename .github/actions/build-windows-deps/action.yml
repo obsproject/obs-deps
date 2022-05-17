@@ -1,0 +1,67 @@
+name: 'Build Windows Dependencies'
+description: 'Builds Windows dependencies for obs-deps with specified architecture, type, and build config'
+inputs:
+  target:
+    description: 'Build target for dependencies'
+    required: true
+  type:
+    description: 'Build type (shared or static libraries)'
+    required: false
+    default: 'static'
+  config:
+    description: 'Build configuration'
+    required: false
+    default: 'Release'
+  cacheRevision:
+    description: 'Cache revision number to force creation of new cache generation'
+    required: false
+    default: '01'
+runs:
+  using: 'composite'
+  steps:
+    - name: Environment Setup
+      id: deps-env-setup
+      shell: pwsh
+      run: |
+        Get-Content .\deps.windows\*.ps1 > temp.txt
+        $DepsHash = ((Get-FileHash -Path temp.txt -Algorithm SHA256).Hash)
+
+        Write-Host "::set-output name=hash::${DepsHash}"
+
+    - name: Restore Windows Dependencies from Cache
+      id: deps-cache
+      uses: actions/cache@v2.1.6
+      with:
+        path: |
+          ${{ github.workspace }}/*_build_temp/*
+          !${{ github.workspace }}/*_build_temp/**/.git
+          !${{ github.workspace }}/*_build_temp/*.tar.gz
+          !${{ github.workspace }}/*_build_temp/*.tar.xz
+          !${{ github.workspace }}/*_build_temp/*.zip
+        key: ${{ inputs.target }}-deps-${{ inputs.type }}-${{ steps.deps-env-setup.outputs.hash }}-${{ inputs.cacheRevision }}
+
+    - name: Install Windows Dependencies
+      if: ${{ steps.deps-cache.outputs.cache-hit == 'true' }}
+      shell: pwsh
+      run: |
+        $Params = @{
+          SkipBuild = $true
+          SkipUnpack = $true
+          Target = '${{ inputs.target }}'
+          Configuration = '${{ inputs.config }}'
+        }
+        if ( '${{ inputs.type }}' -eq 'shared' ) { $Params += @{Shared = $true} }
+
+        ./Build-Dependencies.ps1 @Params
+
+    - name: Build and Install Windows Dependencies
+      if: ${{ steps.deps-cache.outputs.cache-hit != 'true' }}
+      shell: pwsh
+      run: |
+        $Params = @{
+          Target = '${{ inputs.target }}'
+          Configuration = '${{ inputs.config }}'
+        }
+        if ( '${{ inputs.type }}' -eq 'shared' ) { $Params += @{Shared = $true} }
+
+        ./Build-Dependencies.ps1 @Params
