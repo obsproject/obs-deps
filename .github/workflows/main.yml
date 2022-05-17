@@ -397,7 +397,7 @@ jobs:
         arch: ['x86_64', 'arm64']
     env:
       MACOSX_DEPLOYMENT_TARGET: '10.13'
-      QT_REVISION: '04'
+      QT_REVISION: '05'
       QT_VERSION: '5.15.2'
       QT_HASH: '3a530d1b243b5dec00bc54937455471aaa3e56849d2593edb8ded07228202240'
       BLOCKED_FORMULAS: 'llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile libogg composer php gd freetype fontconfig webp libpng lame libtiff opus kotlin sbt libxft libxcb jasper'
