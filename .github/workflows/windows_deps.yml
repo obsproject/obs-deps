@@ -20,7 +20,7 @@ jobs:
       matrix:
         arch: ['x86', 'x86_64']
     env:
-      CACHE_REVISION: '01'
+      CACHE_REVISION: '02'
       MBEDTLS_VERSION: '2.24.0'
       MBEDTLS_HASH: '523f0554b6cdc7ace5d360885c3f5bbcc73ec0e8'
       PTHREAD-WIN32_VERSION: '2.10.0.0'

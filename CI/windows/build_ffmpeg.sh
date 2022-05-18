@@ -75,6 +75,7 @@ _build_product() {
         --enable-libvpx \
         --enable-libsrt \
         --enable-librist \
+        --disable-mediafoundation \
         --$SWITCH-libaom \
         --$SWITCH-libsvtav1 \
         --disable-debug \
