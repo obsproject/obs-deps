@@ -1,0 +1,17 @@
+autoload -Uz log_info log_status log_error log_debug is-at-least
+
+log_info 'Checking for CMake...'
+
+if (( ${+commands[cmake]} )) {
+  local -a cmake_version=($(cmake --version))
+
+  if is-at-least 3.16.0 ${cmake_version[3]}; then
+    log_status "Found CMake ${cmake_version[3]}"
+  else
+    log_error "Found CMake ${cmake_version[3]} - required: 3.16.0"
+    return 2
+  fi
+} else {
+  log_error "No CMake found on system"
+  return 2
+}

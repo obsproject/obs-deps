@@ -1,0 +1,17 @@
+autoload -Uz log_info log_status log_error log_debug
+
+log_info 'Checking for Homebrew...'
+if (( ! ${+commands[brew]} )) {
+  log_error 'No Homebrew command found - please install Homebrew (https://brew.sh)'
+  return 2
+} else {
+  log_debug "Homebrew located at ${commands[brew]}"
+  log_status 'Homebrew found'
+}
+
+if (( ! ${+HOMEBREW_PREFIX} )) {
+  typeset -g -x HOMEBREW_PREFIX=$(brew --prefix)
+  log_debug "HOMEBREW_PREFIX not set - set to '${HOMEBREW_PREFIX}'"
+} else {
+  log_status 'HOMEBREW_PREFIX found'
+}

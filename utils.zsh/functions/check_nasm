@@ -1,0 +1,59 @@
+autoload -Uz is-at-least log_info log_status log_error log_debug log_warning mkcd fetch extract progress
+
+log_info 'Check for nasm support'
+
+if (( ${+commands[nasm]} )) {
+  local -a nasm_version=($(nasm -v))
+
+  if is-at-least 2.15.01 ${nasm_version[3]}; then
+    log_status "Found nasm ${nasm_version[3]}"
+  else
+    log_error "Found nasm ${nasm_version[3]} - required: 2.15.01"
+    return 2
+  fi
+} else {
+  local -a nasm_available=($(apt-cache madison nasm))
+
+  if is-at-least 2.15.01 ${nasm_available[3]}; then
+    log_status "Available nasm via apt: ${nasm_available[3]}"
+    if (( ! ${+CI} )) log_warning 'Dependency installation via apt may require elevated privileges'
+
+    local -a _quiet=('--quiet' '')
+
+    sudo apt-get -y install nasm ${_quiet[(( _loglevel + 1 ))]}
+  else
+    log_status "Available nasm via apt: ${nasm_available[3]} required: 2.15.01"
+    log_info "Install bundled nasm version"
+
+    local temp_dir=$(mktemp -d)
+
+    pushd ${PWD}
+    mkcd ${temp_dir}
+
+    fetch https://www.nasm.us/pub/nasm/releasebuilds/2.15.01/nasm-2.15.01.tar.xz
+    print "28a50f80d2f4023e444b113e9ddc57fcec2b2f295a07ce158cf3f18740375831  nasm-2.15.01.tar.xz" > nasm-2.15.01.tar.xz.sha256
+
+    local -i error_code=0
+
+    log_debug "Running 'sha256sum --check --status nasm-2.15.01.tar.xz.sha256'"
+    sha256sum --check --status nasm-2.15.01.tar.xz.sha256 || error_code=$?
+
+    if (( error_code == 0 )) {
+      log_status 'Hash of downloaded file nasm-2.15.01.tar.xz confirmed.'
+    } else {
+      log_error 'Hash of downloaded file nasm-2.15.01.tar.xz failed.'
+      return 2
+    }
+
+    extract nasm-2.15.01.tar.xz
+    cd nasm-2.15.01
+    ./configure
+
+    progress make
+
+    if (( ! ${+CI} )) log_warning 'Dependency installation may require elevated privileges'
+    sudo make install
+
+    popd
+  fi
+}

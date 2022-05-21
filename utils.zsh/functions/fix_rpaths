@@ -1,0 +1,40 @@
+autoload -Uz log_debug log_status
+
+if (( ! ${+_loglevel} )) _loglevel=1
+
+if (( # < 1 )) {
+  print -u2 -PR "%F{red}${0}: Called without enough arguments.%f"
+  return 2
+}
+
+local lib
+local lib_name
+local lib_basename
+local linked_lib
+
+for lib ($@) {
+  if [[ ! -f "${lib}" || -h "${lib}" ]] continue
+
+  if otool -l ${lib} | grep LC_RPATH > /dev/null; then
+    log_debug "Remove existing rpath entry"
+    install_name_tool -delete_rpath ${lib:A:h} ${lib}
+  fi
+
+  lib_basename=${lib:t}
+  lib_name=${lib_basename%%.*}
+  local libs=$(otool -L "${lib}" | tail -n +3)
+
+  log_debug "Linked libraries reported by otool:\n${(j:\n:)libs}"
+  while read -r linked_lib _ _ _ _ _ _; do
+    log_debug "Working on ${linked_lib}"
+    linked_lib=${linked_lib//[[:space:]]/}
+    if [[ ${linked_lib:A:h} == "${lib:A:h}" ]] {
+
+      install_name_tool -change "${linked_lib}" "@rpath/${linked_lib##*/}" "${lib}"
+      log_status "Fixed library path ${linked_lib:A:h} in ${lib##*/}"
+    }
+  done <<< "${libs}"
+
+  install_name_tool -id "@rpath/${lib_basename}" "${lib}"
+  log_status "Fixed id of ${lib##*/}"
+}

@@ -1,0 +1,24 @@
+local arch
+for arch (x86_64 arm64) {
+  if (( clean_build )) {
+    (
+      trap - ZERR
+      typeset -g arch="${arch}"
+      typeset -g target="${target//universal/${arch}}"
+
+      [[ ! -d "${dir}/build_${arch}" ]] || rm -rf "${dir}/build_${arch}"
+    )
+    if (( $? )) exit 2
+  }
+  (
+    trap - ZERR
+    typeset -g arch="${arch}"
+    typeset -g target="${target//universal/${arch}}"
+    typeset -g -a c_flags=(${c_flags//universal/${arch}})
+    typeset -g -a cxx_flags=(${cxx_flags//universal/${arch}})
+    typeset -g -a ld_flags=(${ld_flags//universal/${arch}})
+    typeset -g -a as_flags=(${as_flags//universal/${arch}})
+    config
+  )
+  if (( $? )) exit 2
+}

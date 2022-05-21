@@ -1,0 +1,23 @@
+autoload -Uz log_info log_status log_error log_debug log_warning
+
+log_debug 'Checking for apt-get...'
+if (( ! ${+commands[apt-get]} )) {
+  log_error 'No apt-get command found. Please install apt'
+  return 2
+} else {
+  log_debug "Apt-get located at ${commands[apt-get]}"
+}
+
+local -a _quiet=('' '--quiet')
+
+if (( ! ${+commands[x86_64-w64-mingw32-gcc]} )) {
+  case ${host_os} {
+    linux)
+      if (( ! ${+CI} )) log_warning 'Dependency installation via apt may require elevated privileges'
+      sudo apt-get -y install mingw-w64 mingw-w64-tools dpkg-dev ${_quiet[(( (_loglevel == 0) + 1 ))]}
+      ;;
+    macos)
+      brew install ${_quiet[(( (_loglevel == 0) + 1 ))]} mingw-w64
+      ;;
+  }
+}

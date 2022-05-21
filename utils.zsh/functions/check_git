@@ -1,0 +1,22 @@
+autoload -Uz log_info log_status log_error log_debug
+
+log_info 'Checking for git...'
+
+if (( ! ${+commands[git]} )) {
+  local host_os=${${(L)$(uname -s)}//darwin/macos}
+
+  if [[ ${host_os} == 'macos' ]] {
+    log_warning 'No git command found, installing via Homebrew'
+    brew install git
+  } elif [[ ${host_os} == 'linux' ]] {
+    log_warning 'No git command found, installing via apt-get'
+    if (( ! ${+CI} )) log_warning 'Dependency installation via apt may require elevated privileges'
+    sudo apt-get install git
+  } else {
+    log_error "Unsupported host operating system: ${host_os}"
+    return 2
+  }
+} else {
+  log_debug "Git found at ${commands[git]}"
+  log_status 'Git found'
+}

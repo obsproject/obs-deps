@@ -1,0 +1,22 @@
+autoload -Uz log_error log_debug log_status
+
+if (( ! ${+commands[curl]} )) { log_error "No curl command found"; exit 2 }
+
+log_debug "curl located at ${commands[curl]}"
+
+local -a curl_opts=()
+
+if (( _loglevel == 0 )) {
+    curl_opts+=(--silent)
+}
+
+if (( ! ${+CI} )) {
+    curl_opts+=(--progress-bar)
+} else {
+    curl_opts+=(--show-error --silent)
+}
+
+curl_opts+=(--location -O ${@})
+
+log_debug "Running curl with options: ${curl_opts}"
+curl ${curl_opts}

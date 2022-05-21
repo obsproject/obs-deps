@@ -1,0 +1,52 @@
+autoload -Uz fetch log_error log_status log_debug
+
+if (( # < 2 )) {
+  log_error 'Called without enough arguments.'
+  return 2
+}
+
+local patch_cmd
+
+if (( ! ${+commands[patch]} )) {
+  log_error 'No patch command found.'; return 2
+} else {
+  log_debug "Patch located at ${commands[patch]}"
+  patch_cmd=${commands[patch]}
+}
+
+
+local patch_url=${1}
+local patch_hash=${2}
+local patch_file
+
+if [[ ${patch_url:0:5} == 'https' ]] {
+  fetch "${patch_url}"
+  patch_file=${patch_url##*/}
+} else {
+  patch_file=${patch_url}
+}
+
+local checksum=${${(s: :)$(sha256sum "${patch_file}")}[1]}
+
+if [[ ${patch_hash} == "${checksum}" ]] {
+  log_status "Hash of patch file ${patch_file##*/*/} confirmed"
+} else {
+  log_error "Hash of patch file ${patch_file##*/*/} failed."
+  return 2
+}
+
+if ! ${patch_cmd} -R -p1 -N --dry-run -i "${patch_file}" > /dev/null; then
+  log_info "Apply patch ${patch_file##*/}"
+
+  local patch_args=(
+    -g 0
+    -f
+    -p1
+    -i
+    "${patch_file}"
+  )
+
+  if (( _loglevel == 0 )) patch_args+=(--silent)
+  log_debug "Running patch with options: ${patch_args}"
+  ${patch_cmd} ${patch_args}
+fi
