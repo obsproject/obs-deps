@@ -1,0 +1,31 @@
+Fixes issue with outdated import library definition files as outlined at
+https://github.com/xiph/vorbis/pull/76/files
+
+--- ./win32/vorbis.def	2021-12-31 17:25:14.612843751 +0100
++++ ./win32/vorbis.def	2022-01-01 00:23:57.415600874 +0100
+@@ -1,6 +1,5 @@
+ ; vorbis.def
+ ; 
+-LIBRARY
+ EXPORTS
+ _floor_P
+ _mapping_P
+--- ./win32/vorbisenc.def	2021-12-31 17:25:14.612843751 +0100
++++ ./win32/vorbisenc.def	2022-01-01 00:24:02.927552252 +0100
+@@ -1,7 +1,5 @@
+ ; vorbisenc.def
+ ;
+-LIBRARY
+-
+ EXPORTS
+ vorbis_encode_init
+ vorbis_encode_setup_managed
+--- ./win32/vorbisfile.def	2021-12-31 17:25:14.612843751 +0100
++++ ./win32/vorbisfile.def	2022-01-01 00:24:07.935508091 +0100
+@@ -1,6 +1,5 @@
+ ; vorbisfile.def
+ ;
+-LIBRARY
+ EXPORTS
+ ov_clear
+ ov_open

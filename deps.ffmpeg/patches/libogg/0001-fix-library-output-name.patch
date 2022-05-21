@@ -1,0 +1,31 @@
+Issue originally reported at https://github.com/msys2/MINGW-packages/issues/5825
+
+--- ./CMakeLists.txt	2021-05-10 19:40:30.000000000 +0200
++++ ./CMakeLists.txt	2022-01-01 20:30:45.000000000 +0100
+@@ -105,6 +105,14 @@
+     PUBLIC_HEADER "${OGG_HEADERS}"
+ )
+ 
++if(WIN32)
++    set_target_properties(ogg
++        PROPERTIES
++        OUTPUT_NAME ogg
++        RUNTIME_OUTPUT_NAME ogg
++        ARCHIVE_OUTPUT_NAME ogg)
++endif()
++
+ if(BUILD_FRAMEWORK)
+     set_target_properties(ogg PROPERTIES
+         FRAMEWORK TRUE
+--- ./win32/ogg.def	2020-05-04 19:10:44.000000000 +0200
++++ ./win32/ogg.def	2022-01-01 20:31:11.000000000 +0100
+@@ -2,7 +2,7 @@
+ ; ogg.def
+ ; List of exported functions for Windows builds.
+ ;
+-LIBRARY ogg
++LIBRARY "libogg"
+ EXPORTS
+ ;
+ oggpack_writeinit
+

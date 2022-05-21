@@ -1,0 +1,21 @@
+--- ./configure	2017-08-15 17:17:12.000000000 +0200
++++ ./configure	2022-01-07 17:40:31.000000000 +0100
+@@ -9469,7 +9469,7 @@
+       exclude_expsyms='[_]+GLOBAL_OFFSET_TABLE_|[_]+GLOBAL__[FID]_.*|[_]+head_[A-Za-z0-9_]+_dll|[A-Za-z0-9_]+_dll_iname'
+ 
+       if $LD --help 2>&1 | $GREP 'auto-import' > /dev/null; then
+-        archive_cmds='$CC -shared $libobjs $deplibs $compiler_flags -o $output_objdir/$soname $wl--enable-auto-image-base -Xlinker --out-implib -Xlinker $lib'
++        archive_cmds='$CC -static-libgcc -shared $libobjs $deplibs $compiler_flags -o $output_objdir/$soname $wl--enable-auto-image-base -Xlinker --out-implib -Xlinker $lib'
+ 	# If the export-symbols file already is a .def file, use it as
+ 	# is; otherwise, prepend EXPORTS...
+ 	archive_expsym_cmds='if   test DEF = "`$SED -n     -e '\''s/^[	 ]*//'\''     -e '\''/^\(;.*\)*$/d'\''     -e '\''s/^\(EXPORTS\|LIBRARY\)\([	 ].*\)*$/DEF/p'\''     -e q     $export_symbols`" ; then
+@@ -9478,7 +9478,7 @@
+           echo EXPORTS > $output_objdir/$soname.def;
+           cat $export_symbols >> $output_objdir/$soname.def;
+         fi~
+-        $CC -shared $output_objdir/$soname.def $libobjs $deplibs $compiler_flags -o $output_objdir/$soname $wl--enable-auto-image-base -Xlinker --out-implib -Xlinker $lib'
++        $CC -static-libgcc -shared $output_objdir/$soname.def $libobjs $deplibs $compiler_flags -o $output_objdir/$soname $wl--enable-auto-image-base -Xlinker --out-implib -Xlinker $lib'
+       else
+ 	ld_shlibs=no
+       fi
+

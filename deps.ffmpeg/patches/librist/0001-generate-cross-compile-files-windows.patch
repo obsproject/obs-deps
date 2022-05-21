@@ -1,0 +1,52 @@
+diff --git a/cross_mingw_x86.txt b/cross_mingw_x86.txt
+new file mode 100644
+index 0000000..559f598
+--- /dev/null
++++ b/cross_mingw_x86.txt
+@@ -0,0 +1,20 @@
++[host_machine]
++system = 'windows'
++cpu_family = 'x86'
++cpu = 'i686'
++endian = 'little'
++
++[binaries]
++c = 'i686-w64-mingw32-gcc'
++cpp = 'i686-w64-mingw32-c++'
++ar = 'i686-w64-mingw32-ar'
++ranlib = 'i686-w64-mingw32-ranlib'
++strip = 'i686-w64-mingw32-strip'
++windres = 'i686-w64-mingw32-windres'
++pkgconfig = '/usr/bin/pkg-config'
++
++[built-in options]
++c_std = 'c11'
++cpp_std = 'c++11'
++c_args = '-fno-semantic-interposition'
++c_link_args = '-static-libgcc'
+diff --git a/cross_mingw_x86_64.txt b/cross_mingw_x86_64.txt
+new file mode 100644
+index 0000000..a5b0606
+--- /dev/null
++++ b/cross_mingw_x86_64.txt
+@@ -0,0 +1,20 @@
++[host_machine]
++system = 'windows'
++cpu_family = 'x86_64'
++cpu = 'x86_64'
++endian = 'little'
++
++[binaries]
++c = 'x86_64-w64-mingw32-gcc'
++cpp = 'x86_64-w64-mingw32-c++'
++ld = 'x86_64-w64-mingw32-ld'
++ar = 'x86_64-w64-mingw32-ar'
++strip = 'x86_64-w64-mingw32-strip'
++pkgconfig = '/usr/bin/pkg-config'
++objdump = 'x86_64-w64-mingw32-objdump'
++
++[built-in options]
++c_std = 'c11'
++cpp_std = 'c++11'
++c_args = '-fno-semantic-interposition'
++c_link_args = '-static-libgcc'
