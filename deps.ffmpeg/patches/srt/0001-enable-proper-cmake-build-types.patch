@@ -1,0 +1,53 @@
+Instead of setting internal debug status based on CMake standard build types,
+libsrt uses inverse logic. This patches honors the official CMake types and
+sets internal debug status accordingly.
+
+--- ./CMakeLists.txt	2019-12-06 18:32:50.000000000 +0100
++++ ./CMakeLists.txt	2022-01-05 19:17:10.000000000 +0100
+@@ -14,6 +14,10 @@
+ #project(SRT VERSION "1.4.1")
+ project(SRT C CXX)
+ 
++if(POLICY CMP0057)
++  cmake_policy(SET CMP0057 NEW)
++endif()
++
+ set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
+ include(haiUtil)
+ include(FindPkgConfig)
+@@ -42,25 +42,18 @@
+ set (SRT_VERSION 1.4.1)
+ set_version_variables(SRT_VERSION ${SRT_VERSION})
+ 
+-# The CMAKE_BUILD_TYPE seems not to be always set, weird.
+-if (NOT DEFINED ENABLE_DEBUG)
+-
+-	if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+-		set (ENABLE_DEBUG ON)
+-	else()
+-		set (ENABLE_DEBUG OFF)
+-	endif()
++if(NOT CMAKE_BUILD_TYPE)
++  set(CMAKE_BUILD_TYPE
++      "RelWithDebInfo"
++      CACHE STRING
++            "Build type [Release, RelWithDebInfo, Debug, MinSizeRel]" FORCE)
++  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Release RelWithDebInfo
++                                               Debug MinSizeRel)
+ endif()
+ 
+-# Set CMAKE_BUILD_TYPE properly, now that you know
+-# that ENABLE_DEBUG is set as it should.
+-
+-if (ENABLE_DEBUG EQUAL 2)
+-	set (CMAKE_BUILD_TYPE "RelWithDebInfo")
+-elseif (ENABLE_DEBUG) # 1, ON, YES, TRUE, Y, or any other non-zero number
+-	set (CMAKE_BUILD_TYPE "Debug")
+-else()
+-	set (CMAKE_BUILD_TYPE "Release")
++set(_DEBUG_TYPES Debug RelWithDebInfo)
++if(CMAKE_BUILD_TYPE IN_LIST _DEBUG_TYPES)
++	set(ENABLE_DEBUG ON)
+ endif()
+ 
+ message(STATUS "BUILD TYPE: ${CMAKE_BUILD_TYPE}")
