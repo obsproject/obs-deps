@@ -1,0 +1,10 @@
+autoload -Uz log_debug log_info log_warning log_status
+
+log_info "Restore shared mingw32 libraries"
+if (( ! ${+CI} )) log_warning 'Moving files may require elevated privileges'
+
+local file
+for file (/usr/**/${target_config[cross_prefix]}-w64-mingw32/**/*.(dll|dll.a).inactive(N)) {
+    sudo mv ${file} "${file//.inactive/}"
+    log_status "Moved ${file#/usr}"
+}

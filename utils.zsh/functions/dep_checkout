@@ -1,0 +1,71 @@
+autoload -Uz is-at-least log_error log_debug log_status
+
+if (( # < 2 )) {
+  log_error 'Called without enough arguments'
+  return 2
+}
+
+local -a repo=()
+local -a args=()
+local -i sparse=0
+
+while (( # )) {
+  case ${1} {
+    --)
+      shift
+      args+=(${@})
+      break
+      ;;
+    --pr) pull_request=${2}; shift 2 ;;
+    --branch) branch=${2}; shift 2 ;;
+    --sparse) sparse=1; shift ;;
+    -*) log_error "Unknown option: %B${1}%b"; exit 2 ;;
+    *) repo+=(${1}); shift ;;
+  }
+}
+
+local url=${repo[1]}
+local commit=${repo[2]}
+local repo_name=${url##*/}
+
+if [[ -d .git ]] {
+  log_status "Repository ${repo_name%.*} already exists"
+
+  git config advice.detachedHead false
+  git config remote.origin.url "${url}"
+  git config remote.origin.fetch "+refs/heads/${branch:-master}:refs/remotes/origin/${branch:-master}"
+  git config remote.origin.tapOpt --no-tags
+
+  log_debug "Check if commit ${hash} available in local tree"
+  git rev-parse -q --verify "${hash}^{commit}" > /dev/null || git fetch origin
+
+  log_debug "Reset to commit ${hash}"
+  git reset --hard "${commit}" --
+
+  if [[ -f .gitmodules ]] {
+    log_debug 'Submodules found, update recursively'
+    git submodule foreach --recursive git submodule sync
+    git submodule update --init --recursive
+  }
+} else {
+  log_debug 'No local checkout found'
+  local -a git_version=($(git --version 2>/dev/null))
+  if (( sparse )) && is-at-least 2.25 ${git_version[3]}; then
+    log_debug "Attempt sparse checkout with options ${args}"
+    git clone --filter=blob:none --no-checkout "${url}" "${PWD}"
+    git sparse-checkout ${args}
+  else
+    log_debug "Clone repository from ${url}"
+    git clone "${url}" "${PWD}"
+  fi
+
+  git config advice.detachedHead false
+  log_info "Checking out commit ${repo_name%.*}@${commit}..."
+  git checkout -f "${commit}" --
+
+  if [[ -f .gitmodules ]] {
+    log_debug 'Submodules found, update recursively'
+    git submodule foreach --recursive git submodule sync
+    git submodule update --init --recursive
+  }
+}

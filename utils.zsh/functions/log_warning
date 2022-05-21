@@ -1,0 +1,6 @@
+if (( _loglevel > 0 )) {
+  local stage_name="${stage_name:-}"
+  local icon=' =>'
+
+  print -PR "%F{3}  ${stage_name} ${(r:5:)icon} ${@}%f"
+}

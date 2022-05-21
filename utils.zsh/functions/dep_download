@@ -1,0 +1,37 @@
+autoload -Uz fetch log_error log_status
+
+if (( # < 2 )) {
+  log_error 'Called without enough arguments.'
+  return 2
+}
+
+local url
+local hash_file
+read -r url hash_file <<< "${(@)@:1:2}"
+
+local -a curl_args=(${(@)@:2})
+local dep_file="${url##*/}"
+local -i error_code=0
+
+if [[ ! -r "${hash_file}" ]] {
+  log_error "Provided hash file ${hash_file} not found or readable."
+  return 2
+} elif [[ ${${hash_file##*/}%.*} != "${dep_file}" ]] {
+  log_error "Provided hash file ${hash_file} not aligned with ${dep_file}"
+  return 2
+}
+
+log_debug "Checking for available download from ${url}"
+
+[[ -e ${dep_file} ]] || fetch "${url}"
+
+log_debug "Running 'sha256sum --check --status ${hash_file}'"
+sha256sum --check --status "${hash_file}" || error_code="$?"
+
+if (( error_code == 0 )) {
+  log_status "Hash of downloaded file ${dep_file} confirmed."
+} else {
+  log_error "Hash of downloaded file ${dep_file} failed."
+}
+
+return ${error_code}

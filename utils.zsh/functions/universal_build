@@ -1,0 +1,30 @@
+autoload -Uz log_info log_status
+
+local arch
+for arch (x86_64 arm64) {
+  (
+    typeset -g arch="${arch}"
+    typeset -g target="${target//universal/${arch}}"
+    typeset -g -a c_flags=(${c_flags//universal/${arch}})
+    typeset -g -a cxx_flags=(${cxx_flags//universal/${arch}})
+    typeset -g -a ld_flags=(${ld_flags//universal/${arch}})
+    typeset -g -a as_flags=(${as_flags//universal/${arch}})
+    build
+  )
+  if (( $? )) exit 2
+}
+
+cd "${dir}"
+
+log_info 'Create universal binaries...'
+if [[ -d "build_universal" ]] rm -rf "build_universal"
+cp -cpR "build_x86_64" "build_universal"
+cd "build_universal"
+
+local -a candidates=(./**/*.(dylib|so|a)(D))
+local c
+for c (${candidates}) {
+  [[ -e ../build_arm64/"${c}" ]] || continue
+  lipo -create ../build_x86_64/"${c}" ../build_arm64/"${c}" -output "${c}"
+  log_status "Converted ${c##*/} into universal binary"
+}

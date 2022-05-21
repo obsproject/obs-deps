@@ -1,0 +1,8 @@
+if (( ! ${+_loglevel} )) typeset -g _loglevel=1
+
+if (( _loglevel > 0 )) {
+  local stage_name="${stage_name:-}"
+  local icon=' =>'
+
+  print -PR "%F{4}  ${stage_name} ${(r:5:)icon}%f %B${@}%b"
+}

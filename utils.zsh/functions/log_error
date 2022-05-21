@@ -1,0 +1,4 @@
+local stage_name="${funcstack[2]}:"
+local icon='  ✖︎ '
+
+print -u2 -PR "%F{1}  ${icon} ${stage_name}%f ${@}"

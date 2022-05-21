@@ -1,0 +1,31 @@
+autoload -Uz log_debug log_status log_info
+
+if (( ! ${+_loglevel} )) _loglevel=1
+
+if (( # < 1 )) {
+  print -u2 -PR "%F{red}${0}: Called without enough arguments.%f"
+  return 2
+}
+
+local lib
+local -r temp_dir=$(mktemp -d)
+local -r dlltool="${target_config[cross_prefix]}-w64-mingw32-dlltool"
+
+pushd ${PWD}
+mkcd ${temp_dir}
+
+log_info "Create ${target} import library files"
+log_debug "Shared libraries supplied: $*"
+
+for lib ($*) {
+  if [[ ! -f "${lib:a}" || -h "${lib:a}" ]] continue
+  log_debug 'Export symbols to definition file'
+  gendef ${lib}
+  log_debug 'Create import library from definition file'
+  ${dlltool} --machine ${target_config[mval]} \
+    --input-def "${lib:t:r}.def" \
+    --output-lib "${target_config[output_dir]}/lib/${lib:t:r}.lib"
+  log_status "Created import library for ${lib:t}"
+}
+
+popd

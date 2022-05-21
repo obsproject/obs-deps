@@ -1,0 +1,19 @@
+if (( ! ${+_loglevel} )) _loglevel=1
+
+local -a command=($@)
+
+if (( ${+CI} == 0 && _loglevel == 1 )) {
+  local spin='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+  {
+    local line
+    local i=0
+    while read -r line; do
+      i=$(( (i+1) % 10 ))
+      builtin printf '\r%s  %s  ' "${(r:(( COLUMNS - 5 )):)${${line//$'\t'/  }:0:(( COLUMNS - 5 ))}}" "${spin:${i}:1}"
+    done < <(${command})
+  }
+  (( ! ? )) || return $?
+  print ''
+} else {
+  ${command}
+}
