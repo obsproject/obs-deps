@@ -14,6 +14,8 @@ setup_target() {
     [output_dir]="${project_root}/${1}/obs-${PACKAGE_NAME}-${1##*-}"
   )
 
+  mkdir -p "${project_root}/${1}/obs-${PACKAGE_NAME}-${1##*-}"
+
   case ${1} {
     macos-x86_64)
       config_data+=(
