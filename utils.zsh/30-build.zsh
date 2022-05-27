@@ -109,8 +109,13 @@ setup_build_parameters() {
         -DCMAKE_OSX_ARCHITECTURES=${target_config[cmake_arch]}
         -DCMAKE_MACOSX_RPATH=ON
         -DCMAKE_C_FLAGS="${c_flags}"
-        -DCMAKE_CXX_FLAGS="${cxx_flags} -std=c++11 -stdlib=libc++"
       )
+
+      if [[ "${PACKAGE_NAME}" != 'qt6' ]] {
+        cmake_flags+=(-DCMAKE_CXX_FLAGS="${cxx_flags} -std=c++11 -stdlib=libc++")
+      } else {
+        cmake_flags+=(-DCMAKE_CXX_FLAGS="${cxx_flags} -stdlib=libc++")
+      }
 
       as_flags+=(${defaults})
       c_flags+=(${defaults})
