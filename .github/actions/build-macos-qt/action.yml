@@ -8,6 +8,10 @@ inputs:
     description: 'Build configuration'
     required: false
     default: 'Release'
+  qtVersion:
+    description: 'Qt version to build'
+    required: false
+    default: '5'
   cacheRevision:
     description: 'Cache revision number to force creation of new cache generation'
     required: false
@@ -23,8 +27,15 @@ runs:
         rehash
         /usr/bin/xcrun --sdk macosx -show-sdk-version &> /dev/null
 
-        qt_dep_hash=$(cat ${{ github.workspace }}/deps.macos/qt.zsh | sha256sum | cut -d " " -f 1)
-        qt_patch_hash=$(cat ${{ github.workspace }}/deps.macos/patches/Qt/*.patch | sha256sum | cut -d " " -f 1)
+        qt_dep_hash=$(cat ${{ github.workspace }}/deps.qt/qt${{ inputs.qtVersion }}.zsh | sha256sum | cut -d " " -f 1)
+
+        patch_files=(${{ github.workspace }}/deps.qt/patches/Qt${{ inputs.qtVersion }}/*.patch(N))
+        if (( #patch_files > 0 )) {
+          qt_patch_hash=$(cat ${patch_files} | sha256sum | cut -d " " -f 1)
+        } else {
+          qt_patch_hash=$(echo '' | sha256sum | cut -d " " -f 1)
+        }
+
         print "::set-output name=depHash::${qt_dep_hash}"
         print "::set-output name=patchHash::${qt_patch_hash}"
 
@@ -33,20 +44,20 @@ runs:
       uses: actions/cache@v2.1.6
       with:
         path: |
-          ${{ github.workspace }}/*_build_temp/qt*
+          ${{ github.workspace }}/*_build_temp/qt${{ inputs.qtVersion }}*
           !${{ github.workspace }}/*_build_temp/**/.git
           !${{ github.workspace }}/*_build_temp/*.tar.gz
           !${{ github.workspace }}/*_build_temp/*.tar.xz
           !${{ github.workspace }}/*_build_temp/*.zip
-        key: ${{ inputs.target }}-macos-qt-${{ steps.qt-env-setup.outputs.depHash }}-${{ inputs.cacheRevision }}-${{ steps.qt-env-setup.outputs.patchHash }}
-        restore-keys: ${{ inputs.target }}-macos-qt-${{ steps.qt-env-setup.outputs.depHash }}-${{ inputs.cacheRevision }}-
+        key: ${{ inputs.target }}-macos-qt${{ inputs.qtVersion }}-${{ steps.qt-env-setup.outputs.depHash }}-${{ inputs.cacheRevision }}-${{ steps.qt-env-setup.outputs.patchHash }}
+        restore-keys: ${{ inputs.target }}-macos-qt${{ inputs.qtVersion }}-${{ steps.qt-env-setup.outputs.depHash }}-${{ inputs.cacheRevision }}-
 
     - name: Install macOS Qt
       if: ${{ steps.deps-cache.outputs.cache-hit == 'true' }}
       shell: zsh {0}
-      run: ./build-qt.zsh --skip-build --skip-unpack --target ${{ inputs.target }} --config ${{ inputs.config }} --shared
+      run: ./build-qt${{ inputs.qtVersion }}.zsh --skip-build --skip-unpack --target ${{ inputs.target }} --config ${{ inputs.config }} --shared
 
     - name: Build and Install macOS Qt
       if: ${{ steps.deps-cache.outputs.cache-hit != 'true' }}
       shell: zsh {0}
-      run: ./build-qt.zsh --target ${{ inputs.target }} --config ${{ inputs.config }} --shared
+      run: ./build-qt${{ inputs.qtVersion }}.zsh --target ${{ inputs.target }} --config ${{ inputs.config }} --shared
