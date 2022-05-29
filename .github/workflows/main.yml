@@ -25,27 +25,27 @@ jobs:
             os: 'macos-12'
             config: 'Release'
             type: 'static'
-            revision: 6
+            revision: 7
           - target: macos-x86_64
             os: 'macos-12'
             config: 'Release'
             type: 'static'
-            revision: 6
+            revision: 7
           - target: linux-x86_64
             os: 'ubuntu-20.04'
             config: 'Release'
             type: 'static'
-            revision: 7
+            revision: 8
           - target: windows-x64
             os: 'ubuntu-20.04'
             config: 'Release'
             type: 'static'
-            revision: 6
+            revision: 7
           - target: windows-x86
             os: 'ubuntu-20.04'
             config: 'Release'
             type: 'static'
-            revision: 6
+            revision: 7
     env:
       CACHE_REVISION: ${{ matrix.revision }}
     defaults:
@@ -462,7 +462,6 @@ jobs:
               esac
             done
 
-            cp -R ${{ github.workspace }}/licenses .
             zip -r windows-deps-${{ steps.metadata.outputs.version }}-${arch}.zip -- *
             mv windows-deps-${{ steps.metadata.outputs.version }}-${arch}.zip ${{ github.workspace }}
 
@@ -485,7 +484,6 @@ jobs:
               esac
             done
 
-            cp -R ${{ github.workspace }}/licenses .
             XZ_OPT=-T0 tar -cvJf linux-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz -- *
             mv linux-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz ${{ github.workspace }}
 
@@ -508,7 +506,6 @@ jobs:
               esac
             done
 
-            cp -R ${{ github.workspace }}/licenses .
             XZ_OPT=-T0 tar -cvJf macos-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz -- *
             mv macos-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz ${{ github.workspace }}
 

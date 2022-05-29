@@ -94,8 +94,14 @@ function Run-Stages {
             Remove-Item -ErrorAction 'SilentlyContinue' function:$_
             $script:StageName = ''
         }
-    }
 
+        if ( Test-Path "$PSScriptRoot/licenses/${Name}" ) {
+            Log-Information "Install license files"
+
+            $null = New-Item -ItemType Directory -Path "$($ConfigData.OutputPath)/licenses" -ErrorAction SilentlyContinue
+            Copy-Item -Path "$PSScriptRoot/licenses/${Name}" -Recurse -Force -Destination "$($ConfigData.OutputPath)/licenses"
+        }
+    }
 }
 
 function Package-Dependencies {

@@ -59,6 +59,11 @@ run_stages() {
         popd
       }
 
+      if [[ -d ${SCRIPT_HOME}/licenses/${name} ]] {
+        log_status "Install license files"
+        mkdir -p ${target_config[output_dir]}/licenses/${name} && cp -pR ${SCRIPT_HOME}/licenses/${name} ${target_config[output_dir]}/licenses/
+      }
+
       log_output "%F{2}DONE%f"
     }
   }

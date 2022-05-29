@@ -1,5 +1,5 @@
 param(
-    [string] $Name = 'pyenv',
+    [string] $Name = 'python',
     [string] $Version = '2.64.11',
     [string] $Uri = 'https://github.com/pyenv-win/pyenv-win.git',
     [string] $Hash = '404cd4bdd0dff3a8650c890fa59a3761f328f36b',
