@@ -29,9 +29,11 @@ function Invoke-DevShell {
         . $PSScriptRoot/Logger.ps1
     }
 
-    if ( ! ( Test-Path variable:VisualStudioData ) ) {
-        $VisualStudioData = Get-CimInstance MSFT_VSInstance
+    if ( ! ( Test-Path function:Find-VisualStudio ) ) {
+        . $PSScriptRoot/Setup-Target.ps1
     }
+
+    $VisualStudioData = Find-VisualStudio
 
     $DevShellCommand =
 @"
