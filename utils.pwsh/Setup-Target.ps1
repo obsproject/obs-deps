@@ -78,6 +78,10 @@ function Find-VisualStudio {
 
     $VisualStudioData = Get-CimInstance MSFT_VSInstance
 
+    if ( $VisualStudioData.GetType() -eq [object[]] ) {
+        $VisualStudioData = ($VisualStudioData | Where-Object {$_.Version -ge 16} | Sort-Object -Property Version)[0]
+    }
+
     if ( ! ( $VisualStudioData ) -or ( $VisualStudioData.Version -lt 16 ) ) {
         $ErrorMessage = @(
             "A Visual Studio installation (2019 or newer) is required for this build script.",
