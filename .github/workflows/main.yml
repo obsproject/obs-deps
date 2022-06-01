@@ -283,7 +283,7 @@ jobs:
 
           target='${{ matrix.target }}'
           artifact_name="qt-${target}-${{ github.sha }}"
-          file_name="${target%%-*}-qt-$(date +"%Y-%m-%d")-${target##*-}.tar.xz"
+          file_name="${target%%-*}-deps-qt-$(date +"%Y-%m-%d")-${target##*-}.tar.xz"
 
           echo "::set-output name=artifactName::${artifact_name}"
           echo "::set-output name=artifactFileName::${file_name}"

@@ -71,7 +71,11 @@ run_stages() {
 
 package() {
   autoload -Uz log_info log_status
-  local filename="${target%%-*}-${PACKAGE_NAME}-${current_date}-${target_config[arch]}.tar.xz"
+  if [[ ${PACKAGE_NAME} == 'qt'* ]] {
+    local filename="${target%%-*}-deps-${PACKAGE_NAME}-${current_date}-${target_config[arch]}.tar.xz"
+  } else {
+    local filename="${target%%-*}-${PACKAGE_NAME}-${current_date}-${target_config[arch]}.tar.xz"
+  }
 
   pushd ${PWD}
   cd ${target_config[output_dir]}
