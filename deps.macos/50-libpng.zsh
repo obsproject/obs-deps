@@ -10,6 +10,9 @@ local patches=(
   fb8a209b466e8b2d9eba4c11f776412657b43386ef5db846dd1cc1476556aaa9"
 )
 
+## Dependency Overrides
+local -i force_static=1
+
 ## Build Steps
 setup() {
   log_info "Setup (%F{3}${target}%f)"
@@ -49,13 +52,18 @@ patch() {
 config() {
   autoload -Uz mkcd progress
 
+  if (( shared_libs )) {
+    local shared=$(( shared_libs - force_static ))
+  } else {
+    local shared=0
+  }
   local _onoff=(OFF ON)
 
   args=(
     ${cmake_flags}
     -DPNG_TESTS=OFF
     -DPNG_STATIC=ON
-    -DPNG_SHARED="${_onoff[(( shared_libs + 1 ))]}"
+    -DPNG_SHARED="${_onoff[(( shared + 1 ))]}"
   )
 
   if [[ "${config}" == "Debug" ]] {
