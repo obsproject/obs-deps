@@ -39,8 +39,15 @@ function Invoke-SafeWebRequest {
     try {
         $HashData = Import-Clixml $HashFile
 
+        $SupportedAlgorithms = @("SHA1", "SHA256", "SHA384", "SHA512", "MD5")
+        if ( $HashData.Algorithm -and $SupportedAlgorithms.Contains($HashData.Algorithm) ) {
+            $Algorithm = $HashData.Algorithm
+        } else {
+            $Algorithm = "SHA256"
+        }
+
         if ( ( $CheckExisting ) -and ( Test-Path $OutFile ) ) {
-            $NewHash = Get-FileHash -Path $OutFile -Algorithm SHA256
+            $NewHash = Get-FileHash -Path $OutFile -Algorithm $Algorithm
         } else {
             $WebRequestParams = @{
                 UserAgent = "NativeHost"
@@ -56,7 +63,7 @@ function Invoke-SafeWebRequest {
 
             Invoke-WebRequest @WebRequestParams
 
-            $NewHash = Get-FileHash -Path $OutFile -Algorithm SHA256
+            $NewHash = Get-FileHash -Path $OutFile -Algorithm $Algorithm
         }
     } catch {
         throw "Error while downloading ${Uri}: ${PSItem}."
