@@ -19,7 +19,7 @@ setup_target() {
   case ${1} {
     macos-x86_64)
       config_data+=(
-        [deployment_target]=10.13
+        [deployment_target]=10.15
         [darwin_target]=17
       )
       ;;
@@ -33,7 +33,7 @@ setup_target() {
     macos-universal)
       config_data+=(
         [cmake_arch]="x86_64;arm64"
-        [deployment_target]=10.13
+        [deployment_target]=10.15
         [darwin_target]=17
       )
       ;;
