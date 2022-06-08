@@ -1,5 +1,5 @@
---- ./qtbase/qmake/Makefile   2021-06-12 15:29:37.000000000 +0200
-+++ ./qtbase/qmake/Makefile    2021-06-12 15:35:54.000000000 +0200
+--- ./qmake/Makefile   2021-06-12 15:29:37.000000000 +0200
++++ ./qmake/Makefile    2021-06-12 15:35:54.000000000 +0200
 @@ -38,8 +38,8 @@
  CARBON_LFLAGS = -framework ApplicationServices
  CARBON_CFLAGS = -fconstant-cfstrings
