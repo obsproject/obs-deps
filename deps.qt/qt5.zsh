@@ -1,28 +1,36 @@
 autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
-local name='qt'
+local name='qt5'
 local version=5.15.2
-local url='https://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz'
-local hash="${0:a:h}/checksums/qt-everywhere-src-5.15.2.tar.xz.sha256"
+local url='https://download.qt.io/official_releases/qt/5.15/5.15.2'
+local hash="${0:a:h}/checksums"
 local -a patches=(
-  "macos ${0:a:h}/patches/Qt/0001-QTBUG-74606.patch \
+  "macos ${0:a:h}/patches/Qt5/0001-QTBUG-74606.patch \
     6ba73e94301505214b85e6014db23b042ae908f2439f0c18214e92644a356638"
-  "macos ${0:a:h}/patches/Qt/0002-QTBUG-88495.patch \
+  "macos ${0:a:h}/patches/Qt5/0002-QTBUG-88495.patch \
     d60d663d2d940aa21cbcda65b1e60c4ecb1ec1900736e896367e5436d121206e"
-  "macos ${0:a:h}/patches/Qt/0003-QTBUG-90370.patch \
+  "macos ${0:a:h}/patches/Qt5/0003-QTBUG-90370.patch \
     277b16f02f113e60579b07ad93c35154d7738a296e3bf3452182692b53d29b85"
-  "macos ${0:a:h}/patches/Qt/0004-QTBUG-70137-1.patch \
+  "macos ${0:a:h}/patches/Qt5/0004-QTBUG-70137-1.patch \
     216be72245a80b7762dc2e2bd720a4ea9b9c423ce9d006cce3985b63c0269ba3"
-  "macos ${0:a:h}/patches/Qt/0005-QTBUG-70137-2.patch \
+  "macos ${0:a:h}/patches/Qt5/0005-QTBUG-70137-2.patch \
     92d49352c321c653d6f5377e64603e48b38a9c1ec87a8956acba42459c151e42"
-  "macos ${0:a:h}/patches/Qt/0006-QTBUG-70137-3.patch \
+  "macos ${0:a:h}/patches/Qt5/0006-QTBUG-70137-3.patch \
     f8b220a444fcd0e121b8643e7526af33a4f30e0c85d11c28d40fcc7072d56783"
-  "macos ${0:a:h}/patches/Qt/0007-QTBUG-97855.patch \
+  "macos ${0:a:h}/patches/Qt5/0007-QTBUG-97855.patch \
     d8620262ad3f689fdfe6b6e277ddfdd3594db3de9dbc65810a871f142faa9966"
-  "macos ${0:a:h}/patches/Qt/0008-fix-sdk-version-check.patch \
+  "macos ${0:a:h}/patches/Qt5/0008-fix-sdk-version-check.patch \
     73a1194cf2ddffbbd3b640235217e543df4dc9aae444a4d1533011d0be46da2a"
 )
+
+local -a qt_components=(
+  qtbase
+  qtimageformats
+  qtmultimedia
+  qtsvg
+)
+local dir='qt5'
 
 ## Build Steps
 setup() {
@@ -31,17 +39,45 @@ setup() {
     exit 2
   }
 
-  log_info "Setup (%F{3}${target}%f)"
-  setup_dep ${url} ${hash}
+  autoload -Uz dep_download
+
+  local -a _tarflags=(--strip-components 1)
+  if (( _loglevel > 1 )) _tarflags+=(-v)
+  _tarflags+=('-xJf')
+
+  local -r source_dir=${PWD}
+
+  for component (${qt_components}) {
+    log_info "Setup ${component} (%F{3}${target}%f)"
+
+    local _url="${url}/submodules/${component}-everywhere-src-${version}.tar.xz"
+    local _hash="${hash}/${component}-everywhere-src-${version}.tar.xz.sha256"
+
+    log_info "Download ${_url}"
+    dep_download ${_url} ${_hash}
+
+    if (( ! ${skips[(Ie)unpack]} )) {
+      log_info "Extract ${_url:t}"
+
+      mkdir -p ${dir}/${component}
+      pushd ${dir}/${component}
+      tar ${_tarflags} ${source_dir}/${_url:t}
+      popd
+    }
+  }
 }
 
 clean() {
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${clean_build} -gt 0 && -f "build_${arch}/Makefile" ]] {
-    log_info "Clean build directory (%F{3}${target}%f)"
+  if (( ${clean_build} )) {
+    build_dirs=(**/build_${arch}(N))
 
-    rm -rf "build_${arch}"
+    for dir (${build_dirs}) {
+      log_info "Clean build directory ${dir} (%F{3}${target}%f)"
+
+      rm -rf ${dir}
+    }
   }
 }
 
@@ -50,7 +86,7 @@ patch() {
 
   log_info "Patch (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
   local patch
   local _target
@@ -77,7 +113,7 @@ qt_config() {
 
   case ${config} {
     Debug) args+=(-debug) ;;
-    RelWithDebInfo) args+=(-release -no-strip) ;;
+    RelWithDebInfo) args+=(-release -force-debug-info -separate-debug-info) ;;
     Release) args+=(-release -strip) ;;
     MinSizeRel) args+=(-release -optimize-size -strip) ;;
   }
@@ -90,8 +126,6 @@ qt_config() {
     -qt-libjpeg
     -qt-freetype
     -qt-pcre
-    -qt-webp
-    -qt-tiff
     -nomake examples
     -nomake tests
     -no-compile-examples
@@ -122,27 +156,14 @@ qt_config() {
     args+=("-no-feature-${part}")
   }
 
-  for part ('db2' 'ibase' 'mysql' 'oci' 'odbc' 'psql' 'sqlite2' 'sqlite' 'tds') {
-    args+=("-no-sql-${part}")
-  }
-
-  for part ('3d' 'activeqt' 'androidextras' 'charts' 'connectivity' 'datavis3d' 'declarative' 'doc'
-    'gamepad' 'graphicaleffects' 'lottie' 'location' 'networkauth' 'purchasing' 'quick3d' 'quickcontrols'
-    'quickcontrols2' 'quicktimeline' 'remoteobjects' 'script' 'scxml' 'sensors' 'serialbus' 'speech' 'tools'
-    'translations' 'virtualkeyboard' 'wayland' 'webchannel' 'webengine' 'webglplugin' 'websockets' 'webview'
-    'winextras' 'macextras' 'x11extras' 'xmlpatterns') {
-    args+=(-skip "qt${part}")
-  }
-
   args+=(QMAKE_APPLE_DEVICE_ARCHS="${arch}")
 
   log_status "Hide undesired libraries from qt..."
   if [[ -d "${HOMEBREW_PREFIX}/opt/zstd" ]] brew unlink zstd
 
-  log_info "Config (%F{3}${target}%f)"
-  cd "${dir}"
+  log_info "Config qtbase (%F{3}${target}%f)"
 
-  mkcd "build_${arch}"
+  mkcd ${dir}/qtbase/build_${arch}
 
   log_debug "Configure options: ${args}"
   ../configure ${args}
@@ -160,11 +181,23 @@ build() {
     cross_prepare
   }
 
-  log_info "Build (%F{3}${target}%f)"
-  cd "${dir}/build_${arch}"
+  local -r source_dir=${PWD}
 
-  log_debug "Running make -j ${num_procs}"
-  progress make -j "${num_procs}"
+  for component (${qt_components}) {
+    log_info "Build ${component} (%F{3}${target}%f)"
+    mkdir -p ${dir}/${component}/build_${arch}
+    pushd ${dir}/${component}/build_${arch}
+
+    if [[ ${component} != 'qtbase' ]] {
+      log_debug "Running qmake"
+      ${source_dir}/${dir}/qtbase/build_${arch}/bin/qmake ..
+    }
+
+    log_debug "Running make -j ${num_procs}"
+    progress make -j "${num_procs}"
+    popd
+
+  }
 }
 
 install() {
@@ -176,17 +209,20 @@ install() {
     return
   }
 
-  cd "${dir}/build_${arch}"
-
-  log_info "Install (%F{3}${target}%f)"
-  progress make install
+  for component (${qt_components}) {
+    log_info "Install ${component} (%F{3}${target}%f)"
+    pushd ${dir}/${component}/build_"${arch}"
+    progress make install
+    popd
+  }
 
   if [[ ${CPUTYPE} != "${arch}" ]] {
-    cp -cp qtbase/bin/qmake "${target_config[output_dir]}/bin/"
+    cp -cp ${dir}/qtbase/build_${arch}/bin/qmake "${target_config[output_dir]}/bin/"
 
     for file (
       'lib/QtCore.framework/Versions/5/QtCore'
       'lib/libQt5Bootstrap.a'
+      'bin/moc'
       'bin/qvkgen'
       'bin/rcc'
       'bin/uic'
@@ -209,7 +245,7 @@ cross_prepare() {
 
   pushd ${PWD}
 
-  if [[ ! -f "${dir}/build_${CPUTYPE}/qtbase/lib/QtCore.framework/Versions/5/QtCore" ]] {
+  if [[ ! -f ${dir}/qtbase/build_${CPUTYPE}/lib/QtCore.framework/Versions/5/QtCore ]] {
     log_status "Build QtCore (macos-${CPUTYPE})..."
 
     pushd ${PWD}
@@ -220,30 +256,28 @@ cross_prepare() {
 
       qt_config
 
-      progress make -j ${num_procs} module-qtbase-qmake_all
+      progress make -j ${num_procs} qmake_all
 
-      cd qtbase/src
+      pushd src
       progress make -j ${num_procs} sub-moc-all
       progress make -j ${num_procs} sub-corelib
+      popd
     )
     popd
   }
 
-  cd "${dir}/build_${arch}"
-
-  # qmake is built thin by the configure script
-  if ! ([[ -f "qtbase/bin/qmake" ]] && \
-    lipo -archs "qtbase/bin/qmake" | grep "${arch}" >/dev/null 2>&1); then
+  pushd ${dir}/qtbase/build_${arch}
+  if ! ([[ -f bin/qmake ]] && lipo -archs bin/qmake | grep "${arch}" &> /dev/null); then
     pushd ${PWD}
     log_info "Fix qmake to enable building ${arch} on ${CPUTYPE} host"
 
     log_status "Apply patches to qmake makefile..."
-    apply_patch "${funcfiletrace[1]:a:h}/patches/Qt/0009-qmake-append-cflags-and-ldflags.patch" \
-      "4840e9104c2049228c307056d86e2d9f2464dedc761c02eb4494b602a3896ab6"
+    apply_patch "${funcfiletrace[1]:a:h}/patches/Qt5/0009-qmake-append-cflags-and-ldflags.patch" \
+      "6c880f3b744222ed2ac2eb5bca0ff0ba907e1d77605ad4b06f814e4d5813e496"
 
     log_status "Remove thin qmake"
-    rm "qtbase/bin/qmake"
-    cd "qtbase/qmake"
+    rm bin/qmake
+    cd qmake
     progress make clean
 
     log_status "Build qmake..."
@@ -255,18 +289,18 @@ cross_prepare() {
 
   # we need to build some tools universal so we can cross compile on x86 host
   log_status "Build Qt build tools..."
-  progress make -j ${num_procs} module-qtbase-qmake_all
+  progress make -j ${num_procs} qmake_all
 
   # Modify Makefiles so we can specify ARCHS
   local fixup
-  for fixup (qtbase/src/**/Makefile) {
+  for fixup (src/**/Makefile) {
     log_status "Patching ${fixup}"
     sed -i '.orig' "s/EXPORT_VALID_ARCHS =/EXPORT_VALID_ARCHS +=/" ${fixup}
   }
 
   log_status "Build Qt tools (part 1)..."
   pushd ${PWD}
-  cd "qtbase/src"
+  cd src
   ARCHS="arm64 x86_64" EXPORT_VALID_ARCHS="arm64 x86_64" progress make -j ${num_procs} sub-moc-all
 
   # QtCore sadly does not build universal so we build it for both archs, lipo them,
@@ -276,20 +310,20 @@ cross_prepare() {
   popd
 
   log_status "Create universal QtCore..."
-  if lipo -archs "qtbase/lib/QtCore.framework/Versions/5/QtCore" \
+  if lipo -archs "lib/QtCore.framework/Versions/5/QtCore" \
     | grep "${CPUTYPE}" >/dev/null 2>&1; then
       log_info "Target architecture ${CPUTYPE} already found, will remove"
-      lipo -remove ${CPUTYPE} "qtbase/lib/QtCore.framework/Versions/5/QtCore" \
-        -output "qtbase/lib/QtCore.framework/Versions/5/QtCore"
+      lipo -remove ${CPUTYPE} "lib/QtCore.framework/Versions/5/QtCore" \
+        -output "lib/QtCore.framework/Versions/5/QtCore"
   fi
 
-  lipo -create "../build_${CPUTYPE}/qtbase/lib/QtCore.framework/Versions/5/QtCore" \
-    "qtbase/lib/QtCore.framework/Versions/5/QtCore" \
-    -output "qtbase/lib/QtCore.framework/Versions/5/QtCore"
+  lipo -create "../build_${CPUTYPE}/lib/QtCore.framework/Versions/5/QtCore" \
+    "lib/QtCore.framework/Versions/5/QtCore" \
+    -output "lib/QtCore.framework/Versions/5/QtCore"
 
   log_status "Build Qt tools (part 2)..."
   pushd ${PWD}
-  cd "qtbase/src"
+  cd src
   ARCHS="arm64 x86_64" EXPORT_VALID_ARCHS="arm64 x86_64" \
     progress make -j ${num_procs} sub-qvkgen-all sub-rcc sub-uic sub-qlalr
   popd
@@ -350,7 +384,11 @@ universal_fixup() {
 
   # Using arm64 as the source build, find any file starting with magic bytes for thin binary
 
-  local -a fixups=(lib/**/(*.a|*.dylib)(.) lib/**/*.framework/Versions/(5|6)/*(.))
+  local -a fixups=(
+    lib/**/(*.a|*.dylib)(.)
+    lib/**/*.framework/Versions/(5|6)/*(.)
+    plugins/**/*.dylib(.)
+    )
 
   for file (bin/**/*(.)) {
     magic=$(xxd -ps -l 4 ${file})

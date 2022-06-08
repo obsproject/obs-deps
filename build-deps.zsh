@@ -82,7 +82,7 @@ package() {
 
   log_info "Package dependencies"
 
-  if [[ ${PACKAGE_NAME} != 'qt' ]] {
+  if [[ ${PACKAGE_NAME} != 'qt'* ]] {
     log_status "Cleanup unnecessary files"
 
     rm -rf lib/^(*.dylib|libajantv*|*.so*|*.lib)(N)
@@ -119,6 +119,8 @@ build_dependencies() {
   local subdir
   if [[ ${PACKAGE_NAME} == 'ffmpeg' ]] {
     subdir='deps.ffmpeg'
+  } elif [[ ${PACKAGE_NAME} == 'qt'* ]] {
+    subdir='deps.qt'
   } else {
     subdir="deps.${host_os}"
   }
@@ -126,8 +128,8 @@ build_dependencies() {
   local -a files
   if (( #deps )) {
     files=(${subdir}/*-(${~${(j:|:)deps}}).zsh)
-  } elif [[ ${PACKAGE_NAME} == 'qt' ]] {
-    files=(${subdir}/qt.zsh)
+  } elif [[ ${PACKAGE_NAME} == 'qt'* ]] {
+    files=(${subdir}/${PACKAGE_NAME}.zsh)
   } else {
     files=(${subdir}/*-*.zsh)
   }
