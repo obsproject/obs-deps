@@ -24,7 +24,7 @@ function Invoke-SafeWebRequest {
     )
 
     if ( ! ( Test-Path function:Log-Information ) ) {
-        . $PSScriptRoot/Utils-Logger.ps1
+        . $PSScriptRoot/Logger.ps1
     }
 
     if ( $Resume -and $PSVersionTable.PSVersion -lt "6.1.0") {
