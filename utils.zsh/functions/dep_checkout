@@ -8,6 +8,8 @@ if (( # < 2 )) {
 local -a repo=()
 local -a args=()
 local -i sparse=0
+local pull_request
+local branch
 
 while (( # )) {
   case ${1} {
@@ -33,8 +35,18 @@ if [[ -d .git ]] {
 
   git config advice.detachedHead false
   git config remote.origin.url "${url}"
-  git config remote.origin.fetch "+refs/heads/${branch:-master}:refs/remotes/origin/${branch:-master}"
   git config remote.origin.tapOpt --no-tags
+
+  local _ref="+refs/heads/${branch:-master}:refs/remotes/origin/${branch:-master}"
+  git config --replace-all remote.origin.fetch $_ref
+
+  if [[ ${pull_request} ]] {
+    if ! git show-ref --quiet --verify "refs/heads/pull-${pull_request}"; then
+      git fetch origin "pull/${pull_request}/head:pull-${pull_request}"
+    fi
+
+    git checkout -f "pull-${pull_request}"
+  }
 
   log_debug "Check if commit ${hash} available in local tree"
   git rev-parse -q --verify "${hash}^{commit}" > /dev/null || git fetch origin
@@ -60,6 +72,12 @@ if [[ -d .git ]] {
   fi
 
   git config advice.detachedHead false
+
+  if [[ ${pull_request} ]] {
+    git fetch origin "pull/${pull_request}/head:pull-${pull_request}"
+    git checkout "pull-${pull_request}"
+  }
+
   log_info "Checking out commit ${repo_name%.*}@${commit}..."
   git checkout -f "${commit}" --
 
