@@ -74,7 +74,7 @@ function Invoke-GitCheckout {
 
         if ( $PullRequest -ne "" ) {
             try {
-                Invoke-External git show-ref --quiet --verify refs/heads/pr-$PullRequest
+                Invoke-External git show-ref --quiet --verify refs/heads/pull-$PullRequest
             } catch {
                 Invoke-External git fetch origin $("pull/{0}/head:pull-{0}" -f $PullRequest)
             } finally {
