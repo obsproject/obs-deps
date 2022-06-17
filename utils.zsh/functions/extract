@@ -21,6 +21,7 @@ while (( # > 0 )) {
         xzcat "${1}" | tar -xf -
       fi
       ;;
+    *.tar.bz|*.tar.bz2|*.tbz|*.tbz2) tar ${_tarflags//z/j} ${1} ;;      
     *.tar) tar "-${_tarflags}" "${1}" ;;
     *.zip) unzip "${_vflag[(( _loglevel > 1 ))]}" "${1}" ;;
     *.lzma) unlzma -T0 "${_vflag[(( _loglevel > 1 ))]}" "${1}" ;;
