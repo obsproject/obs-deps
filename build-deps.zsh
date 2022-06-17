@@ -86,9 +86,16 @@ package() {
     log_status "Cleanup unnecessary files"
 
     rm -rf lib/^(*.dylib|libajantv*|*.so*|*.lib)(N)
-    rm -rf bin/^(*.exe|*.dll|*.pdb)(N)
+    rm -rf bin/^(*.exe|*.dll|*.pdb|swig)(N)
 
-    if [[ -d share ]] rm -rf share
+    if [[ -f bin/swig ]] {
+      swig_lib=(share/swig/*(/))
+      pushd ${swig_lib:h}
+      ln -s ${swig_lib:t} CURRENT
+      popd
+    }
+
+    if [[ -d share ]] rm -rf share/^(swig)(N)
     if [[ -d cmake ]] rm -rf cmake
     if [[ -d man ]] rm -rf man
   }
