@@ -90,6 +90,7 @@ package() {
 
     if [[ -d share ]] rm -rf share
     if [[ -d cmake ]] rm -rf cmake
+    if [[ -d man ]] rm -rf man
   }
 
   log_status "Create archive ${filename}"
