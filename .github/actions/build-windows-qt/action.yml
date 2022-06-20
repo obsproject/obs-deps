@@ -1,0 +1,57 @@
+name: 'Build Windows Qt'
+description: 'Builds Windows Qt for obs-deps with specified architecture and build config'
+inputs:
+  qtVersion:
+    description: 'Qt version to build'
+    required: false
+    default: '5'
+  target:
+    description: 'Build target for Qt'
+    required: true
+  config:
+    description: 'Build configuration'
+    required: false
+    default: 'Release'
+  cacheRevision:
+    description: 'Cache revision number to force creation of new cache generation'
+    required: false
+    default: '01'
+runs:
+  using: 'composite'
+  steps:
+    - name: Environment Setup
+      id: qt-env-setup
+      shell: pwsh
+      run: |
+        $QtDepHash = (Get-FileHash -Path "${{ github.workspace }}/deps.qt/qt${{ inputs.qtVersion }}.ps1" -Algorithm "SHA256").Hash
+        if ( Test-Path "${{ github.workspace }}/deps.qt/patches/Qt${{ inputs.qtVersion }}" ) {
+          $QtPatchHash = (Get-FileHash "${{ github.workspace }}/deps.qt/patches/Qt${{ inputs.qtVersion }}/win/0001-QTBUG-74606.patch" -Algorithm "SHA256").Hash
+        } else {
+          $QtPatchHash = "nopatches"
+        }
+
+        Write-Output "::set-output name=depHash::${QtDepHash}"
+        Write-Output "::set-output name=patchHash::${QtPatchHash}"
+
+    - name: Restore Windows Qt from Cache
+      id: deps-cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          ${{ github.workspace }}/*_build_temp/qt${{ inputs.qtVersion }}*
+          !${{ github.workspace }}/*_build_temp/**/.git
+          !${{ github.workspace }}/*_build_temp/*.tar.gz
+          !${{ github.workspace }}/*_build_temp/*.tar.xz
+          !${{ github.workspace }}/*_build_temp/*.zip
+        key: ${{ inputs.target }}-windows-qt${{ inputs.qtVersion }}-${{inputs.config }}-${{ steps.qt-env-setup.outputs.depHash }}-${{ inputs.cacheRevision }}-${{ steps.qt-env-setup.outputs.patchHash }}
+        restore-keys: ${{ inputs.target }}-windows-qt${{ inputs.qtVersion }}-${{inputs.config }}-${{ steps.qt-env-setup.outputs.depHash }}-${{ inputs.cacheRevision }}-
+
+    - name: Install Windows Qt
+      if: ${{ steps.deps-cache.outputs.cache-hit == 'true' }}
+      shell: pwsh
+      run: ./Build-Dependencies.ps1 -Dependencies "Qt${{ inputs.qtVersion }}" -SkipBuild -SkipUnpack -Target ${{ inputs.target }} -Configuration ${{ inputs.config }} -Shared
+
+    - name: Build and Install Windows Qt
+      if: ${{ steps.deps-cache.outputs.cache-hit != 'true' }}
+      shell: pwsh
+      run: ./Build-Dependencies.ps1 -Dependencies "Qt${{ inputs.qtVersion }}"  -Target ${{ inputs.target }} -Configuration ${{ inputs.config }} -Shared
