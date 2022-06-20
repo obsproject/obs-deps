@@ -1,0 +1,13 @@
+--- ./qtbase/src/widgets/kernel/qwidgetwindow.cpp 2020-10-27 09:02:11.000000000 +0100
++++ ./qtbase/src/widgets/kernel/qwidgetwindow.cpp 2021-06-12 16:20:04.000000000 +0200
+@@ -252,10 +252,7 @@
+     switch (event->type()) {
+     case QEvent::Close: {
+         // The widget might be deleted in the close event handler.
+-        QPointer<QObject> guard = this;
+         handleCloseEvent(static_cast<QCloseEvent *>(event));
+-        if (guard)
+-            QWindow::event(event);
+         return true;
+     }
+ 
