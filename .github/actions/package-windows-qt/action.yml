@@ -1,0 +1,88 @@
+name: 'Package Windows Qt'
+description: 'Packages Windows Qt for obs-deps with specified architecture'
+inputs:
+  base:
+    description: 'Base name of the Windows artifacts to download'
+    required: true
+  outputName:
+    description: 'Name pattern for created Windows artifacts'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Download Windows RelWithDebInfo artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ inputs.base }}-RelWithDebInfo-${{ github.sha }}
+
+    - name: Get File Names
+      id: GetFileNames
+      shell: pwsh
+      run: |
+        $FileName = (Get-ChildItem -Filter "windows-deps-qt*.zip").Name.Replace("-RelWithDebInfo", "")
+        $PDBArchiveFileName = (Get-ChildItem -Filter "windows-deps-qt*.zip").Name.Replace("RelWithDebInfo", "ReleasePDBs")
+        $PDBOutputName = "${{ inputs.outputName }}".Replace("${{ inputs.base }}", "${{ inputs.base }}-ReleasePDBs")
+        Write-Output "::set-output name=fileName::${FileName}"
+        Write-Output "::set-output name=pdbFileName::${PDBArchiveFileName}"
+        Write-Output "::set-output name=pdbOutputName::${PDBOutputName}"
+
+    - name: Extract RelWithDebInfo
+      shell: pwsh
+      run: |
+        7z x 'windows-deps-qt*.zip' -oqt_rel
+        Remove-Item "*.zip"
+
+    - name: Separate RelWithDebInfo PDBs
+      shell: pwsh
+      run: |
+        New-Item -ItemType "directory" rel_pdbs
+        Set-Location "qt_rel"
+        $QtInstallDir = (Get-Location | Convert-Path)
+        Set-Location "..\rel_pdbs"
+        $ReleasePdbInstallDir = (Get-Location | Convert-Path)
+        Set-Location ".."
+        $ReleasePdbFiles = Get-ChildItem -Filter "*.pdb" -File -Recurse
+        $DestinationDirRelativePaths = ( $ReleasePdbFiles | ForEach-Object { $_.DirectoryName } | Sort-Object -Unique ).Replace("${QtInstallDir}\", "")
+        $DestinationDirRelativePaths | ForEach-Object { New-Item -Name "$_" -Path "${ReleasePdbInstallDir}" -ItemType "directory" -Force }
+        $ReleasePdbFiles | ForEach-Object { Move-Item $_.FullName $_.FullName.Replace("${QtInstallDir}", "${ReleasePdbInstallDir}") }
+
+    - name: Download Windows Debug artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ inputs.base }}-Debug-${{ github.sha }}
+
+    - name: Extract Debug
+      shell: pwsh
+      run: |
+        7z x 'windows-deps-qt*.zip' -oqt
+        Remove-Item "*.zip"
+
+    - name: Copy RelWithDebInfo over Debug
+      shell: pwsh
+      run: |
+        Remove-Item -Path "qt" -Include "cmake_automoc_parser.*","moc.*","qlalr.*","qmake.*","qsb.*","qtpaths.*","qvkgen.*","rcc.*","tracegen.*","uic.*" -Recurse
+        Copy-Item "qt_rel\*" "qt\" -Recurse -Force
+
+    - name: Create combined Qt archive
+      shell: pwsh
+      run: |
+        $FileName = "${{ steps.GetFileNames.outputs.fileName }}"
+        7z a "$FileName" .\qt\* -mx=9
+
+    - name: Create Release PDBs archive
+      shell: pwsh
+      run: |
+        $FileName = "${{ steps.GetFileNames.outputs.pdbFileName }}"
+        7z a "$FileName" .\rel_pdbs\* -mx=9
+
+    - name: Publish Combined Qt Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ inputs.outputName }}
+        path: ${{ github.workspace }}/${{ steps.GetFileNames.outputs.fileName }}
+
+    - name: Publish Release PDBs Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ steps.GetFileNames.outputs.pdbOutputName }}
+        path: ${{ github.workspace }}/${{ steps.GetFileNames.outputs.pdbFileName }}
