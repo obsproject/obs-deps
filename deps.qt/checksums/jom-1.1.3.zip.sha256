@@ -1,0 +1,14 @@
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.PowerShell.Commands.FileHashInfo</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Microsoft.PowerShell.Commands.FileHashInfo</ToString>
+    <Props>
+      <S N="Algorithm">SHA256</S>
+      <S N="Hash">128FDD846FE24F8594EED37D1D8929A0EA78DF563537C0C1B1861A635013FFF8</S>
+      <S N="Path">jom_1_1_3.zip</S>
+    </Props>
+  </Obj>
+</Objs>
