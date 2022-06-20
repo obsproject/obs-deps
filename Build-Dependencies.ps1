@@ -105,7 +105,11 @@ function Run-Stages {
 }
 
 function Package-Dependencies {
-    $ArchiveFileName = "windows-${PackageName}-${CurrentDate}-${Target}.zip"
+    if ( $script:PackageName -like 'qt*' ) {
+        $ArchiveFileName = "windows-deps-${PackageName}-${CurrentDate}-${Target}-${Configuration}.zip"
+    } else {
+        $ArchiveFileName = "windows-${PackageName}-${CurrentDate}-${Target}.zip"
+    }
 
     Push-Location -Stack BuildTemp
     Set-Location $ConfigData.OutputPath
@@ -136,7 +140,15 @@ function Build-Main {
         exit 2
     }
 
-    $script:PackageName = 'deps'
+    $script:PackageName = ((Get-Item $PSCommandPath).Basename).Split('-')[1]
+    if ( $script:PackageName -eq 'Dependencies' ) {
+        $script:PackageName = 'deps'
+    }
+    if ( $Dependencies -eq 'qt5' ) {
+        $script:PackageName = 'qt5'
+    } elseif ( $Dependencies -eq 'qt6' ) {
+        $script:PackageName = 'qt6'
+    }
 
     $UtilityFunctions = Get-ChildItem -Path $PSScriptRoot/utils.pwsh/*.ps1 -Recurse
 
@@ -147,13 +159,20 @@ function Build-Main {
 
     Bootstrap
 
+    $SubDir = ''
+    if ( $script:PackageName -like 'qt*' ) {
+        $SubDir = 'deps.qt'
+    } else {
+        $SubDir = 'deps.windows'
+    }
+
     if ( $Dependencies.Count -eq 0 ) {
-        $DependencyFiles = Get-ChildItem -Path $PSScriptRoot/${PackageName}.windows/*.ps1 -File -Recurse
+        $DependencyFiles = Get-ChildItem -Path $PSScriptRoot/${SubDir}/*.ps1 -File -Recurse
     } else {
         $DependencyFiles = $Dependencies | ForEach-Object {
             $Item = $_
             try {
-                Get-ChildItem $PSScriptRoot/deps.windows/*$Item.ps1
+                Get-ChildItem $PSScriptRoot/${SubDir}/*$Item.ps1
             } catch {
                 throw "Script for requested dependency ${Item} not found"
             }
@@ -170,7 +189,7 @@ function Build-Main {
 
     Pop-Location -Stack BuildTemp
 
-    if ( $Dependencies.Count -eq 0 ) {
+    if ( $Dependencies.Count -eq 0 -or $script:PackageName -like 'qt*' ) {
         Package-Dependencies
     }
 
