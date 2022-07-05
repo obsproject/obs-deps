@@ -1,0 +1,14 @@
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.PowerShell.Commands.FileHashInfo</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Microsoft.PowerShell.Commands.FileHashInfo</ToString>
+    <Props>
+      <S N="Algorithm">SHA256</S>
+      <S N="Hash">CD239AB43BAEA53CFDB1F2663AD0883586B97F22CEE825C3780AD9BBA7E6EE19</S>
+      <S N="Path">bison-2.4.1-bin.zip</S>
+    </Props>
+  </Obj>
+</Objs>
