@@ -1,0 +1,14 @@
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.PowerShell.Commands.FileHashInfo</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Microsoft.PowerShell.Commands.FileHashInfo</ToString>
+    <Props>
+      <S N="Algorithm">SHA256</S>
+      <S N="Hash">B6EE01732F0E41296E60A00CE37FBED1C4955AE7E7625B1FD29A55605C9493B4</S>
+      <S N="Path">windows_32-bit_build_temp\pcre2-10.40.zip</S>
+    </Props>
+  </Obj>
+</Objs>
