@@ -35,17 +35,17 @@ jobs:
             os: 'ubuntu-20.04'
             config: 'Release'
             type: 'static'
-            revision: 8
+            revision: 9
           - target: windows-x64
             os: 'ubuntu-20.04'
             config: 'Release'
             type: 'static'
-            revision: 7
+            revision: 8
           - target: windows-x86
             os: 'ubuntu-20.04'
             config: 'Release'
             type: 'static'
-            revision: 7
+            revision: 8
     env:
       CACHE_REVISION: ${{ matrix.revision }}
     defaults:
