@@ -1,0 +1,53 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8a8862f63..d440ed72d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -75,9 +75,10 @@ endif ()
+ 
+ option (WITH_PCRE "Enable PCRE" ON)
+ if (WITH_PCRE)
+-  find_package (PCRE2 REQUIRED)
++  set(PCRE2_USE_STATIC_LIBS ON)
++  find_package(PCRE2 CONFIG COMPONENTS 8BIT)
+   set (HAVE_PCRE 1)
+-  include_directories (${PCRE2_INCLUDE_DIRS})
++  include_directories (${PCRE2_INCLUDE_DIR})
+ endif()
+ 
+ if (WIN32)
+@@ -146,7 +147,7 @@ add_executable (swig
+   ${PROJECT_BINARY_DIR}/Source/CParse/parser.h
+ )
+ if (PCRE2_FOUND)
+-  target_link_libraries (swig ${PCRE2_LIBRARIES})
++  target_link_libraries (swig PCRE2::8BIT)
+ endif ()
+ install (TARGETS swig DESTINATION bin)
+ 
+diff --git a/Tools/cmake/FindPCRE2.cmake b/Tools/cmake/FindPCRE2.cmake
+deleted file mode 100644
+index 08c216347..000000000
+--- a/Tools/cmake/FindPCRE2.cmake
++++ /dev/null
+@@ -1,21 +0,0 @@
+-# - Find PCRE2
+-# Perl Compatible Regular Expressions
+-# https://www.pcre.org/
+-
+-# The following variables are set:
+-# PCRE2_FOUND - System has the PCRE library
+-# PCRE2_LIBRARIES - The PCRE library file
+-# PCRE2_INCLUDE_DIRS - The folder with the PCRE headers
+-
+-find_library(PCRE2_LIBRARY NAMES pcre2 pcre2-8)
+-find_path(PCRE2_INCLUDE_DIR pcre2.h)
+-
+-set (PCRE2_LIBRARIES ${PCRE2_LIBRARY})
+-set (PCRE2_INCLUDE_DIRS ${PCRE2_INCLUDE_DIR})
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(PCRE2 DEFAULT_MSG PCRE2_LIBRARIES PCRE2_INCLUDE_DIRS)
+-
+-mark_as_advanced (
+-  PCRE2_LIBRARY
+-  PCRE2_INCLUDE_DIR)
