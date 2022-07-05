@@ -114,6 +114,26 @@ function Package-Dependencies {
     Push-Location -Stack BuildTemp
     Set-Location $ConfigData.OutputPath
 
+    Log-Information "Cleanup unnecessary files"
+    $Items = @(
+        "./bin/bison.exe"
+        "./bin/libiconv2.dll"
+        "./bin/libintl3.dll"
+        "./bin/m4.exe"
+        "./bin/pcre2*"
+        "./bin/regex2.dll"
+        "./cmake/pcre2*"
+        "./include/pcre2*"
+        "./lib/pcre2*"
+        "./lib/pkgconfig/libpcre2*"
+        "./man1/pcre2*"
+        "./man3/pcre2*"
+        "./share/bison"
+        "./share/doc/pcre2"
+    )
+
+    Remove-Item -ErrorAction 'SilentlyContinue' -Path $Items -Force -Recurse
+
     Log-Information "Package dependencies"
 
     $Params = @{
