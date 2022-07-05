@@ -699,7 +699,7 @@ jobs:
             _temp=$(mktemp -d)
             pushd "${_temp}" > /dev/null
 
-            for artifact in ${{ github.workspace }}/**/macos-@(deps|ffmpeg)-!(*qt5|qt6*)-arm64.*; do
+            for artifact in ${{ github.workspace }}/**/macos-@(deps|ffmpeg)-!(*qt5|qt6*)-${arch}.*; do
               case ${artifact} in
                 *.zip) unzip ${artifact} > /dev/null ;;
                 *.tar.xz) XZ_OPT=-T0 tar -xvJf ${artifact} ;;
