@@ -9,7 +9,7 @@ function Check-Git {
             Check-Git
     #>
 
-    if ( ! ( Test-Path function:Log-Info ) ) {
+    if ( ! ( Test-Path function:Log-Information ) ) {
         . $PSScriptRoot/Logger.ps1
     }
 
