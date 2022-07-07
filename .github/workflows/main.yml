@@ -25,12 +25,12 @@ jobs:
             os: 'macos-12'
             config: 'Release'
             type: 'static'
-            revision: 8
+            revision: 9
           - target: macos-x86_64
             os: 'macos-12'
             config: 'Release'
             type: 'static'
-            revision: 8
+            revision: 9
           - target: linux-x86_64
             os: 'ubuntu-20.04'
             config: 'Release'
@@ -162,7 +162,7 @@ jobs:
             config: 'Release'
             type: 'shared'
     env:
-      CACHE_REVISION: '2'
+      CACHE_REVISION: '3'
     defaults:
       run:
         shell: zsh {0}
