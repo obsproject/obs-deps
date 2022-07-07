@@ -38,7 +38,9 @@ function Setup-Dependency {
             $Params += @{PullRequest = $PullRequest}
         }
 
-        Invoke-GitCheckout  @Params
+        if ( ! ( $script:SkipUnpack ) ) {
+            Invoke-GitCheckout  @Params
+        }
     } else {
         $File = [System.IO.Path]::GetFileName($Uri)
 
