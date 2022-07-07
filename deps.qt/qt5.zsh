@@ -216,7 +216,7 @@ install() {
     popd
   }
 
-  if [[ ${CPUTYPE} != "${arch}" ]] && (( ${+CI} == 0 )) {
+  if [[ ${CPUTYPE} != "${arch}" ]] {
     cp -cp ${dir}/qtbase/build_${arch}/bin/qmake "${target_config[output_dir]}/bin/"
 
     for file (
