@@ -19,7 +19,7 @@ setup_target() {
   case ${1} {
     macos-x86_64)
       config_data+=(
-        [deployment_target]=10.15
+        [deployment_target]=10.13
         [darwin_target]=17
       )
       ;;
