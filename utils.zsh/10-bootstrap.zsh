@@ -152,12 +152,10 @@ Usage: %B${functrace[1]%:*}%b <option> [<options>]
   function _trap_exit() {
     typeset -g _padding=0
 
-    if (( ! #1 )) set -- "All"
-
     log_output "
   ---------------------------------------------------------------------------------------------------
   %B[OBS-DEPS]%b %F{2}All done%f
-  %BBuilt dependencies:%b ${1}
+  %BBuilt dependencies:%b ${(j:,:)deps}
   ---------------------------------------------------------------------------------------------------
     "
   }

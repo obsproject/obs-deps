@@ -50,7 +50,7 @@ config() {
   autoload -Uz mkcd progress
 
   args=(
-    ${cmake_flags}
+    ${cmake_flags//ARCHITECTURES=${arch}/"ARCHITECTURES='x86_64;arm64'"}
   )
 
   log_info "Config (%F{3}${target}%f)"

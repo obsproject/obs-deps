@@ -57,7 +57,7 @@ config() {
   local _onoff=(OFF ON)
 
   args=(
-    ${cmake_flags}
+    ${cmake_flags//ARCHITECTURES=${arch}/"ARCHITECTURES='x86_64;arm64'"}
     -DBUILD_SHARED_LIBS="${_onoff[(( shared + 1 ))]}"
   )
 
