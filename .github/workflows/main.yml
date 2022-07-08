@@ -53,7 +53,7 @@ jobs:
         shell: bash
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
 
       - name: Setup Environment
         id: setup
@@ -89,7 +89,7 @@ jobs:
 
       - name: Restore Compilation Cache
         id: ccache-cache
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/.ccache
           key: ${{ matrix.target }}-ccache-ffmpeg-${{ steps.setup.outputs.ccacheDate }}
@@ -116,7 +116,7 @@ jobs:
 
       - name: Publish Build Artifacts
         if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.artifactFileName }}
@@ -127,7 +127,7 @@ jobs:
     needs: [ffmpeg-build]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
 
       - name: Check for GitHub Labels
         id: seekingTesters
@@ -168,7 +168,7 @@ jobs:
         shell: zsh {0}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
 
       - name: Setup Environment
         id: setup
@@ -191,7 +191,7 @@ jobs:
 
       - name: Restore Compilation Cache
         id: ccache-cache
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/.ccache
           key: ${{ matrix.target }}-ccache-deps-${{ steps.setup.outputs.ccacheDate }}
@@ -218,7 +218,7 @@ jobs:
 
       - name: Publish Build Artifacts
         if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.artifactFileName }}
@@ -229,7 +229,7 @@ jobs:
     needs: [macos-build]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
 
       - name: Check for GitHub Labels
         id: seekingTesters
@@ -268,7 +268,7 @@ jobs:
         shell: zsh {0}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
 
       - name: Setup Environment
         id: setup
@@ -291,7 +291,7 @@ jobs:
 
       - name: Restore Compilation Cache
         id: ccache-cache
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/.ccache
           key: ${{ matrix.target }}-ccache-qt5-${{ steps.setup.outputs.ccacheDate }}
@@ -318,7 +318,7 @@ jobs:
 
       - name: Publish Build Artifacts
         if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.artifactFileName }}
@@ -329,7 +329,7 @@ jobs:
     needs: [macos-qt5-build]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
 
       - name: Check for GitHub Labels
         id: seekingTesters
@@ -359,7 +359,7 @@ jobs:
         shell: zsh {0}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
 
       - name: Setup Environment
         id: setup
@@ -382,7 +382,7 @@ jobs:
 
       - name: Restore Compilation Cache
         id: ccache-cache
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/.ccache
           key: macos-universal-ccache-qt6-${{ steps.setup.outputs.ccacheDate }}
@@ -409,7 +409,7 @@ jobs:
 
       - name: Publish Build Artifacts
         if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}/macos-universal/${{ steps.setup.outputs.artifactFileName }}
@@ -429,7 +429,7 @@ jobs:
     needs: [macos-qt6-build]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
 
       - name: Check for GitHub Labels
         id: seekingTesters
@@ -470,7 +470,7 @@ jobs:
         shell: pwsh
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
 
       - name: Setup Environment
         id: setup
@@ -524,7 +524,7 @@ jobs:
 
       - name: Publish Build Artifacts
         if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}\windows\${{ steps.setup.outputs.artifactFileName }}
@@ -642,7 +642,7 @@ jobs:
           echo "::set-output name=date::$(date +"%Y-%m-%d")"
 
       - name: 'Download build artifacts'
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
 
       - name: 'Package Windows dependencies'
         run: |

@@ -14,12 +14,12 @@ runs:
   using: 'composite'
   steps:
     - name: Download arm64 macOS artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: ${{ inputs.arm64 }}
 
     - name: Download x86_64 macOS artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: ${{ inputs.x86_64 }}
 
@@ -86,7 +86,7 @@ runs:
         print "::set-output name=artifactFileName::${file_name}"
 
     - name: Publish Build Artifacts
-      uses: actions/upload-artifact@v2.2.4
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ steps.combineArchs.outputs.artifactName }}
         path: ${{ github.workspace }}/${{ steps.combineArchs.outputs.artifactFileName }}
