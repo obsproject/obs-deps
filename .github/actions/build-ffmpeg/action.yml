@@ -41,7 +41,7 @@ runs:
 
     - name: Restore FFmpeg Dependencies from Cache
       id: ffmpeg-deps-cache
-      uses: actions/cache@v2.1.6
+      uses: actions/cache@v3
       with:
         path: |
           ${{ github.workspace }}/*_build_temp/*
@@ -59,7 +59,7 @@ runs:
 
     - name: Restore FFmpeg from Cache
       id: ffmpeg-cache
-      uses: actions/cache@v2.1.6
+      uses: actions/cache@v3
       with:
         path: |
           ${{ github.workspace }}/*_build_temp/FFmpeg*/*
