@@ -194,7 +194,7 @@ config() {
         --disable-mediafoundation
       )
 
-      if [[ ${arch} == 'x86_64' ]] args+=(--enable-libaom --enable-libsvtav1)
+      if [[ ${arch} == 'x64' ]] args+=(--enable-libaom --enable-libsvtav1)
     ;;
   }
 
