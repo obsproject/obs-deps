@@ -12,18 +12,18 @@ function Ensure-Location {
 
     param(
         [Parameter(Mandatory)]
-        [string] $Directory
+        [string] $Path
     )
 
-    if ( ! ( Test-Path $Directory ) ) {
+    if ( ! ( Test-Path $Path ) ) {
         $_Params = @{
             ItemType = "Directory"
-            Path = $Directory
+            Path = $Path
             ErrorAction = "SilentlyContinue"
         }
 
         New-Item @_Params | Set-Location
     } else {
-        Set-Location -Path $Directory
+        Set-Location -Path $Path
     }
 }

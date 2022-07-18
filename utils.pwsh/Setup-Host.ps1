@@ -3,6 +3,12 @@ function Setup-Host {
         . $PSScriptRoot/Logger.ps1
     }
 
+    if ( ! ( Test-Path function:Check-Winget ) ) {
+        . $PSScriptRoot/Check-Winget.ps1
+    }
+
+    Check-Winget
+
     if ( ! ( Test-Path function:Check-Git ) ) {
         . $PSScriptRoot/Check-Git.ps1
     }
