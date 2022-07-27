@@ -2,7 +2,7 @@ param(
     [string] $Name = 'detours',
     [string] $Version = '4.0.1',
     [string] $Uri = 'https://github.com/microsoft/detours.git',
-    [string] $Hash = 'e4bfd6b03e50de46b47abfbd1e46b384f0c5f833'
+    [string] $Hash = '24357c6a5a6bb9025a71050e50b38dbe9c02713a'
 )
 
 function Setup {
