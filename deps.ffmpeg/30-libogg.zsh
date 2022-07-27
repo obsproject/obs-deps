@@ -5,17 +5,17 @@ local name='libogg'
 local -A versions=(
   macos 1.3.5
   linux 1.3.5
-  windows 1.3.4
+  windows 1.3.5
 )
 local -A urls=(
   macos https://github.com/xiph/ogg/releases/download/v1.3.5/libogg-1.3.5.tar.xz
   linux https://github.com/xiph/ogg/releases/download/v1.3.5/libogg-1.3.5.tar.xz
-  windows https://github.com/xiph/ogg.git
+  windows https://github.com/xiph/ogg/releases/download/v1.3.5/libogg-1.3.5.tar.xz
 )
 local -A hashes=(
   macos "${0:a:h}/checksums/libogg-1.3.5.tar.xz.sha256"
   linux "${0:a:h}/checksums/libogg-1.3.5.tar.xz.sha256"
-  windows 31bd3f2707fb7dbae539a7093ba1fc4b2b37d84e
+  windows "${0:a:h}/checksums/libogg-1.3.5.tar.xz.sha256"
 )
 local -a patches=(
   "windows ${0:a:h}/patches/libogg/0001-fix-library-output-name.patch \
