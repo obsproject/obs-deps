@@ -3,15 +3,15 @@ autoload -Uz log_debug log_error log_info log_status log_output
 ## Dependency Information
 local name='mbedtls'
 local -A versions=(
-  macos 3.1.0
-  linux 3.1.0
-  windows 3.1.0
+  macos 3.2.1
+  linux 3.2.1
+  windows 3.2.1
 )
 local url='https://github.com/Mbed-TLS/mbedtls.git'
 local -A hashes=(
-  macos d65aeb37349ad1a50e0f6c9b694d4b5290d60e49
-  linux d65aeb37349ad1a50e0f6c9b694d4b5290d60e49
-  windows d65aeb37349ad1a50e0f6c9b694d4b5290d60e49
+  macos 869298bffeea13b205343361b7a7daf2b210e33d
+  linux 869298bffeea13b205343361b7a7daf2b210e33d
+  windows 869298bffeea13b205343361b7a7daf2b210e33d
 )
 local -a patches=(
   "macos ${0:a:h}/patches/mbedtls/0001-enable-posix-threading-support.patch \
@@ -167,13 +167,7 @@ fixup() {
     if (( shared_libs )) {
       mkdir -p ${target_config[output_dir]}/bin
       autoload -Uz create_importlibs
-      create_importlibs ${target_config[output_dir]}/lib/libmbed*.dll
-
-      for file ("${target_config[output_dir]}"/lib/libmbed*.dll(.)) {
-        mv ${file} "${target_config[output_dir]}/bin/${file##*/}"
-
-        log_status "Moved ${file#${target_config[output_dir]}} to /bin/${file##*/}"
-      }
+      create_importlibs ${target_config[output_dir]}/bin/libmbed*.dll
     }
   }
 }
