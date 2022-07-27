@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'vulkansdk',
-    [string] $Version = '1.2.131.2',
-    [string] $Uri = 'https://cdn-fastly.obsproject.com/downloads/VulkanSDK-1.2.131.2-Installer-Components.7z',
-    [string] $Hash = "${PSScriptRoot}/checksums/VulkanSDK-1.2.131.2-Installer-Components.7z.sha256"
+    [string] $Version = '1.3.216.0',
+    [string] $Uri = 'https://sdk.lunarg.com/sdk/download/1.3.216.0/windows/VulkanSDK-1.3.216.0-Installer.exe',
+    [string] $Hash = "${PSScriptRoot}/checksums/VulkanSDK-1.3.216.0-Installer.exe.sha256"
 )
 
 function Setup {
