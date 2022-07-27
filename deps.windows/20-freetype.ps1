@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'freetype',
-    [string] $Version = '2.10.4',
+    [string] $Version = '2.12.1',
     [string] $Uri = 'https://github.com/freetype/freetype.git',
-    [string] $Hash = '6a2b3e4007e794bfc6c91030d0ed987f925164a8'
+    [string] $Hash = 'e8ebfe988b5f57bfb9a3ecb13c70d9791bce9ecf'
 )
 
 function Setup {
