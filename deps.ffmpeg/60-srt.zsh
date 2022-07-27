@@ -2,9 +2,9 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='srt'
-local version='1.4.4'
-local url='https://github.com/Haivision/srt/archive/v1.4.4.tar.gz'
-local hash="${0:a:h}/checksums/v1.4.4.tar.gz.sha256"
+local version='1.5.0'
+local url='https://github.com/Haivision/srt/archive/v1.5.0.tar.gz'
+local hash="${0:a:h}/checksums/v1.5.0.tar.gz.sha256"
 local -a patches=(
   "* ${0:a:h}/patches/srt/0001-enable-proper-cmake-build-types.patch \
     c032f2a23f11c8d6f3cd5c0217b2862fc8bdfad0e4002d1ff0731adede523586"
