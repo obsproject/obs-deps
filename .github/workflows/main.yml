@@ -539,7 +539,7 @@ jobs:
         target: [x64, x86]
         config: ['RelWithDebInfo', 'Debug']
     env:
-      CACHE_REVISION: '01'
+      CACHE_REVISION: '02'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
