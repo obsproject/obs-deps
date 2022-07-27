@@ -79,13 +79,13 @@ function Find-VisualStudio {
     $VisualStudioData = Get-CimInstance MSFT_VSInstance
 
     # Prefer VS versions in this order:
-    # 1. VS2019 Release (stable)
-    # 2. VS2022 Release
-    # 3. VS2022 Preview
+    # 1. VS2022 Release (stable)
+    # 2. VS2022 Preview
+    # 3. VS2019 Release
     [string[]]$SupportedVSVersions =
-        "VisualStudio.16.Release",
         "VisualStudio.17.Release",
-        "VisualStudio.17.Preview"
+        "VisualStudio.17.Preview",
+        "VisualStudio.16.Release"
     $NumSupportedVSVersions = $SupportedVSVersions.length
 
     if ( $VisualStudioData.GetType() -eq [object[]] ) {
