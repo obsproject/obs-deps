@@ -78,8 +78,24 @@ function Find-VisualStudio {
 
     $VisualStudioData = Get-CimInstance MSFT_VSInstance
 
+    # Prefer VS versions in this order:
+    # 1. VS2019 Release (stable)
+    # 2. VS2022 Release
+    # 3. VS2022 Preview
+    [string[]]$SupportedVSVersions =
+        "VisualStudio.16.Release",
+        "VisualStudio.17.Release",
+        "VisualStudio.17.Preview"
+    $NumSupportedVSVersions = $SupportedVSVersions.length
+
     if ( $VisualStudioData.GetType() -eq [object[]] ) {
-        $VisualStudioData = ($VisualStudioData | Where-Object {$_.Version -ge 16} | Sort-Object -Property Version)[0]
+        for ( $i = 0; $i -lt $NumSupportedVSVersions; $i++ ) {
+            $VisualStudioDataTemp = ($VisualStudioData | Where-Object {$_.ChannelId -eq $SupportedVSVersions[$i]} | Sort-Object -Property Version)[0]
+            if ( $VisualStudioDataTemp ) {
+                break;
+            }
+        }
+        $VisualStudioData = $VisualStudioDataTemp
     }
 
     if ( ! ( $VisualStudioData ) -or ( $VisualStudioData.Version -lt 16 ) ) {
