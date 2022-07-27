@@ -2,26 +2,16 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='FFmpeg'
-local version='4.4.1'
+local version='5.0.1'
 local url='https://github.com/FFmpeg/FFmpeg.git'
-local hash='cc33e73618a981de7fd96385ecb34719de031f16'
+local hash='9687cae2b468e09e35df4cea92cc2e6a0e6c93b3'
 local -a patches=(
   "* ${0:a:h}/patches/FFmpeg/0001-FFmpeg-9010.patch \
     97ac6385c2b7a682360c0cfb3e311ef4f3a48041d3f097d6b64f8c13653b6450"
-  "* ${0:a:h}/patches/FFmpeg/0002-FFmpeg-4.4.1-OBS.patch \
+  "* ${0:a:h}/patches/FFmpeg/0002-FFmpeg-5.0.1-OBS.patch \
     710fb5a381f7b68c95dcdf865af4f3c63a9405c305abef55d24c7ab54e90b182"
-  "* ${0:a:h}/patches/FFmpeg/0003-FFmpeg-4.4.1-libaomenc.patch \
-    993f429b3c3f4acac4929bfb9b51d074381f4937f2e86068a6039998cebc0aca"
-  "* ${0:a:h}/patches/FFmpeg/0004-FFmpeg-4.4.1-librist.patch \
-    96345ca97b9a923a07c4dd38c20cb435241463eda2d69e13daa97faa758ed8cc"
-  "windows https://github.com/obsproject/FFmpeg/commit/9ee65983b32b3aa637a839f5171aa16d7bc3650d.patch?full_index=1 \
-    a7b0850f6ab1e688a02ba98f05b2a60d6fc1cb306ca825a3bd4e7eacb2fc0a75"
-  "windows https://github.com/obsproject/FFmpeg/commit/3558b7c140f86551cd65e7e7aa9815cc2db6e16b.patch?full_index=1 \
-    865bbc3dd389569786a6f6972faee7d3e36a7f0d724226c286dd2dfa8ac4efdf"
-  "windows https://github.com/obsproject/FFmpeg/commit/8451b7c1d4ade3477b9446b8cd5bfd6ddbf71e83.patch?full_index=1 \
-    5c41f4702927b0dc35fae9d22f32f6d2ac54f69ca7042e375a38ffdd17fff3af"
-  "windows https://github.com/obsproject/FFmpeg/commit/2927d888cbfda5d19b3147eb5b3a6f423b23cc33.patch?full_index=1 \
-    5d00f30410a3ceb8c47bcd14935151ead13ed834d87e570771836b1e3e7b768a"
+  "* ${0:a:h}/patches/FFmpeg/0003-FFmpeg-5.0.1-librist-7f3f3539e8.patch \
+    6b5797b7d897d04db5c8d82009a3705c330fc7461676d51712b1012ff0916f0b"
 )
 
 ## Build Steps
