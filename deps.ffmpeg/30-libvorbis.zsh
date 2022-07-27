@@ -14,8 +14,8 @@ local -A urls=(
 )
 local -A hashes=(
   macos "${0:a:h}/checksums/libvorbis-1.3.7.tar.xz.sha256"
-  linux 83a82dd9296400d811b78c06e9ca429e24dd1e5c
-  windows 83a82dd9296400d811b78c06e9ca429e24dd1e5c
+  linux 84c023699cdf023a32fa4ded32019f194afcdad0
+  windows 84c023699cdf023a32fa4ded32019f194afcdad0
 )
 local -a patches=(
   "windows ${0:a:h}/patches/libvorbis/0001-fix-outdated-windows-import-library-definition.patch \
