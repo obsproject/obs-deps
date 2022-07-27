@@ -3,21 +3,21 @@ autoload -Uz log_debug log_error log_info log_status log_output
 ## Dependency Information
 local name='mbedtls'
 local -A versions=(
-  macos 2.26.0
-  linux 2.26.0
-  windows 2.24.0
+  macos 2.28.1
+  linux 2.28.1
+  windows 2.28.1
 )
-local url='https://github.com/ARMmbed/mbedtls.git'
+local url='https://github.com/Mbed-TLS/mbedtls.git'
 local -A hashes=(
-  macos e483a77c85e1f9c1dd2eb1c5a8f552d2617fe400
-  linux e483a77c85e1f9c1dd2eb1c5a8f552d2617fe400
-  windows 523f0554b6cdc7ace5d360885c3f5bbcc73ec0e8
+  macos dd79db10014d85b26d11fe57218431f2e5ede6f2
+  linux dd79db10014d85b26d11fe57218431f2e5ede6f2
+  windows dd79db10014d85b26d11fe57218431f2e5ede6f2
 )
 local -a patches=(
   "macos ${0:a:h}/patches/mbedtls/0001-enable-posix-threading-support.patch \
-    363e6b8359f1c5fb8cc8e3c47439223c79de09935697e1d38c20336529fb9a5d"
+    ea52cf47ca01211cbadf03c0493986e8d4e0d1e9ab4aaa42365b2dea7b591188"
   "linux ${0:a:h}/patches/mbedtls/0001-enable-posix-threading-support.patch \
-    363e6b8359f1c5fb8cc8e3c47439223c79de09935697e1d38c20336529fb9a5d"
+    ea52cf47ca01211cbadf03c0493986e8d4e0d1e9ab4aaa42365b2dea7b591188"
 )
 
 ## Dependency Overrides
