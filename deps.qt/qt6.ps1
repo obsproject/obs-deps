@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'qt6',
-    [string] $Version = '6.3',
+    [string] $Version = '6.3.1',
     [string] $Uri = 'https://github.com/qt/qt5.git',
-    [string] $Hash = '9af3e106a7bb6bd4ed2b8c4d31a8d6090a582b02'
+    [string] $Hash = 'c3d2dfa229f87374fc5919b5c44606445cf94bd8'
 )
 
 # References:
