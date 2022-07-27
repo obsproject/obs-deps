@@ -4,8 +4,8 @@ param(
     [string] $Uri = 'https://github.com/pyenv-win/pyenv-win.git',
     [string] $Hash = '404cd4bdd0dff3a8650c890fa59a3761f328f36b',
     [hashtable] $PythonVersion = @{
-         x86 = '3.6.2-win32'
-         x64 = '3.6.2'
+         x86 = '3.8.10-win32'
+         x64 = '3.8.10'
     }
 )
 
