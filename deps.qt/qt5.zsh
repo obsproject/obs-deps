@@ -2,14 +2,12 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='qt5'
-local version=5.15.2
-local url='https://download.qt.io/official_releases/qt/5.15/5.15.2'
+local version=5.15.5
+local url='https://download.qt.io/official_releases/qt/5.15/5.15.5'
 local hash="${0:a:h}/checksums"
 local -a patches=(
   "macos ${0:a:h}/patches/Qt5/0001-QTBUG-74606.patch \
     6ba73e94301505214b85e6014db23b042ae908f2439f0c18214e92644a356638"
-  "macos ${0:a:h}/patches/Qt5/0002-QTBUG-88495.patch \
-    d60d663d2d940aa21cbcda65b1e60c4ecb1ec1900736e896367e5436d121206e"
   "macos ${0:a:h}/patches/Qt5/0003-QTBUG-90370.patch \
     277b16f02f113e60579b07ad93c35154d7738a296e3bf3452182692b53d29b85"
   "macos ${0:a:h}/patches/Qt5/0004-QTBUG-70137-1.patch \
@@ -21,7 +19,7 @@ local -a patches=(
   "macos ${0:a:h}/patches/Qt5/0007-QTBUG-97855.patch \
     d8620262ad3f689fdfe6b6e277ddfdd3594db3de9dbc65810a871f142faa9966"
   "macos ${0:a:h}/patches/Qt5/0008-fix-sdk-version-check.patch \
-    73a1194cf2ddffbbd3b640235217e543df4dc9aae444a4d1533011d0be46da2a"
+    167664bed786baf67902dce7ed63570cbc6a13f52f446e1a95d3a6991c89c274"
 )
 
 local -a qt_components=(
@@ -50,8 +48,8 @@ setup() {
   for component (${qt_components}) {
     log_info "Setup ${component} (%F{3}${target}%f)"
 
-    local _url="${url}/submodules/${component}-everywhere-src-${version}.tar.xz"
-    local _hash="${hash}/${component}-everywhere-src-${version}.tar.xz.sha256"
+    local _url="${url}/submodules/${component}-everywhere-opensource-src-${version}.tar.xz"
+    local _hash="${hash}/${component}-everywhere-opensource-src-${version}.tar.xz.sha256"
 
     log_info "Download ${_url}"
     dep_download ${_url} ${_hash}
