@@ -15,7 +15,7 @@
  # older SDKs we have to keep this.
  QT_MAC_SDK_VERSION_MIN = 10.14
  
--QT_MAC_SDK_VERSION_MAX = 10.15
+-QT_MAC_SDK_VERSION_MAX = 11.0
 +QT_MAC_SDK_VERSION_MAX = 13.0
  
  device.sdk = macosx
