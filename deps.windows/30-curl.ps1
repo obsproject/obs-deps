@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'curl',
-    [string] $Version = '7.73.0',
+    [string] $Version = '7.84.0',
     [string] $Uri = 'https://github.com/curl/curl.git',
-    [string] $Hash = '315ee3fe75dade912b48a21ceec9ccda0230d937'
+    [string] $Hash = '45ac4d019475df03562fe0ac54eb67e1d1de0ca7'
 )
 
 function Setup {
@@ -36,8 +36,8 @@ function Configure {
         $CmakeOptions
         '-DBUILD_CURL_EXE=OFF'
         '-DBUILD_TESTING=OFF'
-        '-DCMAKE_USE_LIBSSH2=OFF'
-        '-DCMAKE_USE_SCHANNEL=ON'
+        '-DCURL_USE_LIBSSH2=OFF'
+        '-DCURL_USE_SCHANNEL=ON'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options
