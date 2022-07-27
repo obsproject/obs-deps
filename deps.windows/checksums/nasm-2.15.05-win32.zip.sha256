@@ -7,8 +7,8 @@
     <ToString>Microsoft.PowerShell.Commands.FileHashInfo</ToString>
     <Props>
       <S N="Algorithm">SHA256</S>
-      <S N="Hash">D054BF8595EB2B31BB673A3CD4A999E61BB39394FEDD07A09F30F75B2524953B</S>
-      <S N="Path">windows_32-bit_build_temp\nasm-2.15.01-win64.zip</S>
+      <S N="Hash">258C7D1076E435511CF2FDF94E2281EADBDB9E3003FD57F356F446E2BCE3119E</S>
+      <S N="Path">windows_32-bit_build_temp\nasm-2.15.05-win32.zip</S>
     </Props>
   </Obj>
 </Objs>
