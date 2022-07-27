@@ -1,13 +1,13 @@
 param(
     [string] $Name = 'nasm',
-    [string] $Version = '2.15.01',
+    [string] $Version = '2.15.05',
     [hashtable] $Uris = @{
-        x86 = 'https://www.nasm.us/pub/nasm/releasebuilds/2.15.01/win32/nasm-2.15.01-win32.zip'
-        x64 = 'https://www.nasm.us/pub/nasm/releasebuilds/2.15.01/win64/nasm-2.15.01-win64.zip'
+        x86 = 'https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win32/nasm-2.15.05-win32.zip'
+        x64 = 'https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip'
     },
     [hashtable] $Hashes = @{
-        x86 = "${PSScriptRoot}/checksums/nasm-2.15.01-win32.zip.sha256"
-        x64 = "${PSScriptRoot}/checksums/nasm-2.15.01-win64.zip.sha256"
+        x86 = "${PSScriptRoot}/checksums/nasm-2.15.05-win32.zip.sha256"
+        x64 = "${PSScriptRoot}/checksums/nasm-2.15.05-win64.zip.sha256"
     }
 )
 
