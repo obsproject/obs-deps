@@ -1,8 +1,8 @@
-diff --git a/include/mbedtls/config.h b/include/mbedtls/config.h
-index 1e6e05275..98b5be699 100644
---- a/include/mbedtls/config.h
-+++ b/include/mbedtls/config.h
-@@ -1971,7 +1971,7 @@
+diff --git a/include/mbedtls/mbedtls_config.h b/include/mbedtls/mbedtls_config.h
+index 0558ee001..0d1c2f587 100644
+--- a/include/mbedtls/mbedtls_config.h
++++ b/include/mbedtls/mbedtls_config.h
+@@ -1725,7 +1725,7 @@
   *
   * Uncomment this to allow your own alternate threading implementation.
   */
@@ -11,12 +11,12 @@ index 1e6e05275..98b5be699 100644
  
  /**
   * \def MBEDTLS_THREADING_PTHREAD
-@@ -3286,7 +3286,7 @@
+@@ -1736,7 +1736,7 @@
   *
-  * Enable this layer to allow use of mutexes within mbed TLS
+  * Uncomment this to enable pthread mutexes.
   */
--//#define MBEDTLS_THREADING_C
-+#define MBEDTLS_THREADING_C
+-//#define MBEDTLS_THREADING_PTHREAD
++#define MBEDTLS_THREADING_PTHREAD
  
  /**
-  * \def MBEDTLS_TIMING_C
+  * \def MBEDTLS_USE_PSA_CRYPTO
