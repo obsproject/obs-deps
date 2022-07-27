@@ -2,9 +2,9 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='zlib'
-local version='1.2.11'
+local version='1.2.12'
 local url='https://github.com/madler/zlib.git'
-local hash='cacf7f1d4e3d44d871b605da3b647f07d718623f'
+local hash='21767c654d31d2dccdde4330529775c6c5fd5389'
 
 ## Dependency Overrides
 local targets=('windows-x*')
