@@ -32,7 +32,7 @@ function Expand-ArchiveExt {
             }
             break
         }
-        .7z {
+        { ( $_ -eq ".7z" ) -or ( $_ -eq ".exe" ) } {
             if ( Get-Command 7z ) {
                 Invoke-External 7z x -y $Path "-o${DestinationPath}"
             } else {
