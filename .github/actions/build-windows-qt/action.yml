@@ -25,7 +25,7 @@ runs:
       run: |
         $QtDepHash = (Get-FileHash -Path "${{ github.workspace }}/deps.qt/qt${{ inputs.qtVersion }}.ps1" -Algorithm "SHA256").Hash
         if ( Test-Path "${{ github.workspace }}/deps.qt/patches/Qt${{ inputs.qtVersion }}" ) {
-          $QtPatchHash = (Get-FileHash "${{ github.workspace }}/deps.qt/patches/Qt${{ inputs.qtVersion }}/win/0001-QTBUG-74606.patch" -Algorithm "SHA256").Hash
+          $QtPatchHash = (Get-FileHash "${{ github.workspace }}/deps.qt/patches/Qt${{ inputs.qtVersion }}/win/*.patch" -Algorithm "SHA256").Hash
         } else {
           $QtPatchHash = "nopatches"
         }

@@ -2,7 +2,13 @@ param(
     [string] $Name = 'qt6',
     [string] $Version = '6.3.1',
     [string] $Uri = 'https://github.com/qt/qt5.git',
-    [string] $Hash = 'c3d2dfa229f87374fc5919b5c44606445cf94bd8'
+    [string] $Hash = 'c3d2dfa229f87374fc5919b5c44606445cf94bd8',
+    [array] $Patches = @(
+        @{
+            PatchFile = "${PSScriptRoot}/patches/Qt6/win/0001-QTBUG-86344.patch"
+            HashSum = "688E7787CEA28047DF819AA00E16A81CA3BB7E331E7620268CCD38D1D533B4ED"
+        }
+    )
 )
 
 # References:
@@ -57,6 +63,11 @@ function Patch {
         $Params = $_
         Safe-Patch @Params
     }
+
+    Set-Location qtbase
+    Check-GitUser
+    git add .
+    git commit -m "Backport fix for QTBUG-86344"
 }
 
 function Configure {
