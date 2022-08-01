@@ -67,7 +67,7 @@ config() {
         -DUSE_OPENSSL_PC=OFF
         -DCMAKE_CXX_FLAGS="-static-libgcc -static-libstdc++ -w -pipe -fno-semantic-interposition"
         -DCMAKE_C_FLAGS="-static-libgcc -w -pipe -fno-semantic-interposition"
-        -DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -static-libstdc++ -L${target_config[output_dir]}/lib"
+        -DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -static-libstdc++ -L${target_config[output_dir]}/lib -Wl,--exclude-libs,ALL"
         -DSSL_LIBRARY_DIRS="${target_config[output_dir]}/lib"
         -DSSL_INCLUDE_DIRS="${target_config[output_dir]}/include"
       )
