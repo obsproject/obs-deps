@@ -44,7 +44,7 @@ function Setup {
 
     Check-GitUser
     $Options = @(
-        '--module-subset', 'qtbase,qtimageformats,qtmultimedia,qtsvg,qtwinextras'
+        '--module-subset', 'qtbase,qtimageformats,qtmultimedia,qtsvg,qtwinextras,qtserialport'
         '--force'
     )
     Invoke-External perl init-repository @Options
