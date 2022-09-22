@@ -91,6 +91,7 @@ config() {
   if (( ${+commands[ccache]} )) common_cmake_flags+=(-DQT_USE_CCACHE=ON)
 
   if [[ ${CPUTYPE} != "${arch}" && ${host_os} == 'macos' ]] {
+    unset VCPKG_ROOT
     if ! /usr/bin/pgrep -q oahd; then
       local -A other_arch=(arm64 x86_64 x86_64 arm64)
       common_cmake_flags+=(-DCMAKE_OSX_ARCHITECTURES="${CPUTYPE};${other_arch[${CPUTYPE}]}")
