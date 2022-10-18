@@ -22,9 +22,9 @@ runs:
         $FileName = (Get-ChildItem -Filter "windows-deps-qt*.zip").Name.Replace("-RelWithDebInfo", "")
         $PDBArchiveFileName = (Get-ChildItem -Filter "windows-deps-qt*.zip").Name.Replace("RelWithDebInfo", "ReleasePDBs")
         $PDBOutputName = "${{ inputs.outputName }}".Replace("${{ inputs.base }}", "${{ inputs.base }}-ReleasePDBs")
-        Write-Output "::set-output name=fileName::${FileName}"
-        Write-Output "::set-output name=pdbFileName::${PDBArchiveFileName}"
-        Write-Output "::set-output name=pdbOutputName::${PDBOutputName}"
+        "fileName=${FileName}" >> $env:GITHUB_OUTPUT
+        "pdbFileName=${PDBArchiveFileName}" >> $env:GITHUB_OUTPUT
+        "pdbOutputName=${PDBOutputName}" >> $env:GITHUB_OUTPUT
 
     - name: Extract RelWithDebInfo
       shell: pwsh

@@ -83,9 +83,9 @@ jobs:
           artifact_name="ffmpeg-${target}-${{ github.sha }}"
           file_name="${target%%-*}-ffmpeg-$(date +"%Y-%m-%d")-${target##*-}.tar.xz"
 
-          echo "::set-output name=artifactName::${artifact_name}"
-          echo "::set-output name=artifactFileName::${file_name}"
-          echo "::set-output name=ccacheDate::$(date +"%Y-%m-%d")"
+          echo "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
+          echo "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
+          echo "ccacheDate=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
 
       - name: Restore Compilation Cache
         id: ccache-cache
@@ -101,9 +101,9 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
-            echo "::set-output name=found::true"
+            echo "found=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=found::false"
+            echo "found=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Build FFmpeg
@@ -134,9 +134,9 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
-            echo "::set-output name=found::true"
+            echo "found=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=found::false"
+            echo "found=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Create universal binary package
@@ -185,9 +185,9 @@ jobs:
           artifact_name="deps-${target}-${{ github.sha }}"
           file_name="${target%%-*}-deps-$(date +"%Y-%m-%d")-${target##*-}.tar.xz"
 
-          echo "::set-output name=artifactName::${artifact_name}"
-          echo "::set-output name=artifactFileName::${file_name}"
-          echo "::set-output name=ccacheDate::$(date +"%Y-%m-%d")"
+          echo "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
+          echo "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
+          echo "ccacheDate=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
 
       - name: Restore Compilation Cache
         id: ccache-cache
@@ -203,9 +203,9 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
-            echo "::set-output name=found::true"
+            echo "found=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=found::false"
+            echo "found=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Build macOS Dependencies
@@ -236,9 +236,9 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
-            echo "::set-output name=found::true"
+            echo "found=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=found::false"
+            echo "found=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Create universal binary package
@@ -285,9 +285,9 @@ jobs:
           artifact_name="qt5-${target}-${{ github.sha }}"
           file_name="${target%%-*}-deps-qt5-$(date +"%Y-%m-%d")-${target##*-}.tar.xz"
 
-          echo "::set-output name=artifactName::${artifact_name}"
-          echo "::set-output name=artifactFileName::${file_name}"
-          echo "::set-output name=ccacheDate::$(date +"%Y-%m-%d")"
+          echo "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
+          echo "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
+          echo "ccacheDate=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
 
       - name: Restore Compilation Cache
         id: ccache-cache
@@ -303,9 +303,9 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
-            echo "::set-output name=found::true"
+            echo "found=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=found::false"
+            echo "found=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Build macOS Qt5
@@ -336,9 +336,9 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
-            echo "::set-output name=found::true"
+            echo "found=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=found::false"
+            echo "found=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Create universal binary package
@@ -376,9 +376,9 @@ jobs:
           artifact_name="qt6-${target}-${{ github.sha }}"
           file_name="${target%%-*}-deps-qt6-$(date +"%Y-%m-%d")-${target##*-}.tar.xz"
 
-          echo "::set-output name=artifactName::${artifact_name}"
-          echo "::set-output name=artifactFileName::${file_name}"
-          echo "::set-output name=ccacheDate::$(date +"%Y-%m-%d")"
+          echo "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
+          echo "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
+          echo "ccacheDate=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
 
       - name: Restore Compilation Cache
         id: ccache-cache
@@ -394,9 +394,9 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
-            echo "::set-output name=found::true"
+            echo "found=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=found::false"
+            echo "found=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Build macOS Qt6
@@ -436,9 +436,9 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
-            echo "::set-output name=found::true"
+            echo "found=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=found::false"
+            echo "found=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Create single architecture binary package
@@ -479,8 +479,8 @@ jobs:
           $ArtifactName="deps-windows-${Target}-${{ github.sha }}"
           $FileName="windows-deps-$(Get-Date -Format 'yyyy-MM-dd')-${Target}.zip"
 
-          Write-Output "::set-output name=artifactName::${ArtifactName}"
-          Write-Output "::set-output name=artifactFileName::${FileName}"
+          "artifactName=${ArtifactName}" >> $env:GITHUB_OUTPUT
+          "artifactFileName=${FileName}" >> $env:GITHUB_OUTPUT
 
       - name: 'Check for GitHub Labels'
         id: seekingTesters
@@ -499,7 +499,7 @@ jobs:
             $false
           }
 
-          Write-Output "::set-output name=found::$(([string]${LabelFound}).ToLower())"
+          "found=$(([string]${LabelFound}).ToLower())" >> $env:GITHUB_OUTPUT
 
       - name: Build ntv2 debug
         shell: pwsh
@@ -550,8 +550,8 @@ jobs:
           $ArtifactName="qt${{ matrix.qtVersion }}-windows-${{ matrix.target }}-${{ matrix.config }}-${{ github.sha }}"
           $FileName="windows-deps-qt${{ matrix.qtVersion }}-$(Get-Date -Format 'yyyy-MM-dd')-${{ matrix.target }}-${{ matrix.config }}.zip"
 
-          Write-Output "::set-output name=artifactName::${ArtifactName}"
-          Write-Output "::set-output name=artifactFileName::${FileName}"
+          "artifactName=${ArtifactName}" >> $env:GITHUB_OUTPUT
+          "artifactFileName=${FileName}" >> $env:GITHUB_OUTPUT
 
       - name: 'Check for GitHub Labels'
         id: seekingTesters
@@ -570,7 +570,7 @@ jobs:
             $false
           }
 
-          Write-Output "::set-output name=found::$(([string]${LabelFound}).ToLower())"
+          "found=$(([string]${LabelFound}).ToLower())" >> $env:GITHUB_OUTPUT
 
       - name: 'Build Windows Qt'
         uses: ./.github/actions/build-windows-qt
@@ -617,7 +617,7 @@ jobs:
             $false
           }
 
-          Write-Output "::set-output name=found::$(([string]${LabelFound}).ToLower())"
+          "found=$(([string]${LabelFound}).ToLower())" >> $env:GITHUB_OUTPUT
 
       - name: Create Windows Qt package
         if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
@@ -638,8 +638,8 @@ jobs:
       - name: Get Metadata
         id: metadata
         run: |
-          echo "::set-output name=version::${GITHUB_REF/refs\/tags\//}"
-          echo "::set-output name=date::$(date +"%Y-%m-%d")"
+          echo "version=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
+          echo "date=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
 
       - name: 'Download build artifacts'
         uses: actions/download-artifact@v3
