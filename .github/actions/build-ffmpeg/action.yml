@@ -37,7 +37,7 @@ runs:
         esac
 
         ffmpeg_dep_hash=$(cat ${{ github.workspace }}/deps.ffmpeg/*.zsh | sha256sum | cut -d " " -f 1)
-        echo "::set-output name=hash::${ffmpeg_dep_hash}"
+        echo "hash=${ffmpeg_dep_hash}" >> $GITHUB_OUTPUT
 
     - name: Restore FFmpeg Dependencies from Cache
       id: ffmpeg-deps-cache

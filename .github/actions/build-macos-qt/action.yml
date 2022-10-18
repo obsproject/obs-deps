@@ -36,8 +36,8 @@ runs:
           qt_patch_hash=$(echo '' | sha256sum | cut -d " " -f 1)
         }
 
-        print "::set-output name=depHash::${qt_dep_hash}"
-        print "::set-output name=patchHash::${qt_patch_hash}"
+        print "depHash=${qt_dep_hash}" >> $GITHUB_OUTPUT
+        print "patchHash=${qt_patch_hash}" >> $GITHUB_OUTPUT
 
     - name: Restore macOS Qt from Cache
       id: deps-cache

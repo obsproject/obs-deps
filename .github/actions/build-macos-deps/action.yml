@@ -37,7 +37,7 @@ runs:
         esac
 
         deps_hash=$(cat ${{ github.workspace }}/deps.macos/*.zsh | sha256sum | cut -d " " -f 1)
-        echo "::set-output name=hash::${deps_hash}"
+        echo "hash=${deps_hash}" >> $GITHUB_OUTPUT
 
     - name: Restore macOS Dependencies from Cache
       id: deps-cache

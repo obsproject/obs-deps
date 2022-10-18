@@ -82,8 +82,8 @@ runs:
 
         mv ${file_name} ${{ github.workspace }}/${file_name}
 
-        print "::set-output name=artifactName::${artifact_name}"
-        print "::set-output name=artifactFileName::${file_name}"
+        print "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
+        print "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
 
     - name: Publish Build Artifacts
       uses: actions/upload-artifact@v3

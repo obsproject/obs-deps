@@ -30,8 +30,8 @@ runs:
           $QtPatchHash = "nopatches"
         }
 
-        Write-Output "::set-output name=depHash::${QtDepHash}"
-        Write-Output "::set-output name=patchHash::${QtPatchHash}"
+        "depHash=${QtDepHash}" >> $env:GITHUB_OUTPUT
+        "patchHash=${QtPatchHash}" >> $env:GITHUB_OUTPUT
 
     - name: Restore Windows Qt from Cache
       id: deps-cache

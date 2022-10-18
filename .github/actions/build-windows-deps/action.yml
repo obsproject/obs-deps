@@ -26,7 +26,7 @@ runs:
         Get-Content .\deps.windows\*.ps1 > temp.txt
         $DepsHash = ((Get-FileHash -Path temp.txt -Algorithm SHA256).Hash)
 
-        Write-Host "::set-output name=hash::${DepsHash}"
+        "hash=${DepsHash}" >> $env:GITHUB_OUTPUT
 
     - name: Restore Windows Dependencies from Cache
       id: deps-cache
