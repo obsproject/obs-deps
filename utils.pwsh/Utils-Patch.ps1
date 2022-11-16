@@ -45,8 +45,11 @@ function Revert-Patch {
         $(if ( $DryRun ) { "--dry-run" })
         $(if ( $VerbosePreference -eq 'Continue' ) { "--verbose" })
         '-i', $PatchFile
-        $(if ( $Silent ) { " > NUL" })
     )
+
+    if ( ( $PSVersionTable.PSVersion -lt '7.3.0' ) -and ( $Silent ) ) {
+        $Params += @(" > NUL")
+    }
 
     Log-Information "Reverting patch $([System.IO.Path]::GetFileName($PatchFile))"
     Run-PatchExe @Params
@@ -75,8 +78,11 @@ function Apply-Patch {
         $(if ( $DryRun ) { "--dry-run" })
         $(if ( $VerbosePreference -eq 'Continue' ) { "--verbose" })
         '-i', $PatchFile
-        $(if ( $Silent ) { " > NUL" })
     )
+
+    if ( ( $PSVersionTable.PSVersion -lt '7.3.0' ) -and ( $Silent ) ) {
+        $Params += @(" > NUL")
+    }
 
     Log-Information "Applying patch $([System.IO.Path]::GetFileName($PatchFile))"
     Run-PatchExe @Params
