@@ -65,3 +65,21 @@ install() {
   cd "${dir}"
   progress cmake ${args}
 }
+
+fixup() {
+  cd "${dir}"
+
+  case ${target} {
+    macos*)
+      if (( shared_libs )) {
+        log_info "Fixup (%F{3}${target}%f)"
+        pushd "${target_config[output_dir]}"/lib
+        if [[ -h libjansson.dylib ]] {
+          rm libjansson.dylib
+          ln -s libjansson.*.dylib(.) libjansson.dylib
+        }
+        popd
+      }
+      ;;
+  }
+}
