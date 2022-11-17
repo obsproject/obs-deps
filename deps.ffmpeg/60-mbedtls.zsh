@@ -162,12 +162,28 @@ EOF"
 fixup() {
   cd "${dir}"
 
-  if [[ ${target} == "windows-x"* ]] {
-    log_info "Fixup (%F{3}${target}%f)"
-    if (( shared_libs )) {
-      mkdir -p ${target_config[output_dir]}/bin
-      autoload -Uz create_importlibs
-      create_importlibs ${target_config[output_dir]}/bin/libmbed*.dll
-    }
+  case ${target} {
+    macos*)
+      if (( shared_libs )) {
+        log_info "Fixup (%F{3}${target}%f)"
+        pushd "${target_config[output_dir]}"/lib
+
+        for file (libmbed(crypto|tls|x509).dylib(@)) {
+          if [[ -h "${file}" ]] {
+            rm "${file}"
+            ln -s "${file:r}".*.dylib(.) "${file}"
+          }
+        }
+        popd
+      }
+      ;;
+    windows*)
+      log_info "Fixup (%F{3}${target}%f)"
+      if (( shared_libs )) {
+        mkdir -p ${target_config[output_dir]}/bin
+        autoload -Uz create_importlibs
+        create_importlibs ${target_config[output_dir]}/bin/libmbed*.dll
+      }
+      ;;
   }
 }

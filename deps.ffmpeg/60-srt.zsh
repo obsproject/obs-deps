@@ -121,13 +121,26 @@ fixup() {
 
   rm ${target_config[output_dir]}/bin/(srt-ffp*)(N)
 
-  if [[ ${target} == "windows-x"* ]] {
-    log_info "Fixup (%F{3}${target}%f)"
-    if (( shared_libs )) {
-      autoload -Uz create_importlibs
-      create_importlibs ${target_config[output_dir]}/bin/libsrt*.dll
-    }
+  case ${target} {
+    macos*)
+      if (( shared_libs )) {
+        log_info "Fixup (%F{3}${target}%f)"
+        pushd "${target_config[output_dir]}"/lib
+        if [[ -h libsrt.dylib ]] {
+          rm libsrt.dylib
+          ln -s libsrt.*.dylib(.) libsrt.dylib
+        }
+        popd
+      }
+      ;;
+    windows*)
+      log_info "Fixup (%F{3}${target}%f)"
+      if (( shared_libs )) {
+        autoload -Uz create_importlibs
+        create_importlibs ${target_config[output_dir]}/bin/libsrt*.dll
+      }
 
-    autoload -Uz restore_dlls && restore_dlls
+      autoload -Uz restore_dlls && restore_dlls
+      ;;
   }
 }
