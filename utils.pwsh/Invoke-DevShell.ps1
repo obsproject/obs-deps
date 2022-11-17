@@ -51,8 +51,9 @@ Enter-VsDevShell @_Params
 
 Set-Location ${BuildPath}
 & ${BuildCommand}
-if ( `$LASTEXITCODE -ne 0 ) {
-    throw "${BuildCommand} failed with exit code `${LASTEXITCODE}
+
+if ( ! ( `$? ) ) {
+    throw "$(${BuildCommand} -replace '"','`"') failed."
 }
 "@
 
@@ -69,11 +70,11 @@ if ( `$LASTEXITCODE -ne 0 ) {
 
     & $PowerShellCommand -Command $DevShellCommand
 
-    $Result = $LASTEXITCODE
+    $Result = $?
 
     $ErrorActionPreference = $_EAP
 
-    if ( $Result -ne 0 ) {
-        throw "${PowerShellCommand} exited with non-zero code ${Result}."
+    if ( ! ( $Result ) ) {
+        throw "${PowerShellCommand} exited with error."
     }
 }
