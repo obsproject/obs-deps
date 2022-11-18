@@ -2,7 +2,8 @@ param(
     [string] $Name = 'vulkansdk',
     [string] $Version = '1.3.216.0',
     [string] $Uri = 'https://cdn-fastly.obsproject.com/downloads/VulkanSDK-1.3.216.0-Installer-Components.7z',
-    [string] $Hash = "${PSScriptRoot}/checksums/VulkanSDK-1.3.216.0-Installer-Components.7z.sha256"
+    [string] $Hash = "${PSScriptRoot}/checksums/VulkanSDK-1.3.216.0-Installer-Components.7z.sha256",
+    [array] $Targets = @('x86', 'x64')
 )
 
 function Setup {

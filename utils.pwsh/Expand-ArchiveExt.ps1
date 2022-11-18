@@ -20,7 +20,7 @@ function Expand-ArchiveExt {
     )
 
     switch ( [System.IO.Path]::GetExtension($Path) ) {
-        .zip {
+        { ( $_ -eq ".zip" ) -or ( $_ -eq ".nupkg" ) } {
             try {
                 Expand-Archive -Path $Path -DestinationPath $DestinationPath -Force:$Force
             } catch {

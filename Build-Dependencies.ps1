@@ -3,7 +3,7 @@ param(
     [ValidateSet('Debug', 'RelWithDebInfo', 'Release', 'MinSizeRel')]
     [string] $Configuration = 'Release',
     [string[]] $Dependencies,
-    [ValidateSet('x86', 'x64')]
+    [ValidateSet('x86', 'x64', 'arm64')]
     [string] $Target,
     [switch] $Clean,
     [switch] $Quiet,
