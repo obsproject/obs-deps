@@ -11,7 +11,7 @@
                      flv->validate_index[0].pos - 4 < next) {
 --- ./libavcodec/libaomenc.c  2021-10-24 22:47:07.000000000 +0200
 +++ ./libavcodec/libaomenc.c  2021-11-08 13:15:54.000000000 +0100
-@@ -1247,7 +1247,7 @@
+@@ -1337,7 +1337,7 @@
  #define OFFSET(x) offsetof(AOMContext, x)
  #define VE AV_OPT_FLAG_VIDEO_PARAM | AV_OPT_FLAG_ENCODING_PARAM
  static const AVOption options[] = {

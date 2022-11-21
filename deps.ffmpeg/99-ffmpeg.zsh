@@ -2,16 +2,12 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='FFmpeg'
-local version='5.0.1'
+local version='5.1.2'
 local url='https://github.com/FFmpeg/FFmpeg.git'
-local hash='9687cae2b468e09e35df4cea92cc2e6a0e6c93b3'
+local hash='eacfcbae690f914a4b1b4ad06999f138540cc3d8'
 local -a patches=(
-  "* ${0:a:h}/patches/FFmpeg/0001-FFmpeg-9010.patch \
-    97ac6385c2b7a682360c0cfb3e311ef4f3a48041d3f097d6b64f8c13653b6450"
-  "* ${0:a:h}/patches/FFmpeg/0002-FFmpeg-5.0.1-OBS.patch \
-    710fb5a381f7b68c95dcdf865af4f3c63a9405c305abef55d24c7ab54e90b182"
-  "* ${0:a:h}/patches/FFmpeg/0003-FFmpeg-5.0.1-librist-7f3f3539e8.patch \
-    6b5797b7d897d04db5c8d82009a3705c330fc7461676d51712b1012ff0916f0b"
+  "* ${0:a:h}/patches/FFmpeg/0001-FFmpeg-5.1.2-OBS.patch \
+    7fcb67d5e68a6ca3102c3a6aaba56750b22850552ccd8704c6636c174968ef56"
 )
 
 ## Build Steps
