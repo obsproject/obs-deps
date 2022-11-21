@@ -2,16 +2,13 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='libpng'
-local version='1.6.37'
-local url='https://downloads.sourceforge.net/project/libpng/libpng16/1.6.37/libpng-1.6.37.tar.xz'
-local hash="${0:a:h}/checksums/libpng-1.6.37.tar.xz.sha256"
-local patches=(
-  "${0:a:h}/patches/libpng/0001-enable-ARM-NEON-optimisations.patch \
-  fb8a209b466e8b2d9eba4c11f776412657b43386ef5db846dd1cc1476556aaa9"
+local version='1.6.38'
+local url='https://downloads.sourceforge.net/project/libpng/libpng16/1.6.38/libpng-1.6.38.tar.xz'
+local hash="${0:a:h}/checksums/libpng-1.6.38.tar.xz.sha256"
+local -a patches=(
+  "macos ${0:a:h}/patches/libpng/0001-enable-ARM-NEON-optimisations.patch \
+  f9ce2b5f8b63ef6caa9ab0195d27c52563652da56ab53956ffa51b34ff90ad4d"
 )
-
-## Dependency Overrides
-local -i force_static=1
 
 ## Build Steps
 setup() {
@@ -33,37 +30,29 @@ patch() {
   autoload -Uz apply_patch
 
   log_info "Patch (%F{3}${target}%f)"
-
   cd "${dir}"
 
-  case ${target} {
-    macos-*)
-      local patch
-      for patch (${patches}) {
-        local _url
-        local _hash
-        read _url _hash <<< "${patch}"
-        apply_patch "${_url}" "${_hash}"
-      }
-      ;;
+  local patch
+  local _target
+  local _url
+  local _hash
+  for patch (${patches}) {
+    read _target _url _hash <<< "${patch}"
+
+    if [[ ${_target} == "${target%%-*}" ]] apply_patch "${_url}" "${_hash}"
   }
 }
 
 config() {
   autoload -Uz mkcd progress
 
-  if (( shared_libs )) {
-    local shared=$(( shared_libs - force_static ))
-  } else {
-    local shared=0
-  }
   local _onoff=(OFF ON)
 
   args=(
     ${cmake_flags}
     -DPNG_TESTS=OFF
     -DPNG_STATIC=ON
-    -DPNG_SHARED="${_onoff[(( shared + 1 ))]}"
+    -DPNG_SHARED="${_onoff[(( shared_libs + 1 ))]}"
   )
 
   if [[ "${config}" == "Debug" ]] {
@@ -121,4 +110,18 @@ install() {
 
   cd "${dir}"
   progress cmake ${args}
+}
+
+fixup() {
+  cd "${dir}"
+
+  if [[ ${target} == "windows-x"* ]] {
+    log_info "Fixup (%F{3}${target}%f)"
+    if (( shared_libs )) {
+      autoload -Uz create_importlibs
+      create_importlibs ${target_config[output_dir]}/bin/libpng*.dll(:a)
+    }
+
+    rm ${target_config[output_dir]}/bin/(libpng*-config|png*fix*)(N)
+  }
 }
