@@ -2,7 +2,7 @@ param(
     [string] $Name = 'cmocka',
     [string] $Version = '1.1.5',
     [string] $Uri = 'https://git.cryptomilk.org/projects/cmocka.git',
-    [string] $Hash = 'bbf5ff7dd591a4b2e5dfa462d2f3e5de5826c4c0'
+    [string] $Hash = '59dc0013f9f29fcf212fe4911c78e734263ce24c'
 )
 
 function Setup {
