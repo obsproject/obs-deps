@@ -2,23 +2,12 @@ Instead of setting internal debug status based on CMake standard build types,
 libsrt uses inverse logic. This patches honors the official CMake types and
 sets internal debug status accordingly.
 
---- ./CMakeLists.txt	2019-12-06 18:32:50.000000000 +0100
-+++ ./CMakeLists.txt	2022-01-05 19:17:10.000000000 +0100
-@@ -14,6 +14,10 @@
- #project(SRT VERSION "1.4.1")
- project(SRT C CXX)
- 
-+if(POLICY CMP0057)
-+  cmake_policy(SET CMP0057 NEW)
-+endif()
-+
- set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
- include(haiUtil)
- include(FindPkgConfig)
-@@ -42,25 +42,18 @@
- set (SRT_VERSION 1.4.1)
- set_version_variables(SRT_VERSION ${SRT_VERSION})
- 
+--- ./CMakeLists.txt   2022-09-21 16:29:01.000000000 +0200
++++ ./CMakeLists.txt   2022-11-03 12:40:20.973886158 +0100
+@@ -47,14 +47,8 @@
+
+ include(GNUInstallDirs)
+
 -# The CMAKE_BUILD_TYPE seems not to be always set, weird.
 -if (NOT DEFINED ENABLE_DEBUG)
 -
@@ -28,26 +17,39 @@ sets internal debug status accordingly.
 -		set (ENABLE_DEBUG OFF)
 -	endif()
 +if(NOT CMAKE_BUILD_TYPE)
-+  set(CMAKE_BUILD_TYPE
-+      "RelWithDebInfo"
-+      CACHE STRING
-+            "Build type [Release, RelWithDebInfo, Debug, MinSizeRel]" FORCE)
-+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Release RelWithDebInfo
-+                                               Debug MinSizeRel)
++    set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build type [Release, RelWithDebInfo, Debug, MinSizeRel]" FORCE)
  endif()
- 
--# Set CMAKE_BUILD_TYPE properly, now that you know
--# that ENABLE_DEBUG is set as it should.
+
+ # XXX This is a kind of workaround - this part to set the build
+@@ -64,21 +58,16 @@
+ # sets _DEBUG and NDEBUG flags itself, so this shouldn't be done
+ # at all in this case.
+ if (NOT MICROSOFT)
 -
--if (ENABLE_DEBUG EQUAL 2)
--	set (CMAKE_BUILD_TYPE "RelWithDebInfo")
--elseif (ENABLE_DEBUG) # 1, ON, YES, TRUE, Y, or any other non-zero number
--	set (CMAKE_BUILD_TYPE "Debug")
--else()
--	set (CMAKE_BUILD_TYPE "Release")
-+set(_DEBUG_TYPES Debug RelWithDebInfo)
-+if(CMAKE_BUILD_TYPE IN_LIST _DEBUG_TYPES)
-+	set(ENABLE_DEBUG ON)
+-	# Set CMAKE_BUILD_TYPE properly, now that you know
+-	# that ENABLE_DEBUG is set as it should.
+-	if (ENABLE_DEBUG EQUAL 2)
+-		set (CMAKE_BUILD_TYPE "RelWithDebInfo")
+-		add_definitions(-DNDEBUG)
+-	elseif (ENABLE_DEBUG) # 1, ON, YES, TRUE, Y, or any other non-zero number
+-		set (CMAKE_BUILD_TYPE "Debug")
+-
+-		# Add _DEBUG macro in debug mode only, to enable SRT_ASSERT().
+-		add_definitions(-D_DEBUG)
+-	else()
+-		set (CMAKE_BUILD_TYPE "Release")
+-		add_definitions(-DNDEBUG)
+-	endif()
++    if(CMAKE_BUILD_TYPE STREQUAL Debug)
++        add_definitions(-D_DEBUG)
++        set(ENABLE_DEBUG 2)
++    elseif(CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo)
++        add_definitions(-DNDEBUG)
++        set(ENABLE_DEBUG ON)
++    else()
++        add_definitions(-DNDEBUG)
++        set(ENABLE_DEBUG OFF)
++    endif()
  endif()
- 
+
  message(STATUS "BUILD TYPE: ${CMAKE_BUILD_TYPE}")
