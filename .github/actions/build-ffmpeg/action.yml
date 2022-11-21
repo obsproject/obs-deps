@@ -50,6 +50,7 @@ runs:
           !${{ github.workspace }}/*_build_temp/*.tar.xz
           !${{ github.workspace }}/*_build_temp/*.zip
           !${{ github.workspace }}/*_build_temp/FFmpeg*
+          !${{ github.workspace }}/*_build_temp/x264-*-shared/
         key: ${{ inputs.target }}-ffmpeg-deps-${{ inputs.type }}-${{ steps.ffmpeg-env-setup.outputs.hash }}-${{ inputs.cacheRevision }}
 
     - name: Build and Install FFmpeg Dependencies
