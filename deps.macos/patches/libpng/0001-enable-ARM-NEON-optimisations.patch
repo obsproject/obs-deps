@@ -24,22 +24,17 @@
     /* By default the 'intrinsics' code in arm/filter_neon_intrinsics.c is used
      * if possible - if __ARM_NEON__ is set and the compiler version is not known
 
---- ./CMakeLists.txt  2019-04-14 20:10:32.000000000 +0200
-+++ ./CMakeLists.txt  2021-06-11 12:11:06.000000000 +0200
-@@ -67,7 +67,7 @@
+--- ./CMakeLists.txt  2022-09-14 21:42:00.000000000 +0200
++++ ./CMakeLists.txt  2022-11-03 12:15:04.250849789 +0100
+@@ -89,9 +89,9 @@
+ if(PNG_HARDWARE_OPTIMIZATIONS)
  
- # set definitions and sources for arm
- if(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm" OR
--  CMAKE_SYSTEM_PROCESSOR MATCHES "^aarch64")
-+  CMAKE_OSX_ARCHITECTURES MATCHES ".*arm64.*" OR CMAKE_SYSTEM_PROCESSOR MATCHES "^aarch64")
-   set(PNG_ARM_NEON_POSSIBLE_VALUES check on off)
-   set(PNG_ARM_NEON "check" CACHE STRING "Enable ARM NEON optimizations:
-      check: (default) use internal checking code;
-@@ -172,7 +172,7 @@
- 
- # set definitions and sources for arm
- if(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm" OR
--   CMAKE_SYSTEM_PROCESSOR MATCHES "^aarch64")
-+   CMAKE_OSX_ARCHITECTURES MATCHES ".*arm64.*" OR CMAKE_SYSTEM_PROCESSOR MATCHES "^aarch64")
-   add_definitions(-DPNG_ARM_NEON_OPT=0)
- endif()
+ # Set definitions and sources for ARM.
+-if(TARGET_ARCH MATCHES "^arm" OR
++if(TARGET_ARCH MATCHES ".*arm.*" OR
+    TARGET_ARCH MATCHES "^aarch64")
+-  if(TARGET_ARCH MATCHES "^arm64" OR
++  if(TARGET_ARCH MATCHES ".*arm64.*" OR
+      TARGET_ARCH MATCHES "^aarch64")
+     set(PNG_ARM_NEON_POSSIBLE_VALUES on off)
+     set(PNG_ARM_NEON "on"
