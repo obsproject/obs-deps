@@ -15,7 +15,19 @@ local -A hashes=(
 )
 
 ## Dependency Overrides
-local -i shared_libs=1
+local script_order=${${(s:-:)0:t:r}[1]}
+
+if (( script_order < 99 )) {
+  if [[ ${target} =~ 'windows'* ]] {
+    local -i shared_libs=0
+  } else {
+    local -i shared_libs=1
+  }
+} else {
+  local -a targets=('windows-x*')
+  local -i shared_libs=1
+  suffix="-shared"
+}
 
 ## Build Steps
 setup() {
@@ -26,10 +38,10 @@ setup() {
 clean() {
   cd "${dir}"
 
-  if [[ ${clean_build} -gt 0 && -f "build_${arch}/Makefile" ]] {
+  if [[ ${clean_build} -gt 0 && -f "build_${arch}${suffix:-}/Makefile" ]] {
     log_info "Clean build directory (%F{3}${target}%f)"
 
-    rm -rf "build_${arch}"
+    rm -rf "build_${arch}${suffix:-}${suffix:-}"
   }
 }
 
@@ -74,7 +86,7 @@ config() {
   log_info "Config (%F{3}${target}%f)"
   cd "${dir}"
 
-  mkcd "build_${arch}"
+  mkcd "build_${arch}${suffix:-}"
 
   args+=(
     --prefix="${target_config[output_dir]}"
@@ -111,7 +123,7 @@ build() {
   }
 
   log_info "Build (%F{3}${target}%f)"
-  cd "${dir}/build_${arch}"
+  cd "${dir}/build_${arch}${suffix:-}"
 
   log_debug "Running make -j ${num_procs}"
   PATH="${(j.:.)cc_path}" progress make -j "${num_procs}"
@@ -122,7 +134,7 @@ install() {
 
   log_info "Install (%F{3}${target}%f)"
 
-  cd "${dir}/build_${arch}"
+  cd "${dir}/build_${arch}${suffix:-}"
   progress make install
 }
 
