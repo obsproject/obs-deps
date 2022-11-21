@@ -2,9 +2,9 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='zlib'
-local version='1.2.12'
+local version='1.2.13'
 local url='https://github.com/madler/zlib.git'
-local hash='21767c654d31d2dccdde4330529775c6c5fd5389'
+local hash='04f42ceca40f73e2978b50e93806c2a18c1281fc'
 
 ## Dependency Overrides
 local targets=('windows-x*')
@@ -33,6 +33,11 @@ config() {
     -DCMAKE_SHARED_LIBRARY_PREFIX=""
     -DCMAKE_SHARED_LIBRARY_PREFIX_C=""
   )
+  if [[ ${target} == "windows-x"* ]] {
+    args+=(
+      -DZ_HAVE_UNISTD_H=OFF
+    )
+  }
 
   log_info "Config (%F{3}${target}%f)"
   cd "${dir}"
@@ -89,10 +94,6 @@ fixup() {
 
     pushd ${PWD}
     cd ${target_config[output_dir]}
-
-    autoload -Uz apply_patch
-    apply_patch "${funcsourcetrace[1]:A:h}/patches/zlib/0001-disable-unistd-import.patch" \
-      'e7534bbf425d4670757b329eebb7c997e4ab928030c7479bdd8fc872e3c6e728'
 
     mv lib/libzlib.dll.a lib/libz.dll.a
     mv lib/libzlibstatic.a lib/libz.a
