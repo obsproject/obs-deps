@@ -3,15 +3,15 @@ autoload -Uz log_debug log_error log_info log_status log_output
 ## Dependency Information
 local name='x264'
 local -A versions=(
-  macos r3095
-  linux r3095
-  windows r3095
+  macos r3101
+  linux r3101
+  windows r3101
 )
 local url='https://github.com/mirror/x264.git'
 local -A hashes=(
-  macos baee400fa9ced6f5481a728138fed6e867b0ff7f
-  linux baee400fa9ced6f5481a728138fed6e867b0ff7f
-  windows baee400fa9ced6f5481a728138fed6e867b0ff7f
+  macos b093bbe7d9bc642c8f24067cbdcc73bb43562eab
+  linux b093bbe7d9bc642c8f24067cbdcc73bb43562eab
+  windows b093bbe7d9bc642c8f24067cbdcc73bb43562eab
 )
 
 ## Dependency Overrides
