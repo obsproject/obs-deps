@@ -2,23 +2,15 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='qt5'
-local version=5.15.5
-local url='https://download.qt.io/official_releases/qt/5.15/5.15.5'
+local version=5.15.7
+local url='https://download.qt.io/official_releases/qt/5.15/5.15.7'
 local hash="${0:a:h}/checksums"
 local -a patches=(
   "macos ${0:a:h}/patches/Qt5/0001-QTBUG-74606.patch \
     6ba73e94301505214b85e6014db23b042ae908f2439f0c18214e92644a356638"
-  "macos ${0:a:h}/patches/Qt5/0003-QTBUG-90370.patch \
-    277b16f02f113e60579b07ad93c35154d7738a296e3bf3452182692b53d29b85"
-  "macos ${0:a:h}/patches/Qt5/0004-QTBUG-70137-1.patch \
-    216be72245a80b7762dc2e2bd720a4ea9b9c423ce9d006cce3985b63c0269ba3"
-  "macos ${0:a:h}/patches/Qt5/0005-QTBUG-70137-2.patch \
-    92d49352c321c653d6f5377e64603e48b38a9c1ec87a8956acba42459c151e42"
-  "macos ${0:a:h}/patches/Qt5/0006-QTBUG-70137-3.patch \
-    f8b220a444fcd0e121b8643e7526af33a4f30e0c85d11c28d40fcc7072d56783"
-  "macos ${0:a:h}/patches/Qt5/0007-QTBUG-97855.patch \
+  "macos ${0:a:h}/patches/Qt5/0002-QTBUG-97855.patch \
     d8620262ad3f689fdfe6b6e277ddfdd3594db3de9dbc65810a871f142faa9966"
-  "macos ${0:a:h}/patches/Qt5/0008-fix-sdk-version-check.patch \
+  "macos ${0:a:h}/patches/Qt5/0003-fix-sdk-version-check.patch \
     167664bed786baf67902dce7ed63570cbc6a13f52f446e1a95d3a6991c89c274"
 )
 
@@ -270,7 +262,7 @@ cross_prepare() {
     log_info "Fix qmake to enable building ${arch} on ${CPUTYPE} host"
 
     log_status "Apply patches to qmake makefile..."
-    apply_patch "${funcfiletrace[1]:a:h}/patches/Qt5/0009-qmake-append-cflags-and-ldflags.patch" \
+    apply_patch "${funcfiletrace[1]:a:h}/patches/Qt5/0004-qmake-append-cflags-and-ldflags.patch" \
       "6c880f3b744222ed2ac2eb5bca0ff0ba907e1d77605ad4b06f814e4d5813e496"
 
     log_status "Remove thin qmake"
