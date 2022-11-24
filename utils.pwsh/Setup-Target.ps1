@@ -48,6 +48,7 @@ function Setup-BuildParameters {
         '-G', $VisualStudioId
         "-DCMAKE_INSTALL_PREFIX=$($script:ConfigData.OutputPath)"
         "-DCMAKE_PREFIX_PATH=$($script:ConfigData.OutputPath)"
+        "-DCMAKE_IGNORE_PREFIX_PATH=C:\Strawberry\c"
         "-DCMAKE_BUILD_TYPE=${script:Configuration}"
         '--no-warn-unused-cli'
     )
