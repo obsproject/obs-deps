@@ -82,7 +82,7 @@ function Configure {
         $QtBuildConfiguration = '-release'
     }
 
-    $BuildCommand = "..\..\..\qt6\configure -opensource -confirm-license ${QtBuildConfiguration} -nomake examples -nomake tests -schannel -no-dbus -no-freetype -no-icu -no-openssl -no-feature-androiddeployqt -no-feature-pdf -no-feature-printsupport -no-feature-qmake -no-feature-sql -no-feature-testlib -no-feature-windeployqt -DQT_NO_PDF -DCMAKE_IGNORE_PREFIX_PATH=C:/Strawberry/c -prefix ${BuildPath}"
+    $BuildCommand = "..\..\..\qt6\configure -opensource -confirm-license ${QtBuildConfiguration} -nomake examples -nomake tests -schannel -no-dbus -no-freetype -no-icu -no-openssl -no-feature-androiddeployqt -no-feature-pdf -no-feature-printsupport -no-feature-qmake -no-feature-sql -no-feature-testlib -no-feature-windeployqt -qt-doubleconversion -qt-pcre -qt-zlib -qt-libjpeg -qt-libpng -qt-libmd4c -qt-tiff -qt-webp -DQT_NO_PDF -DCMAKE_IGNORE_PREFIX_PATH=C:/Strawberry/c -prefix ${BuildPath}"
 
     $Params = @{
         BasePath = (Get-Location | Convert-Path)
