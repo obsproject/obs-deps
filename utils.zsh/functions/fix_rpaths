@@ -29,12 +29,13 @@ for lib ($@) {
     log_debug "Working on ${linked_lib}"
     linked_lib=${linked_lib//[[:space:]]/}
     if [[ ${linked_lib:A:h} == "${lib:A:h}" ]] {
-
-      install_name_tool -change "${linked_lib}" "@rpath/${linked_lib##*/}" "${lib}"
+      install_name_tool -change "${linked_lib}" "@rpath/${${linked_lib##*/}%%.*}.dylib" "${lib}"
       log_status "Fixed library path ${linked_lib:A:h} in ${lib##*/}"
+    } elif [[ ${${linked_lib:A:h}##*/} == '@rpath' ]] {
+      install_name_tool -change "${linked_lib}" "@rpath/${${linked_lib##*/}%%.*}.dylib" "${lib}"
     }
   done <<< "${libs}"
 
-  install_name_tool -id "@rpath/${lib_basename}" "${lib}"
+  install_name_tool -id "@rpath/${lib_name}.dylib" "${lib}"
   log_status "Fixed id of ${lib##*/}"
 }
