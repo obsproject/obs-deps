@@ -111,17 +111,3 @@ install() {
   cd "${dir}"
   progress cmake ${args}
 }
-
-fixup() {
-  cd "${dir}"
-
-  if [[ ${target} == "windows-x"* ]] {
-    log_info "Fixup (%F{3}${target}%f)"
-    if (( shared_libs )) {
-      autoload -Uz create_importlibs
-      create_importlibs ${target_config[output_dir]}/bin/libpng*.dll(:a)
-    }
-
-    rm ${target_config[output_dir]}/bin/(libpng*-config|png*fix*)(N)
-  }
-}
