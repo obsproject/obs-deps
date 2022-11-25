@@ -85,13 +85,13 @@ package() {
   if [[ ${PACKAGE_NAME} != 'qt'* ]] {
     log_status "Cleanup unnecessary files"
 
-    rm -rf lib/^(*.dylib|libajantv*|*.so*|*.lib)(N)
+    rm -rf lib/^(*.dylib|libajantv*|*.a|*.so*|*.lib|cmake)(N)
     rm -rf bin/^(*.exe|*.dll|*.pdb|swig)(N)
 
     if [[ -f bin/swig ]] {
       swig_lib=(share/swig/*(/))
       pushd ${swig_lib:h}
-      ln -s ${swig_lib:t} CURRENT
+      ln -sf ${swig_lib:t} CURRENT
       popd
     }
 
