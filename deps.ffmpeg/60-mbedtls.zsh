@@ -175,6 +175,9 @@ fixup() {
           }
         }
         popd
+
+        autoload -Uz fix_rpaths
+        fix_rpaths "${target_config[output_dir]}"/lib/libmbed*.dylib(.)
       }
       ;;
     windows*)
