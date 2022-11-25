@@ -79,6 +79,13 @@ fixup() {
           ln -s libjansson.*.dylib(.) libjansson.dylib
         }
         popd
+
+        autoload -Uz fix_rpaths
+        fix_rpaths "${target_config[output_dir]}"/lib/libjansson*.dylib
+
+        for file ("${target_config[output_dir]}"/lib/cmake/jansson/janssonTargets-*.cmake) {
+          sed -i '' 's/libjansson.*.dylib/libjansson.dylib/' "${file}"
+        }
       }
       ;;
   }
