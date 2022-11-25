@@ -130,6 +130,9 @@ fixup() {
           ln -s libsrt.*.dylib(.) libsrt.dylib
         }
         popd
+
+        autoload -Uz fix_rpaths
+        fix_rpaths "${target_config[output_dir]}"/lib/libsrt*.dylib(.)
       }
       ;;
     windows*)
