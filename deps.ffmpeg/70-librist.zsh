@@ -133,8 +133,8 @@ fixup() {
     log_info "Fixup (%F{3}${target}%f)"
     case ${target} {
       macos*)
-          autoload -Uz fix_rpaths
-          fix_rpaths "${target_config[output_dir]}"/lib/librist*.dylib(.)
+        autoload -Uz fix_rpaths
+        fix_rpaths "${target_config[output_dir]}"/lib/librist*.dylib(.)
 
         strip_tool=strip
         strip_files=("${target_config[output_dir]}"/lib/librist*.dylib(.))
