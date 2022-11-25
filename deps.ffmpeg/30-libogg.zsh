@@ -111,11 +111,14 @@ install() {
 fixup() {
   cd "${dir}"
 
-  if [[ ${target} == "windows-x"* ]] {
-    if (( shared_libs )) {
-      log_info "Fixup (%F{3}${target}%f)"
-      autoload -Uz create_importlibs
-      create_importlibs ${target_config[output_dir]}/bin/libogg*.dll
-    }
+  case ${target} {
+    macos-*|linux-*) rm -rf "${target_config[output_dir]}"/lib/cmake/Ogg ;;
+    windows-*)
+      if (( shared_libs )) {
+        log_info "Fixup (%F{3}${target}%f)"
+        autoload -Uz create_importlibs
+        create_importlibs ${target_config[output_dir]}/bin/libogg*.dll
+      }
+      ;;
   }
 }
