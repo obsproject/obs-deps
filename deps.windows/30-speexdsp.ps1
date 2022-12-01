@@ -6,7 +6,7 @@ param(
     [array] $Patches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/speexdsp/0001-Add-CMakeLists.patch"
-            HashSum = '3790e04820570ce911961c11291e4310583d41ad5f14a1dc5b5cc83485458c46'
+            HashSum = 'a7e625bdf83fea2c0d0a215e7e04a44c0ac0f892217895481723e33e0008ba18'
         }
     )
 )
