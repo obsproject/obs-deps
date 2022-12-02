@@ -38,6 +38,7 @@ function Configure {
         '-DBUILD_TESTING=OFF'
         '-DCURL_USE_LIBSSH2=OFF'
         '-DCURL_USE_SCHANNEL=ON'
+        '-DCURL_ZLIB=OFF'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options
