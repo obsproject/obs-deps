@@ -62,44 +62,46 @@ function Run-Stages {
 
         . $Dependency
 
-        if ( ! ( $Targets.contains($Target) ) ) { continue }
-
-        if ( $Version -eq '' ) { $Version = $Versions[$Target] }
-        if ( $Uri -eq '' ) { $Uri = $Uris[$Target] }
-        if ( $Hash -eq '' ) { $Hash = $Hashes[$Target] }
-
-        if ( $Path -eq '' ) { $Path = [System.IO.Path]::GetFileNameWithoutExtension($Uri) }
-
-        Log-Output 'Initializing build'
-
-        $Stages | ForEach-Object {
-            $Stage = $_
-            $script:StageName = $Name
-            try {
-                Push-Location -Stack BuildTemp
-                if ( Test-Path function:$Stage ) {
-                    . $Stage
+        if ( ( $Targets.contains($Target) ) ) {
+            if ( $Version -eq '' ) { $Version = $Versions[$Target] }
+            if ( $Uri -eq '' ) { $Uri = $Uris[$Target] }
+            if ( $Hash -eq '' ) { $Hash = $Hashes[$Target] }
+    
+            if ( $Path -eq '' ) { $Path = [System.IO.Path]::GetFileNameWithoutExtension($Uri) }
+    
+            Log-Output 'Initializing build'
+    
+            $Stages | ForEach-Object {
+                $Stage = $_
+                $script:StageName = $Name
+                try {
+                    Push-Location -Stack BuildTemp
+                    if ( Test-Path function:$Stage ) {
+                        . $Stage
+                    }
+                } catch {
+                    Pop-Location -Stack BuildTemp
+                    Log-Error "Error during build step ${Stage} - $_"
+                } finally {
+                    $StageName = ''
+                    Pop-Location -Stack BuildTemp
                 }
-            } catch {
-                Pop-Location -Stack BuildTemp
-                Log-Error "Error during build step ${Stage} - $_"
-            } finally {
-                $StageName = ''
-                Pop-Location -Stack BuildTemp
             }
+    
+            if ( Test-Path "$PSScriptRoot/licenses/${Name}" ) {
+                Log-Information "Install license files"
+    
+                $null = New-Item -ItemType Directory -Path "$($ConfigData.OutputPath)/licenses" -ErrorAction SilentlyContinue
+                Copy-Item -Path "$PSScriptRoot/licenses/${Name}" -Recurse -Force -Destination "$($ConfigData.OutputPath)/licenses"
+            }
+        } else {
+            Log-Debug "Skipping $Name"
         }
 
         $Stages | ForEach-Object {
             Log-Debug "Removing function $_"
             Remove-Item -ErrorAction 'SilentlyContinue' function:$_
             $script:StageName = ''
-        }
-
-        if ( Test-Path "$PSScriptRoot/licenses/${Name}" ) {
-            Log-Information "Install license files"
-
-            $null = New-Item -ItemType Directory -Path "$($ConfigData.OutputPath)/licenses" -ErrorAction SilentlyContinue
-            Copy-Item -Path "$PSScriptRoot/licenses/${Name}" -Recurse -Force -Destination "$($ConfigData.OutputPath)/licenses"
         }
     }
 }
