@@ -11,7 +11,8 @@ param(
     [switch] $SkipAll,
     [switch] $SkipBuild,
     [switch] $SkipDeps,
-    [switch] $SkipUnpack
+    [switch] $SkipUnpack,
+    [string] $QtHostPath = $Env:Qt6_DIR
 )
 
 $ErrorActionPreference = "Stop"
@@ -170,6 +171,10 @@ function Build-Main {
         $script:PackageName = 'qt5'
     } elseif ( $Dependencies -eq 'qt6' ) {
         $script:PackageName = 'qt6'
+        
+        if ( $Target -eq 'arm64' ) {
+            $script:QtHostPath = $QtHostPath
+        }
     }
 
     $UtilityFunctions = Get-ChildItem -Path $PSScriptRoot/utils.pwsh/*.ps1 -Recurse

@@ -8,7 +8,8 @@ param(
             PatchFile = "${PSScriptRoot}/patches/Qt5/win/0001-QTBUG-74606.patch"
             HashSum = "BAE8765FC74FB398BC3967AD82760856EE308E643A8460C324D36A4D07063001"
         }
-    )
+    ),
+    [array] $Targets = @('x86', 'x64')
 )
 
 # References:
@@ -96,7 +97,44 @@ function Configure {
         $QtBuildConfiguration = '-release'
     }
 
-    $BuildCommand = "..\..\..\qt5\configure -opensource -confirm-license ${QtBuildConfiguration} -no-strip -nomake examples -nomake tests -no-compile-examples -schannel -no-dbus -no-freetype -no-harfbuzz -no-icu -no-feature-itemmodeltester -no-feature-printdialog -no-feature-printer -no-feature-printpreviewdialog -no-feature-printpreviewwidget -no-feature-sql -no-feature-sqlmodel -no-feature-testlib -no-sql-db2 -no-sql-ibase -no-sql-mysql -no-sql-oci -no-sql-odbc -no-sql-psql -no-sql-sqlite2 -no-sql-sqlite -no-sql-tds -DQT_NO_PDF -DQT_NO_PRINTER -mp -prefix ${BuildPath}"
+    $BuildCommand = @(
+        "..\..\..\qt5\configure",
+        "-opensource",
+        "-confirm-license",
+        "${QtBuildConfiguration}",
+        "-no-strip",
+        "-nomake",
+        "examples",
+        "-nomake",
+        "tests",
+        "-no-compile-examples",
+        "-schannel",
+        "-no-dbus",
+        "-no-freetype",
+        "-no-harfbuzz",
+        "-no-icu",
+        "-no-feature-itemmodeltester",
+        "-no-feature-printdialog",
+        "-no-feature-printer",
+        "-no-feature-printpreviewdialog",
+        "-no-feature-printpreviewwidget",
+        "-no-feature-sql",
+        "-no-feature-sqlmodel",
+        "-no-feature-testlib",
+        "-no-sql-db2",
+        "-no-sql-ibase",
+        "-no-sql-mysql",
+        "-no-sql-oci",
+        "-no-sql-odbc",
+        "-no-sql-psql",
+        "-no-sql-sqlite2",
+        "-no-sql-sqlite",
+        "-no-sql-tds",
+        "-DQT_NO_PDF",
+        "-DQT_NO_PRINTER",
+        "-mp",
+        "-prefix", "${BuildPath}"
+    )
 
     $Params = @{
         BasePath = (Get-Location | Convert-Path)
