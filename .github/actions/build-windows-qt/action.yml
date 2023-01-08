@@ -51,7 +51,22 @@ runs:
       shell: pwsh
       run: ./Build-Dependencies.ps1 -Dependencies "Qt${{ inputs.qtVersion }}" -SkipBuild -SkipUnpack -Target ${{ inputs.target }} -Configuration ${{ inputs.config }} -Shared
 
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '6.4.1'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2019_64'
+        modules: 'qtimageformats qtmultimedia qtshadertools'
+        archives: 'qtsvg qtbase'
+        cache: true
+
     - name: Build and Install Windows Qt
-      if: ${{ steps.deps-cache.outputs.cache-hit != 'true' }}
+      if: ${{ steps.deps-cache.outputs.cache-hit != 'true' && inputs.qtVersion > '5'}}
+      shell: pwsh
+      run: ./Build-Dependencies.ps1 -Dependencies "Qt${{ inputs.qtVersion }}"  -Target ${{ inputs.target }} -Configuration ${{ inputs.config }} -Shared -QtHostPath $Env:Qt6_DIR
+    - name: Build and Install Windows Qt
+      if: ${{ steps.deps-cache.outputs.cache-hit != 'true' && inputs.qtVersion == '5'}}
       shell: pwsh
       run: ./Build-Dependencies.ps1 -Dependencies "Qt${{ inputs.qtVersion }}"  -Target ${{ inputs.target }} -Configuration ${{ inputs.config }} -Shared
