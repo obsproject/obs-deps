@@ -7,7 +7,7 @@ local url='https://gitlab.com/AOMediaCodec/SVT-AV1.git'
 local hash='91b94efb2809e83d9bf041d8575b32f234dfef27'
 
 ## Dependency Overrides
-local targets=(windows-x64 'linux-*')
+local targets=(windows-x64 windows-arm64 'linux-*')
 
 ## Build Steps
 setup() {
@@ -83,7 +83,7 @@ install() {
 fixup() {
   cd "${dir}"
 
-  if [[ ${target} == "windows-x"* ]] {
+  if [[ ${target} == "windows-"* ]] {
     if (( shared_libs )) {
       mv (#i)"${target_config[output_dir]}"/lib/libsvtav1*.dll "${target_config[output_dir]}"/bin/
       log_info "Fixup (%F{3}${target}%f)"

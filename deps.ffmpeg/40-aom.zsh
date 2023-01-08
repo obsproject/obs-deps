@@ -11,7 +11,7 @@ local -a patches=(
 )
 
 ## Dependency Overrides
-local targets=(windows-x64 'macos-*' 'linux-*')
+local targets=(windows-x64 windows-arm64 'macos-*' 'linux-*')
 
 ## Build Steps
 setup() {
@@ -66,6 +66,7 @@ config() {
 
   case ${target} {
     macos-arm64) args+=(-DCONFIG_RUNTIME_CPU_DETECT=0) ;;
+    windows-arm64) args+=(-DCMAKE_TOOLCHAIN_FILE="build/cmake/toolchains/arm64-mingw-gcc.cmake") ;;
     windows-x*) args+=(-DCMAKE_TOOLCHAIN_FILE="build/cmake/toolchains/${target_config[cmake_arch]}-mingw-gcc.cmake")
   }
 
@@ -112,7 +113,7 @@ install() {
 fixup() {
   cd "${dir}"
 
-  if [[ ${target} == "windows-x"* ]] {
+  if [[ ${target} == "windows-"* ]] {
     if (( shared_libs )) {
       log_info "Fixup (%F{3}${target}%f)"
       autoload -Uz create_importlibs

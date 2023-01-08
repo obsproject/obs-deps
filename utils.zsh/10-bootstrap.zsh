@@ -46,6 +46,7 @@ bootstrap() {
     macos-universal
     windows-x64
     windows-x86
+    windows-arm64
     linux-x86_64
   )
   local -r -a _valid_configs=(Debug RelWithDebInfo Release MinSizeRel)

@@ -103,7 +103,7 @@ config() {
       )
 
       if [[ ${CPUTYPE} != "${arch}" ]] args+=(--enable-cross-compile)
-    ;;
+      ;;
     linux-*)
       ff_cflags=(
         -I"${target_config[output_dir]}"/include
@@ -138,7 +138,7 @@ config() {
 
       if [[ ${CPUTYPE} != "${arch}" ]] args+=(--enable-cross-compile)
       ;;
-    windows-x*)
+    windows-*)
       ff_cflags=(
         -I"${target_config[output_dir]}"/include
         -static-libgcc
@@ -180,8 +180,16 @@ config() {
         --disable-mediafoundation
       )
 
+      if [[ ${target} == "windows-arm64" ]]; then
+        ff_ldflags+=(-Wl,-Bdynamic)
+        args+=(
+          --cc=aarch64-w64-mingw32-clang
+          --cxx=aarch64-w64-mingw32-clang++
+        )
+      fi
+
       if [[ ${arch} == 'x64' ]] args+=(--enable-libaom --enable-libsvtav1)
-    ;;
+      ;;
   }
 
   args+=(
@@ -279,7 +287,7 @@ function _fixup_ffmpeg() {
 
       fix_rpaths "${target_config[output_dir]}"/lib/lib(sw|av|postproc)*.dylib
       ;;
-    windows-x*)
+    windows-*)
       mv "${target_config[output_dir]}"/bin/(sw|av|postproc)*.lib "${target_config[output_dir]}"/lib
 
       if (( ! shared_libs )) { autoload -Uz restore_dlls && restore_dlls }

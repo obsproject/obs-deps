@@ -24,7 +24,7 @@ if (( script_order < 99 )) {
     local -i shared_libs=1
   }
 } else {
-  local -a targets=('windows-x*')
+  local -a targets=('windows-*')
   local -i shared_libs=1
   suffix="-shared"
 }
@@ -75,7 +75,7 @@ config() {
       ;;
     macos-arm64) args+=(--host="aarch64-apple-darwin${target_config[darwin_target]}") ;;
     macos-x86_64) args+=(--host="x86_64-apple-darwin${target_config[darwin_target]}") ;;
-    windows-x*)
+    windows-*)
       args+=(
         --host="${target_config[cross_prefix]}-pc-mingw32"
         --cross-prefix="${target_config[cross_prefix]}-w64-mingw32-"
@@ -159,7 +159,7 @@ fixup() {
         strip_tool=strip
         strip_files=("${target_config[output_dir]}"/lib/libx264.so.*(.))
         ;;
-      windows-x*)
+      windows-*)
         autoload -Uz create_importlibs
         create_importlibs "${target_config[output_dir]}"/bin/libx264-*.dll(.)
 

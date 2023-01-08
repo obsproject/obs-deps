@@ -27,7 +27,7 @@ runs:
           Linux)
             if ! type zsh > /dev/null 2>&1; then
               sudo apt update
-              sudo apt install zsh
+              sudo apt install zsh yasm
             fi
             ;;
           macOS)

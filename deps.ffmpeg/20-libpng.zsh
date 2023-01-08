@@ -62,7 +62,7 @@ config() {
   }
 
   case ${target} {
-    macos-arm64 | macos-universal)
+    macos-arm64 | macos-universal | windows-arm64)
       args+=(
         -DCMAKE_ASM_FLAGS="-DPNG_ARM_NEON_IMPLEMENTATION=1"
         -DPNG_ARM_NEON=on
@@ -115,7 +115,7 @@ install() {
 fixup() {
   cd "${dir}"
 
-  if [[ ${target} == "windows-x"* ]] {
+  if [[ ${target} == "windows-"* ]] {
     log_info "Fixup (%F{3}${target}%f)"
     if (( shared_libs )) {
       autoload -Uz create_importlibs

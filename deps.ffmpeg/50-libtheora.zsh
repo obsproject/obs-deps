@@ -59,7 +59,7 @@ patch() {
     if [[ ${_target} == "${target%%-*}" ]] apply_patch "${_url}" "${_hash}"
   }
 
-  if [[ ${target} = "windows-x"* ]] {
+  if [[ ${target} = "windows-"* ]] {
     sed -i -e 's/\r$//' win32/xmingw32/libtheoraenc-all.def
     sed -i -e 's/\r$//' win32/xmingw32/libtheoradec-all.def
   }
@@ -76,13 +76,13 @@ config() {
       ;;
     macos-arm64) args+=(--host="arm-apple-darwin${target_config[darwin_target]}") ;;
     macos-x86_64) args+=(--host="x86_64-apple-darwin${target_config[darwin_target]}") ;;
-    windows-x*) args+=(--host="${target_config[cross_prefix]}-w64-mingw32") ;;
+    windows-*) args+=(--host="${target_config[cross_prefix]}-w64-mingw32") ;;
   }
 
   log_info "Config (%F{3}${target}%f)"
   cd "${dir}"
 
-  if [[ ${target} == "windows-x"* ]] progress ./autogen.sh
+  if [[ ${target} == "windows-"* ]] progress ./autogen.sh
 
   mkcd "build_${arch}"
 
@@ -154,7 +154,7 @@ fixup() {
         autoload -Uz fix_rpaths
         fix_rpaths "${target_config[output_dir]}"/lib/libtheora*.dylib(.)
         ;;
-      windows-x*)
+      windows-*)
         autoload -Uz create_importlibs
         create_importlibs "${target_config[output_dir]}"/bin/libtheora*.dll(.)
         ;;

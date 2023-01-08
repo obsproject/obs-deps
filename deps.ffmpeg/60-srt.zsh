@@ -8,6 +8,8 @@ local hash="${0:a:h}/checksums/v1.5.1.tar.gz.sha256"
 local -a patches=(
   "* ${0:a:h}/patches/srt/0001-enable-proper-cmake-build-types.patch \
     d762ed8c4ce36f98329a5b7e1fcc10d67b38f23d100e1ed66da5d64c970e8a56"
+  "* ${0:a:h}/patches/srt/0002-identify-parameters-with-a-prepended-l.patch \
+    3219de1f936c138b71dcd5ce36064bfba449c6c7d18b8a2f3052a09308bd5a6a"
 )
 
 ## Dependency Overrides
@@ -60,19 +62,22 @@ config() {
     -DUSE_ENCLIB="mbedtls"
   )
 
-  case ${target} {
-    windows-x*)
-      args+=(
+  if [[ ${target} == "windows-"* ]] {
+          args+=(
         -DUSE_OPENSSL_PC=OFF
         -DCMAKE_CXX_FLAGS="-static-libgcc -static-libstdc++ -w -pipe -fno-semantic-interposition"
         -DCMAKE_C_FLAGS="-static-libgcc -w -pipe -fno-semantic-interposition"
-        -DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -static-libstdc++ -L${target_config[output_dir]}/lib -Wl,--exclude-libs,ALL"
         -DSSL_LIBRARY_DIRS="${target_config[output_dir]}/lib"
         -DSSL_INCLUDE_DIRS="${target_config[output_dir]}/include"
       )
 
+      if [[ ${target} == "windows-arm64" ]] {
+        args+=(-DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -static-libstdc++ -L${target_config[output_dir]}/lib")
+      } else {
+        args+=(-DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc -static-libstdc++ -L${target_config[output_dir]}/lib -Wl,--exclude-libs,ALL")
+      }
+      
       autoload -Uz hide_dlls && hide_dlls
-      ;;
   }
 
   log_info "Config (%F{3}${target}%f)"

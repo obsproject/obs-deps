@@ -1,6 +1,31 @@
+diff --git a/cross_mingw_arm64.txt b/cross_mingw_arm64.txt
+new file mode 100644
+index 0000000..f4fb2a4
+--- /dev/null
++++ b/cross_mingw_arm64.txt
+@@ -0,0 +1,19 @@
++[host_machine]
++system = 'windows'
++cpu_family = 'aarch64'
++cpu = 'armv8'
++endian = 'little'
++
++[binaries]
++c = 'aarch64-w64-mingw32-gcc'
++cpp = 'aarch64-w64-mingw32-c++'
++ld = 'aarch64-w64-mingw32-ld'
++ar = 'aarch64-w64-mingw32-ar'
++strip = 'aarch64-w64-mingw32-strip'
++pkgconfig = '/usr/bin/pkg-config'
++objdump = 'aarch64-w64-mingw32-objdump'
++
++[built-in options]
++c_std = 'c11'
++cpp_std = 'c++11'
++c_link_args = '-static-libgcc'
 diff --git a/cross_mingw_x86.txt b/cross_mingw_x86.txt
 new file mode 100644
-index 0000000..559f598
+index 0000000..599089a
 --- /dev/null
 +++ b/cross_mingw_x86.txt
 @@ -0,0 +1,20 @@
@@ -26,7 +51,7 @@ index 0000000..559f598
 +c_link_args = '-static-libgcc'
 diff --git a/cross_mingw_x86_64.txt b/cross_mingw_x86_64.txt
 new file mode 100644
-index 0000000..a5b0606
+index 0000000..019b0af
 --- /dev/null
 +++ b/cross_mingw_x86_64.txt
 @@ -0,0 +1,20 @@

@@ -57,6 +57,14 @@ config() {
         -DOPUS_FORTIFY_SOURCE=OFF
       )
       ;;
+    windows-arm64)
+      args+=(
+        -DOPUS_STACK_PROTECTOR=OFF
+        -DOPUS_FORTIFY_SOURCE=OFF
+        -DRUNTIME_CPU_CAPABILITY_DETECTION=OFF
+        -DOPUS_DISABLE_INTRINSICS=ON
+      )
+      ;;
   }
 
   log_info "Config (%F{3}${target}%f)"
@@ -103,7 +111,7 @@ install() {
 fixup() {
   cd "${dir}"
 
-  if [[ ${target} == "windows-x"* ]] {
+  if [[ ${target} == "windows-"* ]] {
     if (( shared_libs )) {
       log_info "Fixup (%F{3}${target}%f)"
       autoload -Uz create_importlibs
