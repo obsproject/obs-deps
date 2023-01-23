@@ -13,3 +13,6 @@
 /linux*/*
 /windows*
 /windows*/*
+# Ignore rust environment
+.cargo/*
+.rustup/*

@@ -85,7 +85,7 @@ package() {
   if [[ ${PACKAGE_NAME} != 'qt'* ]] {
     log_status "Cleanup unnecessary files"
 
-    rm -rf lib/^(*.dylib|libajantv*|*.so*|*.lib)(N)
+    rm -rf lib/^(*.dylib|libajantv*|*.so*|*.lib|cmake)(N)
     rm -rf bin/^(*.exe|*.dll|*.pdb|swig)(N)
 
     if [[ -f bin/swig ]] {
@@ -95,7 +95,7 @@ package() {
       popd
     }
 
-    if [[ -d share ]] rm -rf share/^(swig)(N)
+    if [[ -d share ]] rm -rf share/^(swig|cmake)(N)
     if [[ -d cmake ]] rm -rf cmake
     if [[ -d man ]] rm -rf man
   }

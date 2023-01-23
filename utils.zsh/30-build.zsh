@@ -8,7 +8,7 @@ setup_target() {
   }
 
   config_data=(
-    [cmake_arch]=x86_64
+    [cmake_arch]=arm64
     [target_os]=${1%%-*}
     [arch]=${1##*-}
     [output_dir]="${project_root}/${1}/obs-${PACKAGE_NAME}-${1##*-}"
@@ -19,6 +19,7 @@ setup_target() {
   case ${1} {
     macos-x86_64)
       config_data+=(
+        [cmake_arch]=x86_64
         [deployment_target]=10.13
         [darwin_target]=17
       )
@@ -58,6 +59,24 @@ setup_target() {
       )
       ;;
     *) log_error "Invalid target specified: %F{1}${1}%f"; exit 2 ;;
+  }
+
+  if [[ ${PACKAGE_NAME} == 'deps' && ${1%%-*} == 'macos' ]] {
+    if [[  ! -f "${project_root}/.cargo/bin/rustup" ]] {
+      rustup_options=(
+        -y
+        --no-modify-path
+        --profile minimal
+      )
+
+      if (( _loglevel > 1 )) rustup_options+='--verbose'
+
+      typeset -g -x RUSTUP_HOME="${project_root}/.rustup"
+      typeset -g -x CARGO_HOME="${project_root}/.cargo"
+      RUSTUP_INIT_SKIP_PATH_CHECK=yes rustup-init ${rustup_options}
+    }
+    path=("${project_root}/.cargo/bin" $path)
+    rustup target add "${${config_data[arch]}//arm64/aarch64}-apple-darwin"
   }
 
   typeset -g -A target_config=(${(kv)config_data})
