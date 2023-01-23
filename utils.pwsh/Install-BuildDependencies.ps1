@@ -18,9 +18,12 @@ function Install-BuildDependencies {
         . Logger.ps1
     }
     
-    $Host64Bit = [System.Environment]::Is64BitOperatingSystem
+    $Prefixes = @{
+        'x64' = ${Env:ProgramFiles}
+        'x86' = ${Env:ProgramFiles(x86)}
+        'arm64' = ${Env:ProgramFiles(arm)}
+    }
 
-    $Prefix = (${Env:ProgramFiles(x86)}, $Env:ProgramFiles)[$Host64Bit]
 
     $Paths = $Env:Path -split [System.IO.Path]::PathSeparator
 
@@ -31,12 +34,27 @@ function Install-BuildDependencies {
     }
 
     Get-Content $WingetFile | ForEach-Object {
-        $_, $Package, $_, $Path, $_, $Binary = $_ -replace ',','' -replace "'", '' -split ' '
+        $_, $Package, $_, $Path, $_, $Binary, $_, $Version = $_ -replace ',','' -split " +(?=(?:[^\']*\'[^\']*\')*[^\']*$)" -replace "'",''
 
-        $FullPath = "${Prefix}\${Path}"
-        if ( ( Test-Path $FullPath  ) -and ! ( $Paths -contains $FullPath ) ) {
-            $Paths += $FullPath
-            $Env:Path = $Paths -join [System.IO.Path]::PathSeparator
+        if ( $Package -eq 'Rustlang.Rust.MSVC' ) {
+            $Prefix = $Prefixes[$Target]
+            $WingetOptions += @('--architecture', $Target)
+
+            $FullPath = "${Prefix}\${Path}"
+
+            if ( Test-Path $FullPath ) {
+                if ( ( $Paths -contains $FullPath ) )  {
+                    $Paths = $Paths | Where-Object { $_ -ne $FullPath }
+                }
+                $Paths = @($FullPath) + $Paths
+                $Env:Path = $Paths -join [System.IO.Path]::PathSeparator
+            }
+        } else {
+            $FullPath = "${Prefix}\${Path}"
+            if ( ( Test-Path $FullPath  ) -and ! ( $Paths -contains $FullPath ) ) {
+                $Paths = @($FullPath) + $Paths
+                $Env:Path = $Paths -join [System.IO.Path]::PathSeparator
+            }
         }
 
         Log-Debug "Checking for command ${Binary}"
@@ -45,7 +63,11 @@ function Install-BuildDependencies {
         if ( $Found ) {
             Log-Status "Found dependency ${Binary} as $($Found.Source)"
         } else {
-            Log-Status "Installing package ${Package}"
+            Log-Status "Installing package ${Package} $(if ( $Version -ne '' ) { "Version: ${Version}" } )"
+
+            if ( $Version -ne '' ) {
+                $WingetOptions += '--version', ${Version}
+            }
 
             try {
                 $Params = $WingetOptions + $Package

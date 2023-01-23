@@ -1,2 +1,3 @@
 package '7zip.7zip', path: '7-zip', bin: '7z'
 package 'cmake', path: 'Cmake\bin', bin: 'cmake'
+package 'Rustlang.Rust.MSVC', path: 'Rust stable MSVC 1.66\bin', bin: 'rustc', version: '1.66.1'

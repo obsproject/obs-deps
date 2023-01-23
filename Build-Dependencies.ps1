@@ -126,8 +126,7 @@ function Package-Dependencies {
         "./include/pcre2*"
         "./lib/pcre2*"
         "./lib/pkgconfig/libpcre2*"
-        "./man1/pcre2*"
-        "./man3/pcre2*"
+        "./man"
         "./share/bison"
         "./share/doc/pcre2"
     )
