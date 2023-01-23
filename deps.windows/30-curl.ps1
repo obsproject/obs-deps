@@ -45,8 +45,13 @@ function Configure {
         '-DCURL_USE_LIBSSH2:BOOL=OFF'
         '-DCURL_USE_SCHANNEL:BOOL=ON'
         '-DCURL_ZLIB:BOOL=OFF'
+        '-DBUILD_SHARED_LIBS:BOOL=OFF'
+        '-DCURL_BROTLI:BOOL=ON'
+        '-DUSE_NGHTTP2:BOOL=ON'
     )
 
+    $env:CFLAGS="-DNGHTTP2_STATICLIB"
+    $env:CXXFLAGS="-DNGHTTP2_STATICLIB"
     Invoke-External cmake -S . -B "build_${Target}" @Options
 }
 
