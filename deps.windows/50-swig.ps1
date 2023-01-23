@@ -91,10 +91,12 @@ function Fixup {
         @{
             Path = "$($ConfigData.OutputPath)/swig/bin/swig.exe"
             Destination = "$($ConfigData.OutputPath)/swig/swig.exe"
+            Force = $true
         },
         @{
             Path = "$($ConfigData.OutputPath)/swig/share/swig/${Version}"
             Destination = "$($ConfigData.OutputPath)/swig/Lib"
+            Force = $true
         }
     )
 

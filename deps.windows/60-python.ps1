@@ -88,10 +88,12 @@ function Install {
             Path = "${PythonPath}/include/*"
             Destination = "$($ConfigData.OutputPath)/include/python/"
             Recurse = $true
+            Force = $true
         }
         @{
             Path = "${PythonPath}/libs/python3*.lib"
             Destination = "$($ConfigData.OutputPath)/lib/"
+            Force = $true
         }
     )
 
@@ -99,6 +101,7 @@ function Install {
         $Items += @{
             Path = "${PythonPath}/python3*.dll"
             Destination = "$($ConfigData.OutputPath)/bin/"
+            Force = $true
         }
     }
 
