@@ -91,7 +91,7 @@ package() {
     if [[ -f bin/swig ]] {
       swig_lib=(share/swig/*(/))
       pushd ${swig_lib:h}
-      ln -s ${swig_lib:t} CURRENT
+      ln -fs ${swig_lib:t} CURRENT
       popd
     }
 

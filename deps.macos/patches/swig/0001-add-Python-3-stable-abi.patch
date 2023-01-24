@@ -1,18 +1,18 @@
 diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
-index 60791155c..b77e840ca 100644
+index 35c6d31cb..6c366391c 100644
 --- a/.github/workflows/ci.yml
 +++ b/.github/workflows/ci.yml
-@@ -135,6 +135,8 @@ jobs:
-           VER: '3.9'
-         - SWIGLANG: python
+@@ -145,6 +145,8 @@ jobs:
            VER: '3.10'
+         - SWIGLANG: python
+           VER: '3.11'
 +        - SWIGLANG: python
 +          SWIG_FEATURES: -py3-stable-abi
          - SWIGLANG: python
            PY2: 2
            SWIG_FEATURES: -builtin
 diff --git a/Lib/python/director.swg b/Lib/python/director.swg
-index 9694c6233..7935f7003 100644
+index 9694c6233..e1cfcc465 100644
 --- a/Lib/python/director.swg
 +++ b/Lib/python/director.swg
 @@ -14,6 +14,24 @@
@@ -40,7 +40,7 @@ index 9694c6233..7935f7003 100644
  
  /*
    Use -DSWIG_PYTHON_DIRECTOR_NO_VTABLE if you don't want to generate a 'virtual
-@@ -244,25 +262,89 @@ namespace Swig {
+@@ -244,25 +262,88 @@ namespace Swig {
    };
  
  
@@ -54,76 +54,75 @@ index 9694c6233..7935f7003 100644
  #ifdef __THREAD__
 -# include "pythread.h"
 +#ifndef Py_LIMITED_API
-+   class Mutex
-+   {
-+   public:
-+       Mutex() {
-+           mutex_ = PyThread_allocate_lock();
-+       }
++  class Mutex {
++  public:
++    Mutex() {
++      mutex_ = PyThread_allocate_lock();
++    }
 +
-+       ~Mutex() {
-+           PyThread_release_lock(mutex_);
-+       }
++    ~Mutex() {
++      PyThread_release_lock(mutex_);
++    }
 +
-+   private:
-+       void Lock() {
-+           PyThread_acquire_lock(mutex_, WAIT_LOCK);
-+       }
++  private:
++    void Lock() {
++      PyThread_acquire_lock(mutex_, WAIT_LOCK);
++    }
 +
-+       void Unlock() {
-+           PyThread_free_lock(mutex_);
-+       }
++    void Unlock() {
++      PyThread_free_lock(mutex_);
++    }
 +
-+       PyThread_type_lock mutex_;
++    PyThread_type_lock mutex_;
 +
-+       friend class Guard;
-+   };
++    friend class Guard;
++  };
 +#elif defined(_WIN32)
-+    class Mutex : private CRITICAL_SECTION {
-+    public:
-+        Mutex() {
-+            InitializeCriticalSection(this);
-+        }
++  class Mutex : private CRITICAL_SECTION {
++  public:
++    Mutex() {
++      InitializeCriticalSection(this);
++    }
 +
-+        ~Mutex() {
-+            DeleteCriticalSection(this);
-+        }
++    ~Mutex() {
++      DeleteCriticalSection(this);
++    }
 +
-+    private:
-+        void Lock() {
-+            EnterCriticalSection(this);
-+        }
++  private:
++    void Lock() {
++      EnterCriticalSection(this);
++    }
 +
-+        void Unlock() {
-+            LeaveCriticalSection(this);
-+        }
++    void Unlock() {
++      LeaveCriticalSection(this);
++    }
 +
-+        friend class Guard;
-+    };
++    friend class Guard;
++  };
 +#else
-+    class Mutex {
-+    public:
-+        Mutex() {
-+            pthread_mutex_init(&mutex_, NULL);
-+        }
++  class Mutex {
++  public:
++    Mutex() {
++      pthread_mutex_init(&mutex_, NULL);
++    }
 +
-+        ~Mutex() {
-+            pthread_mutex_destroy(&mutex_);
-+        }
++    ~Mutex() {
++      pthread_mutex_destroy(&mutex_);
++    }
 +
-+    private:
-+        void Lock() {
-+            pthread_mutex_lock(&mutex_);
-+        }
++  private:
++    void Lock() {
++      pthread_mutex_lock(&mutex_);
++    }
 +
-+        void Unlock() {
-+            pthread_mutex_unlock(&mutex_);
-+        }
++    void Unlock() {
++      pthread_mutex_unlock(&mutex_);
++    }
 +
-+        friend class Guard;
++    friend class Guard;
 +
-+        pthread_mutex_t mutex_;
-+    };
++    pthread_mutex_t mutex_;
++  };
 +#endif
    class Guard {
 -    PyThread_type_lock &mutex_;
@@ -142,7 +141,7 @@ index 9694c6233..7935f7003 100644
      }
    };
  # define SWIG_GUARD(mutex) Guard _guard(mutex)
-@@ -330,7 +412,7 @@ namespace Swig {
+@@ -330,7 +411,7 @@ namespace Swig {
      typedef std::map<void *, GCItem_var> swig_ownership_map;
      mutable swig_ownership_map swig_owner;
  #ifdef __THREAD__
@@ -151,7 +150,7 @@ index 9694c6233..7935f7003 100644
  #endif
  
    public:
-@@ -382,7 +464,7 @@ namespace Swig {
+@@ -382,7 +463,7 @@ namespace Swig {
    };
  
  #ifdef __THREAD__
@@ -314,28 +313,10 @@ index 2fdaa6d6e..9ebc36a8c 100644
  }
  %enddef
 diff --git a/Lib/python/pyhead.swg b/Lib/python/pyhead.swg
-index d3730a8fa..4ec5c2c07 100644
+index a5f804a7b..790da0836 100644
 --- a/Lib/python/pyhead.swg
 +++ b/Lib/python/pyhead.swg
-@@ -36,7 +36,7 @@
- SWIGINTERN char*
- SWIG_Python_str_AsChar(PyObject *str)
- {
--#if PY_VERSION_HEX >= 0x03030000
-+#if PY_VERSION_HEX >= 0x03030000 && !defined(Py_LIMITED_API)
-   return (char *)PyUnicode_AsUTF8(str);
- #elif PY_VERSION_HEX >= 0x03000000
-   char *newstr = 0;
-@@ -57,7 +57,7 @@ SWIG_Python_str_AsChar(PyObject *str)
- #endif
- }
- 
--#if PY_VERSION_HEX >= 0x03030000 || PY_VERSION_HEX < 0x03000000
-+#if (PY_VERSION_HEX >= 0x03030000 && !defined(Py_LIMITED_API)) || PY_VERSION_HEX < 0x03000000
- #  define SWIG_Python_str_DelForPy3(x)
- #else
- #  define SWIG_Python_str_DelForPy3(x) free( (void*) (x) )
-@@ -92,3 +92,17 @@ SWIG_Python_str_FromChar(const char *c)
+@@ -80,3 +80,17 @@ SWIG_Python_str_FromChar(const char *c)
  #define PyDescr_NAME(x) (((PyDescrObject *)(x))->d_name)
  #define Py_hash_t long
  #endif
@@ -354,10 +335,10 @@ index d3730a8fa..4ec5c2c07 100644
 +# define PySliceObject PyObject
 +#endif
 diff --git a/Lib/python/pyrun.swg b/Lib/python/pyrun.swg
-index 935885934..bc3e2417b 100644
+index 6b119be1c..e8acbcdcf 100644
 --- a/Lib/python/pyrun.swg
 +++ b/Lib/python/pyrun.swg
-@@ -334,6 +334,7 @@ swig_varlink_setattr(swig_varlinkobject *v, char *n, PyObject *p) {
+@@ -338,6 +338,7 @@ swig_varlink_setattr(PyObject *o, char *n, PyObject *p) {
  SWIGINTERN PyTypeObject*
  swig_varlink_type(void) {
    static char varlink__doc__[] = "Swig var link object";
@@ -365,11 +346,11 @@ index 935885934..bc3e2417b 100644
    static PyTypeObject varlink_type;
    static int type_init = 0;
    if (!type_init) {
-@@ -398,12 +399,28 @@ swig_varlink_type(void) {
+@@ -402,12 +403,28 @@ swig_varlink_type(void) {
        return NULL;
    }
    return &varlink_type;
-+#else // Py_LIMITED_API
++#else
 +  PyType_Slot slots[] = {
 +    { Py_tp_dealloc, (void*)swig_varlink_dealloc },
 +    { Py_tp_repr, (void*)swig_varlink_repr },
@@ -379,7 +360,7 @@ index 935885934..bc3e2417b 100644
 +    { Py_tp_doc, (void*)varlink__doc__ },
 +    { 0, NULL }
 +  };
-+  PyType_Spec spec = {0};
++  PyType_Spec spec = {};
 +  spec.name = "swigvarlink";
 +  spec.basicsize = sizeof(swig_varlinkobject);
 +  spec.slots = slots;
@@ -395,7 +376,7 @@ index 935885934..bc3e2417b 100644
    if (result) {
      result->vars = 0;
    }
-@@ -714,6 +731,14 @@ SwigPyObject_Check(PyObject *op) {
+@@ -718,6 +735,14 @@ SwigPyObject_Check(PyObject *op) {
    if (PyType_IsSubtype(op->ob_type, target_tp))
      return 1;
    return (strcmp(op->ob_type->tp_name, "SwigPyObject") == 0);
@@ -410,7 +391,7 @@ index 935885934..bc3e2417b 100644
  #else
    return (Py_TYPE(op) == SwigPyObject_type())
      || (strcmp(Py_TYPE(op)->tp_name,"SwigPyObject") == 0);
-@@ -859,7 +884,7 @@ swigobject_methods[] = {
+@@ -864,7 +889,7 @@ swigobject_methods[] = {
  SWIGRUNTIME PyTypeObject*
  SwigPyObject_TypeOnce(void) {
    static char swigobject_doc[] = "Swig object carries a C/C++ instance pointer";
@@ -419,7 +400,7 @@ index 935885934..bc3e2417b 100644
    static PyNumberMethods SwigPyObject_as_number = {
      (binaryfunc)0, /*nb_add*/
      (binaryfunc)0, /*nb_subtract*/
-@@ -991,12 +1016,30 @@ SwigPyObject_TypeOnce(void) {
+@@ -996,12 +1021,30 @@ SwigPyObject_TypeOnce(void) {
        return NULL;
    }
    return &swigpyobject_type;
@@ -434,7 +415,7 @@ index 935885934..bc3e2417b 100644
 +    { Py_nb_int, (void*)SwigPyObject_long },
 +    { 0, NULL }
 +  };
-+  PyType_Spec spec = {0};
++  PyType_Spec spec = {};
 +  spec.name = "SwigPyObject";
 +  spec.basicsize = sizeof(SwigPyObject);
 +  spec.flags = Py_TPFLAGS_DEFAULT;
@@ -451,7 +432,7 @@ index 935885934..bc3e2417b 100644
    if (sobj) {
      sobj->ptr  = ptr;
      sobj->ty   = ty;
-@@ -1067,8 +1110,18 @@ SwigPyPacked_type(void) {
+@@ -1072,8 +1115,18 @@ SwigPyPacked_type(void) {
  
  SWIGRUNTIMEINLINE int
  SwigPyPacked_Check(PyObject *op) {
@@ -470,7 +451,7 @@ index 935885934..bc3e2417b 100644
  }
  
  SWIGRUNTIME void
-@@ -1084,6 +1137,7 @@ SwigPyPacked_dealloc(PyObject *v)
+@@ -1089,6 +1142,7 @@ SwigPyPacked_dealloc(PyObject *v)
  SWIGRUNTIME PyTypeObject*
  SwigPyPacked_TypeOnce(void) {
    static char swigpacked_doc[] = "Swig object carries a C/C++ instance pointer";
@@ -478,7 +459,7 @@ index 935885934..bc3e2417b 100644
    static PyTypeObject swigpypacked_type;
    static int type_init = 0;
    if (!type_init) {
-@@ -1171,12 +1225,28 @@ SwigPyPacked_TypeOnce(void) {
+@@ -1176,12 +1230,28 @@ SwigPyPacked_TypeOnce(void) {
        return NULL;
    }
    return &swigpypacked_type;
@@ -491,7 +472,7 @@ index 935885934..bc3e2417b 100644
 +    { Py_tp_doc, swigpacked_doc },
 +    { 0, NULL }
 +  };
-+  PyType_Spec spec = {0};
++  PyType_Spec spec = {};
 +  spec.name = "SwigPyPacked";
 +  spec.basicsize = sizeof(SwigPyPacked);
 +  spec.flags = Py_TPFLAGS_DEFAULT;
@@ -508,7 +489,7 @@ index 935885934..bc3e2417b 100644
    if (sobj) {
      void *pack = malloc(size);
      if (pack) {
-@@ -1421,10 +1491,18 @@ SWIG_Python_ConvertFunctionPtr(PyObject *obj, void **ptr, swig_type_info *ty) {
+@@ -1433,10 +1503,18 @@ SWIG_Python_ConvertFunctionPtr(PyObject *obj, void **ptr, swig_type_info *ty) {
      swig_cast_info *tc;
  
      /* here we get the method pointer for callbacks */
@@ -522,51 +503,12 @@ index 935885934..bc3e2417b 100644
      if (desc)
        desc = ty ? SWIG_UnpackVoidPtr(desc + 10, &vptr, ty->name) : 0;
 +#ifdef Py_LIMITED_API
-+    SWIG_Python_str_DelForPy3(doc);
++      SWIG_Python_str_DelForPy3(doc);
 +#endif
      if (!desc)
        return SWIG_ERROR;
      tc = SWIG_TypeCheck(desc,ty);
-@@ -1500,14 +1578,23 @@ SWIG_Python_NewShadowInstance(SwigPyClientData *data, PyObject *swig_this)
-     if (empty_args) {
-       PyObject *empty_kwargs = PyDict_New();
-       if (empty_kwargs) {
--        inst = ((PyTypeObject *)data->newargs)->tp_new((PyTypeObject *)data->newargs, empty_args, empty_kwargs);
-+#ifndef Py_LIMITED_API
-+        newfunc newfn = ((PyTypeObject *)data->newargs)->tp_new;
-+#else
-+        newfunc newfn = (newfunc)PyType_GetSlot((PyTypeObject *)data->newargs, Py_tp_new);
-+#endif
-+        inst = newfn((PyTypeObject *)data->newargs, empty_args, empty_kwargs);
-         Py_DECREF(empty_kwargs);
-         if (inst) {
-           if (PyObject_SetAttr(inst, SWIG_This(), swig_this) == -1) {
-             Py_DECREF(inst);
-             inst = 0;
-           } else {
-+#ifndef Py_LIMITED_API
-             Py_TYPE(inst)->tp_flags &= ~Py_TPFLAGS_VALID_VERSION_TAG;
-+#else
-+            PyType_Modified(Py_TYPE(inst));
-+#endif
-           }
-         }
-       }
-@@ -1582,7 +1669,12 @@ SWIG_Python_NewPointerObj(PyObject *self, void *ptr, swig_type_info *type, int f
-     if (flags & SWIG_BUILTIN_TP_INIT) {
-       newobj = (SwigPyObject*) self;
-       if (newobj->ptr) {
--        PyObject *next_self = clientdata->pytype->tp_alloc(clientdata->pytype, 0);
-+#ifndef Py_LIMITED_API
-+        allocfunc alloc = clientdata->pytype->tp_alloc;
-+#else
-+        allocfunc alloc = (allocfunc)PyType_GetSlot(clientdata->pytype, Py_tp_alloc);
-+#endif
-+        PyObject *next_self = alloc(clientdata->pytype, 0);
-         while (newobj->next)
- 	  newobj = (SwigPyObject *) newobj->next;
-         newobj->next = next_self;
-@@ -1803,6 +1895,7 @@ SWIG_Python_TypeError(const char *type, PyObject *obj)
+@@ -1820,6 +1898,7 @@ SWIG_Python_TypeError(const char *type, PyObject *obj)
      } else 
  #endif      
      {
@@ -574,7 +516,7 @@ index 935885934..bc3e2417b 100644
        const char *otype = (obj ? obj->ob_type->tp_name : 0); 
        if (otype) {
  	PyObject *str = PyObject_Str(obj);
-@@ -1818,6 +1911,7 @@ SWIG_Python_TypeError(const char *type, PyObject *obj)
+@@ -1834,6 +1913,7 @@ SWIG_Python_TypeError(const char *type, PyObject *obj)
  	Py_XDECREF(str);
  	return;
        }
@@ -583,7 +525,7 @@ index 935885934..bc3e2417b 100644
      PyErr_Format(PyExc_TypeError, "a '%s' is expected", type);
    } else {
 diff --git a/Source/Modules/python.cxx b/Source/Modules/python.cxx
-index 9aac91601..192abe104 100644
+index b613b2bd0..242d50bc7 100644
 --- a/Source/Modules/python.cxx
 +++ b/Source/Modules/python.cxx
 @@ -68,6 +68,8 @@ static int no_header_file = 0;
@@ -607,9 +549,9 @@ index 9aac91601..192abe104 100644
  	  fputs(usage1, stdout);
  	  fputs(usage2, stdout);
  	  fputs(usage3, stdout);
-+	} else if (strcmp(argv[i], "-py3-stable-abi") == 0) {
-+	  py3_stable_abi = 1;
-+	  Swig_mark_arg(i);
++  } else if (strcmp(argv[i], "-py3-stable-abi") == 0) {
++    py3_stable_abi = 1;
++    Swig_mark_arg(i);
  	} else if (strcmp(argv[i], "-builtin") == 0) {
  	  builtin = 1;
  	  Preprocessor_define("SWIGPYTHON_BUILTIN", 0);
@@ -623,8 +565,8 @@ index 9aac91601..192abe104 100644
 +    }
 +
 +    if (py3_stable_abi && fastproxy) {
-+      Printf(stderr, "-py3-stable-abi and -fastproxy options are not compatible.  Disabling -fastproxy.\n");
-+      fastproxy = 0;
++      Printf(stderr, "-py3-stable-abi and -fastproxy options are not compatible.\n");
++      Exit(EXIT_FAILURE);
 +    }
 +
      if (!global_name)
