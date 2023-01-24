@@ -1,12 +1,12 @@
 param(
     [string] $Name = 'swig',
-    [string] $Version = '4.1.0',
+    [string] $Version = '4.1.1',
     [string] $Uri = 'https://github.com/swig/swig.git',
-    [string] $Hash = "4dd285fad736c014224ef2ad25b85e17f3dce1f9",
+    [string] $Hash = "c85e7f1625f8b421c92b8c1a8279d134ba050ecc",
     [array] $Patches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/swig/0001-add-Python-3-stable-abi.patch"
-            HashSum = '0fba519582d891a01953fd81f4e91ddd583f32cab398436df5632d98e0060309'
+            HashSum = '4a2d8a3180127f2b72c4484fb0f421a6edacc7636243857e721d23a2bfc5bb13'
         },
         @{
             PatchFile = "${PSScriptRoot}/patches/swig/0002-remove-PCRE-cmake-finder.patch"
@@ -91,12 +91,23 @@ function Fixup {
         @{
             Path = "$($ConfigData.OutputPath)/swig/bin/swig.exe"
             Destination = "$($ConfigData.OutputPath)/swig/swig.exe"
-        },
-        @{
-            Path = "$($ConfigData.OutputPath)/swig/share/swig/${Version}"
-            Destination = "$($ConfigData.OutputPath)/swig/Lib"
+            Force = $true
         }
     )
+
+    if ( $Version -le '4.1.0' ) {
+        $Items += @{
+            Path = "$($ConfigData.OutputPath)/swig/share/swig/${Version}"
+            Destination = "$($ConfigData.OutputPath)/swig/Lib"
+            Force = $true
+        }
+    } else {
+        $Items += @{
+            Path = "$($ConfigData.OutputPath)/swig/bin/Lib"
+            Destination = "$($ConfigData.OutputPath)/swig/Lib"
+            Force = $true
+        }
+    }
 
     $Items | ForEach-Object {
         $Item = $_
