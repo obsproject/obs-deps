@@ -95,7 +95,7 @@ package() {
       popd
     }
 
-    if [[ -d share ]] rm -rf share/^(swig)(N)
+    if [[ -d share ]] rm -rf share/^(swig|cmake)(N)
     if [[ -d cmake ]] rm -rf cmake
     if [[ -d man ]] rm -rf man
   }
