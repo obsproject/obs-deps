@@ -127,6 +127,8 @@ fixup() {
       if (( shared_libs )) {
         log_info "Fixup (%F{3}${target}%f)"
         fix_rpaths "${target_config[output_dir]}"/lib/libspeexdsp*.dylib
+      } else {
+        rm "${target_config[output_dir]}"/lib/libspeexdsp*.dylib(N)
       }
       ;;
   }
