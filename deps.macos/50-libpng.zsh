@@ -10,6 +10,8 @@ local -a patches=(
   f9ce2b5f8b63ef6caa9ab0195d27c52563652da56ab53956ffa51b34ff90ad4d"
 )
 
+local -i shared_libs=0
+
 ## Build Steps
 setup() {
   log_info "Setup (%F{3}${target}%f)"
@@ -110,4 +112,22 @@ install() {
 
   cd "${dir}"
   progress cmake ${args}
+}
+
+fixup() {
+  cd "${dir}"
+
+  log_info "Fixup (%F{3}${target}%f)"
+  case ${target} {
+    macos*)
+      if [[ "${config}" == "Debug" ]] {
+        local _file
+        local -a _debug_files
+        _debug_files=("${target_config[output_dir]}"/lib/libpng16d.*(N))
+        for _file (${_debug_files}) {
+          mv "${_file}" "${_file//d./.}"
+        }
+      }
+      ;;
+  }
 }
