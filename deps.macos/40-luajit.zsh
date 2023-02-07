@@ -128,7 +128,12 @@ fixup() {
     macos*)
       if (( shared_libs )) {
         log_info "Fixup (%F{3}${target}%f)"
-        fix_rpaths "${target_config[output_dir]}"/lib/libluajit*.dylib
+        for file ("${target_config[output_dir]}"/lib/libluajit-5.1*.dylib(.)) {
+          install_name_tool -id "@rpath/libluajit-5.1.dylib" "${file}"
+          log_status "Fixed id of ${file##*/}"
+        }
+      } else {
+        rm "${target_config[output_dir]}"/lib/libluajit-5.1*.dylib(N)
       }
       ;;
   }
