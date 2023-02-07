@@ -6,6 +6,8 @@ local version='2.12.1'
 local url='https://downloads.sourceforge.net/project/freetype/freetype2/2.12.1/freetype-2.12.1.tar.xz'
 local hash="${0:a:h}/checksums/freetype-2.12.1.tar.xz.sha256"
 
+local -i shared_libs=1
+
 ## Build Steps
 setup() {
   log_info "Setup (%F{3}${target}%f)"
