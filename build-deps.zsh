@@ -98,6 +98,9 @@ package() {
     if [[ -d share ]] rm -rf share/^(swig|cmake)(N)
     if [[ -d cmake ]] rm -rf cmake
     if [[ -d man ]] rm -rf man
+
+    mkdir -p share/obs-deps
+    echo "${current_date}" >! share/obs-deps/VERSION
   }
 
   log_status "Create archive ${filename}"
