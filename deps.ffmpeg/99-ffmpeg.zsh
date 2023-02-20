@@ -60,7 +60,6 @@ config() {
     macos-*)
       local -A hide_libs=(
         xz libzlma
-        sdl libSDL2
       )
 
       local lib lib_name lib_file
@@ -203,7 +202,7 @@ config() {
     --disable-static
     --disable-libjack
     --disable-indev=jack
-    --disable-outdev=sdl
+    --disable-sdl2
     --disable-doc
     --disable-postproc
   )

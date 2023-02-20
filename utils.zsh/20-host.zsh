@@ -38,7 +38,6 @@ _setup_macos() {
 
     local -a restore_libs=(
       'xz lzma'
-      'sdl2 SDL2'
       zstd
       'libtiff tiff'
       webp
