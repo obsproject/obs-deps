@@ -87,6 +87,7 @@ config() {
   local -a common_cmake_flags=(
     ${cmake_flags}
     -DBUILD_SHARED_LIBS="${_onoff[(( shared_libs + 1 ))]}"
+    -DFEATURE_rpath="${_onoff[(( shared_libs + 1 ))]}"
   )
   if (( ${+commands[ccache]} )) common_cmake_flags+=(-DQT_USE_CCACHE=ON)
 
@@ -116,7 +117,6 @@ config() {
     -DFEATURE_printpreviewdialog=OFF
     -DFEATURE_printpreviewwidget=OFF
     -DFEATURE_qmake=OFF
-    -DFEATURE_rpath=ON
     -DFEATURE_sql=OFF
     -DFEATURE_system_zlib=ON
     -DINPUT_libjpeg=qt
