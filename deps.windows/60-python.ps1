@@ -6,7 +6,8 @@ param(
     [hashtable] $PythonVersion = @{
          x86 = '3.8.10-win32'
          x64 = '3.8.10'
-    }
+    },
+    [array] $Targets = @('x86', 'x64')
 )
 
 function Enable-PyEnv {

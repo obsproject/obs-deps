@@ -20,9 +20,9 @@ function Invoke-DevShell {
         [Parameter(Mandatory)]
         [string] $BuildCommand,
         [Parameter(Mandatory)]
-        [ValidateSet('x86', 'x64')]
+        [ValidateSet('x86', 'x64', 'arm64')]
         [string] $Target,
-        [string] $HostArchitecture = ( 'x86', 'x64' )[ [System.Environment]::Is64BitOperatingSystem ]
+        [string] $HostArchitecture = $(Get-HostArchitecture)
     )
 
     if ( ! ( Test-Path function:Log-Information ) ) {

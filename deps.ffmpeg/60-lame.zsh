@@ -61,7 +61,7 @@ config() {
       ;;
     macos-arm64) args+=(--host="arm-apple-darwin${target_config[darwin_target]}") ;;
     macos-x86_64) args+=(--host="x86_64-apple-darwin${target_config[darwin_target]}") ;;
-    windows-x*) args+=(--host="${target_config[cross_prefix]}-w64-mingw32") ;;
+    windows-*) args+=(--host="${target_config[cross_prefix]}-w64-mingw32") ;;
   }
 
   log_info "Config (%F{3}${target}%f)"
@@ -139,7 +139,7 @@ fixup() {
         autoload -Uz fix_rpaths
         fix_rpaths "${target_config[output_dir]}"/lib/libmp3lame*.dylib(.)
         ;;
-      windows-x*)
+      windows-*)
         autoload -Uz create_importlibs
         create_importlibs "${target_config[output_dir]}"/bin/libmp3lame*.dll(.)
         ;;

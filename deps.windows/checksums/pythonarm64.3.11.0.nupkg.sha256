@@ -1,0 +1,14 @@
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.PowerShell.Commands.FileHashInfo</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Microsoft.PowerShell.Commands.FileHashInfo</ToString>
+    <Props>
+      <S N="Algorithm">SHA256</S>
+      <S N="Hash">898A23E767D5BFC064709AB2CE644A56335454E7FF7207085802FA3D1958BE27</S>
+      <S N="Path">pythonarm64.3.11.0.nupkg</S>
+    </Props>
+  </Obj>
+</Objs>

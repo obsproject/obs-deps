@@ -1,0 +1,65 @@
+param(
+    [string] $Name = 'python-arm64',
+    [string] $Version = '3.11.0',
+    [string] $Uri = 'https://globalcdn.nuget.org/packages/pythonarm64.3.11.0.nupkg',
+    [string] $Hash = "${PSScriptRoot}/checksums/pythonarm64.3.11.0.nupkg.sha256"
+)
+
+function Setup {
+    if (${Target} -ne "arm64") {
+        Log-Information "Skipping ${MyInvocation.MyCommand.Name} ${Name} for Windows ${Target}"
+        return
+    }
+    
+    Setup-Dependency -Uri $Uri -Hash $Hash -DestinationPath $Path
+}
+
+function Install {
+    if (${Target} -ne "arm64") {
+        Log-Information "Skipping ${MyInvocation.MyCommand.Name} ${Name} for Windows ${Target}"
+        return
+    }
+    
+    Log-Information "Install (${Target})"
+    Set-Location $Path
+
+    $PythonPath = "$(Get-Location)/tools" | Convert-Path
+
+    $Params = @{
+        ErrorAction = "SilentlyContinue"
+        Path = @(
+            "$($ConfigData.OutputPath)/include/python"
+            "$($ConfigData.OutputPath)/bin"
+            "$($ConfigData.OutputPath)/lib"
+        )
+        ItemType = "Directory"
+        Force = $true
+    }
+
+    New-Item @Params *> $null
+
+    $Items = @(
+        @{
+            Path = "${PythonPath}/include/*"
+            Destination = "$($ConfigData.OutputPath)/include/python/"
+            Recurse = $true
+        }
+        @{
+            Path = "${PythonPath}/libs/python3*.lib"
+            Destination = "$($ConfigData.OutputPath)/lib/"
+        }
+    )
+
+    if ( $script:Shared ) {
+        $Items += @{
+            Path = "${PythonPath}/python3*.dll"
+            Destination = "$($ConfigData.OutputPath)/bin/"
+        }
+    }
+
+    $Items | ForEach-Object {
+        $Item = $_
+        Log-Output ('{0} => {1}' -f ($Item.Path -join ", "), $Item.Destination)
+        Copy-Item @Item
+    }
+}

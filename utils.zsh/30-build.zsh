@@ -57,6 +57,15 @@ setup_target() {
         [toolchain]="${funcsourcetrace[1]:A:h}/toolchain/windows-cross-toolchain.cmake"
       )
       ;;
+    windows-arm64)
+      config_data+=(
+        [cmake_arch]='arm64'
+        [cross_prefix]='aarch64'
+        [mval]='arm64'
+        [gcc_target]='arm64-win64-gcc'
+        [toolchain]="${funcsourcetrace[1]:A:h}/toolchain/windows-cross-toolchain.cmake"
+      )
+      ;;
     *) log_error "Invalid target specified: %F{1}${1}%f"; exit 2 ;;
   }
 

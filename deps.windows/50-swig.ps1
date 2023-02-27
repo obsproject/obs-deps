@@ -42,7 +42,7 @@ function Configure {
     Log-Information "Configure (${Target})"
     Set-Location $Path
 
-    $Options = $CmakeOptions
+    $Options = $HostCmakeOptions
 
     Invoke-External cmake -S . -B "build_${Target}" @Options
 

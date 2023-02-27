@@ -35,11 +35,5 @@ function Cleanup {
     Log-Debug "Running Cleanup actions"
 }
 
-function Get-HostArchitecture {
-    $Host64Bit = [System.Environment]::Is64BitOperatingSystem
-    $HostArchitecture = ('x86', 'x64')[$Host64Bit]
-
-    return $HostArchitecture
-}
 
 $script:HostArchitecture = Get-HostArchitecture

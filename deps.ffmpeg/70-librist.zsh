@@ -9,7 +9,7 @@ local -a patches=(
   "macos ${0:a:h}/patches/librist/0001-generate-cross-compile-files-macos.patch \
     f185682aba370288585dda020d259311486056b228169cdfa5559dd7a03e2473"
   "windows ${0:a:h}/patches/librist/0001-generate-cross-compile-files-windows.patch \
-    c7b8459642281a82a85c23acf7939c7a2c8345fc23b89773b8d1e9d8152dca2e"
+    100fe586bc49028f8937c392c2182a4b872c6394e206be262f2d08ec92427847"
 )
 
 ## Dependency Overrides
@@ -74,7 +74,7 @@ config() {
       return
       ;;
     macos-*) args+=(--cross-file "cross_compile_${arch}.txt") ;;
-    windows-x*)
+    windows-*)
       args+=(--cross-file "cross_mingw_${target_config[cmake_arch]}.txt")
 
       autoload -Uz hide_dlls && hide_dlls
@@ -143,7 +143,7 @@ fixup() {
         strip_tool=strip
         strip_files=("${target_config[output_dir]}"/lib/librist.so*(.))
         ;;
-      windows-x*)
+      windows-*)
         autoload -Uz create_importlibs
         create_importlibs ${target_config[output_dir]}/bin/librist*.dll(.)
 

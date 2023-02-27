@@ -110,7 +110,7 @@ install() {
 fixup() {
   cd "${dir}"
 
-  if [[ ${target} == "windows-x"* ]] {
+  if [[ ${target} == "windows-"* ]] {
     if (( shared_libs )) {
       log_info "Fixup (%F{3}${target}%f)"
       autoload -Uz create_importlibs

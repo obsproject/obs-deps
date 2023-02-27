@@ -23,7 +23,7 @@ function Configure {
     Set-Location "${Path}/$([System.IO.Path]::GetFileNameWithoutExtension($Uri))"
 
     $Options = @(
-        $CmakeOptions
+        $HostCmakeOptions
         "-DBUILD_SHARED_LIBS=OFF"
     )
 

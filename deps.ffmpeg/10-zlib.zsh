@@ -7,7 +7,7 @@ local url='https://github.com/madler/zlib.git'
 local hash='04f42ceca40f73e2978b50e93806c2a18c1281fc'
 
 ## Dependency Overrides
-local targets=('windows-x*')
+local targets=('windows-*')
 
 ## Build Steps
 setup() {
@@ -33,7 +33,7 @@ config() {
     -DCMAKE_SHARED_LIBRARY_PREFIX=""
     -DCMAKE_SHARED_LIBRARY_PREFIX_C=""
   )
-  if [[ ${target} == "windows-x"* ]] {
+  if [[ ${target} == "windows-"* ]] {
     args+=(
       -DZ_HAVE_UNISTD_H=OFF
     )
@@ -83,7 +83,7 @@ install() {
 fixup() {
   cd "${dir}"
 
-  if [[ ${target} == "windows-x"* ]] {
+  if [[ ${target} == "windows-"* ]] {
     log_info "Fixup (%F{3}${target}%f)"
     autoload -Uz create_importlibs
     create_importlibs ${target_config[output_dir]}/bin/zlib*.dll

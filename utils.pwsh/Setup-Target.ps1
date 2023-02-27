@@ -3,15 +3,8 @@ function Setup-Target {
         . $PSScriptRoot/Logger.ps1
     }
 
-    $Target64Bit = ( $script:Target -eq 'x64' )
-
-    $script:ConfigData = @{
-        Arch = ('x86', 'x64')[$Target64Bit]
-        UnixArch = ('x86', 'x86_64')[$Target64Bit]
-        CmakeArch = ('Win32', 'x64')[$Target64Bit]
-        Bitness = ('32', '64')[$Target64Bit]
-        OutputPath = "${script:ProjectRoot}\windows\obs-${script:PackageName}-${script:Target}"
-    }
+    $script:ConfigData = Get-ConfigData -Arch $script:Target
+    $script:HostConfigData = Get-ConfigData -Arch $(Get-HostArchitecture)
 
     Log-Debug "
 Architecture    : $($script:ConfigData.Arch)
@@ -53,8 +46,21 @@ function Setup-BuildParameters {
         '--no-warn-unused-cli'
     )
 
+    $script:HostCmakeOptions = @(
+        '-A', $script:HostConfigData.CmakeArch
+        '-G', $VisualStudioId
+        "-DCMAKE_INSTALL_PREFIX=$($script:ConfigData.OutputPath)"
+        "-DCMAKE_PREFIX_PATH=$($script:ConfigData.OutputPath)"
+        "-DCMAKE_IGNORE_PREFIX_PATH=C:\Strawberry\c"
+        "-DCMAKE_BUILD_TYPE=${script:Configuration}"
+        '--no-warn-unused-cli'
+    )
+
     if ( $script:Quiet ) {
         $script:CmakeOptions += @(
+            '-Wno-deprecated', '-Wno-dev', '--log-level=ERROR'
+        )
+        $script:HostCmakeOptions += @(
             '-Wno-deprecated', '-Wno-dev', '--log-level=ERROR'
         )
     }
@@ -113,4 +119,41 @@ function Find-VisualStudio {
     }
 
     return $VisualStudioData
+}
+
+function Get-ConfigData {
+    param (
+        [string]
+        $Arch
+    )
+
+    switch ($Arch) {
+        'arm64' {
+            return @{
+                Arch              = 'arm64'
+                UnixArch          = 'aarch64'
+                CmakeArch         = 'ARM64'
+                Bitness           = '64'
+                OutputPath        = "${script:ProjectRoot}\windows\obs-${script:PackageName}-${script:Target}"
+            } 
+        }
+        'x64' {
+            return @{
+                Arch              = 'x64'
+                UnixArch          = 'x86_64'
+                CmakeArch         = 'x64'
+                Bitness           = '64'
+                OutputPath        = "${script:ProjectRoot}\windows\obs-${script:PackageName}-${script:Target}"
+            } 
+        }
+        'x86' {
+            return @{
+                Arch              = 'x86'
+                UnixArch          = 'x86'
+                CmakeArch         = 'Win32'
+                Bitness           = '32'
+                OutputPath        = "${script:ProjectRoot}\windows\obs-${script:PackageName}-${script:Target}"
+            } 
+        }
+    }
 }

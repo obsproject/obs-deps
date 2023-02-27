@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [macos-arm64, macos-x86_64, linux-x86_64, windows-x64, windows-x86]
+        target: [macos-arm64, macos-x86_64, linux-x86_64, windows-x64, windows-x86, windows-arm64]
         include:
           - target: macos-arm64
             os: 'macos-12'
@@ -42,6 +42,11 @@ jobs:
             type: 'static'
             revision: 8
           - target: windows-x86
+            os: 'ubuntu-20.04'
+            config: 'Release'
+            type: 'static'
+            revision: 8
+          - target: windows-arm64
             os: 'ubuntu-20.04'
             config: 'Release'
             type: 'static'
@@ -455,12 +460,15 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [x64, x86]
+        target: [x64, x86, arm64]
         include:
           - target: x64
             config: 'Release'
             type: 'static'
           - target: x86
+            config: 'Release'
+            type: 'static'
+          - target: arm64
             config: 'Release'
             type: 'static'
     env:
@@ -536,8 +544,11 @@ jobs:
       fail-fast: true
       matrix:
         qtVersion: [5, 6]
-        target: [x64, x86]
+        target: [x64, x86, arm64]
         config: ['RelWithDebInfo', 'Debug']
+        exclude: 
+          - qtVersion: 5
+            target: arm64
     env:
       CACHE_REVISION: '02'
     steps:
@@ -594,7 +605,10 @@ jobs:
       fail-fast: true
       matrix:
         qtVersion: [5, 6]
-        target: [x64, x86]
+        target: [x64, x86, arm64]
+        exclude: 
+          - qtVersion: 5
+            target: arm64
     needs: [windows-qt-build]
     steps:
       - name: Checkout

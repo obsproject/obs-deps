@@ -1,0 +1,19 @@
+autoload -Uz log_info log_status log_error log_debug log_warning dep_download extract
+
+if [[ ! ${host_os} == 'linux' ]] {
+  log_error "Cross-compile to Windows ARM64 is only supported on Linux."
+  return 2
+}
+
+if (( ! ${+commands[aarch64-w64-mingw32-clang++]} )) {
+  log_warning 'llvm-mingw not found'
+  # pushd $(mktemp -d)
+  log_warning 'Downloading llvm-mingw toolchain'
+  echo "ee00708bdd65eeaa88d5fa89ad7e3fa1d6bae8093ee4559748e431e55f7568ec  llvm-mingw-20220906-ucrt-ubuntu-18.04-x86_64.tar.xz" >> llvm-mingw-20220906-ucrt-ubuntu-18.04-x86_64.tar.xz.sha256
+  dep_download https://github.com/mstorsjo/llvm-mingw/releases/download/20220906/llvm-mingw-20220906-ucrt-ubuntu-18.04-x86_64.tar.xz "${0:a:h}/llvm-mingw-20220906-ucrt-ubuntu-18.04-x86_64.tar.xz.sha256"
+  log_warning 'Expanding llvm-mingw toolchain'
+  extract llvm-mingw-20220906-ucrt-ubuntu-18.04-x86_64.tar.xz
+  log_warning 'Add llvm-mingw toolchain to PATH'
+  export PATH="$(pwd)/llvm-mingw-20220906-ucrt-ubuntu-18.04-x86_64/bin:$PATH"
+  # popd
+}

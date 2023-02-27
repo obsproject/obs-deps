@@ -8,3 +8,9 @@ for file (/usr/**/${target_config[cross_prefix]}-w64-mingw32/**/*.(dll|dll.a).in
     sudo mv ${file} "${file//.inactive/}"
     log_status "Moved ${file#/usr}"
 }
+
+local fileARM64
+for fileARM64 (${project_root}/llvm-mingw-*/**/*.(dll|dll.a).inactive(N)) {
+    mv ${fileARM64} "${fileARM64//.inactive/}"
+    log_status "Moved ${fileARM64#/usr}"
+}

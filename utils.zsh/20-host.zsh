@@ -56,7 +56,7 @@ _setup_macos() {
 }
 
 _setup_linux() {
-  autoload -Uz is-at-least check_deps check_git check_nasm check_cross
+  autoload -Uz is-at-least check_deps check_git check_nasm check_cross_windows_x86_x64 check_cross_windows_arm64
 
   check_git
 
@@ -73,9 +73,15 @@ _setup_linux() {
 
   if (( ! (${skips[(Ie)all]} + ${skips[(Ie)deps]}) )) {
     check_deps
-    check_nasm
 
-    if [[ ${target} == "windows-x"* ]] check_cross
+    if [[ ${target} == "windows-x"* ]] {
+      check_nasm
+      check_cross_windows_x86_x64
+    }
+    if [[ ${target} == "windows-arm64" ]] {
+      check_cross_windows_arm64
+    }
+
     rehash
   }
 
@@ -83,7 +89,7 @@ _setup_linux() {
     unset CC
     unset CXX
 
-    if [[ ${target} =~ "windows-x*" ]] { autoload -Uz restore_dlls && restore_dlls }
+    if [[ ${target} =~ "windows-*" ]] { autoload -Uz restore_dlls && restore_dlls }
   }
 }
 

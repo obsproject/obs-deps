@@ -85,6 +85,10 @@ config() {
       cross_prefix="${target_config[cross_prefix]}-w64-mingw32-"
       args+=(--enable-runtime-cpu-detect --target="${target_config[gcc_target]}")
       ;;
+    windows-arm64)
+      cross_prefix="${target_config[cross_prefix]}-w64-mingw32-"
+      args+=(--disable-runtime-cpu-detect --target="${target_config[gcc_target]}")
+      ;;
   }
 
   log_info "Config (%F{3}${target}%f)"
@@ -164,7 +168,7 @@ fixup() {
         strip_tool=strip
         strip_files=("${target_config[output_dir]}"/lib/libvpx*.dylib(:a))
         ;;
-      windows-x*)
+      windows-*)
         autoload -Uz create_importlibs
         create_importlibs "${target_config[output_dir]}"/bin/libvpx*.dll(:a)
 
