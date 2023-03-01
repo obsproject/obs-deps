@@ -157,10 +157,10 @@ jobs:
         include:
           - target: macos-arm64
             config: 'Release'
-            type: 'shared'
+            type: 'static'
           - target: macos-x86_64
             config: 'Release'
-            type: 'shared'
+            type: 'static'
     env:
       CACHE_REVISION: '3'
     defaults:
