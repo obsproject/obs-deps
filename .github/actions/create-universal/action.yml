@@ -60,9 +60,9 @@ runs:
         cp -cpR ${artifact_arm64:r:r} ${target_dir}
         cd ${target_dir}
 
-        typeset -a fixups=(**/(*.a|*.dylib)(.))
+        typeset -a fixups=()
 
-        for file (**/*~(*.a|*.dylib)(.)) {
+        for file (**/*(.)) {
           magic=$(xxd -ps -l 4 ${file})
 
           if [[ ${magic} == "cffaedfe" ]] fixups+=(${file})
