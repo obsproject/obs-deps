@@ -1,0 +1,37 @@
+From c4e0a259a953eea99876ce6ef207c1acc77de0a8 Mon Sep 17 00:00:00 2001
+From: Rodney <dennis@obsproject.com>
+Date: Thu, 2 Mar 2023 13:28:55 +0100
+Subject: [PATCH] Remove 8.1 target platform
+
+---
+ vs/vs2015/ducible/ducible.vcxproj | 1 -
+ vs/vs2015/pdbdump/pdbdump.vcxproj | 1 -
+ 2 files changed, 2 deletions(-)
+
+diff --git a/vs/vs2015/ducible/ducible.vcxproj b/vs/vs2015/ducible/ducible.vcxproj
+index 99d4ef4..a208957 100644
+--- a/vs/vs2015/ducible/ducible.vcxproj
++++ b/vs/vs2015/ducible/ducible.vcxproj
+@@ -22,7 +22,6 @@
+     <ProjectGuid>{2C07E47D-CA17-4D0A-8C9A-336DB1256938}</ProjectGuid>
+     <Keyword>Win32Proj</Keyword>
+     <RootNamespace>ducible</RootNamespace>
+-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+diff --git a/vs/vs2015/pdbdump/pdbdump.vcxproj b/vs/vs2015/pdbdump/pdbdump.vcxproj
+index cf2efc8..8f071c8 100755
+--- a/vs/vs2015/pdbdump/pdbdump.vcxproj
++++ b/vs/vs2015/pdbdump/pdbdump.vcxproj
+@@ -22,7 +22,6 @@
+     <ProjectGuid>{801F75FB-A618-42FE-ADB3-DAFD16DF799F}</ProjectGuid>
+     <Keyword>Win32Proj</Keyword>
+     <RootNamespace>ducible</RootNamespace>
+-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+-- 
+2.39.1.windows.1
+

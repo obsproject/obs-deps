@@ -1,0 +1,93 @@
+From bc650d6c64f2f3925263cf4c5fc7587363ba4875 Mon Sep 17 00:00:00 2001
+From: Rodney <dennis@obsproject.com>
+Date: Thu, 2 Mar 2023 13:35:20 +0100
+Subject: [PATCH] Use py instead of python
+
+---
+ vs/vs2015/ducible/ducible.vcxproj | 9 ++++-----
+ vs/vs2015/pdbdump/pdbdump.vcxproj | 9 ++++-----
+ 2 files changed, 8 insertions(+), 10 deletions(-)
+
+diff --git a/vs/vs2015/ducible/ducible.vcxproj b/vs/vs2015/ducible/ducible.vcxproj
+index 99d4ef4..f49dd22 100644
+--- a/vs/vs2015/ducible/ducible.vcxproj
++++ b/vs/vs2015/ducible/ducible.vcxproj
+@@ -109,7 +108,7 @@
+       <GenerateDebugInformation>true</GenerateDebugInformation>
+     </Link>
+     <CustomBuildStep>
+-      <Command>python ..\..\..\scripts\version.py ..\..\..\src\version.h.in ..\..\..\src\version.h --version-file ..\..\..\VERSION</Command>
++      <Command>py -3 ..\..\..\scripts\version.py ..\..\..\src\version.h.in ..\..\..\src\version.h --version-file ..\..\..\VERSION</Command>
+     </CustomBuildStep>
+     <CustomBuildStep>
+       <Outputs>..\..\..\src\version.h;%(Outputs)</Outputs>
+@@ -135,7 +134,7 @@
+       <GenerateDebugInformation>true</GenerateDebugInformation>
+     </Link>
+     <CustomBuildStep>
+-      <Command>python ..\..\..\scripts\version.py ..\..\..\src\version.h.in ..\..\..\src\version.h --version-file ..\..\..\VERSION</Command>
++      <Command>py -3 ..\..\..\scripts\version.py ..\..\..\src\version.h.in ..\..\..\src\version.h --version-file ..\..\..\VERSION</Command>
+     </CustomBuildStep>
+     <CustomBuildStep>
+       <Outputs>..\..\..\src\version.h;%(Outputs)</Outputs>
+@@ -166,7 +165,7 @@
+       <GenerateDebugInformation>true</GenerateDebugInformation>
+     </Link>
+     <CustomBuildStep>
+-      <Command>python ..\..\..\scripts\version.py ..\..\..\src\version.h.in ..\..\..\src\version.h --version-file ..\..\..\VERSION</Command>
++      <Command>py -3 ..\..\..\scripts\version.py ..\..\..\src\version.h.in ..\..\..\src\version.h --version-file ..\..\..\VERSION</Command>
+     </CustomBuildStep>
+     <CustomBuildStep>
+       <Outputs>..\..\..\src\version.h;%(Outputs)</Outputs>
+@@ -197,7 +196,7 @@
+       <GenerateDebugInformation>true</GenerateDebugInformation>
+     </Link>
+     <CustomBuildStep>
+-      <Command>python ..\..\..\scripts\version.py ..\..\..\src\version.h.in ..\..\..\src\version.h --version-file ..\..\..\VERSION</Command>
++      <Command>py -3 ..\..\..\scripts\version.py ..\..\..\src\version.h.in ..\..\..\src\version.h --version-file ..\..\..\VERSION</Command>
+     </CustomBuildStep>
+     <CustomBuildStep>
+       <Outputs>..\..\..\src\version.h;%(Outputs)</Outputs>
+diff --git a/vs/vs2015/pdbdump/pdbdump.vcxproj b/vs/vs2015/pdbdump/pdbdump.vcxproj
+index cf2efc8..c20fb01 100755
+--- a/vs/vs2015/pdbdump/pdbdump.vcxproj
++++ b/vs/vs2015/pdbdump/pdbdump.vcxproj
+@@ -109,7 +108,7 @@
+       <GenerateDebugInformation>true</GenerateDebugInformation>
+     </Link>
+     <CustomBuildStep>
+-      <Command>python ..\..\..\scripts\version.py ..\..\..\src\version.h.in ..\..\..\src\version.h --version-file ..\..\..\VERSION</Command>
++      <Command>py -3 ..\..\..\scripts\version.py ..\..\..\src\version.h.in ..\..\..\src\version.h --version-file ..\..\..\VERSION</Command>
+     </CustomBuildStep>
+     <CustomBuildStep>
+       <Outputs>..\..\..\src\version.h;%(Outputs)</Outputs>
+@@ -135,7 +134,7 @@
+       <GenerateDebugInformation>true</GenerateDebugInformation>
+     </Link>
+     <CustomBuildStep>
+-      <Command>python ..\..\..\scripts\version.py ..\..\..\src\version.h.in ..\..\..\src\version.h --version-file ..\..\..\VERSION</Command>
++      <Command>py -3 ..\..\..\scripts\version.py ..\..\..\src\version.h.in ..\..\..\src\version.h --version-file ..\..\..\VERSION</Command>
+     </CustomBuildStep>
+     <CustomBuildStep>
+       <Outputs>..\..\..\src\version.h;%(Outputs)</Outputs>
+@@ -166,7 +165,7 @@
+       <GenerateDebugInformation>true</GenerateDebugInformation>
+     </Link>
+     <CustomBuildStep>
+-      <Command>python ..\..\..\scripts\version.py ..\..\..\src\version.h.in ..\..\..\src\version.h --version-file ..\..\..\VERSION</Command>
++      <Command>py -3 ..\..\..\scripts\version.py ..\..\..\src\version.h.in ..\..\..\src\version.h --version-file ..\..\..\VERSION</Command>
+     </CustomBuildStep>
+     <CustomBuildStep>
+       <Outputs>..\..\..\src\version.h;%(Outputs)</Outputs>
+@@ -197,7 +196,7 @@
+       <GenerateDebugInformation>true</GenerateDebugInformation>
+     </Link>
+     <CustomBuildStep>
+-      <Command>python ..\..\..\scripts\version.py ..\..\..\src\version.h.in ..\..\..\src\version.h --version-file ..\..\..\VERSION</Command>
++      <Command>py -3 ..\..\..\scripts\version.py ..\..\..\src\version.h.in ..\..\..\src\version.h --version-file ..\..\..\VERSION</Command>
+     </CustomBuildStep>
+     <CustomBuildStep>
+       <Outputs>..\..\..\src\version.h;%(Outputs)</Outputs>
+-- 
+2.39.1.windows.1
+
