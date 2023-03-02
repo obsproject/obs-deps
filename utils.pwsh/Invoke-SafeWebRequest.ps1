@@ -49,19 +49,16 @@ function Invoke-SafeWebRequest {
         if ( ( $CheckExisting ) -and ( Test-Path $OutFile ) ) {
             $NewHash = Get-FileHash -Path $OutFile -Algorithm $Algorithm
         } else {
-            $WebRequestParams = @{
-                UserAgent = "NativeHost"
-                Uri = $Uri
-                OutFile = $OutFile
-                UseBasicParsing = $true
-                ErrorAction = "Stop"
+            if ( $Headers.count -gt 0 ) {
+                $HeaderStrings = @()
+
+                $Headers.GetEnumerator() | ForEach-Object {
+                    $Header = $_
+                    $HeaderStrings += "-H `"$($Header.key): $($Header.Value)`""
+                }
             }
 
-            if ( $Headers.Count -gt 0 ) {
-                $WebRequestParams += @{Headers = $Headers}
-            }
-
-            Invoke-WebRequest @WebRequestParams
+            curl.exe -Lf $Uri -o $OutFile $($HeaderStrings -join " ")
 
             $NewHash = Get-FileHash -Path $OutFile -Algorithm $Algorithm
         }
