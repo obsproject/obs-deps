@@ -1,0 +1,14 @@
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.PowerShell.Commands.FileHashInfo</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Microsoft.PowerShell.Commands.FileHashInfo</ToString>
+    <Props>
+      <S N="Algorithm">SHA256</S>
+      <S N="Hash">91F589EF69FCE51645A3ECBB215B405C98DB7B891479474EC3B5ED3B63C25E4A</S>
+      <S N="Path">windows_32-bit_build_temp\vlc.zip</S>
+    </Props>
+  </Obj>
+</Objs>
