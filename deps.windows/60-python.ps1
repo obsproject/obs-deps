@@ -20,7 +20,7 @@ function Enable-PyEnv {
 
     $PyEnvPaths = @(
         "${Env:PYENV}\bin"
-        "${Env:PYENV}\bin\shims"
+        "${Env:PYENV}\shims"
     )
     $Env:Path = ($PyEnvPaths + $PathElements) -join [System.IO.Path]::PathSeparator
 
