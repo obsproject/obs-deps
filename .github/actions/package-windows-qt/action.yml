@@ -66,14 +66,16 @@ runs:
     - name: Create combined Qt archive
       shell: pwsh
       run: |
+        if ( '${{ github.event_name }}' -eq 'push' -and '${{ github.ref }}' -like '*refs/tags/*' ) { $CompressionLevel = '9' } else { $CompressionLevel = '5' }
         $FileName = "${{ steps.GetFileNames.outputs.fileName }}"
-        7z a "$FileName" .\qt\* -mx=9
+        7z a "$FileName" .\qt\* -mx="$CompressionLevel"
 
     - name: Create Release PDBs archive
       shell: pwsh
       run: |
+        if ( '${{ github.event_name }}' -eq 'push' -and '${{ github.ref }}' -like '*refs/tags/*' ) { $CompressionLevel = '9' } else { $CompressionLevel = '5' }
         $FileName = "${{ steps.GetFileNames.outputs.pdbFileName }}"
-        7z a "$FileName" .\rel_pdbs\* -mx=9
+        7z a "$FileName" .\rel_pdbs\* -mx="$CompressionLevel"
 
     - name: Publish Combined Qt Artifact
       uses: actions/upload-artifact@v3
