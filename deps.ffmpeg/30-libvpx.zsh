@@ -3,19 +3,19 @@ autoload -Uz log_debug log_error log_info log_status log_output
 ## Dependency Information
 local name='libvpx'
 local -A versions=(
-  macos 1.12.0
-  linux 1.12.0
-  windows 1.12.0
+  macos 1.13.0
+  linux 1.13.0
+  windows 1.13.0
 )
 local -A urls=(
-  macos https://github.com/webmproject/libvpx/archive/v1.12.0.tar.gz
-  linux https://github.com/webmproject/libvpx/archive/v1.12.0.tar.gz
-  windows https://github.com/webmproject/libvpx/archive/v1.12.0.tar.gz
+  macos https://github.com/webmproject/libvpx/archive/v1.13.0.tar.gz
+  linux https://github.com/webmproject/libvpx/archive/v1.13.0.tar.gz
+  windows https://github.com/webmproject/libvpx/archive/v1.13.0.tar.gz
 )
 local -A hashes=(
-  macos "${0:a:h}/checksums/v1.12.0.tar.gz.sha256"
-  linux "${0:a:h}/checksums/v1.12.0.tar.gz.sha256"
-  windows "${0:a:h}/checksums/v1.12.0.tar.gz.sha256"
+  macos "${0:a:h}/checksums/v1.13.0.tar.gz.sha256"
+  linux "${0:a:h}/checksums/v1.13.0.tar.gz.sha256"
+  windows "${0:a:h}/checksums/v1.13.0.tar.gz.sha256"
 )
 local -a patches=(
   "windows ${0:a:h}/patches/libvpx/0001-libvpx-crosscompile-win-dll.patch \
