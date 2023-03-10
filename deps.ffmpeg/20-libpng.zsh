@@ -3,8 +3,8 @@ autoload -Uz log_debug log_error log_info log_status log_output
 ## Dependency Information
 local name='libpng'
 local version='1.6.38'
-local url='https://downloads.sourceforge.net/project/libpng/libpng16/1.6.38/libpng-1.6.38.tar.xz'
-local hash="${0:a:h}/checksums/libpng-1.6.38.tar.xz.sha256"
+local url='https://downloads.sourceforge.net/project/libpng/libpng16/1.6.39/libpng-1.6.39.tar.xz'
+local hash="${0:a:h}/checksums/libpng-1.6.39.tar.xz.sha256"
 local -a patches=(
   "macos ${0:a:h}/patches/libpng/0001-enable-ARM-NEON-optimisations.patch \
   f9ce2b5f8b63ef6caa9ab0195d27c52563652da56ab53956ffa51b34ff90ad4d"
