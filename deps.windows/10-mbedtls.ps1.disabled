@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'mbedtls',
-    [string] $Version = '3.2.1',
+    [string] $Version = '3.3.0',
     [string] $Uri = 'https://github.com/Mbed-TLS/mbedtls.git',
-    [string] $Hash = '869298bffeea13b205343361b7a7daf2b210e33d',
+    [string] $Hash = '8c89224991adff88d53cd380f42a2baa36f91454',
     [array] $Patches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/mbedtls/0001-enable-alt-threading-mode.patch"
