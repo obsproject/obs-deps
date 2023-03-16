@@ -1,14 +1,8 @@
 param(
     [string] $Name = 'qt6',
-    [string] $Version = '6.3.1',
+    [string] $Version = '6.4.3',
     [string] $Uri = 'https://github.com/qt/qt5.git',
-    [string] $Hash = 'c3d2dfa229f87374fc5919b5c44606445cf94bd8',
-    [array] $Patches = @(
-        @{
-            PatchFile = "${PSScriptRoot}/patches/Qt6/win/0001-QTBUG-86344.patch"
-            HashSum = "688E7787CEA28047DF819AA00E16A81CA3BB7E331E7620268CCD38D1D533B4ED"
-        }
-    )
+    [string] $Hash = 'cdcd14470143c516799748620479c7ff0eb81190'
 )
 
 # References:
