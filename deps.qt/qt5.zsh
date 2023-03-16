@@ -2,8 +2,8 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='qt5'
-local version=5.15.7
-local url='https://download.qt.io/official_releases/qt/5.15/5.15.7'
+local version=5.15.8
+local url='https://download.qt.io/official_releases/qt/5.15/5.15.8'
 local hash="${0:a:h}/checksums"
 local -a patches=(
   "macos ${0:a:h}/patches/Qt5/0001-QTBUG-74606.patch \
@@ -11,7 +11,7 @@ local -a patches=(
   "macos ${0:a:h}/patches/Qt5/0002-QTBUG-97855.patch \
     d8620262ad3f689fdfe6b6e277ddfdd3594db3de9dbc65810a871f142faa9966"
   "macos ${0:a:h}/patches/Qt5/0003-fix-sdk-version-check.patch \
-    167664bed786baf67902dce7ed63570cbc6a13f52f446e1a95d3a6991c89c274"
+    ad2ce47f7baa5d5cf8ef3d535fc0cb652efe484f84b210911c22800f6c1f7fa5"
 )
 
 local -a qt_components=(

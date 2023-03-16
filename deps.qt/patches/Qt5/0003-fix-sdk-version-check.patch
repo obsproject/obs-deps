@@ -10,13 +10,13 @@
  
  include(unix.conf)
 --- ./qtbase/mkspecs/common/macx.conf   2022-01-10 20:39:44.000000000 +0100
-+++ ./qtbase/mkspecs/common/macx.conf 2022-01-10 20:29:39.000000000 +0100
++++ ./qtbase/mkspecs/common/macx.conf 2023-03-16 17:15:00.000000000 -0400
 @@ -12,7 +12,7 @@
  # older SDKs we have to keep this.
  QT_MAC_SDK_VERSION_MIN = 10.14
  
--QT_MAC_SDK_VERSION_MAX = 11.0
-+QT_MAC_SDK_VERSION_MAX = 13.0
+-QT_MAC_SDK_VERSION_MAX = 12
++QT_MAC_SDK_VERSION_MAX = 13
  
  device.sdk = macosx
  device.target = device
