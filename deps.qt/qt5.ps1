@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'qt5',
-    [string] $Version = '5.15.7',
+    [string] $Version = '5.15.8',
     [string] $Uri = 'https://github.com/qt/qt5.git',
-    [string] $Hash = '95254e52c658729e80f741324045034c15ce9cb0',
+    [string] $Hash = '3c61a77b7f2a2df6077290843ab13069bd70dca9',
     [array] $Patches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/Qt5/win/0001-QTBUG-74606.patch"
