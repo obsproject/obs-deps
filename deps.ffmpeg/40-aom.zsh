@@ -55,7 +55,6 @@ config() {
   args=(
     ${cmake_flags}
     -DBUILD_SHARED_LIBS="${_onoff[(( shared_libs + 1 ))]}"
-    -DAOM_TARGET_CPU="${arch}"
     -DENABLE_DOCS=OFF
     -DENABLE_EXAMPLES=OFF
     -DENABLE_TESTDATA=OFF
@@ -65,7 +64,7 @@ config() {
   )
 
   case ${target} {
-    macos-arm64) args+=(-DCONFIG_RUNTIME_CPU_DETECT=0) ;;
+    macos-*) args+=(-DCONFIG_RUNTIME_CPU_DETECT=0 -DCMAKE_TOOLCHAIN_FILE="build/cmake/toolchains/${target_config[cmake_arch]}-macos.cmake") ;;
     windows-x*) args+=(-DCMAKE_TOOLCHAIN_FILE="build/cmake/toolchains/${target_config[cmake_arch]}-mingw-gcc.cmake")
   }
 
