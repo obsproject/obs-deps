@@ -119,7 +119,7 @@ setup_build_parameters() {
 
       as_flags+=(${defaults})
       c_flags+=(${defaults})
-      cxx_flags+=(-stc=c++11 -stdlib=libc++ ${defaults})
+      cxx_flags+=(-std=c++11 -stdlib=libc++ ${defaults})
       ld_flags+=(${defaults})
 
       if (( ${+commands[clang]} )) {
