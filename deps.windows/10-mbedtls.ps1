@@ -6,11 +6,15 @@ param(
     [array] $Patches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/mbedtls/0001-enable-alt-threading-mode.patch"
-            HashSum = "dd811e3e406430d7140d04b6c23eee6dc1a7ec8bca70d3a6b0d9db55cc9f4fdc"
+            HashSum = "64e8d40a6be9721108220e667ac61c9219335be0a3f2c438c2e17a35a1b74109"
         }
         @{
             PatchFile = "${PSScriptRoot}/patches/mbedtls/0002-add-alt-threading-header-file.patch"
             HashSum = "1c42a3bd74ada543f8852ccf8e55f482022f08d3888e0b5d0d101ab0beff409d"
+        }
+        @{
+            PatchFile = "${PSScriptRoot}/patches/mbedtls/0003-enable-dtls-srtp-support.patch"
+            HashSum = "6bc1af2b09800e99279f1cc462d9c58a0cf850da541072c7b43b6b5aac57f09e"
         }
     ),
     [switch] $Shared = $false
