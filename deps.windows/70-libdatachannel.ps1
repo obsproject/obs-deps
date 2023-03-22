@@ -2,7 +2,7 @@ param(
     [string] $Name = 'libdatachannel',
     [string] $Version = '0.18.3',
     [string] $Uri = 'https://github.com/Sean-Der/libdatachannel.git',
-    [string] $Hash = '272af68a4a0231587fbe4d49d4c543ae5b68a0e8'
+    [string] $Hash = 'bffcbeec9db0ba3f1493e0cf1398aa153b8a6682'
 )
 
 function Setup {
