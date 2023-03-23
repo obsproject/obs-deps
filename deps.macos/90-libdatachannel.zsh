@@ -4,7 +4,7 @@ autoload -Uz log_debug log_error log_info log_status log_output
 local name='libdatachannel'
 local version='0.18.3'
 local url='https://github.com/Sean-Der/libdatachannel.git'
-local hash='bffcbeec9db0ba3f1493e0cf1398aa153b8a6682'
+local hash='8935bd0c07e41819753c18ca6d82e5a490556b76'
 
 ## Build Steps
 setup() {
