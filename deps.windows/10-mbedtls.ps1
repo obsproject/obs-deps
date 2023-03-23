@@ -16,8 +16,7 @@ param(
             PatchFile = "${PSScriptRoot}/patches/mbedtls/0003-enable-dtls-srtp-support.patch"
             HashSum = "6bc1af2b09800e99279f1cc462d9c58a0cf850da541072c7b43b6b5aac57f09e"
         }
-    ),
-    [switch] $Shared = $false
+    )
 )
 
 function Setup {
@@ -50,7 +49,7 @@ function Configure {
     $OnOff = @('OFF', 'ON')
     $Options = @(
         $CmakeOptions
-        "-DUSE_SHARED_MBEDTLS_LIBRARY=$($OnOff[$Shared.isPresent])"
+        "-DBUILD_SHARED_LIBS=$($OnOff[$script:Shared.isPresent])"
         '-DUSE_STATIC_MBEDTLS_LIBRARY=ON'
         '-DENABLE_PROGRAMS=OFF'
         '-DENABLE_TESTING=OFF'
