@@ -38,7 +38,6 @@ function Configure {
         '-DNO_WEBSOCKET=1'
         '-DNO_TESTS=1'
         '-DNO_EXAMPLES=1'
-        '-DUSE_SYSTEM_MBEDTLS=1'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options

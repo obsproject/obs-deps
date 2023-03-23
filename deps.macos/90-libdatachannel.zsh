@@ -33,7 +33,6 @@ config() {
     -DNO_WEBSOCKET=1
     -DNO_TESTS=1
     -DNO_EXAMPLES=1
-    -DUSE_SYSTEM_MBEDTLS=1
   )
 
   cd "${dir}"
