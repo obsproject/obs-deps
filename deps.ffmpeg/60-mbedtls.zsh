@@ -3,9 +3,9 @@ autoload -Uz log_debug log_error log_info log_status log_output
 ## Dependency Information
 local name='mbedtls'
 local -A versions=(
-  macos 3.3.0
-  linux 3.3.0
-  windows 3.3.0
+  macos 3.2.1
+  linux 3.2.1
+  windows 3.2.1
 )
 local url='https://github.com/Mbed-TLS/mbedtls.git'
 local -A hashes=(
@@ -20,6 +20,10 @@ local -a patches=(
     6c5f88b9758285f848ec6e0f07c943f07b3d7c54eed135afec47282667e625b9"
   "linux ${0:a:h}/patches/mbedtls/0001-enable-posix-threading-support.patch \
     ea52cf47ca01211cbadf03c0493986e8d4e0d1e9ab4aaa42365b2dea7b591188"
+  "linux ${0:a:h}/patches/mbedtls/0002-enable-dtls-srtp-support.patch \
+    6c5f88b9758285f848ec6e0f07c943f07b3d7c54eed135afec47282667e625b9"
+  "windows ${0:a:h}/patches/mbedtls/0002-enable-dtls-srtp-support.patch \
+    6c5f88b9758285f848ec6e0f07c943f07b3d7c54eed135afec47282667e625b9"
 )
 
 ## Dependency Overrides
