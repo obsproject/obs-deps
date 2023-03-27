@@ -192,6 +192,7 @@ config() {
     --extra-ldflags="${ff_ldflags}"
     --enable-version3
     --enable-gpl
+    --enable-libopenh264
     --enable-libx264
     --enable-libopus
     --enable-libvorbis
