@@ -2,7 +2,8 @@ param(
     [string] $Name = 'jansson',
     [string] $Version = '2.14',
     [string] $Uri = 'https://github.com/akheron/jansson.git',
-    [string] $Hash = '684e18c927e89615c2d501737e90018f4930d6c5'
+    [string] $Hash = '684e18c927e89615c2d501737e90018f4930d6c5',
+    [array] $Targets = @('x64')
 )
 
 function Setup {

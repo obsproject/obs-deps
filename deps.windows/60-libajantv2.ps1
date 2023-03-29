@@ -3,6 +3,7 @@ param(
     [string] $Version = '17.0.1',
     [string] $Uri = 'https://github.com/aja-video/libajantv2.git',
     [string] $Hash = 'b6acce6b135c3d9ae7a2bce966180b159ced619f',
+    [array] $Targets = @('x64'),
     [switch] $ForceStatic = $true
 )
 

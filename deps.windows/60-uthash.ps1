@@ -2,7 +2,8 @@ param(
     [string] $Name = 'uthash',
     [string] $Version = '2.3.0',
     [string] $Uri = 'https://github.com/troydhanson/uthash.git',
-    [string] $Hash = "e493aa90a2833b4655927598f169c31cfcdf7861"
+    [string] $Hash = "e493aa90a2833b4655927598f169c31cfcdf7861",
+    [array] $Targets = @('x64')
 )
 
 function Setup {
