@@ -2,7 +2,8 @@ param(
     [string] $Name = 'simde',
     [string] $Version = '0.8.2',
     [string] $Uri = 'https://github.com/simd-everywhere/simde.git',
-    [string] $Hash = '71fd833d9666141edcd1d3c109a80e228303d8d7'
+    [string] $Hash = '71fd833d9666141edcd1d3c109a80e228303d8d7',
+    [array] $Targets = @('x64')
 )
 
 function Setup {

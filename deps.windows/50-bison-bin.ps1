@@ -2,7 +2,8 @@ param(
     [string] $Name = 'bison',
     [string] $Version = '2.4.1',
     [string] $Uri = 'http://downloads.sourceforge.net/gnuwin32/bison-2.4.1-bin.zip',
-    [string] $Hash = "${PSScriptRoot}/checksums/bison-2.4.1-bin.zip.sha256"
+    [string] $Hash = "${PSScriptRoot}/checksums/bison-2.4.1-bin.zip.sha256",
+    [array] $Targets = @('x64')
 )
 
 function Setup {

@@ -133,11 +133,15 @@ function Package-Dependencies {
         dependencies {
             Get-ChildItem ./bin/*.lib | Move-Item -Destination ./lib
             Get-ChildItem ./bin -Exclude 'lua51.dll','libcurl.dll','swig.exe','Lib' | Remove-Item
-            Get-ChildItem ./cmake/pcre2*,./lib/pcre2* | Remove-Item
-            Remove-Item -Recurse ./lib/pkgconfig
-            Remove-Item -Recurse ./man
-            Get-ChildItem ./share -Exclude 'cmake' | Remove-Item -Recurse
-            Get-ChildItem ./share/cmake -Exclude 'nlohmann_json*' | Remove-Item -Recurse
+
+            if ( $script:Target -ne 'x86' ) {
+                Get-ChildItem ./cmake/pcre2*,./lib/pcre2* | Remove-Item
+                Remove-Item -Recurse ./lib/pkgconfig
+                Remove-Item -Recurse ./man
+                Get-ChildItem ./share -Exclude 'cmake' | Remove-Item -Recurse
+                Get-ChildItem ./share/cmake -Exclude 'nlohmann_json*' | Remove-Item -Recurse
+            }
+
             $ArchiveFileName = "windows-deps-${CurrentDate}-${Target}.zip"
         }
         qt {
