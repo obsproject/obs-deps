@@ -2,7 +2,8 @@ param(
     [string] $Name = 'nlohmann-json',
     [string] $Version = '3.11.2',
     [string] $Uri = 'https://github.com/nlohmann/json.git',
-    [string] $Hash = 'bc889afb4c5bf1c0d8ee29ef35eaaf4c8bef8a5d'
+    [string] $Hash = 'bc889afb4c5bf1c0d8ee29ef35eaaf4c8bef8a5d',
+    [array] $Targets = @('x64')
 )
 
 function Setup {
