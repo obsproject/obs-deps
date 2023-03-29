@@ -11,7 +11,8 @@ param(
     [switch] $SkipAll,
     [switch] $SkipBuild,
     [switch] $SkipDeps,
-    [switch] $SkipUnpack
+    [switch] $SkipUnpack,
+    [switch] $VSPrerelease
 )
 
 $ErrorActionPreference = "Stop"
