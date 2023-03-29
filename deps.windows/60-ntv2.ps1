@@ -32,11 +32,11 @@ function Configure {
     $OnOff = @('OFF', 'ON')
     $Options = @(
         $CmakeOptions
-        "-DAJA_BUILD_SHARED=$($OnOff[$Shared])"
-        '-DAJA_BUILD_OPENSOURCE=ON'
-        '-DAJA_BUILD_APPS=OFF'
-        '-DAJA_INSTALL_SOURCES=OFF'
-        '-DAJA_INSTALL_HEADERS=ON'
+        "-DAJA_BUILD_SHARED:BOOL=$($OnOff[$Shared])"
+        '-DAJA_BUILD_OPENSOURCE:BOOL=ON'
+        '-DAJA_BUILD_APPS:BOOL=OFF'
+        '-DAJA_INSTALL_SOURCES:BOOL=OFF'
+        '-DAJA_INSTALL_HEADERS:BOOL=ON'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options

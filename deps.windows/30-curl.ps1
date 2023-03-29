@@ -34,11 +34,11 @@ function Configure {
 
     $Options = @(
         $CmakeOptions
-        '-DBUILD_CURL_EXE=OFF'
-        '-DBUILD_TESTING=OFF'
-        '-DCURL_USE_LIBSSH2=OFF'
-        '-DCURL_USE_SCHANNEL=ON'
-        '-DCURL_ZLIB=OFF'
+        '-DBUILD_CURL_EXE:BOOL=OFF'
+        '-DBUILD_TESTING:BOOL=OFF'
+        '-DCURL_USE_LIBSSH2:BOOL=OFF'
+        '-DCURL_USE_SCHANNEL:BOOL=ON'
+        '-DCURL_ZLIB:BOOL=OFF'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options

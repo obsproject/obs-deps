@@ -40,9 +40,9 @@ function Configure {
 
     $Options = @(
         $CmakeOptions
-        '-DENABLE_CPP11=ON'
-        '-DBUILD_EXAMPLES=OFF'
-        '-DBUILD_TESTS=OFF'
+        '-DENABLE_CPP11:BOOL=ON'
+        '-DBUILD_EXAMPLES:BOOL=OFF'
+        '-DBUILD_TESTS:BOOL=OFF'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options

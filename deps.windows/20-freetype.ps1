@@ -24,12 +24,12 @@ function Configure {
     $OnOff = @('OFF', 'ON')
     $Options = @(
         $CmakeOptions
-        "-DBUILD_SHARED_LIBS=$($OnOff[$script:Shared.isPresent])"
-        '-DFT_DISABLE_BROTLI=ON'
-        '-DFT_DISABLE_BZIP2=ON'
-        '-DFT_DISABLE_HARFBUZZ=ON'
-        '-DFT_DISABLE_PNG=ON'
-        '-DFT_DISABLE_ZLIB=ON'
+        "-DBUILD_SHARED_LIBS:BOOL=$($OnOff[$script:Shared.isPresent])"
+        '-DFT_DISABLE_BROTLI:BOOL=ON'
+        '-DFT_DISABLE_BZIP2:BOOL=ON'
+        '-DFT_DISABLE_HARFBUZZ:BOOL=ON'
+        '-DFT_DISABLE_PNG:BOOL=ON'
+        '-DFT_DISABLE_ZLIB:BOOL=ON'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options
