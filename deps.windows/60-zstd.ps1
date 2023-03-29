@@ -24,11 +24,11 @@ function Configure {
 
     $Options = @(
         $CmakeOptions
-        '-DZSTD_BUILD_PROGRAMS=OFF'
-        '-DZSTD_BUILD_TESTS=OFF'
-        '-DZSTD_BUILD_SHARED=OFF'
-        '-DZSTD_USE_STATIC_RUNTIME=ON'
-        '-DZSTD_LEGACY_SUPPORT=OFF'
+        '-DZSTD_BUILD_PROGRAMS:BOOL=OFF'
+        '-DZSTD_BUILD_TESTS:BOOL=OFF'
+        '-DZSTD_BUILD_SHARED:BOOL=OFF'
+        '-DZSTD_USE_STATIC_RUNTIME:BOOL=ON'
+        '-DZSTD_LEGACY_SUPPORT:BOOL=OFF'
     )
 
     Invoke-External cmake -S build/cmake -B "build_${Target}" @Options

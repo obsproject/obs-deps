@@ -33,7 +33,7 @@ function Install {
         Force = $true
     }
 
-    $null = New-Item @Params
+    New-Item @Params -ErrorAction SilentlyContinue > $null
 
     $Items = @(
         @{
@@ -41,8 +41,12 @@ function Install {
             Destination = "$($ConfigData.OutputPath)/include/luajit"
         }
         @{
-            Path = "src/lua51.dll", "src/lua51.lib"
+            Path = "src/lua51.dll"
             Destination = "$($ConfigData.OutputPath)/bin"
+        }
+        @{
+            Path = "src/lua51.lib"
+            Destination = "$($ConfigData.OutputPath)/lib"
         }
     )
 

@@ -10,30 +10,30 @@ param(
 )
 
 function Enable-PyEnv {
-    $Env:PYENV = "$(Get-Location | Convert-Path)\pyenv-win"
-    $Env:PYENV_ROOT = $Env:PYENV
-    $Env:PYENV_HOME = $Env:PYENV
+    $env:PYENV = "$(Get-Location | Convert-Path)\pyenv-win"
+    $env:PYENV_ROOT = $env:PYENV
+    $env:PYENV_HOME = $env:PYENV
 
-    $Env:OriginalPath = $Env:Path
+    $env:OriginalPath = $env:Path
 
-    $PathElements = ([Collections.Generic.HashSet[string]]::new([string[]]($Env:Path -split [System.IO.Path]::PathSeparator), [StringComparer]::OrdinalIgnoreCase))
+    $PathElements = ([Collections.Generic.HashSet[string]]::new([string[]]($env:Path -split [System.IO.Path]::PathSeparator), [StringComparer]::OrdinalIgnoreCase))
 
     $PyEnvPaths = @(
-        "${Env:PYENV}\bin"
-        "${Env:PYENV}\shims"
+        "${env:PYENV}\bin"
+        "${env:PYENV}\shims"
     )
-    $Env:Path = ($PyEnvPaths + $PathElements) -join [System.IO.Path]::PathSeparator
+    $env:Path = ($PyEnvPaths + $PathElements) -join [System.IO.Path]::PathSeparator
 
     $null = Invoke-External pyenv rehash
 }
 
 function Disable-PyEnv {
-    $Env:Path = $Env:OriginalPath
+    $env:Path = $Env:OriginalPath
 
-    Remove-Item Env:OriginalPath
-    Remove-Item Env:PYENV
-    Remove-Item Env:PYENV_ROOT
-    Remove-Item Env:PYENV_HOME
+    Remove-Item env:OriginalPath
+    Remove-Item env:PYENV
+    Remove-Item env:PYENV_ROOT
+    Remove-Item env:PYENV_HOME
 }
 
 function Setup {
@@ -105,6 +105,6 @@ function Install {
     $Items | ForEach-Object {
         $Item = $_
         Log-Output ('{0} => {1}' -f ($Item.Path -join ", "), $Item.Destination)
-        Copy-Item @Item
+        Copy-Item -Force @Item
     }
 }

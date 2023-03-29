@@ -24,7 +24,7 @@ function Configure {
 
     $Options = @(
         $CmakeOptions
-        "-DBUILD_SHARED_LIBS=OFF"
+        "-DBUILD_SHARED_LIBS:BOOL=OFF"
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options

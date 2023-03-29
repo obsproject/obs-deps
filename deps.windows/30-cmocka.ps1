@@ -35,9 +35,9 @@ function Configure {
     $OnOff = @('OFF', 'ON')
     $Options = @(
         $CmakeOptions
-        "-DBUILD_SHARED_LIBS=$($OnOff[$script:Shared.isPresent])"
-        '-DBUILD_TESTING=OFF'
-        '-DWITH_EXAMPLES=OFF'
+        "-DBUILD_SHARED_LIBS:BOOL=$($OnOff[$script:Shared.isPresent])"
+        '-DBUILD_TESTING:BOOL=OFF'
+        '-DWITH_EXAMPLES:BOOL=OFF'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options

@@ -24,7 +24,7 @@ function Configure {
 
     $Options = @(
         $CmakeOptions
-        '-DJSON_BuildTests=OFF'
+        '-DJSON_BuildTests:BOOL=OFF'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options
