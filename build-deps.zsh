@@ -86,7 +86,7 @@ package() {
     log_status "Cleanup unnecessary files"
 
     rm -rf lib/^(*.dylib|libajantv*|*.a|*.so*|*.lib|*.framework|*.dSYM|cmake)(N)
-    rm -rf lib/(libpcre*|libpng*)(N)
+    rm -rf lib/(libpcre*|libpng*|libz.*)(N)
     rm -rf bin/^(*.exe|*.dll|*.pdb|swig)(N)
 
     if [[ -f bin/swig ]] {
