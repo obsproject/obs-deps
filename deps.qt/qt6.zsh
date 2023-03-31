@@ -8,6 +8,8 @@ local hash="${0:a:h}/checksums"
 local -a patches=(
   "macos ${0:a:h}/patches/Qt6/mac/0001-QTBUG-106369.patch \
     f96ce8408b03e752708c606df10d6473aeed78843a6acb0a90c05f0a9fc913af"
+  "macos ${0:a:h}/patches/Qt6/mac/0002-QTBUG-56064.patch \
+    08a2e4f384d21e169d6ddb6e37084bc8b8701bb3e6a675b76843784a88250ad7"
 )
 
 local -a qt_components=(
