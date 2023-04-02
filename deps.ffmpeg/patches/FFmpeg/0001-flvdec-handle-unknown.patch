@@ -1,0 +1,11 @@
+--- ./libavformat/flvdec.c	2021-10-24 22:47:07.000000000 +0200
++++ ./libavformat/flvdec.c	2021-11-08 13:13:47.000000000 +0100
+@@ -1077,7 +1077,7 @@
+             int type;
+             meta_pos = avio_tell(s->pb);
+             type = flv_read_metabody(s, next);
+-            if (type == 0 && dts == 0 || type < 0) {
++            if (type == 0 && dts == 0 || type < 0 || type == TYPE_UNKNOWN) {
+                 if (type < 0 && flv->validate_count &&
+                     flv->validate_index[0].pos     > next &&
+                     flv->validate_index[0].pos - 4 < next) {
