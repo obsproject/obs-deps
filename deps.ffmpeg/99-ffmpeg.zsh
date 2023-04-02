@@ -6,8 +6,10 @@ local version='6.0'
 local url='https://github.com/FFmpeg/FFmpeg.git'
 local hash='3980415627a187d188dc25669cea6b12912eb178'
 local -a patches=(
-  "* ${0:a:h}/patches/FFmpeg/0001-FFmpeg-6.0-OBS.patch \
-    7fcb67d5e68a6ca3102c3a6aaba56750b22850552ccd8704c6636c174968ef56"
+  "* ${0:a:h}/patches/FFmpeg/0001-flvdec-handle-unknown.patch \
+    5a5185f54cbcf4672763cce687d1b6ddb662549b69637da826279ce4797f57ef"
+  "* ${0:a:h}/patches/FFmpeg/0002-libaomenc-presets.patch \
+    d5f1410efb31fe31e8e905ec3f10ccb7841dd5594cb3591c3b205e77232fd183"
 )
 
 ## Build Steps
