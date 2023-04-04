@@ -40,7 +40,7 @@ function Setup-BuildParameters {
 
     $VisualStudioId = "Visual Studio {0} {1}" -f @(
         ([System.Version] $VisualStudioData.Version).Major
-        ( $VisualStudioData.Name -split ' ')[3]
+        ([regex]::Match($VisualStudioData.Name, "\b\d{4}\b"))
     )
 
     $script:CmakeOptions = @(
