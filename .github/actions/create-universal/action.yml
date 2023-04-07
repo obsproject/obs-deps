@@ -65,7 +65,7 @@ runs:
         for file (**/*(.)) {
           magic=$(xxd -ps -l 4 ${file})
 
-          if [[ ${magic} == "cffaedfe" ]] fixups+=(${file})
+          if [[ ${magic} == "cffaedfe" || ${magic} == "213c6172" ]] fixups+=(${file})
         }
 
         for file (${fixups}) {
