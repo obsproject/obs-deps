@@ -19,7 +19,7 @@ setup_target() {
   case ${1} {
     macos-x86_64)
       config_data+=(
-        [deployment_target]=10.13
+        [deployment_target]=11.0
         [darwin_target]=17
       )
       ;;
@@ -33,7 +33,7 @@ setup_target() {
     macos-universal)
       config_data+=(
         [cmake_arch]="x86_64;arm64"
-        [deployment_target]=10.15
+        [deployment_target]=11.0
         [darwin_target]=17
       )
       ;;
@@ -110,18 +110,20 @@ setup_build_parameters() {
       cmake_flags+=(
         -DCMAKE_OSX_ARCHITECTURES=${target_config[cmake_arch]}
         -DCMAKE_MACOSX_RPATH=ON
-        -DCMAKE_C_FLAGS="${c_flags}"
+        -DCMAKE_C_FLAGS="${c_flags} -std=c17"
+        -DCMAKE_C_FLAGS_RELEASE="-O3 -g -DNDEBUG"
+        -DCMAKE_CXX_FLAGS_RELEASE="-O3 -g -DNDEBUG"
       )
 
       if [[ "${PACKAGE_NAME}" != 'qt6' ]] {
-        cmake_flags+=(-DCMAKE_CXX_FLAGS="${cxx_flags} -std=c++11 -stdlib=libc++")
+        cmake_flags+=(-DCMAKE_CXX_FLAGS="${cxx_flags} -std=c++11")
       } else {
-        cmake_flags+=(-DCMAKE_CXX_FLAGS="${cxx_flags} -stdlib=libc++")
+        cmake_flags+=(-DCMAKE_CXX_FLAGS="${cxx_flags} -std=c++17")
       }
 
       as_flags+=(${defaults})
-      c_flags+=(${defaults})
-      cxx_flags+=(-std=c++11 -stdlib=libc++ ${defaults})
+      c_flags+=(-std=c17 ${defaults})
+      cxx_flags+=(-std=c++17 ${defaults})
       ld_flags+=(${defaults})
 
       if (( ${+commands[clang]} )) {
@@ -170,8 +172,8 @@ setup_build_parameters() {
       cxx_flags+=(-O2 -g -DNDEBUG)
       ;;
     Release)
-      c_flags+=(-O3 -DNDEBUG)
-      cxx_flags+=(-O3 -DNDEBUG)
+      c_flags+=(-O3 -g -DNDEBUG)
+      cxx_flags+=(-O3 -g -DNDEBUG)
       ;;
     MinSizeRel)
       c_flags+=(-Os -DNDEBUG)
