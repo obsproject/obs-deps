@@ -19,7 +19,7 @@ build() {
   autoload -Uz mkcd progress
 
   log_info "Build (%F{3}${target}%f)"
-  cd "${dir}"
+  cd ${dir}
 
   log_debug "Running make"
   make PREFIX="${target_config[output_dir]}"
@@ -30,7 +30,7 @@ install() {
 
   log_info "Install (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
   make PREFIX="${target_config[output_dir]}" install
 }
