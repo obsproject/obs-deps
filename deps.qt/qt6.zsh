@@ -81,7 +81,7 @@ patch() {
   for patch (${patches}) {
     read _target _url _hash <<< "${patch}"
 
-    if [[ "${target%%-*}" == ${~_target} ]] apply_patch ${_url} ${_hash}
+    if [[ ${target%%-*} == ${~_target} ]] apply_patch ${_url} ${_hash}
   }
 }
 
