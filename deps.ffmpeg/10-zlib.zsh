@@ -16,12 +16,12 @@ setup() {
 }
 
 clean() {
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${clean_build} -gt 0 && -d "build_${arch}" ]] {
+  if [[ ${clean_build} -gt 0 && -d build_${arch} ]] {
     log_info "Clean build directory (%F{3}${target}%f)"
 
-    rm -rf "build_${arch}"
+    rm -rf build_${arch}
   }
 }
 
@@ -40,9 +40,9 @@ config() {
   }
 
   log_info "Config (%F{3}${target}%f)"
-  cd "${dir}"
+  cd ${dir}
   log_debug "CMake configuration options: ${args}'"
-  progress cmake -S . -B "build_${arch}" -G Ninja ${args}
+  progress cmake -S . -B build_${arch} -G Ninja ${args}
 }
 
 build() {
@@ -50,11 +50,11 @@ build() {
 
   log_info "Build (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
   args=(
-    --build "build_${arch}"
-    --config "${config}"
+    --build build_${arch}
+    --config ${config}
   )
 
   if (( _loglevel > 1 )) args+=(--verbose)
@@ -68,14 +68,14 @@ install() {
   log_info "Install (%F{3}${target}%f)"
 
   args=(
-    --install "build_${arch}"
-    --config "${config}"
+    --install build_${arch}
+    --config ${config}
   )
 
-  if [[ "${config}" =~ "Release|MinSizeRel" ]] args+=(--strip)
+  if [[ ${config} == (Release|MinSizeRel) ]] args+=(--strip)
   if (( _loglevel > 1 )) args+=(--verbose)
 
-  cd "${dir}"
+  cd ${dir}
 
   progress cmake ${args}
 }
@@ -83,20 +83,16 @@ install() {
 fixup() {
   cd "${dir}"
 
-  if [[ ${target} == "windows-x"* ]] {
-    log_info "Fixup (%F{3}${target}%f)"
-    autoload -Uz create_importlibs
-    create_importlibs ${target_config[output_dir]}/bin/zlib*.dll
+  log_info "Fixup (%F{3}${target}%f)"
+  autoload -Uz create_importlibs
+  create_importlibs ${target_config[output_dir]}/bin/zlib*.dll
 
-    mkdir -p ${target_config[output_dir]}/lib/pkgconfig
-    mv ${target_config[output_dir]}/share/pkgconfig/zlib.pc \
-      ${target_config[output_dir]}/lib/pkgconfig/zlib.pc
+  mkdir -p ${target_config[output_dir]}/lib/pkgconfig
+  mv ${target_config[output_dir]}/share/pkgconfig/zlib.pc \
+    ${target_config[output_dir]}/lib/pkgconfig/zlib.pc
 
-    pushd ${PWD}
-    cd ${target_config[output_dir]}
-
-    mv lib/libzlib.dll.a lib/libz.dll.a
-    mv lib/libzlibstatic.a lib/libz.a
-    popd
-  }
+  pushd ${target_config[output_dir]}
+  mv lib/libzlib.dll.a lib/libz.dll.a
+  mv lib/libzlibstatic.a lib/libz.a
+  popd
 }

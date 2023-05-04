@@ -32,12 +32,12 @@ setup() {
 }
 
 clean() {
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${clean_build} -gt 0 && -f "build_${arch}/Makefile" ]] {
+  if [[ ${clean_build} -gt 0 && -f build_${arch}/Makefile ]] {
     log_info "Clean build directory (%F{3}${target}%f)"
 
-    rm -rf "build_${arch}"
+    rm -rf build_${arch}
   }
 }
 
@@ -46,7 +46,7 @@ patch() {
 
   log_info "Patch (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
   local patch
   local _target
@@ -56,10 +56,10 @@ patch() {
   for patch (${patches}) {
     read _target _url _hash <<< "${patch}"
 
-    if [[ ${_target} == "${target%%-*}" ]] apply_patch "${_url}" "${_hash}"
+    if [[ ${_target} == ${target%%-*} ]] apply_patch ${_url} ${_hash}
   }
 
-  if [[ ${target} = "windows-x"* ]] {
+  if [[ ${target} == windows-x* ]] {
     sed -i -e 's/\r$//' win32/xmingw32/libtheoraenc-all.def
     sed -i -e 's/\r$//' win32/xmingw32/libtheoradec-all.def
   }
@@ -69,7 +69,7 @@ config() {
   autoload -Uz mkcd progress
 
   local cross_prefix
-  case "${target}" {
+  case ${target} {
     macos-universal)
       autoload -Uz universal_config && universal_config
       return
@@ -80,11 +80,11 @@ config() {
   }
 
   log_info "Config (%F{3}${target}%f)"
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${target} == "windows-x"* ]] progress ./autogen.sh
+  if [[ ${target} == windows-x* ]] progress ./autogen.sh
 
-  mkcd "build_${arch}"
+  mkcd build_${arch}
 
   local _onoff=(disable enable)
   args+=(
@@ -100,7 +100,7 @@ config() {
     "--${_onoff[(( shared_libs + 1 ))]}-shared"
   )
 
-  if [[ ${config} == "Debug" ]] args+=(--enable-debug)
+  if [[ ${config} == Debug ]] args+=(--enable-debug)
 
   log_debug "Configure options: ${args}"
   CFLAGS="${c_flags}" \
@@ -121,10 +121,10 @@ build() {
   }
 
   log_info "Build (%F{3}${target}%f)"
-  cd "${dir}/build_${arch}"
+  cd ${dir}/build_${arch}
 
   log_debug "Running make -j ${num_procs}"
-  PATH="${(j.:.)cc_path}" progress make -j "${num_procs}"
+  PATH="${(j.:.)cc_path}" progress make -j ${num_procs}
 }
 
 install() {
@@ -132,32 +132,54 @@ install() {
 
   log_info "Install (%F{3}${target}%f)"
 
-  cd "${dir}/build_${arch}"
+  cd ${dir}/build_${arch}
 
-  if [[ "${config}" =~ "Release|MinSizeRel" ]] {
-    progress make install-strip
-  } else {
-    progress make install
-  }
+  progress make install
 }
 
 fixup() {
-  cd "${dir}"
+  cd ${dir}
 
-  if (( shared_libs )) {
-    local strip_tool
-    local -a strip_files
+  log_info "Fixup (%F{3}${target}%f)"
 
-    log_info "Fixup (%F{3}${target}%f)"
-    case ${target} {
-      macos*)
-        autoload -Uz fix_rpaths
-        fix_rpaths "${target_config[output_dir]}"/lib/libtheora*.dylib(.)
-        ;;
-      windows-x*)
+  local strip_tool
+  local -a strip_files
+
+  case ${target} {
+    macos*)
+      if (( shared_libs )) {
+        dylib_files=(${target_config[output_dir]}/lib/libtheora*.dylib(.))
+
+        autoload -Uz fix_rpaths && fix_rpaths ${dylib_files}
+
+        if [[ ${config} == Release ]] dsymutil ${dylib_files}
+
+        strip_tool=strip
+        strip_files=(${dylib_files})
+      } else {
+        rm -rf ${target_config[output_dir]}/lib/libtheora*.(dylib|dSYM)(N)
+      }
+      ;;
+    linux-*)
+      if (( shared_libs )) {
+        strip_tool=strip
+        strip_files=("${target_config[output_dir]}"/lib/libtheora*.so.*(.))
+      } else {
+        rm -rf ${target_config[output_dir]}/lib/libtheora*.so.*(N)
+      }
+      ;;
+    windows-x*)
+      if (( shared_libs )) {
         autoload -Uz create_importlibs
-        create_importlibs "${target_config[output_dir]}"/bin/libtheora*.dll(.)
-        ;;
-    }
+        create_importlibs ${target_config[output_dir]}/bin/libtheora*.dll(.)
+
+        strip_tool=${target_config[cross_prefix]}-w64-mingw32-strip
+        strip_files=(${target_config[output_dir]}/bin/libtheora*.dll(.))
+      } else {
+        rm -rf ${target_config[output_dir]}/bin/libtheora*.dll(N)
+      }
+      ;;
   }
+
+  if (( #strip_files )) && [[ ${config} == (Release|MinSizeRel) ]] ${strip_tool} -x ${strip_files}
 }

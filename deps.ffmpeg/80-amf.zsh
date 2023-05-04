@@ -21,6 +21,6 @@ install() {
 
   log_info "Install (%F{3}${target}%f)"
 
-  cd "${dir}"
-  rsync -a amf/public/include/  "${target_config[output_dir]}/include/AMF"
+  cd ${dir}
+  rsync -a amf/public/include/ ${target_config[output_dir]}/include/AMF
 }
