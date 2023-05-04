@@ -18,11 +18,11 @@ setup() {
 }
 
 clean() {
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${clean_build} -gt 0 && -d "build_${arch}" ]] {
+  if [[ ${clean_build} -gt 0 && -d build_${arch} ]] {
     log_info "Clean build directory (%F{3}${target}%f)"
-    rm -rf "build_${arch}"
+    rm -rf build_${arch}
   }
 }
 
@@ -30,17 +30,14 @@ patch() {
   autoload -Uz apply_patch
 
   log_info "Patch (%F{3}${target}%f)"
-  cd "${dir}"
-  case "${target}" {
-    macos-*)
-      local patch
-      for patch (${patches}) {
-        local _url
-        local _hash
-        read _url _hash <<< "${patch}"
-        apply_patch "${_url}" "${_hash}"
-      }
-      ;;
+  cd ${dir}
+
+  local patch
+  local _url
+  local _hash
+  for patch (${patches}) {
+    read _url _hash <<< "${patch}"
+    apply_patch ${_url} ${_hash}
   }
 }
 
@@ -55,9 +52,9 @@ config() {
   }
 
   log_info "Config (%F{3}${target}%f)"
-  cd "${dir}"
+  cd ${dir}
 
-  mkcd "build_${arch}"
+  mkcd build_${arch}
   rsync -ah ../etc ../src ../dynasm ../doc .
 }
 
@@ -76,24 +73,22 @@ build() {
 
   log_info "Build (%F{3}${target}%f)"
 
-  cd "${dir}/build_${arch}"
+  cd ${dir}/build_${arch}
 
-  case ${target} {
-    macos-*)
-      args+=(
-        XCFLAGS=-DLUAJIT_ENABLE_GC64
-        PREFIX="${target_config[output_dir]}"
-        CC=clang
-        CXX=clang
-        TARGET_CFLAGS="${c_flags}"
-        TARGET_LDFLAGS="${ld_flags}"
-        TARGET_SHLDFLAGS="${ld_flags}"
-      )
-      ;;
-  }
+  args+=(
+    XCFLAGS=-DLUAJIT_ENABLE_GC64
+    PREFIX="${target_config[output_dir]}"
+    CC=clang
+    CXX=clang
+    TARGET_CFLAGS="${c_flags}"
+    TARGET_LDFLAGS="${ld_flags}"
+    TARGET_SHLDFLAGS="${ld_flags}"
+  )
+
+  if [[ ${config} != 'MinSizeRel' ]] args+=(CCDEBUG=-g)
 
   log_debug "Build options: ${args}"
-  PATH="${(j.:.)cc_path}" progress make amalg ${args} -j "${num_procs}" -f ../Makefile
+  PATH="${(j.:.)cc_path}" progress make amalg ${args} -j ${num_procs} -f ../Makefile
 }
 
 install() {
@@ -101,40 +96,29 @@ install() {
 
   log_info "Install (%F{3}${target}%f)"
 
-  cd "${dir}/build_${arch}"
+  cd ${dir}/build_${arch}
 
   PATH="${(j.:.)cc_path}" progress make install PREFIX="${target_config[output_dir]}" -f ../Makefile
-
-  if [[ "${config}" =~ "Release|MinSizeRel" && ${shared_libs} -eq 1 ]] {
-    case "${target}" {
-      macos-*)
-        local file
-        for file ("${target_config[output_dir]}"/lib/libluajit*.dylib) {
-          if [[ ! -e "${file}" || -h "${file}" ]] continue
-          strip -x "${file}"
-          log_status "Stripped ${file#"${target_config[output_dir]}"}"
-        }
-        ;;
-    }
-  }
 }
 
 fixup() {
-  autoload -Uz fix_rpaths
+  cd ${dir}
 
-  cd "${dir}"
+  if (( shared_libs )) {
+    local -a dylib_files=(${target_config[output_dir]}/lib/libluajit-5.1*.dylib(.))
 
-  case ${target} {
-    macos*)
-      if (( shared_libs )) {
-        log_info "Fixup (%F{3}${target}%f)"
-        for file ("${target_config[output_dir]}"/lib/libluajit-5.1*.dylib(.)) {
-          install_name_tool -id "@rpath/libluajit-5.1.dylib" "${file}"
-          log_status "Fixed id of ${file##*/}"
-        }
-      } else {
-        rm "${target_config[output_dir]}"/lib/libluajit-5.1*.dylib(N)
-      }
-      ;;
+    log_info "Fixup (%F{3}${target}%f)"
+
+    for file (${dylib_files}) {
+      install_name_tool -id "@rpath/libluajit-5.1.dylib" "${file}"
+      log_status "Fixed id of ${file##*/}"
+    }
+
+    if [[ ${config} == 'Release' ]] {
+      dsymutil ${dylib_files}
+      strip -x ${dylib_files}
+    }
+  } else {
+    rm -rf -- ${target_config[output_dir]}/lib/libluajit-5.1*.(dylib|dSYM)(N)
   }
 }
