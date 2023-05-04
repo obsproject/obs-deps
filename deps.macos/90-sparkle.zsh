@@ -24,7 +24,7 @@ setup() {
 install() {
   log_info "Install (%F{3}${target}%f)"
 
-  cd "${dir}"
-  cp -Rp  Sparkle.framework "${target_config[output_dir]}"/lib
-  cp -Rp  Symbols/Sparkle.framework.dSYM "${target_config[output_dir]}"/lib
+  cd ${dir}
+  cp -Rp  Sparkle.framework ${target_config[output_dir]}/lib
+  cp -Rp  Symbols/Sparkle.framework.dSYM ${target_config[output_dir]}/lib
 }

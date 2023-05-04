@@ -6,6 +6,8 @@ local version='2020-07-28'
 local url='https://github.com/xiph/rnnoise.git'
 local hash='085d8f484af6141b1b88281a4043fb9215cead01'
 
+local -i shared_libs=0
+
 ## Build Steps
 setup() {
   log_info "Setup (%F{3}${target}%f)"
@@ -13,12 +15,12 @@ setup() {
 }
 
 clean() {
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${clean_build} -gt 0 && -f "build_${arch}/Makefile" ]] {
+  if [[ ${clean_build} -gt 0 && -f build_${arch}/Makefile ]] {
     log_info "Clean build directory (%F{3}${target}%f)"
 
-    rm -rf "build_${arch}"
+    rm -rf build_${arch}
   }
 }
 
@@ -37,7 +39,7 @@ config() {
 
   log_info "Config (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
   case "${target}" in
     macos-*)
@@ -55,7 +57,7 @@ config() {
 
   progress ./autogen.sh
 
-  mkcd "build_${arch}"
+  mkcd build_${arch}
 
   log_debug "Configure options: ${args}"
   CFLAGS="${c_flags}" \
@@ -77,10 +79,10 @@ build() {
 
   log_info "Build (%F{3}${target}%f)"
 
-  cd "${dir}/build_${arch}"
+  cd ${dir}/build_${arch}
 
   log_debug "Running 'make -j ${num_procs}'"
-  PATH="${(j.:.)cc_path}" progress make -j "${num_procs}"
+  PATH="${(j.:.)cc_path}" progress make -j ${num_procs}
 }
 
 install() {
@@ -88,35 +90,23 @@ install() {
 
   log_info "Install (%F{3}${target}%f)"
 
-  cd "${dir}/build_${arch}"
+  cd ${dir}/build_${arch}
 
   PATH="${(j.:.)cc_path}" progress make install
-
-  if [[ "${config}" =~ "Release|MinSizeRel" && ${shared_libs} -eq 1 ]] {
-    case ${target} {
-      macos-*)
-        local file
-        for file ("${target_config[output_dir]}"/lib/librnnoise*.dylib) {
-          if [[ ! -e "${file}" || -h "${file}" ]] continue
-          strip -x "${file}"
-          log_status "Stripped ${file#"${target_config[output_dir]}"}"
-        }
-        ;;
-    }
-  }
 }
 
 fixup() {
-  autoload -Uz fix_rpaths
+  cd ${dir}
 
-  cd "${dir}"
+  if (( shared_libs )) {
+    local -a dylib_files=(${target_config[output_dir]}/lib/librnnoise*.dylib(.))
 
-  case ${target} {
-    macos*)
-      if (( shared_libs )) {
-        log_info "Fixup (%F{3}${target}%f)"
-        fix_rpaths "${target_config[output_dir]}"/lib/librnnoise*.dylib
-      }
-      ;;
+    log_info "Fixup (%F{3}${target}%f)"
+    autoload -Uz fix_rpaths && fix_rpaths ${dylib_files}
+
+    if [[ ${config} == Release ]] dsymutil ${dylib_files}
+    if [[ ${config} == (Release|MinSizeRel) ]] strip -x ${dylib_files}
+  } else {
+    rm -rf -- ${target_config[output_dir]}/lib/librnnoise*.(dylib|dSYM)(N)
   }
 }

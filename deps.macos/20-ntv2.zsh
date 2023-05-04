@@ -7,7 +7,7 @@ local url='https://github.com/aja-video/ntv2.git'
 local hash='0acbac70a0b5e6509cca78cfbf69974c73c10db9'
 
 ## Dependency Overrides
-local -i force_static=1
+local -i shared_libs=0
 
 ## Build Steps
 setup() {
@@ -16,12 +16,12 @@ setup() {
 }
 
 clean() {
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${clean_build} -gt 0 && -d "build_${arch}" ]] {
+  if [[ ${clean_build} -gt 0 && -d build_${arch} ]] {
     log_info "Clean build directory (%F{3}${target}%f)"
 
-    rm -rf "build_${arch}"
+    rm -rf build_${arch}
   }
 }
 
@@ -30,11 +30,6 @@ config() {
 
   log_info "Config (%F{3}${target}%f)"
 
-  if (( shared_libs )) {
-    local shared=$(( shared_libs - force_static ))
-  } else {
-    local shared=0
-  }
   local _onoff=(OFF ON)
 
   args=(
@@ -43,10 +38,10 @@ config() {
     -DAJA_BUILD_APPS=OFF
     -DAJA_INSTALL_SOURCES=OFF
     -DAJA_INSTALL_HEADERS=ON
-    -DAJA_BUILD_SHARED="${_onoff[(( shared + 1 ))]}"
+    -DAJA_BUILD_SHARED="${_onoff[(( shared_libs + 1 ))]}"
   )
 
-  cd "${dir}"
+  cd ${dir}
   log_debug "CMake configure options: ${args}"
   progress cmake -S . -B "build_${arch}" -G Ninja ${args}
 }
@@ -56,8 +51,8 @@ build() {
 
   log_info "Build (%F{3}${target}%f)"
 
-  cd "${dir}"
-  cmake --build "build_${arch}" --config "${config}"
+  cd ${dir}
+  cmake --build build_${arch} --config ${config}
 }
 
 install() {
@@ -66,12 +61,10 @@ install() {
   log_info "Install (%F{3}${target}%f)"
 
   args=(
-    --install "build_${arch}"
-    --config "${config}"
+    --install build_${arch}
+    --config ${config}
   )
 
-  if [[ "${config}" =~ "Release|MinSizeRel" ]] args+=(--strip)
-
-  cd "${dir}"
+  cd ${dir}
   progress cmake ${args}
 }

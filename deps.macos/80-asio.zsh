@@ -16,11 +16,11 @@ install() {
   autoload -Uz progress
 
   log_info "Install (%F{3}${target}%f)"
-  cd "${dir}/asio"
+  cd ${dir}/asio
 
   mkdir -p ${target_config[output_dir]}/include
 
   log_debug "Copying headers to ${target_config[output_dir]}/include"
-  cp -R include/(asio|asio.hpp) "${target_config[output_dir]}/include"
+  cp -R include/(asio|asio.hpp) ${target_config[output_dir]}/include
   log_status "Copied headers to ${target_config[output_dir]}/include"
 }
