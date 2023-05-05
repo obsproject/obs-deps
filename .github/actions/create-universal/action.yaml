@@ -58,7 +58,7 @@ runs:
         target_dir="${${artifact_arm64:r:r}//arm64/universal}"
 
         cp -cpR ${artifact_arm64:r:r} ${target_dir}
-        cd ${target_dir}
+        pushd ${target_dir}
 
         typeset -a fixups=()
 
@@ -81,6 +81,9 @@ runs:
         XZ_OPT=-T0 tar -cJf ${file_name} -- *
 
         mv ${file_name} ${{ github.workspace }}/${file_name}
+        popd
+
+        rm -rf -- *(arm64|x86_64)*(N)
 
         print "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
         print "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
