@@ -48,20 +48,14 @@ runs:
         target_dir="${${artifact:r:r}//universal/${target##*-}}"
 
         cp -cpR ${artifact:r:r} ${target_dir}
-        cd ${target_dir}
+        pushd ${target_dir}
 
         local file
         local magic
         local target_arch="${target##*-}"
         local -A other_arch=(arm64 x86_64 x86_64 arm64)
 
-        local -a fixups=(
-          lib/**/(*.a|*.dylib)(.)
-          lib/**/*.framework/Versions/A/*(.)
-          plugins/**/*.dylib(.)
-        )
-
-        for file (bin/**/*(.) libexec/**/*(.)) {
+        for file (**/*(.)) {
           magic=$(xxd -ps -l 4 ${file})
 
           if [[ ${magic} == "cafebabe" ]] fixups+=(${file})
@@ -78,6 +72,9 @@ runs:
         XZ_OPT=-T0 tar -cJf ${file_name} -- *
 
         mv ${file_name} ${{ github.workspace }}/${file_name}
+        popd
+
+        rm -rf -- *(universal)*(N)
 
         print "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
         print "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
