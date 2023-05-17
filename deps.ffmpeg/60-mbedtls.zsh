@@ -18,6 +18,8 @@ local -a patches=(
     ea52cf47ca01211cbadf03c0493986e8d4e0d1e9ab4aaa42365b2dea7b591188"
   "linux ${0:a:h}/patches/mbedtls/0001-enable-posix-threading-support.patch \
     ea52cf47ca01211cbadf03c0493986e8d4e0d1e9ab4aaa42365b2dea7b591188"
+  "* ${0:a:h}/patches/mbedtls/0002-enable-dtls-srtp-support.patch \
+    c299066df252b8b5a08d169925a82ea6c76d6ae8b6c0069b1bb72ac1d40ba67e"
 )
 
 ## Dependency Overrides
@@ -53,7 +55,7 @@ patch() {
   for patch (${patches}) {
     read _target _url _hash <<< "${patch}"
 
-    if [[ ${_target} == "${target%%-*}" ]] apply_patch "${_url}" "${_hash}"
+    if [[ "${target%%-*}" == ${~_target} ]] apply_patch "${_url}" "${_hash}"
   }
 }
 
