@@ -46,6 +46,7 @@ setup_target() {
         [mval]='i386'
         [gcc_target]='x86-win32-gcc'
         [toolchain]="${funcsourcetrace[1]:A:h}/toolchain/windows-cross-toolchain.cmake"
+        [posix_toolchain]="${funcsourcetrace[1]:A:h}/toolchain/windows-cross-toolchain-posix.cmake"
       )
       ;;
     windows-x64)
@@ -55,6 +56,7 @@ setup_target() {
         [mval]='i386:x86-64'
         [gcc_target]='x86_64-win64-gcc'
         [toolchain]="${funcsourcetrace[1]:A:h}/toolchain/windows-cross-toolchain.cmake"
+        [posix_toolchain]="${funcsourcetrace[1]:A:h}/toolchain/windows-cross-toolchain-posix.cmake"
       )
       ;;
     *) log_error "Invalid target specified: %F{1}${1}%f"; exit 2 ;;
