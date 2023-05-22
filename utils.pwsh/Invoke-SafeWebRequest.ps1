@@ -23,6 +23,10 @@ function Invoke-SafeWebRequest {
         [switch] $CheckExisting
     )
 
+    if ( ! ( Test-Path function:Invoke-External ) ) {
+        . $PSScriptRoot/Invoke-External.ps1
+    }
+
     if ( ! ( Test-Path function:Log-Information ) ) {
         . $PSScriptRoot/Logger.ps1
     }
@@ -53,7 +57,7 @@ function Invoke-SafeWebRequest {
                 }
             }
 
-            curl.exe -Lf $Uri -o $OutFile $($HeaderStrings -join " ")
+            Invoke-External curl --fail --location $(if ( $Env:CI -eq $null ) { '--progress-bar' }) --output $OutFile @HeaderStrings $Uri
 
             $NewHash = Get-FileHash -Path $OutFile -Algorithm $Algorithm
         }
