@@ -36,7 +36,9 @@ function Invoke-GitCheckout {
         [string] $Commit,
         [string] $Path,
         [string] $Branch = "master",
-        [string] $PullRequest
+        [string] $PullRequest,
+        [switch] $Sparse,
+        [array] $SparseArgs
     )
 
     if ( ! ( $Uri -like "*github.com*" ) -and ( $PullRequest -ne "" ) ) {
@@ -90,9 +92,16 @@ function Invoke-GitCheckout {
 
         Invoke-External git checkout -f $Commit -- | Log-Information
     } else {
-        Invoke-External git clone $Uri $Path
+        if ( $Sparse ) {
+            Invoke-External git clone --filter=blob:none --no-checkout $Uri $Path
+            Push-Location -Stack GitCheckoutTemp -Path $Path
+            Invoke-External git sparse-checkout @SparseArgs
+            Pop-Location -Stack GitCheckoutTemp
+        } else {
+            Invoke-External git clone $Uri $Path
+        }
 
-        Set-Location $Path
+        Push-Location -Stack GitCheckoutTemp -Path $Path
 
         Set-GitConfig advice.detachedHead false
 
@@ -104,13 +113,19 @@ function Invoke-GitCheckout {
         }
 
         Invoke-External git checkout -f $Commit
+
+        Pop-Location -Stack GitCheckoutTemp
     }
 
     Log-Information "Checked out commit ${Commit} on branch ${Branch}"
 
     if ( Test-Path ${Path}/.gitmodules ) {
+        Push-Location -Stack GitCheckoutTemp -Path $Path
+
         Invoke-External git submodule foreach --recursive git submodule sync
         Invoke-External git submodule update --init --recursive
+
+        Pop-Location -Stack GitCheckoutTemp
     }
 
     Pop-Location -Stack GitCheckoutTemp
