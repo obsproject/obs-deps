@@ -1,0 +1,14 @@
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.PowerShell.Commands.FileHashInfo</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Microsoft.PowerShell.Commands.FileHashInfo</ToString>
+    <Props>
+      <S N="Algorithm">SHA256</S>
+      <S N="Hash">317CF6CBDBCE55DA8BBA80168E0800FF396FB43EA6B5A26194B9C1A5692C85F6</S>
+      <S N="Path">qtbase-everywhere-src-6.4.3.zip</S>
+    </Props>
+  </Obj>
+</Objs>

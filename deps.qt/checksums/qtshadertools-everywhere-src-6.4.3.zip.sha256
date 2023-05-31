@@ -1,0 +1,14 @@
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.PowerShell.Commands.FileHashInfo</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Microsoft.PowerShell.Commands.FileHashInfo</ToString>
+    <Props>
+      <S N="Algorithm">SHA256</S>
+      <S N="Hash">C0F2057E9490AB5AE690DD5A40F0DBEDD738288B39ABA561E5C0B5DDD95A37B6</S>
+      <S N="Path">qtshadertools-everywhere-src-6.4.3.zip</S>
+    </Props>
+  </Obj>
+</Objs>
