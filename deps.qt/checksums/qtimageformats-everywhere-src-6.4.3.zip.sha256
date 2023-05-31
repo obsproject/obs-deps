@@ -1,0 +1,14 @@
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.PowerShell.Commands.FileHashInfo</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Microsoft.PowerShell.Commands.FileHashInfo</ToString>
+    <Props>
+      <S N="Algorithm">SHA256</S>
+      <S N="Hash">E9263A5A2EEEC3C71DB18DD2D10A922D2A6C5668B8D784AE5AC5A99D40BB3CFD</S>
+      <S N="Path">qtimageformats-everywhere-src-6.4.3.zip</S>
+    </Props>
+  </Obj>
+</Objs>
