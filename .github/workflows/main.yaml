@@ -122,9 +122,13 @@ jobs:
           target='${{ matrix.target }}'
           artifact_name="ffmpeg-${target}-${{ github.sha }}"
           file_name="${target%%-*}-ffmpeg-$(date +"%Y-%m-%d")-${target##*-}.tar.xz"
+          dsym_artifact_name="ffmpeg-${target}-dSYMs-${{ github.sha }}"
+          dsym_file_name="${target%%-*}-ffmpeg-$(date +"%Y-%m-%d")-${target##*-}-dSYMs.tar.xz"
 
           echo "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
           echo "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
+          echo "dsymArtifactName=${dsym_artifact_name}" >> $GITHUB_OUTPUT
+          echo "dsymArtifactFileName=${dsym_file_name}" >> $GITHUB_OUTPUT
           echo "ccacheDate=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
 
       - name: Restore Compilation Cache
@@ -161,6 +165,13 @@ jobs:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.artifactFileName }}
 
+      - name: Publish Debug Symbol Artifacts
+        if: ${{ startsWith(matrix.os, 'macos') && success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.setup.outputs.dsymArtifactName }}
+          path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.dsymArtifactFileName }}
+
   ffmpeg-package-universal:
     name: 'Build FFmpeg (Universal)'
     runs-on: macos-12
@@ -187,25 +198,32 @@ jobs:
           x86_64: 'ffmpeg-macos-x86_64-${{ github.sha }}'
           outputName: 'ffmpeg-macos-universal-${{ github.sha }}'
 
+      - name: Create universal dSYM package
+        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
+        uses: ./.github/actions/create-universal
+        with:
+          arm64: 'ffmpeg-macos-arm64-dSYMs-${{ github.sha }}'
+          x86_64: 'ffmpeg-macos-x86_64-dSYMs-${{ github.sha }}'
+          outputName: 'ffmpeg-macos-universal-dSYMs-${{ github.sha }}'
+
   macos-build:
-    name: 'Build macOS Dependencies'
-    runs-on: macos-12
+    name: Build macOS Dependencies
+    runs-on: macos-13
+    needs: pre-checks
     strategy:
       fail-fast: true
       matrix:
         target: [macos-arm64, macos-x86_64]
         include:
           - target: macos-arm64
-            config: 'Release'
-            type: 'static'
+            config: Release
+            type: static
           - target: macos-x86_64
-            config: 'Release'
-            type: 'static'
-    env:
-      CACHE_REVISION: '3'
+            config: Release
+            type: static
     defaults:
       run:
-        shell: zsh {0}
+        shell: zsh --no-rcs --errexit --pipefail {0}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -213,6 +231,8 @@ jobs:
       - name: Setup Environment
         id: setup
         run: |
+          : Setup Environment
+
           to_remove=()
 
           for formula (llvm gcc) {
@@ -221,73 +241,80 @@ jobs:
 
           if (( #to_remove )) brew uninstall --ignore-dependencies ${to_remove}
 
-          target='${{ matrix.target }}'
-          artifact_name="deps-${target}-${{ github.sha }}"
-          file_name="${target%%-*}-deps-$(date +"%Y-%m-%d")-${target##*-}.tar.xz"
+          local -r date_string=$(date +"%Y-%m-%d")
+          local -r target='${{ matrix.target }}'
+
+          artifact_name="deps-${target}-${{ needs.pre-checks.outputs.shortHash }}"
+          file_name="${target%%-*}-deps-${date_string}-${target##*-}.tar.xz"
+          dsym_artifact_name="deps-${target}-dSYMs-${{ needs.pre-checks.outputs.shortHash }}"
+          dsym_file_name="${target%%-*}-deps-${date_string}-${target##*-}-dSYMs.tar.xz"
 
           echo "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
           echo "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
-          echo "ccacheDate=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
+          echo "dsymArtifactName=${dsym_artifact_name}" >> $GITHUB_OUTPUT
+          echo "dsymArtifactFileName=${dsym_file_name}" >> $GITHUB_OUTPUT
+          echo "ccacheDate=${date_string}" >> $GITHUB_OUTPUT
 
       - name: Restore Compilation Cache
         id: ccache-cache
-        uses: actions/cache@v3
+        uses: actions/cache/restore@v3
         with:
           path: ${{ github.workspace }}/.ccache
           key: ${{ matrix.target }}-ccache-deps-${{ steps.setup.outputs.ccacheDate }}
           restore-keys: |
             ${{ matrix.target }}-ccache-deps-
 
-      - name: Check for GitHub Labels
-        id: seekingTesters
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
-            echo "found=true" >> $GITHUB_OUTPUT
-          else
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Build macOS Dependencies
-        uses: ./.github/actions/build-macos-deps
+        uses: ./.github/actions/build-deps
         with:
           target: ${{ matrix.target }}
           type: ${{ matrix.type }}
           config: ${{ matrix.config }}
-          cacheRevision: ${{ env.CACHE_REVISION }}
 
       - name: Publish Build Artifacts
-        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
+        if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
         uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.artifactFileName }}
 
+      - name: Publish Debug Symbol Artifacts
+        if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.setup.outputs.dsymArtifactName }}
+          path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.dsymArtifactFileName }}
+
+      - name: Save Compilation Cache
+        if: github.event_name == 'push'
+        uses: actions/cache/save@v3
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: ${{ matrix.target }}-ccache-deps-${{ steps.setup.outputs.ccacheDate }}
+
   macos-package-universal:
-    name: 'Build macOS Dependencies (Universal)'
-    runs-on: macos-12
-    needs: [macos-build]
+    name: Build macOS Dependencies (Universal)
+    runs-on: macos-13
+    needs: [pre-checks, macos-build]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Check for GitHub Labels
-        id: seekingTesters
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
-            echo "found=true" >> $GITHUB_OUTPUT
-          else
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Create universal binary package
-        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
+        if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
         uses: ./.github/actions/create-universal
         with:
-          arm64: 'deps-macos-arm64-${{ github.sha }}'
-          x86_64: 'deps-macos-x86_64-${{ github.sha }}'
-          outputName: 'deps-macos-universal-${{ github.sha }}'
+          arm64: deps-macos-arm64-${{ needs.pre-checks.outputs.shortHash }}
+          x86_64: deps-macos-x86_64-${{ needs.pre-checks.outputs.shortHash }}
+          outputName: deps-macos-universal-${{ needs.pre-checks.outputs.shortHash }}
+
+      - name: Create universal dSYM package
+        if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
+        uses: ./.github/actions/create-universal
+        with:
+          arm64: deps-macos-arm64-dSYMs-${{ needs.pre-checks.outputs.shortHash }}
+          x86_64: deps-macos-x86_64-dSYMs-${{ needs.pre-checks.outputs.shortHash }}
+          outputName: deps-macos-universal-dSYMs-${{ needs.pre-checks.outputs.shortHash }}
 
   macos-qt6-build:
     name: Build Qt6 (macOS)
@@ -315,9 +342,13 @@ jobs:
           local -r date_string=$(date +"%Y-%m-%d")
           artifact_name="qt6-macos-universal-${{ needs.pre-checks.outputs.shortHash }}"
           file_name="macos-deps-qt6-${date_string}-universal.tar.xz"
+          dsym_artifact_name="qt6-macos-universal-dSYMs-${{ needs.pre-checks.outputs.shortHash }}"
+          dsym_file_name="macos-deps-qt6-${date_string}-universal-dSYMs.tar.xz"
 
           print "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
           print "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
+          print "dsymArtifactName=${dsym_artifact_name}" >> $GITHUB_OUTPUT
+          print "dsymArtifactFileName=${dsym_file_name}" >> $GITHUB_OUTPUT
           print "ccacheDate=${date_string}" >> $GITHUB_OUTPUT
 
       - name: Restore Compilation Cache
@@ -341,6 +372,13 @@ jobs:
         with:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}/macos-universal/${{ steps.setup.outputs.artifactFileName }}
+
+      - name: Publish Debug Symbol Artifacts
+        if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.setup.outputs.dsymArtifactName }}
+          path: ${{ github.workspace }}/macos-universal/${{ steps.setup.outputs.dsymArtifactFileName }}
 
       - name: Save Compilation Cache
         if: github.event_name == 'push' && steps.ccache-cache.outputs.cache-hit != 'true'
@@ -373,6 +411,14 @@ jobs:
           base: qt6-macos-universal-${{ needs.pre-checks.outputs.shortHash }}
           target: ${{ matrix.target }}
           outputName: qt6-${{ matrix.target }}-${{ needs.pre-checks.outputs.shortHash }}
+
+      - name: Create single architecture dSYM package
+        if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
+        uses: ./.github/actions/create-single-arch
+        with:
+          base: qt6-macos-universal-dSYMs-${{ needs.pre-checks.outputs.shortHash }}
+          target: ${{ matrix.target }}
+          outputName: qt6-${{ matrix.target }}-dSYMs-${{ needs.pre-checks.outputs.shortHash }}
 
   windows-build:
     name: Build Windows Dependencies
@@ -424,7 +470,7 @@ jobs:
           Remove-Item -Recurse -Force ${{ github.workspace }}/windows_build_temp
 
       - name: Build Windows Dependencies
-        uses: ./.github/actions/build-windows-deps
+        uses: ./.github/actions/build-deps
         with:
           target: ${{ matrix.target }}
           type: ${{ matrix.type }}
