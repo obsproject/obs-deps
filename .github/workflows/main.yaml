@@ -12,7 +12,47 @@ on:
     branches:
       - master
 
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
+  pre-checks:
+    name: Run Pre-Checks
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        shell: bash
+    outputs:
+      seekingTesters: ${{ steps.checks.outputs.seekingTesters }}
+      shortHash: ${{ steps.checks.outputs.shortHash }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Check for GitHub Labels
+        id: checks
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          : Check for GitHub Labels
+
+          case "${GITHUB_EVENT_NAME}" in
+            pull_request)
+              if gh pr view ${{ github.event.number }} --json labels \
+                | jq -e -r '.labels[] | select(.name == "Seeking Testers")' > /dev/null; then
+                echo "seekingTesters=true" >> $GITHUB_OUTPUT
+              else
+                echo "seekingTesters=false" >> $GITHUB_OUTPUT
+              fi
+              ;;
+            *)
+              echo "seekingTesters=false" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+          echo "shortHash=${GITHUB_SHA:0:9}" >> $GITHUB_OUTPUT
+
   ffmpeg-build:
     name: 'Build FFmpeg'
     runs-on: ${{ matrix.os }}
@@ -249,114 +289,13 @@ jobs:
           x86_64: 'deps-macos-x86_64-${{ github.sha }}'
           outputName: 'deps-macos-universal-${{ github.sha }}'
 
-  macos-qt5-build:
-    name: 'Build macOS Qt5'
-    runs-on: macos-12
-    strategy:
-      fail-fast: true
-      matrix:
-        target: [macos-arm64, macos-x86_64]
-        include:
-          - target: macos-x86_64
-            config: 'Release'
-          - target: macos-arm64
-            config: 'Release'
-    env:
-      CACHE_REVISION: '3'
-    defaults:
-      run:
-        shell: zsh {0}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup Environment
-        id: setup
-        run: |
-          to_remove=()
-
-          for formula (llvm gcc) {
-            if [[ -d /usr/local/opt/"${formula}" ]] to_remove+=(${formula})
-          }
-
-          if (( #to_remove )) brew uninstall --ignore-dependencies ${to_remove}
-
-          target='${{ matrix.target }}'
-          artifact_name="qt5-${target}-${{ github.sha }}"
-          file_name="${target%%-*}-deps-qt5-$(date +"%Y-%m-%d")-${target##*-}.tar.xz"
-
-          echo "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
-          echo "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
-          echo "ccacheDate=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
-
-      - name: Restore Compilation Cache
-        id: ccache-cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/.ccache
-          key: ${{ matrix.target }}-ccache-qt5-${{ steps.setup.outputs.ccacheDate }}
-          restore-keys: |
-            ${{ matrix.target }}-ccache-qt5-
-
-      - name: Check for GitHub Labels
-        id: seekingTesters
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
-            echo "found=true" >> $GITHUB_OUTPUT
-          else
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Build macOS Qt5
-        uses: ./.github/actions/build-macos-qt
-        with:
-          target: ${{ matrix.target }}
-          config: ${{ matrix.config }}
-          qtVersion: 5
-          cacheRevision: ${{ env.CACHE_REVISION }}
-
-      - name: Publish Build Artifacts
-        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ steps.setup.outputs.artifactName }}
-          path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.artifactFileName }}
-
-  macos-qt5-package-universal:
-    name: 'Build macOS Qt5 (Universal)'
-    runs-on: macos-12
-    needs: [macos-qt5-build]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Check for GitHub Labels
-        id: seekingTesters
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
-            echo "found=true" >> $GITHUB_OUTPUT
-          else
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Create universal binary package
-        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
-        uses: ./.github/actions/create-universal
-        with:
-          arm64: 'qt5-macos-arm64-${{ github.sha }}'
-          x86_64: 'qt5-macos-x86_64-${{ github.sha }}'
-          outputName: 'qt5-macos-universal-${{ github.sha }}'
-
   macos-qt6-build:
-    name: 'Build macOS Qt6'
-    runs-on: macos-12
-    env:
-      CACHE_REVISION: '1'
+    name: Build Qt6 (macOS)
+    runs-on: macos-13
+    needs: pre-checks
     defaults:
       run:
-        shell: zsh {0}
+        shell: zsh --no-rcs --errexit --pipefail {0}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -364,7 +303,8 @@ jobs:
       - name: Setup Environment
         id: setup
         run: |
-          to_remove=()
+          : Setup Environment
+          local -a to_remove=()
 
           for formula (llvm gcc) {
             if [[ -d /usr/local/opt/"${formula}" ]] to_remove+=(${formula})
@@ -372,82 +312,67 @@ jobs:
 
           if (( #to_remove )) brew uninstall --ignore-dependencies ${to_remove}
 
-          target='macos-universal'
-          artifact_name="qt6-${target}-${{ github.sha }}"
-          file_name="${target%%-*}-deps-qt6-$(date +"%Y-%m-%d")-${target##*-}.tar.xz"
+          local -r date_string=$(date +"%Y-%m-%d")
+          artifact_name="qt6-macos-universal-${{ needs.pre-checks.outputs.shortHash }}"
+          file_name="macos-deps-qt6-${date_string}-universal.tar.xz"
 
-          echo "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
-          echo "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
-          echo "ccacheDate=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
+          print "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
+          print "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
+          print "ccacheDate=${date_string}" >> $GITHUB_OUTPUT
 
       - name: Restore Compilation Cache
         id: ccache-cache
-        uses: actions/cache@v3
+        uses: actions/cache/restore@v3
         with:
           path: ${{ github.workspace }}/.ccache
           key: macos-universal-ccache-qt6-${{ steps.setup.outputs.ccacheDate }}
           restore-keys: |
             macos-universal-ccache-qt6-
 
-      - name: Check for GitHub Labels
-        id: seekingTesters
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
-            echo "found=true" >> $GITHUB_OUTPUT
-          else
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Build macOS Qt6
-        uses: ./.github/actions/build-macos-qt
+        uses: ./.github/actions/build-qt
         with:
           target: macos-universal
           config: Release
-          qtVersion: 6
-          cacheRevision: ${{ env.CACHE_REVISION }}
 
       - name: Publish Build Artifacts
-        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
+        if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
         uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}/macos-universal/${{ steps.setup.outputs.artifactFileName }}
 
+      - name: Save Compilation Cache
+        if: github.event_name == 'push'
+        uses: actions/cache/save@v3
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: macos-universal-ccache-qt6-${{ steps.setup.outputs.ccacheDate }}
+
   macos-qt6-package:
-    name: 'Build macOS Qt6 (${{ matrix.target }})'
-    runs-on: macos-12
+    name: Create macOS Qt6 (${{ matrix.target }})
+    runs-on: macos-13
     strategy:
       fail-fast: true
       matrix:
         target: [macos-arm64, macos-x86_64]
         include:
           - target: macos-x86_64
-            config: 'Release'
+            config: Release
           - target: macos-arm64
-            config: 'Release'
-    needs: [macos-qt6-build]
+            config: Release
+    needs: [pre-checks, macos-qt6-build]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Check for GitHub Labels
-        id: seekingTesters
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
-            echo "found=true" >> $GITHUB_OUTPUT
-          else
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Create single architecture binary package
-        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
+        if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
         uses: ./.github/actions/create-single-arch
         with:
-          base: 'qt6-macos-universal-${{ github.sha }}'
-          target: '${{ matrix.target }}'
-          outputName: 'qt6-${{ matrix.target }}-${{ github.sha }}'
+          base: qt6-macos-universal-${{ needs.pre-checks.outputs.shortHash }}
+          target: ${{ matrix.target }}
+          outputName: qt6-${{ matrix.target }}-${{ needs.pre-checks.outputs.shortHash }}
 
   windows-build:
     name: 'Build Windows Dependencies'
@@ -529,17 +454,16 @@ jobs:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}\windows\${{ steps.setup.outputs.artifactFileName }}
 
-  windows-qt-build:
-    name: 'Build Windows Qt'
+  windows-qt6-build:
+    name: Build Qt6 (Windows)
     runs-on: windows-2022
+    needs: pre-checks
     strategy:
       fail-fast: true
       matrix:
-        qtVersion: [5, 6]
         target: [x64, x86]
-        config: ['RelWithDebInfo', 'Debug']
-    env:
-      CACHE_REVISION: '02'
+        config: [RelWithDebInfo, Debug]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -547,90 +471,52 @@ jobs:
       - name: Setup Environment
         id: setup
         run: |
-          $ArtifactName="qt${{ matrix.qtVersion }}-windows-${{ matrix.target }}-${{ matrix.config }}-${{ github.sha }}"
-          $FileName="windows-deps-qt${{ matrix.qtVersion }}-$(Get-Date -Format 'yyyy-MM-dd')-${{ matrix.target }}-${{ matrix.config }}.zip"
+          # Setup Environment
+          $ArtifactName="qt6-windows-${{ matrix.target }}-${{ matrix.config }}-${{ needs.pre-checks.outputs.shortHash }}"
+          $FileName="windows-deps-qt6-$(Get-Date -Format 'yyyy-MM-dd')-${{ matrix.target }}-${{ matrix.config }}.zip"
 
           "artifactName=${ArtifactName}" >> $env:GITHUB_OUTPUT
           "artifactFileName=${FileName}" >> $env:GITHUB_OUTPUT
 
-      - name: 'Check for GitHub Labels'
-        id: seekingTesters
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          $LabelFound = try {
-            $Params = @{
-              Authentication = 'Bearer'
-              Token = (ConvertTo-SecureString '${{ secrets.GITHUB_TOKEN }}' -AsPlainText)
-              Uri = '${{ github.event.pull_request.url }}'
-              UseBasicParsing = $true
-            }
-
-            (Invoke-RestMethod @Params).labels.name.contains("Seeking Testers")
-          } catch {
-            $false
-          }
-
-          "found=$(([string]${LabelFound}).ToLower())" >> $env:GITHUB_OUTPUT
-
-      - name: 'Build Windows Qt'
-        uses: ./.github/actions/build-windows-qt
+      - name: Build Windows Qt
+        uses: ./.github/actions/build-qt
         with:
           target: ${{ matrix.target }}
           config: ${{ matrix.config }}
-          qtVersion: ${{ matrix.qtVersion }}
-          cacheRevision: ${{ env.CACHE_REVISION }}
 
-      - name: 'Publish Build Artifacts'
-        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
+      - name: Publish Build Artifacts
+        if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
         uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}/windows/${{ steps.setup.outputs.artifactFileName }}
 
-  windows-qt-package:
-    name: 'Package Windows Qt (${{ matrix.qtVersion }}, ${{ matrix.target }})'
+  windows-qt6-package:
+    name: Package Windows Qt6
     runs-on: windows-2022
     strategy:
       fail-fast: true
       matrix:
-        qtVersion: [5, 6]
         target: [x64, x86]
-    needs: [windows-qt-build]
+    needs: [pre-checks, windows-qt6-build]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: 'Check for GitHub Labels'
-        id: seekingTesters
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          $LabelFound = try {
-            $Params = @{
-              Authentication = 'Bearer'
-              Token = (ConvertTo-SecureString '${{ secrets.GITHUB_TOKEN }}' -AsPlainText)
-              Uri = '${{ github.event.pull_request.url }}'
-              UseBasicParsing = $true
-            }
-
-            (Invoke-RestMethod @Params).labels.name.contains("Seeking Testers")
-          } catch {
-            $false
-          }
-
-          "found=$(([string]${LabelFound}).ToLower())" >> $env:GITHUB_OUTPUT
-
       - name: Create Windows Qt package
-        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
+        if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
         uses: ./.github/actions/package-windows-qt
         with:
-          base: 'qt${{ matrix.qtVersion }}-windows-${{ matrix.target }}'
-          outputName: 'qt${{ matrix.qtVersion }}-windows-${{ matrix.target }}-${{ github.sha }}'
+          releaseArtifact: qt6-windows-${{ matrix.target }}-RelWithDebInfo-${{ needs.pre-checks.outputs.shortHash }}
+          debugArtifact: qt6-windows-${{ matrix.target }}-Debug-${{ needs.pre-checks.outputs.shortHash }}
+          outputName: qt6-windows-${{ matrix.target }}-${{ needs.pre-checks.outputs.shortHash }}
+          pdbOutputName: qt6-windows-${{ matrix.target }}-PDBs-${{ needs.pre-checks.outputs.shortHash }}
 
   make-release:
-    name: 'Create and upload release'
-    runs-on: ubuntu-20.04
+    name: Create and upload release
+    runs-on: ubuntu-22.04
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
-    needs: [ffmpeg-package-universal, macos-package-universal, macos-qt5-package-universal, macos-qt6-package, windows-build, windows-qt-package]
+    needs: [ffmpeg-package-universal, macos-package-universal, macos-qt6-package, windows-build, windows-qt6-package]
     defaults:
       run:
         shell: bash
@@ -638,21 +524,22 @@ jobs:
       - name: Get Metadata
         id: metadata
         run: |
-          echo "version=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
-          echo "date=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
+          : Get Metadata
+          echo "version=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
 
-      - name: 'Download build artifacts'
+      - name: Download build artifacts
         uses: actions/download-artifact@v3
 
-      - name: 'Package Windows dependencies'
+      - name: Package Windows dependencies
         run: |
+          : Package Windows dependencies
           shopt -s extglob
 
           for arch in x64 x86; do
             _temp=$(mktemp -d)
             pushd "${_temp}" > /dev/null
 
-            for artifact in ${{ github.workspace }}/**/windows-@(deps|ffmpeg)-!(qt5*|qt6*)-${arch}.*; do
+            for artifact in ${GITHUB_WORKSPACE}/**/windows-@(deps|ffmpeg)-!(qt6*)-${arch}.*; do
               case ${artifact} in
                 *.zip) unzip ${artifact} > /dev/null ;;
                 *.tar.xz) XZ_OPT=-T0 tar -xJf ${artifact} ;;
@@ -661,13 +548,12 @@ jobs:
             done
 
             zip -r windows-deps-${{ steps.metadata.outputs.version }}-${arch}.zip -- *
-            mv windows-deps-${{ steps.metadata.outputs.version }}-${arch}.zip ${{ github.workspace }}
+            mv windows-deps-${{ steps.metadata.outputs.version }}-${arch}.zip ${GITHUB_WORKSPACE}
 
-            mv ${{ github.workspace }}/qt5-windows-${arch}-!(RelWithDebInfo*|Debug*)/*.zip ${{ github.workspace }}
-            mv ${{ github.workspace }}/qt6-windows-${arch}-!(RelWithDebInfo*|Debug*)/*.zip ${{ github.workspace }}
-
+            mv ${GITHUB_WORKSPACE}/qt6-windows-${arch}-!(*-@(Debug|RelWithDebInfo|Release|MinSizeRel)/*.zip ${GITHUB_WORKSPACE}
             popd > /dev/null
           done
+
 
       - name: 'Package Linux dependencies'
         run: |
@@ -691,15 +577,16 @@ jobs:
             popd > /dev/null
           done
 
-      - name: 'Package macOS dependencies'
+      - name: Package macOS dependencies
         run: |
+          : Package macOS dependencies
           shopt -s extglob
 
           for arch in arm64 x86_64 universal; do
             _temp=$(mktemp -d)
             pushd "${_temp}" > /dev/null
 
-            for artifact in ${{ github.workspace }}/**/macos-@(deps|ffmpeg)-!(qt5*|qt6*)-${arch}.*; do
+            for artifact in ${GITHUB_WORKSPACE}/**/macos-@(deps|ffmpeg)-!(qt6*)-${arch}.*; do
               case ${artifact} in
                 *.zip) unzip ${artifact} > /dev/null ;;
                 *.tar.xz) XZ_OPT=-T0 tar -xvJf ${artifact} ;;
@@ -708,30 +595,30 @@ jobs:
             done
 
             XZ_OPT=-T0 tar -cvJf macos-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz -- *
-            mv macos-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz ${{ github.workspace }}
+            mv macos-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz ${GITHUB_WORKSPACE}
 
             popd > /dev/null
           done
 
-          mv ${{ github.workspace }}/qt5-macos-*/*.tar.xz ${{ github.workspace }}
-          mv ${{ github.workspace }}/qt6-macos-*/*.tar.xz ${{ github.workspace }}
+          mv ${GITHUB_WORKSPACE}/qt6-macos-*/*.tar.xz ${{ github.workspace }}
 
-      - name: 'Generate Checksums'
+      - name: Generate Checksums
         run: |
+          : Generate Checksums
           shopt -s extglob
           echo "### Checksums" > ${{ github.workspace }}/CHECKSUMS.txt
           for file in ${{ github.workspace }}/@(*.tar.xz|*.zip); do
             echo "    ${file##*/}: $(sha256sum "${file}" | cut -d " " -f 1)" >> ${{ github.workspace }}/CHECKSUMS.txt
           done
 
-      - name: 'Create Release'
+      - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5
         with:
           draft: false
           prerelease: false
           tag_name: ${{ steps.metadata.outputs.version }}
-          name: "OBS Deps Build ${{ steps.metadata.outputs.version }}"
+          name: OBS Deps Build ${{ steps.metadata.outputs.version }}
           body_path: ${{ github.workspace }}/CHECKSUMS.txt
           files: |
             ${{ github.workspace }}/windows-*-x64*.zip
