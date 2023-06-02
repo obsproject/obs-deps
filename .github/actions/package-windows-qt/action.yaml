@@ -1,0 +1,138 @@
+name: Package Windows Qt
+description: Packages Windows Qt for obs-deps with specified architecture
+inputs:
+  releaseArtifact:
+    description: Name of the optimized Windows artifact to use for packaging
+    required: true
+  debugArtifact:
+    description: Name of the debug Windows artifact to use for packaging
+    required: true
+  outputName:
+    description: Name pattern for created Windows artifact
+    required: true
+  pdbOutputName:
+    description: Name pattern for created Windows PDB artifact
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Download Windows RelWithDebInfo artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ inputs.releaseArtifact }}
+
+    - name: Download Windows Debug artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ inputs.debugArtifact }}
+
+    - name: Combine Artifacts
+      id: combine
+      shell: pwsh
+      run: |
+        # Combine Artifacts
+
+        . (Join-Path -Path $env:GITHUB_ACTION_PATH -ChildPath 'Invoke-External.ps1')
+
+        $WorkRoot = Get-Location
+
+        $CompressionLevel = switch ( $env:GITHUB_EVENT_NAME ) {
+          push {
+            if ( $env:GITHUB_REF_TYPE -eq 'tag' ) {
+              '9'
+            } else {
+              '5'
+            }
+          }
+          pull_request {
+            '5'
+          }
+        }
+
+        $Artifacts = Get-ChildItem -Filter "windows-deps-qt6*.zip"
+        $DebugFile = $Artifacts | Where-Object { $_ -match "-Debug.zip" }
+        $ReleaseFile = $Artifacts | Where-Object { $_ -match "-(RelWithDebInfo|Release|MinSizeRel).zip" }
+
+        Write-Output '::group::Extract Artifacts'
+        New-Item -ItemType Directory -Name $($DebugFile.name -replace '.zip','') > $null
+        Push-Location $($DebugFile.name -replace '.zip','')
+        Invoke-External 7z x $($DebugFile.FullName)
+        Pop-Location
+
+        New-Item -ItemType Directory -Name $($ReleaseFile.name -replace '.zip','') > $null
+        Push-Location $($ReleaseFile.name -replace '.zip','')
+        Invoke-External 7z x $($ReleaseFile.FullName)
+        Pop-Location
+        Write-Output '::endgroup::'
+
+
+        $TargetDirectory = $($DebugFile.name -replace '-Debug.zip','-PDBs')
+        New-Item -ItemType Directory -Name $TargetDirectory > $null
+
+        Push-Location $TargetDirectory
+
+        Write-Output '::group::Extract Release PDBs'
+        $PdbSource = Join-Path -Path $WorkRoot -ChildPath ($ReleaseFile.name -replace '.zip','')
+        $Files = Get-ChildItem -Path $PdbSource -Include '*.pdb' -Recurse
+        $Paths = $Files | ForEach-Object {
+          [System.IO.Path]::GetRelativePath($PdbSource, $_.DirectoryName)
+        } | Sort-Object -Unique | ForEach-Object { New-Item -ItemType Directory -Path $_ }
+
+        $Files | ForEach-Object {
+          $RelativePath = [System.IO.Path]::GetRelativePath($PDBSource, $_.DirectoryName)
+          Move-Item -Path $_ -Destination $RelativePath
+        }
+        Write-Output '::endgroup::'
+
+        Write-Output '::group::Create Release PDBs Archive'
+        Invoke-External 7z a "${WorkRoot}/${TargetDirectory}.zip" * -mx="${CompressionLevel}"
+        "pdbFile=${TargetDirectory}.zip" >> $env:GITHUB_OUTPUT
+        Write-Output '::endgroup::'
+
+        Pop-Location
+
+        $TargetDirectory = $($DebugFile.name -replace '-Debug.zip','')
+        New-Item -ItemType Directory -Name $TargetDirectory > $null
+
+        Push-Location $TargetDirectory
+
+        Write-Output '::group::Combine Artifacts'
+        $DebugSource = Join-Path -Path $WorkRoot -ChildPath ($DebugFile.name -replace '.zip','') -AdditionalChildPath '*'
+        Copy-Item -Path $DebugSource -Destination (Get-Location) -Recurse -ErrorAction SilentlyContinue
+        $ReleaseSource = Join-Path -Path $WorkRoot -ChildPath ($ReleaseFile.name -replace '.zip','') -AdditionalChildPath '*'
+        Copy-Item -Path $ReleaseSource -Destination (Get-Location) -Recurse -ErrorAction SilentlyContinue
+
+        $QtBinaries = @(
+          'cmake_automoc_parser.pdb'
+          'moc.pdb'
+          'qlalr.pdb'
+          'qmake.pdb'
+          'qsb.pdb'
+          'qtpaths.pdb'
+          'qvkgen.pdb'
+          'rcc.pdb'
+          'tracegen.pdb'
+          'uic.pdb'
+        )
+
+        Get-ChildItem -Path (Join-Path -Path (Get-Location) -ChildPath 'bin') -Include $QtBinaries -Recurse | Remove-Item -ErrorAction SilentlyContinue
+        Write-Output '::endgroup::'
+
+        Write-Output '::group::Create Combined Qt Artifact'
+        Invoke-External 7z a "${WorkRoot}/${TargetDirectory}.zip" * -mx="${CompressionLevel}"
+        "artifactFile=${TargetDirectory}.zip" >> $env:GITHUB_OUTPUT
+        Write-Output '::endgroup::'
+
+        Pop-Location
+
+    - name: Publish Combined Qt Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ inputs.outputName }}
+        path: ${{ github.workspace }}/${{ steps.combine.outputs.artifactFile }}
+
+    - name: Publish Release PDBs Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ inputs.pdbOutputName }}
+        path: ${{ github.workspace }}/${{ steps.combine.outputs.pdbFile }}

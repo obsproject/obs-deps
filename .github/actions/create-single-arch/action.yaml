@@ -1,17 +1,17 @@
-name: 'Create Single Architecture macOS Build'
-description: 'Takes the contents of an universal macOS build artifact and creates single architecture macOS binaries'
+name: Create Single Architecture macOS Build
+description: Takes the contents of an universal macOS build artifact and creates single architecture macOS binaries
 inputs:
   base:
-    description: 'Name of the universal macOS artifact'
+    description: Name of the universal macOS artifact
     required: true
   target:
-    description: 'Target architecture to extract from universal builds'
+    description: Target architecture to extract from universal builds
     required: true
   outputName:
-    description: 'Name for created universal macOS artifact'
+    description: Name for created universal macOS artifact
     required: true
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - name: Download universal macOS artifact
       uses: actions/download-artifact@v3

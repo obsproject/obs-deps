@@ -1,17 +1,17 @@
-name: 'Create Universal macOS Build'
-description: 'Takes the contents of an arm64 macOS build artifact and x86_64 macOS build artifact and creates matching universal macOS binaries'
+name: Create Universal macOS Build
+description: Takes the contents of an arm64 macOS build artifact and x86_64 macOS build artifact and creates matching universal macOS binaries
 inputs:
   arm64:
-    description: 'Name of the arm64-based macOS artifact'
+    description: Name of the arm64-based macOS artifact
     required: true
   x86_64:
-    description: 'Name of the x86_64-based macOS artifact'
+    description: Name of the x86_64-based macOS artifact
     required: true
   outputName:
-    description: 'Name for created universal macOS artifact'
+    description: Name for created universal macOS artifact
     required: true
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - name: Download arm64 macOS artifact
       uses: actions/download-artifact@v3
