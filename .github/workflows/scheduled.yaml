@@ -51,7 +51,7 @@ jobs:
             fi
           done <<< \
           "$(gh api repos/${GITHUB_REPOSITORY}/actions/caches \
-            --jq '.actions_caches.[] | select(.ref|test("refs/heads/master")) | select(.key|test(".+-qt6-.+")) | {id, key} | join(";")')"
+            --jq '.actions_caches.[] | select(.ref|test("refs/heads/master")) | select(.key|test(".+-(qt6|deps)-.+")) | select(.key|test(".+ffmpeg.+")|not) | {id, key} | join(";")')"
           echo '::endgroup::'
 
           echo '::group::Processing pull request cache entries'
@@ -72,6 +72,49 @@ jobs:
             "$(gh api 'repos/${GITHUB_REPOSITORY}/actions/caches?per_page=100' \
               --jq '.actions_caches.[] | select(.ref|test("refs/heads/master")|not) | {id, key, ref} | join(";")' &> /dev/null)"
           echo '::endgroup::'
+
+  windows-build:
+    name: Build Windows Dependencies
+    runs-on: windows-2022
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [x64, x86]
+        include:
+          - target: x64
+            config: Release
+            type: static
+          - target: x86
+            config: Release
+            type: static
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build ntv2 Debug
+        if: matrix.target == 'x64'
+        shell: pwsh
+        run: |
+          # Build ntv2 Debug
+
+          $Params = @{
+            Target = '${{ matrix.target }}'
+            Configuration = 'Debug'
+            Dependencies = 'ntv2'
+          }
+
+          ./Build-Dependencies.ps1 @Params
+          Remove-Item -Recurse -Force ${{ github.workspace }}/windows_build_temp
+
+      - name: Build Windows Dependencies
+        uses: ./.github/actions/build-windows-deps
+        with:
+          target: ${{ matrix.target }}
+          type: ${{ matrix.type }}
+          config: ${{ matrix.config }}
 
   macos-qt6-build:
     name: Build Qt6 (macOS)

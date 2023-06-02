@@ -375,21 +375,20 @@ jobs:
           outputName: qt6-${{ matrix.target }}-${{ needs.pre-checks.outputs.shortHash }}
 
   windows-build:
-    name: 'Build Windows Dependencies'
+    name: Build Windows Dependencies
     runs-on: windows-2022
+    needs: pre-checks
     strategy:
       fail-fast: true
       matrix:
         target: [x64, x86]
         include:
           - target: x64
-            config: 'Release'
-            type: 'static'
+            config: Release
+            type: static
           - target: x86
-            config: 'Release'
-            type: 'static'
-    env:
-      CACHE_REVISION: '3'
+            config: Release
+            type: static
     defaults:
       run:
         shell: pwsh
@@ -400,41 +399,26 @@ jobs:
       - name: Setup Environment
         id: setup
         run: |
+          # Setup Environment
+
           $Target='${{ matrix.target }}'
-          $ArtifactName="deps-windows-${Target}-${{ github.sha }}"
+          $ArtifactName="deps-windows-${Target}-${{ needs.pre-checks.outputs.shortHash }}"
           $FileName="windows-deps-$(Get-Date -Format 'yyyy-MM-dd')-${Target}.zip"
 
           "artifactName=${ArtifactName}" >> $env:GITHUB_OUTPUT
           "artifactFileName=${FileName}" >> $env:GITHUB_OUTPUT
 
-      - name: 'Check for GitHub Labels'
-        id: seekingTesters
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          $LabelFound = try {
-            $Params = @{
-              Authentication = 'Bearer'
-              Token = (ConvertTo-SecureString '${{ secrets.GITHUB_TOKEN }}' -AsPlainText)
-              Uri = '${{ github.event.pull_request.url }}'
-              UseBasicParsing = $true
-            }
-
-            (Invoke-RestMethod @Params).labels.name.contains("Seeking Testers")
-          } catch {
-            $false
-          }
-
-          "found=$(([string]${LabelFound}).ToLower())" >> $env:GITHUB_OUTPUT
-
-      - name: Build ntv2 debug
+      - name: Build ntv2 Debug
+        if: matrix.target == 'x64'
         shell: pwsh
         run: |
+          # Build ntv2 Debug
+
           $Params = @{
             Target = '${{ matrix.target }}'
             Configuration = 'Debug'
             Dependencies = 'ntv2'
           }
-          if ( '${{ matrix.type }}' -eq 'shared' ) { $Params += @{Shared = $true} }
 
           ./Build-Dependencies.ps1 @Params
           Remove-Item -Recurse -Force ${{ github.workspace }}/windows_build_temp
@@ -445,10 +429,9 @@ jobs:
           target: ${{ matrix.target }}
           type: ${{ matrix.type }}
           config: ${{ matrix.config }}
-          cacheRevision: ${{ env.CACHE_REVISION }}
 
       - name: Publish Build Artifacts
-        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
+        if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
         uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.setup.outputs.artifactName }}
