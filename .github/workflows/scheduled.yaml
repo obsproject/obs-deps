@@ -1,0 +1,137 @@
+name: Scheduled
+run-name: Scheduled Repository Actions ⏰
+on:
+  schedule:
+    - cron: 0 0 * * *
+permissions:
+  contents: write
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.head_ref || github.ref }}'
+  cancel-in-progress: true
+jobs:
+  cache-cleanup:
+    name: Cache Cleanup 🧹
+    runs-on: ubuntu-22.04
+    permissions:
+      actions: write
+    steps:
+      - name: Remove Stale Ccache Caches
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          : Remove Stale Ccache Caches
+
+          echo '::group::Processing master branch cache entries'
+          while IFS=";" read -r cache_id cache_name; do
+            if [[ "${cache_name}" ]]; then
+              result=true
+              gh api -X DELETE repos/${GITHUB_REPOSITORY}/actions/caches?key=${cache_name} --jq '.total_count' &> /dev/null || result=false
+
+              if ${result}; then
+                echo "Deleted cache entry ${cache_name}"
+              else
+                echo "::warning::Unable to delete cache entry ${cache_name}"
+              fi
+            fi
+          done <<< \
+          "$(gh api repos/${GITHUB_REPOSITORY}/actions/caches \
+            --jq '.actions_caches.[] | select(.ref|test("refs/heads/master")) | select(.key|test(".*-ccache-*")) | {id, key} | join(";")')"
+
+
+          while IFS=";" read -r cache_id cache_name; do
+            if [[ "${cache_name}" ]]; then
+              result=true
+              gh api -X DELETE repos/${GITHUB_REPOSITORY}/actions/caches?key=${cache_name} --jq '.total_count' &> /dev/null || result=false
+
+              if ${result}; then
+                echo "Deleted cache entry ${cache_name}"
+              else
+                echo "::warning::Unable to delete cache entry ${cache_name}"
+              fi
+            fi
+          done <<< \
+          "$(gh api repos/${GITHUB_REPOSITORY}/actions/caches \
+            --jq '.actions_caches.[] | select(.ref|test("refs/heads/master")) | select(.key|test(".+-qt6-.+")) | {id, key} | join(";")')"
+          echo '::endgroup::'
+
+          echo '::group::Processing pull request cache entries'
+          while IFS=";" read -r cache_id cache_name cache_ref; do
+            if [[ "${cache_name}" ]]; then
+              result=true
+              gh api -X DELETE repos/${GITHUB_REPOSITORY}/actions/caches?key=${cache_name} --jq '.total_count' &> /dev/null || result=false
+
+              pr_number=$(echo ${cache_ref} | cut -d '/' -f 3)
+
+              if ${result}; then
+                echo "Deleted PR #${pr_number} cache entry ${cache_name}"
+              else
+                echo "::warning::Unable to delete PR #${pr_number} cache entry ${cache_name}"
+              fi
+            fi
+          done <<< \
+            "$(gh api repos/${GITHUB_REPOSITORY}/actions/caches \
+              --jq '.actions_caches.[] | select(.ref|test("refs/heads/master")|not) | {id, key, ref} | join(";")')"
+          echo '::endgroup::'
+
+  macos-qt6-build:
+    name: Build Qt6 (macOS)
+    runs-on: macos-13
+    defaults:
+      run:
+        shell: zsh --no-rcs --errexit --pipefail {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Environment
+        id: setup
+        run: |
+          : Setup Environment
+          local -a to_remove=()
+
+          for formula (llvm gcc) {
+            if [[ -d /usr/local/opt/"${formula}" ]] to_remove+=(${formula})
+          }
+
+          if (( #to_remove )) brew uninstall --ignore-dependencies ${to_remove}
+
+          local -r date_string=$(date +"%Y-%m-%d")
+          print "ccacheDate=${date_string}" >> $GITHUB_OUTPUT
+
+      - name: Restore Compilation Cache
+        id: ccache-cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: macos-universal-ccache-qt6-${{ steps.setup.outputs.ccacheDate }}
+          restore-keys: |
+            macos-universal-ccache-qt6-
+
+      - name: Build macOS Qt
+        uses: ./.github/actions/build-qt
+        with:
+          target: macos-universal
+          config: Release
+
+  windows-qt6-build:
+    name: Build Qt6 (Windows)
+    runs-on: windows-2022
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [x64]
+        include:
+          - target: x64
+            config: RelWithDebInfo
+          - target: x64
+            config: Debug
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build Windows Qt
+        uses: ./.github/actions/build-qt
+        with:
+          target: ${{ matrix.target }}
+          config: ${{ matrix.config }}
