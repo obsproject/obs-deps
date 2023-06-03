@@ -1,2 +1,4 @@
 package '7zip.7zip', path: '7-zip', bin: '7z'
 package 'cmake', path: 'Cmake\bin', bin: 'cmake'
+package 'MSYS2.MSYS2', path: 'C:\msys64\usr\bin', bin 'bash'
+package 'meson', path: 'Meson', bin 'meson'
