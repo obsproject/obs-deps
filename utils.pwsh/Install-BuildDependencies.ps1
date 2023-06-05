@@ -25,7 +25,7 @@ function Install-BuildDependencies {
     }
 
     $Paths = $env:Path -split [System.IO.Path]::PathSeparator
-    $Paths = $Paths | Get-Unique | Where-Object { ( ! ($_ -match 'Strawberry' ) ) }
+    $Paths = $Paths | Get-Unique | Where-Object { ( ! ( $_ -match 'Strawberry' ) ) }
 
     $WingetOptions = @('install', '--accept-package-agreements', '--accept-source-agreements')
 
