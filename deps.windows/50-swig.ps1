@@ -3,7 +3,7 @@ param(
     [string] $Version = '4.1.0',
     [string] $Uri = 'https://github.com/swig/swig.git',
     [string] $Hash = "4dd285fad736c014224ef2ad25b85e17f3dce1f9",
-    [array] $Targets = @('x64'),
+    [array] $Targets = @('x64', 'arm64'),
     [array] $Patches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/swig/0001-add-Python-3-stable-abi.patch"

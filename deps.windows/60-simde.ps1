@@ -3,7 +3,13 @@ param(
     [string] $Version = '0.8.2',
     [string] $Uri = 'https://github.com/simd-everywhere/simde.git',
     [string] $Hash = '71fd833d9666141edcd1d3c109a80e228303d8d7',
-    [array] $Targets = @('x64')
+    [array] $Targets = @('x64', 'arm64'),
+    [array] $Patches = @(
+        @{
+            PatchFile = "${PSScriptRoot}/patches/simde/0001-generate-cross-compile-files-windows-native.patch"
+            HashSum = "AF937409D5965654CA254B7AF8C3D9EF59FB42759F8F1BF36F26797FBEE16193"
+        }
+    )
 )
 
 function Setup {
@@ -16,6 +22,16 @@ function Clean {
     if ( Test-Path "build_${Target}" ) {
         Log-Information "Clean build directory (${Target})"
         Remove-Item -Path "build_${Target}" -Recurse -Force
+    }
+}
+
+function Patch {
+    Log-Information "Patch (${Target})"
+    Set-Location $Path
+
+    $Patches | ForEach-Object {
+        $Params = $_
+        Safe-Patch @Params
     }
 }
 
@@ -38,6 +54,7 @@ function Configure {
         '--backend', "vs${VisualStudioId}"
         '--prefix', "$($script:ConfigData.OutputPath)"
         '-Dtests=false'
+        '--cross-file', "windows-${Target}.txt"
     )
 
      $Params = @{

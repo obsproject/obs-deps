@@ -3,7 +3,7 @@ param(
     [string] $Version = '3.0.8',
     [string] $Uri = 'https://cdn-fastly.obsproject.com/downloads/vlc.zip',
     [string] $Hash = "${PSScriptRoot}/checksums/vlc.zip.sha256",
-    [array] $Targets = @('x64')
+    [array] $Targets = @('x64', 'arm64')
 )
 
 function Setup {
