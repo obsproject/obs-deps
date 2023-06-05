@@ -1,12 +1,12 @@
 param(
     [string] $Name = 'libvpx',
     [string] $Version = '1.13.1',
-    [string] $Uri = 'https://github.com/webmproject/libvpx/archive/refs/tags/v1.13.1.zip',
-    [string] $Hash = "${PSScriptRoot}/checksums/v1.13.1.zip.sha256"
+    [string] $Uri = 'https://github.com/webmproject/libvpx.git',
+    [string] $Hash = '1672f4db71370e07e43e1e121cf2e92bf97ea4ff'
 )
 
 function Setup {
-    Setup-Dependency -Uri $Uri -Hash $Hash -DestinationPath .
+    Setup-Dependency -Uri $Uri -Hash $Hash -DestinationPath $Path
 
     if ( ! ( $SkipAll -or $SkipDeps ) ) {
         Invoke-External pacman.exe -S --noconfirm --needed --noprogressbar nasm
@@ -16,7 +16,7 @@ function Setup {
 }
 
 function Clean {
-    Set-Location "${Name}-${Version}"
+    Set-Location $Path
     if ( Test-Path "build_${Target}" ) {
         Log-Information "Clean build directory (${Target})"
         Remove-Item -Path "build_${Target}" -Recurse -Force
@@ -25,11 +25,12 @@ function Clean {
 
 function Configure {
     Log-Information "Configure (${Target})"
-    Set-Location "${Name}-${Version}"
+    Set-Location $Path
 
     $BuildTargets = @{
         x64 = 'x86_64-win64-vs17'
         x86 = 'x86-win32-vs17'
+        arm64 = 'arm64-win64-vs17-clangcl'
     }
 
     New-Item -ItemType Directory -Force "build_${Target}" > $null
@@ -39,7 +40,7 @@ function Configure {
         '../configure'
         ('--prefix="' + $($script:ConfigData.OutputPath -replace '([A-Fa-f]):','/$1' -replace '\\','/') + '"')
         ('--target=' + $($BuildTargets[$Target]))
-        '--enable-runtime-cpu-detect'
+        $(if ( $Target -eq 'arm64' ) { '--disable-neon_dotprod --disable-neon_i8mm' })
         '--enable-vp8'
         '--enable-vp9'
         '--enable-vp9-highbitdepth'
@@ -74,7 +75,7 @@ function Configure {
 
 function Build {
     Log-Information "Build (${Target})"
-    Set-Location "${Name}-${Version}"
+    Set-Location $Path
 
     $Params = @{
         BasePath = (Get-Location | Convert-Path)
@@ -95,7 +96,7 @@ function Build {
 
 function Install {
     Log-Information "Install (${Target})"
-    Set-Location "${Name}-${Version}"
+    Set-Location $Path
 
     $Params = @{
         BasePath = (Get-Location | Convert-Path)
@@ -116,7 +117,7 @@ function Install {
 
 function Fixup {
     Log-Information "Fixup (${Target})"
-    Set-Location "${Name}-${Version}"
+    Set-Location $Path
 
     Get-ChildItem "$($script:ConfigData.OutputPath)/lib" -Recurse -Filter 'vpxmd.lib' | Move-Item -Destination "$($script:ConfigData.OutputPath)/lib/vpx.lib" -Force
     Remove-Item -Force -Recurse "$($script:ConfigData.OutputPath)/lib/${Target}" -ErrorAction SilentlyContinue

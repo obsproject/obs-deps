@@ -18,10 +18,11 @@ function Setup {
 
 function Clean {
     Set-Location "${Name}-${Version}"
-    if ( Test-Path "build_${Target}" ) {
-        Log-Information "Clean build directory (${Target})"
-        Remove-Item -Path "build_${Target}" -Recurse -Force
-    }
+
+    Get-ChildItem -Recurse -Include 'lame.exe','mp3x.exe','mp3rtp.exe' | Remove-Item
+    Get-ChildItem -Recurse -Include 'libmp3lame.*','libmp3lame-static.lib','lame_enc.dll' | Remove-Item
+    Get-ChildItem -Recurse -Include 'lame.pdb','icl.pch' | Remove-Item
+    Get-ChildItem -Recurse -Include '*.obj','*.res' | Remove-Item
 }
 
 function Patch {
@@ -41,12 +42,13 @@ function Build {
     $BuildMachines = @{
         x64 = 'x64'
         x86 = 'I686'
+        arm64 = 'arm64'
     }
 
     $Params = @{
         BasePath = (Get-Location | Convert-Path)
         BuildPath = "."
-        BuildCommand = "nmake -f Makefile.MSVC MACHINE=/machine:$($BuildMachines[$Target]) COMP=MS ASM=NO MSVCVER=Win64"
+        BuildCommand = "nmake -f Makefile.MSVC MACHINE=/machine:$($BuildMachines[$Target]) MMX=NO COMP=MS ASM=NO MSVCVER=Win64"
         Target = $Target
         HostArchitecture = $Target
     }

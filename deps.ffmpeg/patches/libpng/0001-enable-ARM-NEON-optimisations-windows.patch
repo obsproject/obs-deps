@@ -1,0 +1,40 @@
+--- ./arm/arm_init.c	2019-04-14 20:10:32.000000000 +0200
++++ ./arm/arm_init.c	2021-06-11 12:08:45.000000000 +0200
+@@ -17,7 +17,7 @@
+ 
+ #include "../pngpriv.h"
+ 
+-#ifdef PNG_READ_SUPPORTED
++#if defined(__ARM_NEON__) && defined(PNG_READ_SUPPORTED)
+ 
+ #if PNG_ARM_NEON_OPT > 0
+ #ifdef PNG_ARM_NEON_CHECK_SUPPORTED /* Do run-time checks */
+
+--- ./pngpriv.h	2019-04-14 20:10:32.000000000 +0200
++++ ./pngpriv.h	2021-06-11 12:09:28.000000000 +0200
+@@ -139,7 +139,9 @@
+    /* NEON optimizations are to be at least considered by libpng, so enable the
+     * callbacks to do this.
+     */
+-#  define PNG_FILTER_OPTIMIZATIONS png_init_filter_functions_neon
++#if defined(__ARM_NEON__)
++#define PNG_FILTER_OPTIMIZATIONS png_init_filter_functions_neon
++#endif
+ 
+    /* By default the 'intrinsics' code in arm/filter_neon_intrinsics.c is used
+     * if possible - if __ARM_NEON__ is set and the compiler version is not known
+
+--- ./CMakeLists.txt  2022-09-14 21:42:00.000000000 +0200
++++ ./CMakeLists.txt  2022-11-03 12:15:04.250849789 +0100
+@@ -89,9 +89,9 @@
+ if(PNG_HARDWARE_OPTIMIZATIONS)
+ 
+ # Set definitions and sources for ARM.
+-if(TARGET_ARCH MATCHES "^arm" OR
++if(TARGET_ARCH MATCHES ".*arm.*" OR
+    TARGET_ARCH MATCHES "^aarch64")
+-  if(TARGET_ARCH MATCHES "^arm64" OR
++  if(TARGET_ARCH MATCHES ".*arm64.*" OR
+      TARGET_ARCH MATCHES "^aarch64")
+     set(PNG_ARM_NEON_POSSIBLE_VALUES on off)
+     set(PNG_ARM_NEON "on"

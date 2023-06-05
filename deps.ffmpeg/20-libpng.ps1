@@ -2,7 +2,13 @@ param(
     [string] $Name = 'libpng',
     [string] $Version = '1.6.40',
     [string] $Uri = 'https://sourceforge.net/projects/libpng/files/libpng16/1.6.40/lpng1640.zip',
-    [string] $Hash = "${PSScriptRoot}/checksums/lpng1640.zip.sha256"
+    [string] $Hash = "${PSScriptRoot}/checksums/lpng1640.zip.sha256",
+    [array] $Patches = @(
+        @{
+            PatchFile = "${PSScriptRoot}/patches/libpng/0001-enable-ARM-NEON-optimisations-windows.patch"
+            HashSum = "7fa1ddaf845fcae443b91ef08ac93198c654ecea458aaf479d5cd46d274c0c8c"
+        }
+    )
 )
 
 function Setup {
@@ -17,6 +23,16 @@ function Clean {
     }
 }
 
+function Patch {
+    Log-Information "Patch (${Target})"
+    Set-Location $Path
+
+    $Patches | ForEach-Object {
+        $Params = $_
+        Safe-Patch @Params
+    }
+}
+
 function Configure {
     Log-Information "Configure (${Target})"
     Set-Location $Path
@@ -28,6 +44,13 @@ function Configure {
         '-DPNG_STATIC:BOOL=ON'
         "-DPNG_SHARED:BOOL=$($OnOff[$script:Shared.isPresent])"
     )
+
+    if ( $Target -eq 'arm64' ) {
+        $Options += @(
+            '-DCMAKE_ASM_FLAGS="-DPNG_ARM_NEON_IMPLEMENTATION=1'
+            '-DPNG_ARM_NEON=on'
+        )
+    }
 
     if ( $Configuration -eq 'Debug' ) {
         $Options += '-DPNG_DEBUG:BOOL=ON'
