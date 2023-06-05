@@ -3,7 +3,7 @@ param(
     [string] $Version = '1.5.2',
     [string] $Uri = 'https://github.com/xiph/opus.git',
     [string] $Hash = "ddbe48383984d56acd9e1ab6a090c54ca6b735a6",
-    [array] $Targets = @('x64')
+    [array] $Targets = @('x64', 'arm64')
 )
 
 function Setup {

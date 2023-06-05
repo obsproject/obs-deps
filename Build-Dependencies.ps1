@@ -123,8 +123,8 @@ function Package-Dependencies {
     switch ( $PackageName ) {
         ffmpeg {
             Get-ChildItem ./bin/* -Include '*.exe','srt-ffplay' -Exclude 'ffmpeg.exe','ffprobe.exe' | Remove-Item -Force -Recurse
-            Get-ChildItem ./lib -Exclude 'librist.lib','zlibstatic.lib','srt.lib','libx264.lib','mbed*.lib','zlib.lib','datachannel.lib','cmake' | Remove-Item -Force -Recurse
-            Get-ChildItem ./lib/cmake -Exclude 'LibDataChannel' | Remove-Item -Force -Recurse
+            Get-ChildItem ./lib -Exclude 'librist.lib','zlibstatic.lib','srt.lib','libx264.lib','mbed*.lib','everest.lib','p256m.lib','zlib.lib','datachannel.lib','cmake' | Remove-Item -Force -Recurse
+            Get-ChildItem ./lib/cmake -Exclude 'LibDataChannel','MbedTLS' | Remove-Item -Force -Recurse
             Get-ChildItem ./share/* | Remove-Item -Force -Recurse
             Get-ChildItem ./bin/*.lib | Move-Item -Destination ./lib
             Get-ChildItem -Attribute Directory -Recurse -Include 'pkgconfig' | Remove-Item -Force -Recurse
