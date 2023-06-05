@@ -3,13 +3,13 @@ param(
     [string] $Version = '3.9.1',
     [string] $Uri = 'https://aomedia.googlesource.com/aom.git',
     [string] $Hash = '8ad484f8a18ed1853c094e7d3a4e023b2a92df28',
+    [array] $Targets = @('x64', 'arm64'),
     [array] $FixupPatches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/aom/0001-windows-pkg-config-fix.patch"
             HashSum = "22f38b49d6307c2ee860b08df7495b5f8894658b451c020f8a13162fd7dd29f4"
         }
-    ),
-    [array] $Targets = @('x64')
+    )
 )
 
 function Setup {
@@ -35,6 +35,7 @@ function Configure {
     $OnOff = @('OFF', 'ON')
     $TargetCPUs = @{
         x64 = 'x86_64'
+        arm64 = 'arm64'
     }
 
     $Options = @(

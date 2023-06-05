@@ -2,12 +2,12 @@ Instead of setting internal debug status based on CMake standard build types,
 libsrt uses inverse logic. This patches honors the official CMake types and
 sets internal debug status accordingly.
 
---- ./CMakeLists.txt   2022-09-21 16:29:01.000000000 +0200
-+++ ./CMakeLists.txt   2022-11-03 12:40:20.973886158 +0100
-@@ -47,14 +47,8 @@
-
+--- ./CMakeLists.txt	2024-11-16 21:09:22
++++ ./CMakeLists.txt	2024-11-16 21:09:30
+@@ -52,14 +52,8 @@
+ 
  include(GNUInstallDirs)
-
+ 
 -# The CMAKE_BUILD_TYPE seems not to be always set, weird.
 -if (NOT DEFINED ENABLE_DEBUG)
 -
@@ -16,21 +16,27 @@ sets internal debug status accordingly.
 -	else()
 -		set (ENABLE_DEBUG OFF)
 -	endif()
-+if(NOT CMAKE_BUILD_TYPE)
-+    set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build type [Release, RelWithDebInfo, Debug, MinSizeRel]" FORCE)
++if (NOT CMAKE_BUILD_TYPE)
++	set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build type [Release, RelWithDebInfo, Debug, MinSizeRel]" FORCE)
  endif()
-
+ 
  # XXX This is a kind of workaround - this part to set the build
-@@ -64,21 +58,16 @@
- # sets _DEBUG and NDEBUG flags itself, so this shouldn't be done
+@@ -70,24 +64,19 @@
  # at all in this case.
  if (NOT MICROSOFT)
--
+ 
 -	# Set CMAKE_BUILD_TYPE properly, now that you know
 -	# that ENABLE_DEBUG is set as it should.
 -	if (ENABLE_DEBUG EQUAL 2)
 -		set (CMAKE_BUILD_TYPE "RelWithDebInfo")
--		add_definitions(-DNDEBUG)
+-		if (ENABLE_ASSERT)
+-			# Add _DEBUG macro if explicitly requested, to enable SRT_ASSERT().
++	if(CMAKE_BUILD_TYPE STREQUAL Debug)
++		if(ENABLE_ASSERT)
+ 			add_definitions(-D_DEBUG)
+ 		else()
+ 			add_definitions(-DNDEBUG)
+ 		endif()
 -	elseif (ENABLE_DEBUG) # 1, ON, YES, TRUE, Y, or any other non-zero number
 -		set (CMAKE_BUILD_TYPE "Debug")
 -
@@ -38,18 +44,12 @@ sets internal debug status accordingly.
 -		add_definitions(-D_DEBUG)
 -	else()
 -		set (CMAKE_BUILD_TYPE "Release")
--		add_definitions(-DNDEBUG)
--	endif()
-+    if(CMAKE_BUILD_TYPE STREQUAL Debug)
-+        add_definitions(-D_DEBUG)
-+        set(ENABLE_DEBUG 2)
-+    elseif(CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo)
-+        add_definitions(-DNDEBUG)
-+        set(ENABLE_DEBUG ON)
-+    else()
-+        add_definitions(-DNDEBUG)
-+        set(ENABLE_DEBUG OFF)
-+    endif()
++		set(ENABLE_DEBUG 2)
++	elseif(CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo)
++		add_definitions(-DNDEBUG)
++		set(ENABLE_DEBUG ON)
++	else()
+ 		add_definitions(-DNDEBUG)
++		set(ENABLE_DEBUG OFF)
+ 	endif()
  endif()
-
- message(STATUS "BUILD TYPE: ${CMAKE_BUILD_TYPE}")
