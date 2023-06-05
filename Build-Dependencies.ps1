@@ -5,7 +5,7 @@ param(
     [ValidateSet('dependencies', 'ffmpeg', 'qt')]
     [string] $PackageName = 'dependencies',
     [string[]] $Dependencies,
-    [ValidateSet('x86', 'x64')]
+    [ValidateSet('arm64', 'x64', 'x86')]
     [string] $Target,
     [switch] $Clean,
     [switch] $Quiet,
