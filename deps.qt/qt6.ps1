@@ -3,7 +3,7 @@ param(
     [string] $Version = '6.5.3',
     [string] $Uri = 'https://download.qt.io/official_releases/qt/6.5/6.5.3',
     [string] $Hash = "${PSScriptRoot}/checksums",
-    [array] $Targets = @('x64', 'x86'),
+    [array] $Targets = @('x64', 'x86', 'arm64'),
     [array] $Patches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/Qt6/win/0001-CVE-2023-43114-6.5.patch"
@@ -65,10 +65,10 @@ function Clean {
         $BuildDirectories = Get-ChildItem -Recurse -Directory -Include "build_${Target}" -Depth 1
 
         $BuildDirectories | ForEach-Object {
-            $Directory = $_
-            Log-Information "Clean build directory $($Directory.FullName) (${Target})"
+            $CleanDirectory = $_
+            Log-Information "Clean build directory $($CleanDirectory.FullName) (${Target})"
 
-            Remove-Item -Path $Directory -Force -Recurse
+            Remove-Item -Path $CleanDirectory -Force -Recurse
         }
     }
 }
@@ -143,6 +143,7 @@ function Configure {
     $CMakeTarget = @{
         x64 = 'x64'
         x86 = 'Win32'
+        arm64 = 'arm64'
     }
 
     $Options = ($Options -join ' ') -replace '-G Visual Studio \d+ \d+','-G Ninja' -replace "-A $($CMakeTarget[$Target])",''
@@ -227,6 +228,7 @@ function Qt-Add-Submodules {
     $CMakeTarget = @{
         x64 = 'x64'
         x86 = 'Win32'
+        arm64 = 'arm64'
     }
 
     $QtComponents | Where-Object { $_ -ne 'qtbase' } | ForEach-Object {
