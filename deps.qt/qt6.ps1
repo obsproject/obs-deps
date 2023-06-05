@@ -3,7 +3,7 @@ param(
     [string] $Version = '6.6.3',
     [string] $Uri = 'https://download.qt.io/archive/qt/6.6/6.6.3',
     [string] $Hash = "${PSScriptRoot}/checksums",
-    [array] $Targets = @('x64')
+    [array] $Targets = @('x64', 'arm64')
 )
 
 $QtComponents = @(
@@ -52,10 +52,10 @@ function Clean {
         $BuildDirectories = Get-ChildItem -Recurse -Directory -Include "build_${Target}" -Depth 1
 
         $BuildDirectories | ForEach-Object {
-            $Directory = $_
-            Log-Information "Clean build directory $($Directory.FullName) (${Target})"
+            $CleanDirectory = $_
+            Log-Information "Clean build directory $($CleanDirectory.FullName) (${Target})"
 
-            Remove-Item -Path $Directory -Force -Recurse
+            Remove-Item -Path $CleanDirectory -Force -Recurse
         }
     }
 }
@@ -122,8 +122,18 @@ function Configure {
         '-DCMAKE_IGNORE_PREFIX_PATH:PATH=C:/Strawberry/c'
     )
 
+    if ( $env:QtHostPath -ne $null ) {
+        $Options += @(
+            "-DQT_HOST_PATH:PATH=${env:QtHostPath}"
+            '-DQT_FORCE_BUILD_TOOLS:BOOL=ON'
+            '-DCMAKE_CROSSCOMPILING:BOOL=ON'
+            '-DCMAKE_SYSTEM_NAME:STRING=Windows'
+        )
+    }
+
     $CMakeTarget = @{
         x64 = 'x64'
+        arm64 = 'arm64'
     }
 
     $Options = ($Options -join ' ') -replace '-G Visual Studio \d+ \d+','-G Ninja' -replace "-A $($CMakeTarget[$Target])",''
@@ -205,8 +215,18 @@ function Qt-Add-Submodules {
         )
     }
 
+    if ( $env:QtHostPath -ne $null ) {
+        $Options += @(
+            "-DQT_HOST_PATH:PATH=${env:QtHostPath}"
+            '-DQT_FORCE_BUILD_TOOLS:BOOL=ON'
+            '-DCMAKE_CROSSCOMPILING:BOOL=ON'
+            '-DCMAKE_SYSTEM_NAME:STRING=Windows'
+        )
+    }
+
     $CMakeTarget = @{
         x64 = 'x64'
+        arm64 = 'arm64'
     }
 
     $QtComponents | Where-Object { $_ -ne 'qtbase' } | ForEach-Object {
