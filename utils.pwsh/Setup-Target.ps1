@@ -3,13 +3,30 @@ function Setup-Target {
         . $PSScriptRoot/Logger.ps1
     }
 
-    $Target64Bit = ( $script:Target -eq 'x64' )
+    $TargetData = @{
+        x64 = @{
+            Arch = 'x64'
+            UnixArch = 'x86_64'
+            CmakeArch = 'x64'
+            Bitness = '64'
+        }
+        x86 = @{
+            Arch = 'x86'
+            UnixArch = 'x86'
+            CmakeArch = 'Win32'
+            Bitness = '32'
+        }
+        arm64 = @{
+            Arch = 'arm64'
+            UnixArch = 'aarch64'
+            CmakeArch = 'ARM64'
+            Bitness = '64'
+        }
+    }
 
-    $script:ConfigData = @{
-        Arch = ('x86', 'x64')[$Target64Bit]
-        UnixArch = ('x86', 'x86_64')[$Target64Bit]
-        CmakeArch = ('Win32', 'x64')[$Target64Bit]
-        Bitness = ('32', '64')[$Target64Bit]
+    $script:ConfigData = $TargetData[$script:Target]
+
+    $script:ConfigData += @{
         OutputPath = "${script:ProjectRoot}\windows\obs-${script:PackageName}-${script:Target}"
     }
 
@@ -27,13 +44,6 @@ Project dir     : $($script:ProjectRoot)
 function Setup-BuildParameters {
     if ( ! ( Test-Path function:Log-Output ) ) {
         . $PSScriptRoot/Logger.ps1
-    }
-
-    $NumProcessors = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
-
-    if ( $NumProcessors -gt 1 ) {
-        $env:UseMultiToolTask = $true
-        $env:EnforceProcessCountAcrossBuilds = $true
     }
 
     $VisualStudioData = Find-VisualStudio
