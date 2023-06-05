@@ -1,0 +1,25 @@
+--- ./arm/arm_init.c    2024-02-23 10:51:40
++++ ./arm/arm_init.c    2024-02-23 10:51:40
+@@ -15,7 +15,7 @@
+ 
+ #include "../pngpriv.h"
+ 
+-#ifdef PNG_READ_SUPPORTED
++#if defined(__ARM_NEON__) && defined(PNG_READ_SUPPORTED)
+ 
+ #if PNG_ARM_NEON_OPT > 0
+ #ifdef PNG_ARM_NEON_CHECK_SUPPORTED /* Do run-time checks */
+ 
+--- ./CMakeLists.txt  2024-04-27 15:16:08
++++ ./CMakeLists.txt  2024-04-27 15:16:08
+@@ -133,8 +133,8 @@
+ if(PNG_HARDWARE_OPTIMIZATIONS)
+ 
+ # Set definitions and sources for ARM.
+-if(TARGET_ARCH MATCHES "^(ARM|arm|aarch)")
+-  if(TARGET_ARCH MATCHES "^(ARM64|arm64|aarch64)")
++if(TARGET_ARCH MATCHES "(ARM|arm|aarch)")
++  if(TARGET_ARCH MATCHES "(ARM64|arm64|aarch64)")
+     set(PNG_ARM_NEON_POSSIBLE_VALUES on off)
+     set(PNG_ARM_NEON "on"
+         CACHE STRING "Enable ARM NEON optimizations: on|off; on is default")

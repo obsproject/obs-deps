@@ -3,13 +3,13 @@ param(
     [string] $Version = '0.2.7',
     [string] $Uri = 'https://code.videolan.org/rist/librist.git',
     [string] $Hash = "809390b3b75a259a704079d0fb4d8f1b5f7fa956",
+    [array] $Targets = @('x64', 'arm64'),
     [array] $Patches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/librist/0001-generate-cross-compile-files-windows-native.patch"
-            HashSum = "804B845BC66ED180B6C2F962ECF29D55190AA92248FE25F4478C68AE2A91DFFC"
+            HashSum = "278BEC80C575CBD6AC1C93B6770DE97B25BEFCE99FC2893BFE2D86F4A679569D"
         }
     ),
-    [array] $Targets = @('x64'),
     [switch] $ForceShared = $true
 )
 

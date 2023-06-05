@@ -3,13 +3,13 @@ param(
     [string] $Version = '3.100',
     [string] $Uri = 'https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz',
     [string] $Hash = "${PSScriptRoot}/checksums/lame-3.100.tar.gz.win.sha256",
+    [array] $Targets = @('x64', 'arm64'),
     [array] $Patches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/lame/0001-fix-nmake-64-bit-builds.patch"
             HashSum = "0772e07d3d0c484d281e3bfdb4f93e81adf303623fe57d955b98196795725f39"
         }
-    ),
-    [array] $Targets = @('x64')
+    )
 )
 
 function Setup {
@@ -19,10 +19,11 @@ function Setup {
 
 function Clean {
     Set-Location "${Name}-${Version}"
-    if ( Test-Path "build_${Target}" ) {
-        Log-Information "Clean build directory (${Target})"
-        Remove-Item -Path "build_${Target}" -Recurse -Force
-    }
+
+    Get-ChildItem -Recurse -Include 'lame.exe','mp3x.exe','mp3rtp.exe' | Remove-Item
+    Get-ChildItem -Recurse -Include 'libmp3lame.*','libmp3lame-static.lib','lame_enc.dll' | Remove-Item
+    Get-ChildItem -Recurse -Include 'lame.pdb','icl.pch' | Remove-Item
+    Get-ChildItem -Recurse -Include '*.obj','*.res' | Remove-Item
 }
 
 function Patch {
@@ -42,14 +43,20 @@ function Build {
     $BuildMachines = @{
         x64 = 'x64'
         x86 = 'I686'
+        arm64 = 'arm64'
     }
 
     $Params = @{
         BasePath = (Get-Location | Convert-Path)
         BuildPath = "."
-        BuildCommand = "nmake -f Makefile.MSVC MACHINE=/machine:$($BuildMachines[$Target]) COMP=MS ASM=NO MSVCVER=Win64"
+        BuildCommand = "nmake -f Makefile.MSVC MACHINE=/machine:$($BuildMachines[$Target]) MMX=NO COMP=MS ASM=NO MSVCVER=Win64"
         Target = $Target
-        HostArchitecture = $Target
+    }
+
+    if ( $Target -eq 'x86' ) {
+        $Params += @{
+            HostArchitecture = $Target
+        }
     }
 
     Invoke-DevShell @Params
