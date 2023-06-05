@@ -3,7 +3,7 @@ param(
     [string] $Version = '2020-07-28',
     [string] $Uri = 'https://github.com/xiph/rnnoise.git',
     [string] $Hash = '2938bcf94a2fe3f850df542f5de3996905059c97',
-    [array] $Targets = @('x64')
+    [array] $Targets = @('x64', 'arm64')
 )
 
 function Setup {

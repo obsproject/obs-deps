@@ -3,7 +3,7 @@ param(
     [string] $Version = '10.40',
     [string] $Uri = 'https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.40/pcre2-10.40.zip',
     [string] $Hash = "${PSScriptRoot}/checksums/pcre2-10.40.zip.sha256",
-    [array] $Targets = @('x64')
+    [array] $Targets = @('x64', 'arm64')
 )
 
 function Setup {

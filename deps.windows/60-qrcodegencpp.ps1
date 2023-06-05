@@ -5,7 +5,7 @@ param(
     [string] $Hash = '720f62bddb7226106071d4728c292cb1df519ceb',
     [string] $UriCMake = 'https://github.com/EasyCoding/qrcodegen-cmake.git',
     [string] $HashCMake = '0bc38a5c3ce8bc700a7e1b3082a55b82e292530e',
-    [array] $Targets = @('x64')
+    [array] $Targets = @('x64', 'arm64')
 )
 
 function Setup {
