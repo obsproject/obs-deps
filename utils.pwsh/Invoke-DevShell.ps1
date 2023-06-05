@@ -20,9 +20,9 @@ function Invoke-DevShell {
         [Parameter(Mandatory)]
         [string] $BuildCommand,
         [Parameter(Mandatory)]
-        [ValidateSet('x86', 'x64')]
+        [ValidateSet('arm64', 'x64', 'x86')]
         [string] $Target,
-        [string] $HostArchitecture = ( 'x86', 'x64' )[ [System.Environment]::Is64BitOperatingSystem ]
+        [string] $HostArchitecture = ([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture)
     )
 
     if ( ! ( Test-Path function:Log-Information ) ) {
@@ -43,7 +43,7 @@ Import-Module '$($VisualStudioData.InstallationPath)/Common7/Tools/Microsoft.Vis
 
 `$_Params = @{
     StartInPath = '${BasePath}'
-    DevCmdArguments = '-arch=${Target} -host_arch=${HostArchitecture}'
+    DevCmdArguments = '-arch=${Target} -host_arch=$($HostArchitecture.ToLower())'
     VsInstanceId = '$($VisualStudioData.InstanceId)'
 }
 
