@@ -1,16 +1,16 @@
 param(
     [string] $Name = 'mbedtls',
-    [string] $Version = '3.4.1',
+    [string] $Version = '3.6.2',
     [string] $Uri = 'https://github.com/Mbed-TLS/mbedtls.git',
-    [string] $Hash = '72718dd87e087215ce9155a826ee5a66cfbe9631',
-    [switch] $ForceStatic = $true,
+    [string] $Hash = '107ea89daaefb9867ea9121002fbbdf926780e98',
+    [array] $Targets = @('x64', 'arm64'),
     [array] $Patches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/mbedtls/0001-enable-dtls-srtp-support-windows.patch"
             HashSum = "38dbaff859242c5a4f8196a08e35f0251d2966b22e1d9547ecaaea2aec4aae1b"
         }
     ),
-    [array] $Targets = @('x64')
+    [switch] $ForceStatic = $true
 )
 
 function Setup {

@@ -1,10 +1,16 @@
 param(
     [string] $Name = 'srt',
-    [string] $Version = '1.5.2',
-    [string] $Uri = 'https://github.com/Haivision/srt/archive/refs/tags/v1.5.2.zip',
-    [string] $Hash = "${PSScriptRoot}/checksums/v1.5.2.zip.sha256",
-    [array] $Targets = @('x64'),
-    [switch] $ForceShared = $true
+    [string] $Version = '1.5.4',
+    [string] $Uri = 'https://github.com/Haivision/srt/archive/refs/tags/v1.5.4.zip',
+    [string] $Hash = "${PSScriptRoot}/checksums/v1.5.4.zip.sha256",
+    [array] $Targets = @('x64', 'arm64'),
+    [switch] $ForceShared = $true,
+    [array] $Patches = @(
+        @{
+            PatchFile = "${PSScriptRoot}/patches/srt/0002-update-mbedtls-discovery-windows.patch"
+            HashSum = "c6b236a15e36767cc516c626c410be42b9ff05bd42338c194e1cf6247e4cbdc5"
+        }
+    )
 )
 
 function Setup {
@@ -17,6 +23,16 @@ function Clean {
     if ( Test-Path "build_${Target}" ) {
         Log-Information "Clean build directory (${Target})"
         Remove-Item -Path "build_${Target}" -Recurse -Force
+    }
+}
+
+function Patch {
+    Log-Information "Patch (${Target})"
+    Set-Location "${Name}-${Version}"
+
+    $Patches | ForEach-Object {
+        $Params = $_
+        Safe-Patch @Params
     }
 }
 
