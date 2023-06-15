@@ -65,7 +65,7 @@ runs:
         key: ${{ inputs.target }}-qt${{ inputs.qtVersion }}-${{inputs.config }}-${{ steps.env-setup.outputs.depHash }}-${{ steps.env-setup.outputs.patchHash }}
 
     - name: Build and Install Qt
-      if: runner.os == 'macOS' && steps.deps-cache.outputs.cache-hit != 'true'
+      if: runner.os == 'macOS'
       shell: zsh --no-rcs --errexit --pipefail {0}
       run: |
         : Build and Install macOS Qt
