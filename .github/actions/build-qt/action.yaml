@@ -98,7 +98,7 @@ runs:
         ./Build-Dependencies.ps1 @Params
 
     - name: Save Qt to Cache
-      if: github.event_name == 'push'
+      if: github.event_name == 'schedule' || (github.event_name == 'push' && steps.deps-cache.outputs.cache-hit != 'true')
       uses: actions/cache/save@v3
       with:
         path: |
