@@ -119,12 +119,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [x64]
-        include:
-          - target: x64
-            config: RelWithDebInfo
-          - target: x64
-            config: Debug
+        target: [x64, x86]
+        config: [RelWithDebInfo, Debug]
 
     steps:
       - name: Checkout
