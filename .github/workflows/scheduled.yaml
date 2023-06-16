@@ -15,11 +15,11 @@ jobs:
     permissions:
       actions: write
     steps:
-      - name: Remove Stale Ccache Caches
+      - name: Remove Stale Cache Entries
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          : Remove Stale Ccache Caches
+          : Remove Stale Cache Entries
 
           echo '::group::Processing master branch cache entries'
           while IFS=";" read -r cache_id cache_name; do
@@ -69,8 +69,8 @@ jobs:
               fi
             fi
           done <<< \
-            "$(gh api repos/${GITHUB_REPOSITORY}/actions/caches \
-              --jq '.actions_caches.[] | select(.ref|test("refs/heads/master")|not) | {id, key, ref} | join(";")')"
+            "$(gh api 'repos/${GITHUB_REPOSITORY}/actions/caches?per_page=100' \
+              --jq '.actions_caches.[] | select(.ref|test("refs/heads/master")|not) | {id, key, ref} | join(";")' &> /dev/null)"
           echo '::endgroup::'
 
   macos-qt6-build:
