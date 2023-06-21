@@ -8,6 +8,8 @@ local hash='506961b84c3a28ddfb722eb2bc76e2dce2d76765'
 local -a patches=(
   "* ${0:a:h}/patches/libdatachannel/0001-Fix-mbedtls-cmake-objdump.patch \
     728af402fe8ebf33107b65422d569f0ea4af2e1e17207fbe2fb9a8684c187385"
+  "* ${0:a:h}/patches/libdatachannel/0002-Add-simulcast.patch \
+    c76d1c993dcacf55fbc8c8c25382b8ab4b3c934783f531f1cc796ceda1c83adb"
 )
 ## Dependency Overrides
 local -i shared_libs=1

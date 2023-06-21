@@ -1,0 +1,192 @@
+commit f39a85a39fca38e294b44b8c23c69ab32102bea6
+Author: Sean DuBois <sean@siobud.com>
+Date:   Fri May 26 15:14:29 2023 -0400
+
+    Add Simulcast sender support
+
+diff --git a/include/rtc/description.hpp b/include/rtc/description.hpp
+index cc4d2d19..123e4b1f 100644
+--- a/include/rtc/description.hpp
++++ b/include/rtc/description.hpp
+@@ -91,6 +91,7 @@ public:
+ 		std::vector<string> attributes() const;
+ 		void addAttribute(string attr);
+ 		void removeAttribute(const string &attr);
++		void addRid(string rid);
+ 
+ 		struct RTC_CPP_EXPORT ExtMap {
+ 			static int parseId(string_view description);
+@@ -119,6 +120,7 @@ public:
+ 
+ 	protected:
+ 		Entry(const string &mline, string mid, Direction dir = Direction::Unknown);
++
+ 		virtual string generateSdpLines(string_view eol) const;
+ 
+ 		std::vector<string> mAttributes;
+@@ -128,6 +130,7 @@ public:
+ 		string mType;
+ 		string mDescription;
+ 		string mMid;
++		std::vector<string> mRids;
+ 		Direction mDirection;
+ 		bool mIsRemoved;
+ 	};
+diff --git a/include/rtc/rtp.hpp b/include/rtc/rtp.hpp
+index f0e3ecc6..ea6e230f 100644
+--- a/include/rtc/rtp.hpp
++++ b/include/rtc/rtp.hpp
+@@ -39,6 +39,7 @@ struct RTC_CPP_EXPORT RtpExtensionHeader {
+ 
+ 	void clearBody();
+ 	void writeCurrentVideoOrientation(size_t offset, uint8_t id, uint8_t value);
++	void writeOneByteHeader(size_t offset, uint8_t id, const byte *value, size_t size);
+ };
+ 
+ struct RTC_CPP_EXPORT RtpHeader {
+diff --git a/src/description.cpp b/src/description.cpp
+index 6070a7c4..8482dd0e 100644
+--- a/src/description.cpp
++++ b/src/description.cpp
+@@ -532,6 +532,10 @@ void Description::addAttribute(string attr) {
+ 		mAttributes.emplace_back(std::move(attr));
+ }
+ 
++void Description::Entry::addRid(string rid) {
++	mRids.emplace_back(rid);
++}
++
+ void Description::removeAttribute(const string &attr) {
+ 	mAttributes.erase(
+ 	    std::remove_if(mAttributes.begin(), mAttributes.end(),
+@@ -597,8 +601,34 @@ string Description::Entry::generateSdpLines(string_view eol) const {
+ 	if (mDirection != Direction::Unknown)
+ 		sdp << "a=" << mDirection << eol;
+ 
+-	for (const auto &attr : mAttributes)
++	for (const auto &attr : mAttributes) {
++		if (mRids.size() != 0 && match_prefix(attr, "ssrc:")) {
++			continue;
++		}
++
+ 		sdp << "a=" << attr << eol;
++	}
++
++	for (const auto &rid : mRids) {
++		sdp << "a=rid:" << rid << " send" << eol;
++	}
++
++	if (mRids.size() != 0) {
++		sdp << "a=simulcast:send ";
++
++		bool first = true;
++		for (const auto &rid : mRids) {
++			if (first) {
++				first = false;
++			} else {
++				sdp << ";";
++			}
++
++			sdp << rid;
++		}
++
++		sdp << eol;
++	}
+ 
+ 	return sdp.str();
+ }
+@@ -695,9 +725,12 @@ void Description::Media::addSSRC(uint32_t ssrc, optional<string> name, optional<
+ 		mAttributes.emplace_back("ssrc:" + std::to_string(ssrc));
+ 	}
+ 
+-	if (msid)
++	if (msid) {
+ 		mAttributes.emplace_back("ssrc:" + std::to_string(ssrc) + " msid:" + *msid + " " +
+ 		                         trackId.value_or(*msid));
++		mAttributes.emplace_back("msid:" + *msid + " " +
++				trackId.value_or(*msid));
++	}
+ 
+ 	mSsrcs.emplace_back(ssrc);
+ }
+diff --git a/src/rtp.cpp b/src/rtp.cpp
+index 64f3dca4..5c27592a 100644
+--- a/src/rtp.cpp
++++ b/src/rtp.cpp
+@@ -130,12 +130,20 @@ void RtpExtensionHeader::setHeaderLength(uint16_t headerLength) {
+ 
+ void RtpExtensionHeader::clearBody() { std::memset(getBody(), 0, getSize()); }
+ 
+-void RtpExtensionHeader::writeCurrentVideoOrientation(size_t offset, uint8_t id, uint8_t value) {
+-	if ((id == 0) || (id > 14) || ((offset + 2) > getSize()))
++void RtpExtensionHeader::writeOneByteHeader(size_t offset, uint8_t id, const byte *value, size_t size) {
++	if ((id == 0) || (id > 14) || (size == 0) || (size > 16) || ((offset + 1 + size) > getSize()))
+ 		return;
+ 	auto buf = getBody() + offset;
+ 	buf[0] = id << 4;
+-	buf[1] = value;
++	if (size != 1) {
++		buf[0] |= (uint8_t(size) - 1);
++	}
++	std::memcpy(buf + 1, value, size);
++}
++
++void RtpExtensionHeader::writeCurrentVideoOrientation(size_t offset, const uint8_t id, uint8_t value) {
++	auto v = std::byte{value};
++	writeOneByteHeader(offset, id, &v, 1);
+ }
+ 
+ SSRC RtcpReportBlock::getSSRC() const { return ntohl(_ssrc); }
+diff --git a/include/rtc/rtc.h b/include/rtc/rtc.h
+index 7cd4407..92a21d5 100644
+--- a/include/rtc/rtc.h
++++ b/include/rtc/rtc.h
+@@ -252,15 +252,22 @@ RTC_C_EXPORT int rtcGetDataChannelReliability(int dc, rtcReliability *reliabilit
+ 
+ // Track
+ 
++typedef struct {
++	int id;
++	char *uri;
++} rtcExtMapInit;
++
+ typedef struct {
+ 	rtcDirection direction;
+ 	rtcCodec codec;
+ 	int payloadType;
+ 	uint32_t ssrc;
+ 	const char *mid;
+-	const char *name;    // optional
+-	const char *msid;    // optional
+-	const char *trackId; // optional, track ID used in MSID
++	const char *name;             // optional
++	const char *msid;             // optional
++	const char *trackId;          // optional, track ID used in MSID
++	const rtcExtMapInit **extMaps; // optional
++	const char **rids;             // optional
+ } rtcTrackInit;
+ 
+ RTC_C_EXPORT int rtcSetTrackCallback(int pc, rtcTrackCallbackFunc cb);
+diff --git a/src/capi.cpp b/src/capi.cpp
+index 7b5e458..d4c4f15 100644
+--- a/src/capi.cpp
++++ b/src/capi.cpp
+@@ -1075,6 +1075,18 @@ int rtcAddTrackEx(int pc, const rtcTrackInit *init) {
+ 		             init->msid ? std::make_optional(string(init->msid)) : nullopt,
+ 		             init->trackId ? std::make_optional(string(init->trackId)) : nullopt);
+ 
++		auto currentRid = init->rids;
++		while (*currentRid != NULL) {
++			desc.addRid(*currentRid);
++			currentRid++;
++		}
++
++		auto currentExtMap = init->extMaps;
++		while (*currentExtMap != NULL) {
++			desc.addExtMap(rtc::Description::Entry::ExtMap((*currentExtMap)->id, (*currentExtMap)->uri));
++			currentExtMap++;
++		}
++
+ 		int tr = emplaceTrack(peerConnection->addTrack(std::move(desc)));
+ 
+ 		if (auto ptr = getUserPointer(pc))
