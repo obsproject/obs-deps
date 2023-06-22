@@ -533,7 +533,7 @@ jobs:
             zip -r windows-deps-${{ steps.metadata.outputs.version }}-${arch}.zip -- *
             mv windows-deps-${{ steps.metadata.outputs.version }}-${arch}.zip ${GITHUB_WORKSPACE}
 
-            mv ${GITHUB_WORKSPACE}/qt6-windows-${arch}-!(*-@(Debug|RelWithDebInfo|Release|MinSizeRel)/*.zip ${GITHUB_WORKSPACE}
+            mv ${GITHUB_WORKSPACE}/qt6-windows-${arch}-!(*-@(Debug|RelWithDebInfo|Release|MinSizeRel))/*.zip ${GITHUB_WORKSPACE}
             popd > /dev/null
           done
 
