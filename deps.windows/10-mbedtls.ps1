@@ -3,17 +3,7 @@ param(
     [string] $Version = '3.2.1',
     [string] $Uri = 'https://github.com/Mbed-TLS/mbedtls.git',
     [string] $Hash = '869298bffeea13b205343361b7a7daf2b210e33d',
-    [array] $Patches = @(
-        @{
-            PatchFile = "${PSScriptRoot}/patches/mbedtls/0001-enable-alt-threading-mode.patch"
-            HashSum = "dd811e3e406430d7140d04b6c23eee6dc1a7ec8bca70d3a6b0d9db55cc9f4fdc"
-        }
-        @{
-            PatchFile = "${PSScriptRoot}/patches/mbedtls/0002-add-alt-threading-header-file.patch"
-            HashSum = "1c42a3bd74ada543f8852ccf8e55f482022f08d3888e0b5d0d101ab0beff409d"
-        }
-    ),
-    [switch] $Shared = $false
+    [switch] $ForceStatic = $true
 )
 
 function Setup {
@@ -43,14 +33,20 @@ function Configure {
     Log-Information "Configure (${Target})"
     Set-Location $Path
 
+    if ( $ForceStatic -and $script:Shared ) {
+        $Shared = $false
+    } else {
+        $Shared = $script:Shared.isPresent
+    }
+
     $OnOff = @('OFF', 'ON')
     $Options = @(
         $CmakeOptions
-        "-DUSE_SHARED_MBEDTLS_LIBRARY=$($OnOff[$Shared.isPresent])"
-        '-DUSE_STATIC_MBEDTLS_LIBRARY=ON'
-        '-DENABLE_PROGRAMS=OFF'
-        '-DENABLE_TESTING=OFF'
-        '-DLIB_INSTALL_DIR=bin'
+        "-DUSE_SHARED_MBEDTLS_LIBRARY:BOOL=$($OnOff[$Shared])"
+        "-DUSE_STATIC_MBEDTLS_LIBRARY:BOOL=$($OnOff[$Shared -ne $true]))"
+        '-DENABLE_PROGRAMS:BOOL=OFF'
+        '-DENABLE_TESTING:BOOL=OFF'
+        '-DGEN_FILES:BOOL=OFF'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options
@@ -68,7 +64,13 @@ function Build {
     if ( $VerbosePreference -eq 'Continue' ) {
         $Options += '--verbose'
     }
-
+    $Options += @(
+        '--'
+        '/consoleLoggerParameters:Summary'
+        '/noLogo'
+        '/p:UseMultiToolTask=true'
+        '/p:EnforceProcessCountAcrossBuilds=true'
+    )
     Invoke-External cmake @Options
 }
 
@@ -78,6 +80,7 @@ function Install {
 
     $Options = @(
         '--install', "build_${Target}"
+        '--config', $Configuration
     )
 
     if ( $Configuration -match "(Release|MinSizeRel)" ) {
