@@ -3,7 +3,7 @@ param(
     [string] $Version = '6.5.2',
     [string] $Uri = 'https://download.qt.io/official_releases/qt/6.5/6.5.2',
     [string] $Hash = "${PSScriptRoot}/checksums",
-    [array] $Targets = @('x64', 'x86')
+    [array] $Targets = @('x64')
 )
 
 $QtComponents = @(
@@ -116,7 +116,6 @@ function Configure {
 
     $CMakeTarget = @{
         x64 = 'x64'
-        x86 = 'Win32'
     }
 
     $Options = ($Options -join ' ') -replace '-G Visual Studio \d+ \d+','-G Ninja' -replace "-A $($CMakeTarget[$Target])",''
@@ -200,7 +199,6 @@ function Qt-Add-Submodules {
 
     $CMakeTarget = @{
         x64 = 'x64'
-        x86 = 'Win32'
     }
 
     $QtComponents | Where-Object { $_ -ne 'qtbase' } | ForEach-Object {
