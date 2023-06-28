@@ -59,7 +59,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [macos-arm64, macos-x86_64, linux-x86_64, windows-x64, windows-x86]
+        target: [macos-arm64, macos-x86_64, linux-x86_64, windows-x64]
         include:
           - target: macos-arm64
             os: 'macos-13'
@@ -77,11 +77,6 @@ jobs:
             type: 'static'
             revision: 9
           - target: windows-x64
-            os: 'ubuntu-22.04'
-            config: 'Release'
-            type: 'static'
-            revision: 8
-          - target: windows-x86
             os: 'ubuntu-22.04'
             config: 'Release'
             type: 'static'
@@ -505,7 +500,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [x64, x86]
+        target: [x64]
         config: [RelWithDebInfo, Debug]
 
     steps:
@@ -541,7 +536,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [x64, x86]
+        target: [x64]
     needs: [pre-checks, windows-qt6-build]
     steps:
       - name: Checkout
