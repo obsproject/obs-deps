@@ -72,17 +72,17 @@ jobs:
             type: 'static'
             revision: 9
           - target: linux-x86_64
-            os: 'ubuntu-20.04'
+            os: 'ubuntu-22.04'
             config: 'Release'
             type: 'static'
             revision: 9
           - target: windows-x64
-            os: 'ubuntu-20.04'
+            os: 'ubuntu-22.04'
             config: 'Release'
             type: 'static'
             revision: 8
           - target: windows-x86
-            os: 'ubuntu-20.04'
+            os: 'ubuntu-22.04'
             config: 'Release'
             type: 'static'
             revision: 8
