@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'zstd',
-    [string] $Version = 'v1.5.4',
+    [string] $Version = 'v1.5.5',
     [string] $Uri = 'https://github.com/facebook/zstd.git',
-    [string] $Hash = '945f27758c0fd67b636103a38dbf050266c6b90a'
+    [string] $Hash = '63779c798237346c2b245c546c40b72a5a5913fe'
 )
 
 function Setup {
