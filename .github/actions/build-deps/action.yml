@@ -1,5 +1,5 @@
-name: Build Windows Dependencies
-description: Builds Windows dependencies for obs-deps with specified architecture, type, and build config
+name: Build Dependencies
+description: Builds dependencies for obs-deps with specified architecture, type, and build config
 inputs:
   target:
     description: Build target for dependencies
@@ -83,7 +83,7 @@ runs:
 
         ./Build-Dependencies.ps1 @Params
 
-    - name: Save Windows Dependencies to Cache
+    - name: Save Dependencies to Cache
       uses: actions/cache/save@v3
       if: github.event_name == 'schedule' || (github.event_name == 'push' && steps.deps-cache.outputs.cache-hit != 'true')
       with:
