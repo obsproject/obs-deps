@@ -2,6 +2,8 @@
 param(
     [ValidateSet('Debug', 'RelWithDebInfo', 'Release', 'MinSizeRel')]
     [string] $Configuration = 'Release',
+    [ValidateSet('dependencies', 'qt')]
+    [string] $PackageName = 'dependencies',
     [string[]] $Dependencies,
     [ValidateSet('x86', 'x64')]
     [string] $Target,
@@ -114,34 +116,25 @@ function Run-Stages {
 }
 
 function Package-Dependencies {
-    if ( $script:PackageName -like 'qt*' ) {
-        $ArchiveFileName = "windows-deps-${PackageName}-${CurrentDate}-${Target}-${Configuration}.zip"
-    } else {
-        $ArchiveFileName = "windows-${PackageName}-${CurrentDate}-${Target}.zip"
-    }
-
-    Push-Location -Stack BuildTemp
-    Set-Location $ConfigData.OutputPath
+    Push-Location -Stack BuildTemp -Path $ConfigData.OutputPath
 
     Log-Information "Cleanup unnecessary files"
-    $Items = @(
-        "./bin/bison.exe"
-        "./bin/libiconv2.dll"
-        "./bin/libintl3.dll"
-        "./bin/m4.exe"
-        "./bin/pcre2*"
-        "./bin/regex2.dll"
-        "./cmake/pcre2*"
-        "./include/pcre2*"
-        "./lib/pcre2*"
-        "./lib/pkgconfig/libpcre2*"
-        "./man1/pcre2*"
-        "./man3/pcre2*"
-        "./share/bison"
-        "./share/doc/pcre2"
-    )
 
-    Remove-Item -ErrorAction 'SilentlyContinue' -Path $Items -Force -Recurse
+    switch ( $PackageName ) {
+        dependencies {
+            Get-ChildItem ./bin/*.lib | Move-Item -Destination ./lib
+            Get-ChildItem ./bin -Exclude 'lua51.dll','libcurl.dll','swig.exe','Lib','datachannel.dll' | Remove-Item
+            Get-ChildItem ./cmake/pcre2*,./lib/pcre2* | Remove-Item
+            Remove-Item -Recurse ./lib/pkgconfig
+            Remove-Item -Recurse ./man
+            Get-ChildItem ./share -Exclude 'cmake' | Remove-Item -Recurse
+            Get-ChildItem ./share/cmake -Exclude 'nlohmann_json*' | Remove-Item -Recurse
+            $ArchiveFileName = "windows-deps-${CurrentDate}-${Target}.zip"
+        }
+        qt {
+            $ArchiveFileName = "windows-deps-qt6-${CurrentDate}-${Target}-${Configuration}.zip"
+        }
+    }
 
     $Params = @{
         ErrorAction = "SilentlyContinue"
@@ -154,12 +147,12 @@ function Package-Dependencies {
 
     New-Item @Params *> $null
 
-    "$(Get-Date -Format "yyyy-MM-dd")" > share/obs-deps/VERSION
+    Get-Date -Format "yyyy-MM-dd" | Set-Content -Path share/obs-deps/VERSION
 
     Log-Information "Package dependencies"
 
     $Params = @{
-        Path = (Get-ChildItem -Path $(Get-Location))
+        Path = (Get-ChildItem -Exclude $ArchiveFileName)
         DestinationPath = $ArchiveFileName
         CompressionLevel = "Optimal"
     }
@@ -167,7 +160,7 @@ function Package-Dependencies {
     Log-Information "Create archive ${ArchiveFileName}"
     Compress-Archive @Params
 
-    Move-Item -Force -Path $ArchiveFileName -Destination ..
+    Move-Item -Force -Path $ArchiveFileName -Destination (Split-Path -Parent (Get-Location))
 
     Pop-Location -Stack BuildTemp
 }
@@ -182,16 +175,6 @@ function Build-Main {
         exit 2
     }
 
-    $script:PackageName = ((Get-Item $PSCommandPath).Basename).Split('-')[1]
-    if ( $script:PackageName -eq 'Dependencies' ) {
-        $script:PackageName = 'deps'
-    }
-    if ( $Dependencies -eq 'qt5' ) {
-        $script:PackageName = 'qt5'
-    } elseif ( $Dependencies -eq 'qt6' ) {
-        $script:PackageName = 'qt6'
-    }
-
     $UtilityFunctions = Get-ChildItem -Path $PSScriptRoot/utils.pwsh/*.ps1 -Recurse
 
     foreach($Utility in $UtilityFunctions) {
@@ -201,11 +184,10 @@ function Build-Main {
 
     Bootstrap
 
-    $SubDir = ''
-    if ( $script:PackageName -like 'qt*' ) {
-        $SubDir = 'deps.qt'
+    $SubDir = if ( $PackageName -eq 'dependencies' ) {
+        'deps.windows'
     } else {
-        $SubDir = 'deps.windows'
+        "deps.${PackageName}"
     }
 
     if ( $Dependencies.Count -eq 0 ) {
@@ -231,8 +213,10 @@ function Build-Main {
 
     Pop-Location -Stack BuildTemp
 
-    if ( $Dependencies.Count -eq 0 -or $script:PackageName -like 'qt*' ) {
-        Package-Dependencies
+    if ( $Dependencies.Count -eq 0 -or $PackageName -eq 'qt' ) {
+        if ( Test-Path -Path $ConfigData.OutputPath ) {
+            Package-Dependencies
+        }
     }
 
     Write-Host '---------------------------------------------------------------------------------------------------'
