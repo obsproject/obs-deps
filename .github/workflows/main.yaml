@@ -62,12 +62,12 @@ jobs:
         target: [macos-arm64, macos-x86_64, linux-x86_64, windows-x64, windows-x86]
         include:
           - target: macos-arm64
-            os: 'macos-12'
+            os: 'macos-13'
             config: 'Release'
             type: 'static'
             revision: 9
           - target: macos-x86_64
-            os: 'macos-12'
+            os: 'macos-13'
             config: 'Release'
             type: 'static'
             revision: 9
@@ -174,7 +174,7 @@ jobs:
 
   ffmpeg-package-universal:
     name: 'Build FFmpeg (Universal)'
-    runs-on: macos-12
+    runs-on: macos-13
     needs: [ffmpeg-build]
     steps:
       - name: Checkout
