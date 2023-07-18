@@ -286,7 +286,7 @@ jobs:
           path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.dsymArtifactFileName }}
 
       - name: Save Compilation Cache
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && steps.ccache-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v3
         with:
           path: ${{ github.workspace }}/.ccache
