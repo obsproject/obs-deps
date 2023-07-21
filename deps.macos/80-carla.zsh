@@ -70,7 +70,7 @@ fixup() {
   log_info "Fixup (%F{3}${target}%f)"
   case ${target} {
     macos*)
-      rm -r "${target_config[output_dir]}"/include
+      rm -r "${target_config[output_dir]}"/include/carla
       rm -r "${target_config[output_dir]}"/lib/carla-native-plugin.framework
       rm -r "${target_config[output_dir]}"/lib/carla-standalone.framework
       ;;
