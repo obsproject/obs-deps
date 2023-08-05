@@ -70,7 +70,7 @@ function Install {
         ItemType = "Directory"
         Force = $true
     }
-	
+
     New-Item @Params *> $null
 
     $Items = @(
@@ -85,8 +85,13 @@ function Install {
             Destination = "$($ConfigData.OutputPath)/lib"
             ErrorAction = 'SilentlyContinue'
         }
+        @{
+            Path = "build_${Target}/$Configuration/vpld.lib"
+            Destination = "$($ConfigData.OutputPath)/lib"
+            ErrorAction = 'SilentlyContinue'
+        }
     )
-	
+
     $Items | ForEach-Object {
         $Item = $_
         Log-Output ('{0} => {1}' -f ($Item.Path -join ", "), $Item.Destination)
