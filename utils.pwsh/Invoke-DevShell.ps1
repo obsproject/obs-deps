@@ -62,11 +62,7 @@ if ( ! ( `$? ) ) {
     $_EAP = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
 
-    if ($PSVersionTable.PSEdition -eq "Core") {
-        $PowerShellCommand = "pwsh"
-    } else {
-        $PowerShellCommand = "powershell"
-    }
+    $PowerShellCommand = "pwsh"
 
     & $PowerShellCommand -Command $DevShellCommand
 
