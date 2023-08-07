@@ -22,8 +22,8 @@ if ( $DebugPreference -eq "Continue" ) {
     $InformationPreference = "Continue"
 }
 
-if ( $PSVersionTable.PSVersion -lt '7.0.0' ) {
-    Write-Warning 'The obs-deps PowerShell build script requires PowerShell Core 7. Install or upgrade your PowerShell version: https://aka.ms/pscore6'
+if ( $PSVersionTable.PSVersion -lt '7.2.0' ) {
+    Write-Warning 'The obs-deps PowerShell build script requires PowerShell Core 7.2+. Install or upgrade your PowerShell version: https://aka.ms/pscore6'
     exit 0
 }
 
