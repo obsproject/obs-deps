@@ -27,11 +27,6 @@ function Invoke-SafeWebRequest {
         . $PSScriptRoot/Logger.ps1
     }
 
-    if ( $Resume -and $PSVersionTable.PSVersion -lt "6.1.0") {
-        Log-Warning "-Resume only available on PowerShell 6.1.0 or later, disabling"
-        $Resume = $false
-    }
-
     if ( ! ( Test-Path $HashFile ) ) {
         throw "Provided hash file ${HashFile} not found."
     }
