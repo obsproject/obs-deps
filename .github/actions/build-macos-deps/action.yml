@@ -56,8 +56,11 @@ runs:
       if: ${{ steps.deps-cache.outputs.cache-hit == 'true' }}
       shell: zsh {0}
       run: ./build-deps.zsh --skip-build --skip-unpack --target ${{ inputs.target }} --config ${{ inputs.config }} --${{ inputs.type }}
-
+      env:
+        github_hash: ${{ github.sha }}
     - name: Build and Install macOS Dependencies
       if: ${{ steps.deps-cache.outputs.cache-hit != 'true' }}
       shell: zsh {0}
       run: ./build-deps.zsh --target ${{ inputs.target }} --config ${{ inputs.config }} --${{ inputs.type }}
+      env:
+        github_hash: ${{ github.sha }}

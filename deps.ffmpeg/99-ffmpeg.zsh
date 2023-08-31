@@ -8,6 +8,8 @@ local hash='ea3d24bbe3c58b171e55fe2151fc7ffaca3ab3d2'
 local -a patches=(
   "* ${0:a:h}/patches/FFmpeg/0001-FFmpeg-6.0-OBS.patch \
     7fcb67d5e68a6ca3102c3a6aaba56750b22850552ccd8704c6636c174968ef56"
+  "* ${0:a:h}/patches/FFmpeg/0004-FFmpeg-5.0.1-cuvid.patch \
+    d44609a43f7f09819c74cdfa6fa90c9a1de61b3673aa95e87a294c259f203717"
 )
 
 ## Build Steps
@@ -205,9 +207,13 @@ config() {
     --disable-sdl2
     --disable-doc
     --disable-postproc
+    --disable-encoder="hevc"
+    --disable-decoder="hevc"
   )
 
-  if (( ! shared_libs )) args+=(--pkg-config-flags="--static")
+  if (( ! shared_libs )) {
+    args+=(--pkg-config-flags="--static")
+  } 
 
   log_info "Config (%F{3}${target}%f)"
   cd "${dir}"

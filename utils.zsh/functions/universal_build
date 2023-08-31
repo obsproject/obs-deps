@@ -21,7 +21,7 @@ if [[ -d "build_universal" ]] rm -rf "build_universal"
 cp -cpR "build_x86_64" "build_universal"
 cd "build_universal"
 
-local -a candidates=(./**/*.(dylib|so|a)(D))
+local -a candidates=(./**/(*.dylib|*.so|*.a|ffmpeg|ffprobe)(D))
 local c
 for c (${candidates}) {
   [[ -e ../build_arm64/"${c}" ]] || continue

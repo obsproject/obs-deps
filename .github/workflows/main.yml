@@ -5,7 +5,7 @@ on:
     branches:
       - streamlabs
     tags:
-      - '20[2-9][0-9]-[0-9][0-9]-[0-9][0-9]'
+      - '20[2-9][0-9]-[0-9][0-9]-[0-9][0-9]*'
   pull_request:
     paths-ignore:
       - '**.md'
@@ -81,7 +81,7 @@ jobs:
 
           target='${{ matrix.target }}'
           artifact_name="ffmpeg-${target}-${{ github.sha }}"
-          file_name="${target%%-*}-ffmpeg-$(date +"%Y-%m-%d")-${target##*-}.tar.xz"
+          file_name="${target%%-*}-ffmpeg-${{ github.sha }}-${target##*-}.tar.xz"
 
           echo "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
           echo "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
@@ -113,6 +113,8 @@ jobs:
           type: ${{ matrix.type }}
           config: ${{ matrix.config }}
           cacheRevision: ${{ env.CACHE_REVISION }}
+        env:
+          github_hash: ${{ github.sha }}
 
       - name: Publish Build Artifacts
         if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
@@ -183,7 +185,7 @@ jobs:
 
           target='${{ matrix.target }}'
           artifact_name="deps-${target}-${{ github.sha }}"
-          file_name="${target%%-*}-deps-$(date +"%Y-%m-%d")-${target##*-}.tar.xz"
+          file_name="${target%%-*}-deps-${{ github.sha }}-${target##*-}.tar.xz"
 
           echo "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
           echo "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
@@ -283,7 +285,7 @@ jobs:
 
           target='${{ matrix.target }}'
           artifact_name="qt5-${target}-${{ github.sha }}"
-          file_name="${target%%-*}-deps-qt5-$(date +"%Y-%m-%d")-${target##*-}.tar.xz"
+          file_name="${target%%-*}-deps-qt5-${{ github.sha }}-${target##*-}.tar.xz"
 
           echo "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
           echo "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
@@ -315,6 +317,8 @@ jobs:
           config: ${{ matrix.config }}
           qtVersion: 5
           cacheRevision: ${{ env.CACHE_REVISION }}
+        env:
+          github_hash: ${{ github.sha }}
 
       - name: Publish Build Artifacts
         if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
@@ -374,7 +378,7 @@ jobs:
 
           target='macos-universal'
           artifact_name="qt6-${target}-${{ github.sha }}"
-          file_name="${target%%-*}-deps-qt6-$(date +"%Y-%m-%d")-${target##*-}.tar.xz"
+          file_name="${target%%-*}-deps-qt6-${{ github.sha }}-${target##*-}.tar.xz"
 
           echo "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
           echo "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
@@ -406,6 +410,8 @@ jobs:
           config: Release
           qtVersion: 6
           cacheRevision: ${{ env.CACHE_REVISION }}
+        env:
+            github_hash: ${{ github.sha }}
 
       - name: Publish Build Artifacts
         if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
@@ -628,6 +634,8 @@ jobs:
 
   make-release:
     name: 'Create and upload release'
+    env:
+      RELEASE_BUCKET: "obs-studio-deployment"
     runs-on: ubuntu-20.04
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     needs: [ffmpeg-package-universal, macos-package-universal, macos-qt5-package-universal, macos-qt6-package, windows-build, windows-qt-package]
@@ -639,7 +647,6 @@ jobs:
         id: metadata
         run: |
           echo "version=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
-          echo "date=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
 
       - name: 'Download build artifacts'
         uses: actions/download-artifact@v3
@@ -711,10 +718,9 @@ jobs:
             mv macos-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz ${{ github.workspace }}
 
             popd > /dev/null
+            mv ${{ github.workspace }}/qt5-macos-${arch}-*/*.tar.xz ${{ github.workspace }}/macos-deps-qt5-${{ steps.metadata.outputs.version }}-${arch}.tar.xz
+            mv ${{ github.workspace }}/qt6-macos-${arch}-*/*.tar.xz ${{ github.workspace }}/macos-deps-qt6-${{ steps.metadata.outputs.version }}-${arch}.tar.xz
           done
-
-          mv ${{ github.workspace }}/qt5-macos-*/*.tar.xz ${{ github.workspace }}
-          mv ${{ github.workspace }}/qt6-macos-*/*.tar.xz ${{ github.workspace }}
 
       - name: 'Generate Checksums'
         run: |
@@ -740,3 +746,12 @@ jobs:
             ${{ github.workspace }}/macos-*-x86_64.tar.xz
             ${{ github.workspace }}/macos-*-universal.tar.xz
             ${{ github.workspace }}/linux-*-x86_64.tar.xz
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-access-key-id: ${{secrets.AWS_RELEASE_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{secrets.AWS_RELEASE_SECRET_ACCESS_KEY}}
+          aws-region: us-west-2
+      - name: Upload to S3
+        run: aws s3 sync ${{ github.workspace }} s3://${{env.RELEASE_BUCKET}} --acl public-read --exclude "*" --include "windows-*.zip"  --include "macos-*.tar.xz"
