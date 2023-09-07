@@ -484,6 +484,20 @@ jobs:
           ./Build-Dependencies.ps1 @Params
           Remove-Item -Recurse -Force ${{ github.workspace }}/windows_build_temp
 
+      - name: Build qrcodegencpp Debug
+        shell: pwsh
+        run: |
+          # Build qrcodegencpp Debug
+
+          $Params = @{
+            Target = '${{ matrix.target }}'
+            Configuration = 'Debug'
+            Dependencies = 'qrcodegencpp'
+          }
+
+          ./Build-Dependencies.ps1 @Params
+          Remove-Item -Recurse -Force ${{ github.workspace }}/windows_build_temp
+
       - name: Build Windows Dependencies
         uses: ./.github/actions/build-deps
         with:

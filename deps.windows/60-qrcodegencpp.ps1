@@ -52,6 +52,7 @@ function Configure {
     $OnOff = @('OFF', 'ON')
     $Options = @(
         $CmakeOptions
+        '-DCMAKE_DEBUG_POSTFIX:STRING=d'
         "-DBUILD_SHARED_LIBS:BOOL=$($OnOff[$script:Shared.isPresent])"
     )
 
@@ -99,6 +100,7 @@ function Fixup {
         @{ FullPath = "$($ConfigData.OutputPath)/lib/cmake/qrcodegen" }
         @{ FullPath = "$($ConfigData.OutputPath)/lib/pkgconfig/qrcodegen.pc" }
         @{ FullPath = "$($ConfigData.OutputPath)/lib/qrcodegen.*" }
+        @{ FullPath = "$($ConfigData.OutputPath)/lib/qrcodegend.*" }
         @{ FullPath = "$($ConfigData.OutputPath)/bin/qrcodegen.*" }
     )
 
