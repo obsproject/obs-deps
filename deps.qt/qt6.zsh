@@ -5,6 +5,10 @@ local name='qt6'
 local version=6.5.2
 local url='https://download.qt.io/official_releases/qt/6.5/6.5.2'
 local hash="${0:a:h}/checksums"
+local -a patches=(
+  "macos ${0:a:h}/patches/Qt6/mac/0001-Disable-native-popup-option.patch \
+    da9764ad3abe1acf36494f331a27839c1dd07479e893b9c92dba2136f33b2043"
+)
 
 local -a qt_components=(
   'qtbase'

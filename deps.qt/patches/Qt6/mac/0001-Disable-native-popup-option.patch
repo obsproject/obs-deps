@@ -1,0 +1,317 @@
+From 4264bfd66389a51255166f59c70987fae5478626 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Thorbj=C3=B8rn=20Lund=20Martsum?= <tmartsum@gmail.com>
+Date: Fri, 21 Apr 2023 15:13:19 +0200
+Subject: [PATCH] Allow disable native messagebox dialog
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The native style may not match the program style and it
+makes sense to give an option rather than forcing native style.
+
+Before it could only be done with setting AA_DontUseNativeDialogs
+on the app, but it is reasonable to use native file dialogs and
+Qt styled messageboxes - and it is extremely cumbersome - especially
+since messageboxes often can start save dialogs.
+
+It can look a bit strange that these introduced options has just one
+option (DontUseNativeDialog) and four functions, but this way it works
+similar to QColorDialog, QFileDialog and QFontDialog.
+
+[ChangeLog][QWidgets][QMessageBox] Added options functionality to
+QMessagebox. The currently only option available is DontUseNativeDialog.
+
+Change-Id: I70282fcfaa66f245f7e679b8897c607bcaff333f
+Reviewed-by: Qt CI Bot <qt_ci_bot@qt-project.org>
+Reviewed-by: Tor Arne Vestbø <tor.arne.vestbo@qt.io>
+Reviewed-by: Volker Hilsheimer <volker.hilsheimer@qt.io>
+---
+ src/gui/kernel/qplatformdialoghelper.cpp      | 24 +++++
+ src/gui/kernel/qplatformdialoghelper.h        | 10 ++
+ src/widgets/dialogs/qmessagebox.cpp           | 98 +++++++++++++++++++
+ src/widgets/dialogs/qmessagebox.h             | 17 +++-
+ .../dialogs/qmessagebox/tst_qmessagebox.cpp   | 17 ++++
+ 5 files changed, 164 insertions(+), 2 deletions(-)
+
+diff --git a/qtbase/src/gui/kernel/qplatformdialoghelper.cpp b/qtbase/src/gui/kernel/qplatformdialoghelper.cpp
+index c8510160f8..1a24118529 100644
+--- a/qtbase/src/gui/kernel/qplatformdialoghelper.cpp
++++ b/qtbase/src/gui/kernel/qplatformdialoghelper.cpp
+@@ -778,6 +778,7 @@ public:
+     QPixmap iconPixmap;
+     QString checkBoxLabel;
+     Qt::CheckState checkBoxState = Qt::Unchecked;
++    QMessageDialogOptions::Options options;
+ };
+ 
+ QMessageDialogOptions::QMessageDialogOptions(QMessageDialogOptionsPrivate *dd)
+@@ -924,6 +925,29 @@ Qt::CheckState QMessageDialogOptions::checkBoxState() const
+     return d->checkBoxState;
+ }
+ 
++void QMessageDialogOptions::setOption(QMessageDialogOptions::Option option, bool on)
++{
++    if (!(d->options & option) != !on)
++        setOptions(d->options ^ option);
++}
++
++bool QMessageDialogOptions::testOption(QMessageDialogOptions::Option option) const
++{
++    return d->options & option;
++}
++
++void QMessageDialogOptions::setOptions(QMessageDialogOptions::Options options)
++{
++    if (options != d->options)
++        d->options = options;
++}
++
++QMessageDialogOptions::Options QMessageDialogOptions::options() const
++{
++    return d->options;
++}
++
++
+ QPlatformDialogHelper::ButtonRole QPlatformDialogHelper::buttonRole(QPlatformDialogHelper::StandardButton button)
+ {
+     switch (button) {
+diff --git a/qtbase/src/gui/kernel/qplatformdialoghelper.h b/qtbase/src/gui/kernel/qplatformdialoghelper.h
+index fc2e85a8d6..f90b6ffee8 100644
+--- a/qtbase/src/gui/kernel/qplatformdialoghelper.h
++++ b/qtbase/src/gui/kernel/qplatformdialoghelper.h
+@@ -403,6 +403,11 @@ protected:
+     ~QMessageDialogOptions();
+ 
+ public:
++    // Keep in sync with QMessageBox Option
++    enum class Option : quint8 { DontUseNativeDialog = 0x00000001 };
++    Q_DECLARE_FLAGS(Options, Option);
++    Q_FLAG(Options);
++
+     // Keep in sync with QMessageBox::Icon
+     enum Icon { NoIcon, Information, Warning, Critical, Question };
+     Q_ENUM(Icon)
+@@ -428,6 +433,11 @@ public:
+     void setDetailedText(const QString &text);
+     QString detailedText() const;
+ 
++    void setOption(Option option, bool on = true);
++    bool testOption(Option option) const;
++    void setOptions(Options options);
++    Options options() const;
++
+     void setStandardButtons(QPlatformDialogHelper::StandardButtons buttons);
+     QPlatformDialogHelper::StandardButtons standardButtons() const;
+ 
+diff --git a/qtbase/src/widgets/dialogs/qmessagebox.cpp b/qtbase/src/widgets/dialogs/qmessagebox.cpp
+index b4d76bc5ec..f802089c7b 100644
+--- a/qtbase/src/widgets/dialogs/qmessagebox.cpp
++++ b/qtbase/src/widgets/dialogs/qmessagebox.cpp
+@@ -189,6 +189,7 @@ public:
+     void retranslateStrings();
+ 
+     void setVisible(bool visible) override;
++    bool canBeNativeDialog() const override;
+ 
+     static int showOldMessageBox(QWidget *parent, QMessageBox::Icon icon,
+                                  const QString &title, const QString &text,
+@@ -769,6 +770,12 @@ void QMessageBoxPrivate::_q_clicked(QPlatformDialogHelper::StandardButton button
+     \sa ButtonRole, standardButtons
+ */
+ 
++/*!
++    \enum QMessageBox::Option
++    \since 6.6
++    \value DontUseNativeDialog Don't use the native message dialog.
++*/
++
+ /*!
+     \fn void QMessageBox::buttonClicked(QAbstractButton *button)
+ 
+@@ -1224,6 +1231,78 @@ QCheckBox* QMessageBox::checkBox() const
+     return d->checkbox;
+ }
+ 
++/*!
++    \since 6.6
++    Sets the given \a option to be enabled if \a on is true; otherwise,
++    clears the given \a option.
++
++    Options (particularly the DontUseNativeDialogs option) should be set
++    before showing the dialog.
++
++    Setting options while the dialog is visible is not guaranteed to have
++    an immediate effect on the dialog.
++
++    Setting options after changing other properties may cause these
++    values to have no effect.
++
++    \sa options, testOption()
++*/
++void QMessageBox::setOption(QMessageBox::Option option, bool on)
++{
++    const QMessageBox::Options previousOptions = options();
++    if (!(previousOptions & option) != !on)
++        setOptions(previousOptions ^ option);
++}
++
++/*!
++    \since 6.6
++
++    Returns \c true if the given \a option is enabled; otherwise, returns
++    false.
++
++    \sa options, setOption()
++*/
++bool QMessageBox::testOption(QMessageBox::Option option) const
++{
++    Q_D(const QMessageBox);
++    return d->options->testOption(static_cast<QMessageDialogOptions::Option>(option));
++}
++
++void QMessageBox::setOptions(QMessageBox::Options options)
++{
++    Q_D(QMessageBox);
++
++    if (QMessageBox::options() == options)
++        return;
++
++    d->options->setOptions(QMessageDialogOptions::Option(int(options)));
++}
++
++QMessageBox::Options QMessageBox::options() const
++{
++    Q_D(const QMessageBox);
++    return QMessageBox::Options(int(d->options->options()));
++}
++
++/*!
++    \property QMessageBox::options
++    \brief options that affect the look and feel of the dialog
++    \since 6.6.
++
++    By default, these options are disabled.
++
++    The option DontUseNativeDialog should be set
++    before changing dialog properties or showing the dialog.
++
++    Setting options while the dialog is visible is not guaranteed to have
++    an immediate effect on the dialog.
++
++    Setting options after changing other properties may cause these
++    values to have no effect.
++
++    \sa setOption(), testOption()
++*/
++
+ /*!
+   \property QMessageBox::text
+   \brief the message box text to be displayed.
+@@ -2717,6 +2796,25 @@ static QPlatformDialogHelper::StandardButtons helperStandardButtons(QMessageBox
+     return buttons;
+ }
+ 
++bool QMessageBoxPrivate::canBeNativeDialog() const
++{
++    // Don't use Q_Q here! This function is called from ~QDialog,
++    // so Q_Q calling q_func() invokes undefined behavior (invalid cast in q_func()).
++    const QDialog * const q = static_cast<const QMessageBox*>(q_ptr);
++    if (nativeDialogInUse)
++        return true;
++    if (QCoreApplication::testAttribute(Qt::AA_DontUseNativeDialogs)
++        || q->testAttribute(Qt::WA_DontShowOnScreen)
++        || (options->options() & QMessageDialogOptions::Option::DontUseNativeDialog)) {
++        return false;
++    }
++
++    if (strcmp(QMessageBox::staticMetaObject.className(), q->metaObject()->className()) != 0)
++        return false;
++
++    return QDialogPrivate::canBeNativeDialog();
++}
++
+ void QMessageBoxPrivate::helperPrepareShow(QPlatformDialogHelper *)
+ {
+     Q_Q(QMessageBox);
+diff --git a/qtbase/src/widgets/dialogs/qmessagebox.h b/qtbase/src/widgets/dialogs/qmessagebox.h
+index 4b1f5118c8..1f4f9531c7 100644
+--- a/qtbase/src/widgets/dialogs/qmessagebox.h
++++ b/qtbase/src/widgets/dialogs/qmessagebox.h
+@@ -31,8 +31,15 @@ class Q_WIDGETS_EXPORT QMessageBox : public QDialog
+     Q_PROPERTY(QString informativeText READ informativeText WRITE setInformativeText)
+     Q_PROPERTY(Qt::TextInteractionFlags textInteractionFlags READ textInteractionFlags
+                WRITE setTextInteractionFlags)
+-
++    Q_PROPERTY(Options options READ options WRITE setOptions)
+ public:
++    // Keep in sync with MessageBoxOption in qplatformdialoghelper.h
++    enum class Option : quint8 {
++        DontUseNativeDialog = 0x00000001
++    };
++    Q_FLAG(Option)
++#define OBS_QT_NON_NATIVE_MESSAGEBOX_DIALOG
++
+     enum Icon {
+         // keep this in sync with QMessageDialogOptions::Icon
+         NoIcon = 0,
+@@ -95,8 +102,9 @@ public:
+ #if QT_VERSION < QT_VERSION_CHECK(7, 0, 0)
+     typedef StandardButton Button;
+ #endif
+-
++    Q_DECLARE_FLAGS(Options, Option)
+     Q_DECLARE_FLAGS(StandardButtons, StandardButton)
++
+     Q_FLAG(StandardButtons)
+ 
+     explicit QMessageBox(QWidget *parent = nullptr);
+@@ -149,6 +157,11 @@ public:
+     void setCheckBox(QCheckBox *cb);
+     QCheckBox* checkBox() const;
+ 
++    void setOption(Option option, bool on = true);
++    bool testOption(Option option) const;
++    void setOptions(Options options);
++    Options options() const;
++
+     static StandardButton information(QWidget *parent, const QString &title,
+          const QString &text, StandardButtons buttons = Ok,
+          StandardButton defaultButton = NoButton);
+diff --git a/qtbase/tests/auto/widgets/dialogs/qmessagebox/tst_qmessagebox.cpp b/qtbase/tests/auto/widgets/dialogs/qmessagebox/tst_qmessagebox.cpp
+index 122170e91d..afdf18fedc 100644
+--- a/qtbase/tests/auto/widgets/dialogs/qmessagebox/tst_qmessagebox.cpp
++++ b/qtbase/tests/auto/widgets/dialogs/qmessagebox/tst_qmessagebox.cpp
+@@ -38,6 +38,9 @@ private slots:
+     void detailsButtonText();
+     void expandDetailsWithoutMoving();
+ 
++    void optionsEmptyByDefault();
++    void changeNativeOption();
++
+ #ifndef Q_OS_MAC
+     void shortcut();
+ #endif
+@@ -584,6 +587,20 @@ void tst_QMessageBox::expandDetailsWithoutMoving() // QTBUG-32473
+     QCOMPARE(box.geometry().topLeft(), geom.topLeft());
+ }
+ 
++void tst_QMessageBox::optionsEmptyByDefault()
++{
++    QMessageBox b;
++    QCOMPARE(b.options(), QMessageBox::Options());
++    QVERIFY(!b.testOption(QMessageBox::Option::DontUseNativeDialog));
++}
++
++void tst_QMessageBox::changeNativeOption()
++{
++    QMessageBox b;
++    b.setOption(QMessageBox::Option::DontUseNativeDialog);
++    QCOMPARE(b.options(), QMessageBox::Options(QMessageBox::Option::DontUseNativeDialog));
++}
++
+ void tst_QMessageBox::incorrectDefaultButton()
+ {
+     ExecCloseHelper closeHelper;
+-- 
+2.37.5
+
