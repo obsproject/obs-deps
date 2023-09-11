@@ -17,7 +17,7 @@ for lib ($@) {
 
   if otool -l ${lib} | grep LC_RPATH > /dev/null; then
     log_debug "Remove existing rpath entry"
-    install_name_tool -delete_rpath ${lib:A:h} ${lib}
+    install_name_tool -delete_rpath ${lib:A:h} ${lib} 2>/dev/null || true
   fi
 
   lib_basename=${lib:t}

@@ -98,7 +98,8 @@ config() {
     fi
   }
 
-  if (( shared_libs)) && [[ ${config} == Release ]] common_cmake_flags+=(-DFEATURE_separate_debug_info:BOOL=ON -DQT_FEATURE_force_debug_info:BOOL=ON)
+  if (( shared_libs )) && [[ ${config} == Release ]] common_cmake_flags+=(-DFEATURE_separate_debug_info:BOOL=ON -DQT_FEATURE_force_debug_info:BOOL=ON)
+  if (( shared_libs )) && [[ ${config} == Debug ]] common_cmake_flags+=(-DCMAKE_PLATFORM_NO_VERSIONED_SONAME:BOOL=ON)
 
   args=(
     ${common_cmake_flags}
@@ -199,7 +200,8 @@ qt_add_submodules() {
     fi
   }
 
-  if (( shared_libs)) && [[ ${config} == Release ]] common_cmake_flags+=(-DFEATURE_separate_debug_info:BOOL=ON)
+  if (( shared_libs )) && [[ ${config} == Release ]] common_cmake_flags+=(-DFEATURE_separate_debug_info:BOOL=ON)
+  if (( shared_libs )) && [[ ${config} == Debug ]] common_cmake_flags+=(-DCMAKE_PLATFORM_NO_VERSIONED_SONAME:BOOL=ON)
 
   for component (${qt_components[2,-1]}) {
     if ! (( ${skips[(Ie)all]} + ${skips[(Ie)build]} )) {
