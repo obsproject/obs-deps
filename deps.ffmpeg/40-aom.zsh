@@ -50,6 +50,11 @@ patch() {
 config() {
   autoload -Uz mkcd progress
 
+  if [[ ${target} == macos-universal ]] {
+      autoload -Uz universal_config && universal_config
+      return
+  }
+
   local _onoff=(OFF ON)
 
   args=(
@@ -76,6 +81,11 @@ config() {
 
 build() {
   autoload -Uz mkcd progress
+
+  if [[ ${target} == macos-universal ]] {
+      autoload -Uz universal_build && universal_build
+      return
+  }
 
   log_info "Build (%F{3}${target}%f)"
 
@@ -104,6 +114,13 @@ install() {
   if (( _loglevel > 1 )) args+=(--verbose)
 
   cd ${dir}
+
+  if [[ ${target} == macos-universal ]] {
+    pushd build_universal
+    sed -i -E -e 's/build_x86_64/build_universal/g' cmake_install.cmake
+    popd
+  }
+
   progress cmake ${args}
 }
 
@@ -148,7 +165,6 @@ fixup() {
         rm -rf ${target_config[output_dir]}/bin/libaom*.dll(N)
       }
       ;;
-    }
   }
 
   if (( #strip_files )) && [[ ${config} == (Release|MinSizeRel) ]] ${strip_tool} -x ${strip_files}
