@@ -6,7 +6,7 @@ local version='1.8.0'
 local url='https://github.com/nayuki/QR-Code-generator.git'
 local hash='720f62bddb7226106071d4728c292cb1df519ceb'
 local url_cmake='https://github.com/EasyCoding/qrcodegen-cmake.git'
-local hash_cmake='c57623d48a2d422b0f908dcf22d56d603e56c0e4'
+local hash_cmake='ea5835f7dca5bcf31dc795b1ac61bdc1f15940a7'
 
 ## Build Steps
 setup() {
