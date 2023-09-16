@@ -4,7 +4,7 @@ param(
     [string] $Uri = 'https://github.com/nayuki/QR-Code-generator.git',
     [string] $Hash = '720f62bddb7226106071d4728c292cb1df519ceb',
     [string] $UriCMake = 'https://github.com/EasyCoding/qrcodegen-cmake.git',
-    [string] $HashCMake = 'c57623d48a2d422b0f908dcf22d56d603e56c0e4'
+    [string] $HashCMake = 'ea5835f7dca5bcf31dc795b1ac61bdc1f15940a7'
 )
 
 function Setup {
