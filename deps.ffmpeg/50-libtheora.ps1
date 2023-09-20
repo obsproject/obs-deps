@@ -1,21 +1,35 @@
 param(
-    [string] $Name = 'libdatachannel',
-    [string] $Version = '0.19.0-alpha.4',
-    [string] $Uri = 'https://github.com/paullouisageneau/libdatachannel.git',
-    [string] $Hash = '709a66339451bb4c8d4e5ced78c67605ec09da31',
-    [switch] $ForceShared = $true
+    [string] $Name = 'libtheora',
+    [string] $Version = '1.1.1',
+    [string] $Uri = 'https://ftp.osuosl.org/pub/xiph/releases/theora/libtheora-1.1.1.zip',
+    [string] $Hash = "${PSScriptRoot}/checksums/libtheora-1.1.1.zip.sha256",
+    [array] $Patches = @(
+        @{
+            PatchFile = "${PSScriptRoot}/patches/libtheora/0001-add-windows-cmake.patch"
+            HashSum = "9F7554581AABC81F360D040E95C1CBF935E9CD80019526B1A6951A1179524D50"
+        }
+    )
 )
 
 function Setup {
-    Invoke-GitCheckout -Uri $Uri -Commit $Hash
+    Setup-Dependency -Uri $Uri -Hash $Hash -DestinationPath .
 }
 
 function Clean {
     Set-Location $Path
-
     if ( Test-Path "build_${Target}" ) {
         Log-Information "Clean build directory (${Target})"
         Remove-Item -Path "build_${Target}" -Recurse -Force
+    }
+}
+
+function Patch {
+    Log-Information "Patch (${Target})"
+    Set-Location $Path
+
+    $Patches | ForEach-Object {
+        $Params = $_
+        Safe-Patch @Params
     }
 }
 
@@ -23,27 +37,18 @@ function Configure {
     Log-Information "Configure (${Target})"
     Set-Location $Path
 
-   if ( $ForceShared -and ( $script:Shared -eq $false ) ) {
-        $Shared = $true
-    } else {
-        $Shared = $script:Shared.isPresent
-    }
-
     $OnOff = @('OFF', 'ON')
     $Options = @(
         $CmakeOptions
-        "-DENABLE_SHARED:BOOL=$($OnOff[$Shared])"
-        '-DUSE_MBEDTLS=BOOL=ON'
-        '-DNO_WEBSOCKET=BOOL=ON'
-        '-DNO_TESTS=BOOL=ON'
-        '-DNO_EXAMPLES=BOOL=ON'
+        "-DBUILD_SHARED_LIBS:BOOL=$($OnOff[$script:Shared.isPresent])"
+        "-DCMAKE_C_FLAGS=-wd4700"
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options
 }
 
 function Build {
-    Log-Information "Build (${Target})"
+    Log-Information "Install (${Target})"
     Set-Location $Path
 
     $Options = @(
@@ -55,13 +60,7 @@ function Build {
         $Options += '--verbose'
     }
 
-    $Options += @(
-        '--'
-        '/consoleLoggerParameters:Summary'
-        '/noLogo'
-        '/p:UseMultiToolTask=true'
-        '/p:EnforceProcessCountAcrossBuilds=true'
-    )
+    $Options += @($CmakePostfix)
 
     Invoke-External cmake @Options
 }

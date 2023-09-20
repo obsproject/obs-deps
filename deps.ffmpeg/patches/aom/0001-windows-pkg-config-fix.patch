@@ -1,0 +1,9 @@
+--- ./lib/pkgconfig/aom.pc	2023-05-22 23:59:43
++++ ./lib/pkgconfig/aom.pc	2023-05-22 23:59:48
+@@ -10,5 +10,5 @@
+ Requires:
+ Conflicts:
+ Libs: -L${libdir} -laom
+-Libs.private: -lm
++Libs.private:
+ Cflags: -I${includedir}

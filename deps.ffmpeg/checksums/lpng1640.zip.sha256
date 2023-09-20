@@ -1,0 +1,14 @@
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.PowerShell.Commands.FileHashInfo</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Microsoft.PowerShell.Commands.FileHashInfo</ToString>
+    <Props>
+      <S N="Algorithm">SHA256</S>
+      <S N="Hash">0B05310AFD15C4F5CCBBAE13B4EEC4573EE519DC1C76C411C8C10998EA93F107</S>
+      <S N="Path">lpng1640.zip</S>
+    </Props>
+  </Obj>
+</Objs>
