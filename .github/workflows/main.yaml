@@ -53,44 +53,24 @@ jobs:
 
           echo "shortHash=${GITHUB_SHA:0:9}" >> $GITHUB_OUTPUT
 
-  ffmpeg-build:
-    name: 'Build FFmpeg'
-    runs-on: ${{ matrix.os }}
+  ffmpeg-macos-build:
+    name: Build FFmpeg for macOS
+    runs-on: macos-13
+    needs: pre-checks
     strategy:
       fail-fast: true
       matrix:
-        target: [macos-arm64, macos-x86_64, linux-x86_64, windows-x64, windows-x86]
+        target: [macos-arm64, macos-x86_64]
         include:
           - target: macos-arm64
-            os: 'macos-13'
-            config: 'Release'
-            type: 'static'
-            revision: 9
+            config: Release
+            type: static
           - target: macos-x86_64
-            os: 'macos-13'
-            config: 'Release'
-            type: 'static'
-            revision: 9
-          - target: linux-x86_64
-            os: 'ubuntu-22.04'
-            config: 'Release'
-            type: 'static'
-            revision: 9
-          - target: windows-x64
-            os: 'ubuntu-22.04'
-            config: 'Release'
-            type: 'static'
-            revision: 8
-          - target: windows-x86
-            os: 'ubuntu-22.04'
-            config: 'Release'
-            type: 'static'
-            revision: 8
-    env:
-      CACHE_REVISION: ${{ matrix.revision }}
+            config: Release
+            type: static
     defaults:
       run:
-        shell: bash
+        shell: zsh --no-rcs --errexit --pipefail {0}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -98,57 +78,38 @@ jobs:
       - name: Setup Environment
         id: setup
         run: |
-          case "${{ runner.os }}" in
-            Linux)
-              sudo apt update
-              sudo apt install zsh
-              ;;
-            macOS)
-              to_remove=()
+          local -a to_remove=()
 
-              for formula in llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile \
-                libogg composer php gd freetype fontconfig webp libpng lame libtiff opus kotlin \
-                sbt libxft libxcb; do
-                if [[ -d /usr/local/opt/"${formula}" ]]; then
-                  to_remove+=(${formula})
-                fi
-              done
-              if [[ ${#to_remove} -gt 0 ]]; then
-                brew uninstall --ignore-dependencies ${to_remove[@]}
-              fi
-              ;;
-          esac
+          for formula (llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile \
+            libogg composer php gd freetype fontconfig webp libpng lame libtiff opus kotlin \
+            sbt libxft libxcb) {
+            if [[ -d /usr/local/opt/${formula} ]] to_remove+=(${formula})
+          }
 
-          target='${{ matrix.target }}'
-          artifact_name="ffmpeg-${target}-${{ github.sha }}"
-          file_name="${target%%-*}-ffmpeg-$(date +"%Y-%m-%d")-${target##*-}.tar.xz"
-          dsym_artifact_name="ffmpeg-${target}-dSYMs-${{ github.sha }}"
-          dsym_file_name="${target%%-*}-ffmpeg-$(date +"%Y-%m-%d")-${target##*-}-dSYMs.tar.xz"
+          if (( #to_remove )) brew uninstall --ignore-dependencies ${to_remove}
 
-          echo "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
-          echo "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
-          echo "dsymArtifactName=${dsym_artifact_name}" >> $GITHUB_OUTPUT
-          echo "dsymArtifactFileName=${dsym_file_name}" >> $GITHUB_OUTPUT
-          echo "ccacheDate=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
+          local -r date_string=$(date +"%Y-%m-%d")
+          local -r target='${{ matrix.target }}'
+
+          artifact_name="ffmpeg-${target}-${{ needs.pre-checks.outputs.shortHash }}"
+          file_name="${target%%-*}-ffmpeg-${date_string}-${target##*-}.tar.xz"
+          dsym_artifact_name="ffmpeg-${target}-dSYMs-${{ needs.pre-checks.outputs.shortHash }}"
+          dsym_file_name="${target%%-*}-ffmpeg-${date_string}-${target##*-}-dSYMs.tar.xz"
+
+          print "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
+          print "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
+          print "dsymArtifactName=${dsym_artifact_name}" >> $GITHUB_OUTPUT
+          print "dsymArtifactFileName=${dsym_file_name}" >> $GITHUB_OUTPUT
+          print "ccacheDate=${date_string}" >> $GITHUB_OUTPUT
 
       - name: Restore Compilation Cache
         id: ccache-cache
-        uses: actions/cache@v3
+        uses: actions/cache/restore@v3
         with:
           path: ${{ github.workspace }}/.ccache
           key: ${{ matrix.target }}-ccache-ffmpeg-${{ steps.setup.outputs.ccacheDate }}
           restore-keys: |
             ${{ matrix.target }}-ccache-ffmpeg-
-
-      - name: Check for GitHub Labels
-        id: seekingTesters
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
-            echo "found=true" >> $GITHUB_OUTPUT
-          else
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
 
       - name: Build FFmpeg
         uses: ./.github/actions/build-ffmpeg
@@ -156,55 +117,99 @@ jobs:
           target: ${{ matrix.target }}
           type: ${{ matrix.type }}
           config: ${{ matrix.config }}
-          cacheRevision: ${{ env.CACHE_REVISION }}
 
       - name: Publish Build Artifacts
-        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
+        if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
         uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.artifactFileName }}
 
       - name: Publish Debug Symbol Artifacts
-        if: ${{ startsWith(matrix.os, 'macos') && success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
+        if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
         uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.setup.outputs.dsymArtifactName }}
           path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.dsymArtifactFileName }}
 
-  ffmpeg-package-universal:
-    name: 'Build FFmpeg (Universal)'
-    runs-on: macos-13
-    needs: [ffmpeg-build]
+      - name: Save Compilation Cache
+        if: github.event_name == 'push'
+        uses: actions/cache/save@v3
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: ${{ matrix.target }}-ccache-ffmpeg-${{ steps.setup.outputs.ccacheDate }}
+
+  ffmpeg-windows-build:
+    name: Build FFmpeg for Windows
+    runs-on: windows-2022
+    needs: pre-checks
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [x64, x86]
+        include:
+          - target: x64
+            config: Release
+            type: static
+          - target: x86
+            config: Release
+            type: static
+    defaults:
+      run:
+        shell: pwsh
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Check for GitHub Labels
-        id: seekingTesters
-        if: ${{ github.event_name == 'pull_request' }}
+      - name: Setup Environment
+        id: setup
         run: |
-          if [[ -n "$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s "${{ github.event.pull_request.url }}" | jq -e '.labels[] | select(.name == "Seeking Testers")')" ]]; then
-            echo "found=true" >> $GITHUB_OUTPUT
-          else
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
+          # Setup Environment
+
+          $Target='${{ matrix.target }}'
+          $ArtifactName="ffmpeg-windows-${Target}-${{ needs.pre-checks.outputs.shortHash }}"
+          $FileName="windows-ffmpeg-$(Get-Date -Format 'yyyy-MM-dd')-${Target}.zip"
+
+          "artifactName=${ArtifactName}" >> $env:GITHUB_OUTPUT
+          "artifactFileName=${FileName}" >> $env:GITHUB_OUTPUT
+
+      - name: Build FFmpeg
+        uses: ./.github/actions/build-ffmpeg
+        with:
+          target: ${{ matrix.target }}
+          type: ${{ matrix.type }}
+          config: ${{ matrix.config }}
+
+      - name: Publish Build Artifacts
+        if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.setup.outputs.artifactName }}
+          path: ${{ github.workspace }}\windows\${{ steps.setup.outputs.artifactFileName }}
+
+  ffmpeg-package-universal:
+    name: Build FFmpeg (Universal)
+    runs-on: macos-13
+    needs: [pre-checks, ffmpeg-macos-build]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Create universal binary package
-        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
+        if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
         uses: ./.github/actions/create-universal
         with:
-          arm64: 'ffmpeg-macos-arm64-${{ github.sha }}'
-          x86_64: 'ffmpeg-macos-x86_64-${{ github.sha }}'
-          outputName: 'ffmpeg-macos-universal-${{ github.sha }}'
+          arm64: ffmpeg-macos-arm64-${{ needs.pre-checks.outputs.shortHash }}
+          x86_64: ffmpeg-macos-x86_64-${{ needs.pre-checks.outputs.shortHash }}
+          outputName: ffmpeg-macos-universal-${{ needs.pre-checks.outputs.shortHash }}
 
       - name: Create universal dSYM package
-        if: ${{ success() && (github.event_name != 'pull_request' || steps.seekingTesters.outputs.found == 'true') }}
+        if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
         uses: ./.github/actions/create-universal
         with:
-          arm64: 'ffmpeg-macos-arm64-dSYMs-${{ github.sha }}'
-          x86_64: 'ffmpeg-macos-x86_64-dSYMs-${{ github.sha }}'
-          outputName: 'ffmpeg-macos-universal-dSYMs-${{ github.sha }}'
+          arm64: ffmpeg-macos-arm64-dSYMs-${{ needs.pre-checks.outputs.shortHash }}
+          x86_64: ffmpeg-macos-x86_64-dSYMs-${{ needs.pre-checks.outputs.shortHash }}
+          outputName: ffmpeg-macos-universal-dSYMs-${{ needs.pre-checks.outputs.shortHash }}
 
   macos-build:
     name: Build macOS Dependencies
@@ -574,7 +579,7 @@ jobs:
     name: Create and upload release
     runs-on: ubuntu-22.04
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
-    needs: [ffmpeg-package-universal, macos-package-universal, macos-qt6-package, windows-build, windows-qt6-package]
+    needs: [ffmpeg-package-universal, ffmpeg-windows-build, macos-package-universal, macos-qt6-package, windows-build, windows-qt6-package]
     defaults:
       run:
         shell: bash
@@ -612,28 +617,6 @@ jobs:
             popd > /dev/null
           done
 
-
-      - name: 'Package Linux dependencies'
-        run: |
-          shopt -s extglob
-
-          for arch in x86_64; do
-            _temp=$(mktemp -d)
-            pushd "${_temp}" > /dev/null
-
-            for artifact in ${{ github.workspace }}/**/linux-*-${arch}.*; do
-              case ${artifact} in
-                *.zip) unzip ${artifact} > /dev/null ;;
-                *.tar.xz) XZ_OPT=-T0 tar -xvJf ${artifact} ;;
-                *.tar.gz) tar -xvzf ${artifact} ;;
-              esac
-            done
-
-            XZ_OPT=-T0 tar -cvJf linux-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz -- *
-            mv linux-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz ${{ github.workspace }}
-
-            popd > /dev/null
-          done
 
       - name: Package macOS dependencies
         run: |
@@ -684,4 +667,3 @@ jobs:
             ${{ github.workspace }}/macos-*-arm64.tar.xz
             ${{ github.workspace }}/macos-*-x86_64.tar.xz
             ${{ github.workspace }}/macos-*-universal.tar.xz
-            ${{ github.workspace }}/linux-*-x86_64.tar.xz

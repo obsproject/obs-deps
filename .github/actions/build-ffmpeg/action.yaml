@@ -1,0 +1,141 @@
+name: Build FFmpeg
+description: Builds FFmpeg for obs-deps with specified architecture, type, and build config
+inputs:
+  target:
+    description: Build target for FFmpeg
+    required: true
+  type:
+    description: Build type (shared or static libraries)
+    required: false
+    default: static
+  config:
+    description: Build configuration
+    required: false
+    default: Release
+  workingDirectory:
+    description: Working directory for repository action
+    required: false
+    default: ${{ github.workspace }}
+runs:
+  using: composite
+  steps:
+    - name: Environment Setup
+      id: env-setup
+      shell: bash
+      working-directory: ${{ inputs.workingDirectory }}
+      run: |
+        case "${RUNNER_OS}" in
+          macOS)
+            if ! type sha256sum > /dev/null 2>&1; then
+              brew install coreutils
+            fi
+            ffmpeg_dep_hash=$(cat ${PWD}/deps.ffmpeg/*.zsh | sha256sum | cut -d " " -f 1)
+            ;;
+          Windows)
+            ffmpeg_dep_hash=$(cat ${PWD}/deps.ffmpeg/*.ps1 | sha256sum | cut -d " " -f 1)
+            ;;
+        esac
+
+        echo "hash=${ffmpeg_dep_hash:0:9}" >> $GITHUB_OUTPUT
+
+    - name: Restore FFmpeg Dependencies from Cache
+      id: ffmpeg-deps-cache
+      uses: actions/cache/restore@v3
+      with:
+        path: |
+          ${{ inputs.workingDirectory }}/*_build_temp/*
+          !${{ inputs.workingDirectory }}/*_build_temp/**/.git
+          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.gz
+          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.xz
+          !${{ inputs.workingDirectory }}/*_build_temp/*.zip
+          !${{ inputs.workingDirectory }}/*_build_temp/FFmpeg*
+          !${{ inputs.workingDirectory }}/*_build_temp/x264-*-shared/
+        key: ${{ inputs.target }}-ffmpeg-deps-${{ inputs.type }}-${{ inputs.config }}-${{ steps.env-setup.outputs.hash }}
+
+    - name: Build and Install FFmpeg Dependencies
+      if: runner.os == 'macOS' && steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
+      shell: zsh --no-rcs --errexit --pipefail {0}
+      run: |
+        : Build and Install FFmpeg Dependencies
+        ./build-ffmpeg.zsh '*~ffmpeg' --target ${{ inputs.target }} --config ${{ inputs.config }} --${{ inputs.type }}
+
+    - name: Build and Install FFmpeg Dependencies
+      if: runner.os == 'Windows' && steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
+      shell: pwsh
+      run: |
+        # Build and Install FFmpeg Dependencies
+
+        $BuildArgs = @{
+          PackageName = 'ffmpeg'
+          Target = '${{ inputs.target }}'
+          Configuration = '${{ inputs.config }}'
+          Shared = $(if ( '${{ inputs.type }}' -eq 'shared' ) { $true } else { $false })
+          Dependencies = (Get-ChildItem deps.ffmpeg -filter '*.ps1' | Where-Object { $_.Name -ne '99-ffmpeg.ps1' } | ForEach-Object { $_.Name -replace "[0-9]+-(.+).ps1",'$1' })
+        }
+
+        ./Build-Dependencies.ps1 @BuildArgs
+
+    - name: Restore FFmpeg from Cache
+      id: ffmpeg-cache
+      uses: actions/cache/restore@v3
+      with:
+        path: |
+          ${{ github.workspace }}/*_build_temp/FFmpeg*/*
+          !${{ github.workspace }}/*_build_temp/FFmpeg*/.git
+        key: ${{ inputs.target }}-ffmpeg-${{ inputs.type }}-${{ inputs.config }}-${{ steps.env-setup.outputs.hash }}
+
+    - name: Build and Install FFmpeg
+      if: runner.os == 'macOS'
+      shell: zsh --no-rcs --errexit --pipefail {0}
+      run: |
+        : Build and Install FFmpeg
+
+        local -a build_args=(
+          --target ${{ inputs.target }}
+          --config ${{ inputs.config }}
+          --${{ inputs.type }}
+        )
+
+        if [[ '${{ steps.ffmpeg-cache.outputs.cache-hit }}' == 'true' ]] build_args+=(--skip-build --skip-unpack)
+
+        ./build-ffmpeg.zsh ${build_args}
+
+    - name: Build and Install FFmpeg
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        # Build and Install FFmpeg
+
+        $BuildArgs = @{
+          Package = 'ffmpeg'
+          Target = '${{ inputs.target }}'
+          Config = '${{ inputs.config }}'
+          Shared = $(if ( '${{ inputs.type }}' -eq 'shared' ) { $true } else { $false })
+          SkipBuild = $(if ( '${{ steps.ffmpeg-cache.outputs.cache-hit }}' -eq 'true' ) { $true } else { $false })
+          SkipUnpack = $(if ( '${{ steps.ffmpeg-cache.outputs.cache-hit }}' -eq 'true' ) { $true } else { $false })
+        }
+
+        ./Build-Dependencies.ps1 @BuildArgs
+
+    - name: Save FFmpeg to Cache
+      if: github.event_name == 'push'
+      uses: actions/cache/save@v3
+      with:
+        path: |
+          ${{ github.workspace }}/*_build_temp/FFmpeg*/*
+          !${{ github.workspace }}/*_build_temp/FFmpeg*/.git
+        key: ${{ inputs.target }}-ffmpeg-${{ inputs.type }}-${{ inputs.config }}-${{ steps.env-setup.outputs.hash }}
+
+    - name: Save FFmpeg Dependencies to Cache
+      if: github.event_name == 'push'
+      uses: actions/cache/save@v3
+      with:
+        path: |
+          ${{ inputs.workingDirectory }}/*_build_temp/*
+          !${{ inputs.workingDirectory }}/*_build_temp/**/.git
+          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.gz
+          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.xz
+          !${{ inputs.workingDirectory }}/*_build_temp/*.zip
+          !${{ inputs.workingDirectory }}/*_build_temp/FFmpeg*
+          !${{ inputs.workingDirectory }}/*_build_temp/x264-*-shared/
+        key: ${{ inputs.target }}-ffmpeg-deps-${{ inputs.type }}-${{ inputs.config }}-${{ steps.env-setup.outputs.hash }}
