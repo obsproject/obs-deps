@@ -73,6 +73,88 @@ jobs:
               --jq '.actions_caches.[] | select(.ref|test("refs/heads/master")|not) | {id, key, ref} | join(";")' &> /dev/null)"
           echo '::endgroup::'
 
+  ffmpeg-macos-build:
+    name: Build FFmpeg for macOS
+    runs-on: macos-13
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [macos-arm64, macos-x86_64]
+        include:
+          - target: macos-arm64
+            config: Release
+            type: static
+          - target: macos-x86_64
+            config: Release
+            type: static
+    defaults:
+      run:
+        shell: zsh --no-rcs --errexit --pipefail {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Environment
+        id: setup
+        run: |
+          local -a to_remove=()
+
+          for formula (llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile \
+            libogg composer php gd freetype fontconfig webp libpng lame libtiff opus kotlin \
+            sbt libxft libxcb) {
+            if [[ -d /usr/local/opt/${formula} ]] to_remove+=(${formula})
+          }
+
+          if (( #to_remove )) brew uninstall --ignore-dependencies ${to_remove}
+
+          local -r date_string=$(date +"%Y-%m-%d")
+          print "ccacheDate=${date_string} >> $GITHUB_OUTPUT
+
+      - name: Restore Compilation Cache
+        id: ccache-cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: ${{ matrix.target }}-ccache-ffmpeg-${{ steps.setup.outputs.ccacheDate }}
+          restore-keys: |
+            ${{ matrix.target }}-ccache-ffmpeg-
+
+      - name: Build FFmpeg
+        uses: ./.github/actions/build-ffmpeg
+        with:
+          target: ${{ matrix.target }}
+          type: ${{ matrix.type }}
+          config: ${{ matrix.config }}
+
+  ffmpeg-windows-build:
+    name: Build FFmpeg for Windows
+    runs-on: windows-2022
+    needs: pre-checks
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [x64, x86]
+        include:
+          - target: x64
+            config: Release
+            type: static
+          - target: x86
+            config: Release
+            type: static
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build FFmpeg
+        uses: ./.github/actions/build-ffmpeg
+        with:
+          target: ${{ matrix.target }}
+          type: ${{ matrix.type }}
+          config: ${{ matrix.config }}
+
   macos-build:
     name: Build macOS Dependencies
     runs-on: macos-13
