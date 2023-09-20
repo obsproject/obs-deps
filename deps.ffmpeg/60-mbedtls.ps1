@@ -3,13 +3,13 @@ param(
     [string] $Version = '3.4.0',
     [string] $Uri = 'https://github.com/Mbed-TLS/mbedtls.git',
     [string] $Hash = '1873d3bfc2da771672bd8e7e8f41f57e0af77f33',
+    [switch] $ForceStatic = $true,
     [array] $Patches = @(
         @{
-            PatchFile = "${PSScriptRoot}/patches/mbedtls/0001-enable-dtls-srtp-support.patch"
-            HashSum = "a3f1e5af6621040ffaa358b1fa131e65a42e95a66c684f45338d80b9a76ad0f4"
+            PatchFile = "${PSScriptRoot}/patches/mbedtls/0001-enable-dtls-srtp-support-windows.patch"
+            HashSum = "38dbaff859242c5a4f8196a08e35f0251d2966b22e1d9547ecaaea2aec4aae1b"
         }
-    ),
-    [switch] $ForceStatic = $true
+    )
 )
 
 function Setup {
@@ -70,13 +70,9 @@ function Build {
     if ( $VerbosePreference -eq 'Continue' ) {
         $Options += '--verbose'
     }
-    $Options += @(
-        '--'
-        '/consoleLoggerParameters:Summary'
-        '/noLogo'
-        '/p:UseMultiToolTask=true'
-        '/p:EnforceProcessCountAcrossBuilds=true'
-    )
+
+    $Options += @($CmakePostfix)
+
     Invoke-External cmake @Options
 }
 

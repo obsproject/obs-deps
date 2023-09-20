@@ -1,0 +1,26 @@
+--- /dev/null	2023-05-22 20:53:17
++++ b/windows-x64.txt	2023-05-22 20:51:38
+@@ -0,0 +1,10 @@
++[host_machine]
++system = 'windows'
++cpu_family = 'x86_64'
++cpu = 'x86_64'
++endian = 'little'
++
++[binaries]
++c = 'cl'
++cxx = 'cl'
++ld = 'link'
+--- /dev/null	2023-05-22 20:53:17
++++ b/windows-x86.txt	2023-05-22 20:51:38
+@@ -0,0 +1,10 @@
++[host_machine]
++system = 'windows'
++cpu_family = 'x86'
++cpu = 'x86'
++endian = 'little'
++
++[binaries]
++c = 'cl'
++cxx = 'cl'
++ld = 'link'
