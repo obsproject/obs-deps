@@ -98,6 +98,10 @@ fixup() {
 
         if [[ ${config} == Release ]] dsymutil ${dylib_files}
 
+        for dylib_file (${dylib_files}) {
+          sed -i '' -E -e "s/${dylib_file:t}/libdatachannel.dylib/g" ${target_config[output_dir]}/lib/cmake/LibDataChannel/LibDataChannelTargets-${(L)config}.cmake
+        }
+
         strip_tool=strip
         strip_files=(${dylib_files})
       } else {
