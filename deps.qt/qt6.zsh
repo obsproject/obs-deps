@@ -5,6 +5,10 @@ local name='qt6'
 local version=6.5.2
 local url='https://download.qt.io/official_releases/qt/6.5/6.5.2'
 local hash="${0:a:h}/checksums"
+local patches=(
+  "${0:a:h}/patches/0001-fix-macos-c++17-include.patch \
+  1edc79d5f097be86313a632df31c0643457a10dc155b58e05fb05d083283a00f"
+)
 
 local -a qt_components=(
   'qtbase'
@@ -64,18 +68,14 @@ patch() {
   autoload -Uz apply_patch
 
   log_info "Patch (%F{3}${target}%f)"
-
   cd ${dir}
 
   local patch
-  local _target
   local _url
   local _hash
-
   for patch (${patches}) {
-    read _target _url _hash <<< "${patch}"
-
-    if [[ ${target%%-*} == ${~_target} ]] apply_patch ${_url} ${_hash}
+    read _url _hash <<< "${patch}"
+    apply_patch ${_url} ${_hash}
   }
 }
 
