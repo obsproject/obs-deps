@@ -2,8 +2,8 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='qt6'
-local version=6.5.2
-local url='https://download.qt.io/official_releases/qt/6.5/6.5.2'
+local version=6.5.3
+local url='https://download.qt.io/official_releases/qt/6.5/6.5.3'
 local hash="${0:a:h}/checksums"
 
 local -a qt_components=(
