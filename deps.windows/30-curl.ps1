@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'curl',
-    [string] $Version = '8.1.2',
+    [string] $Version = '8.4.0',
     [string] $Uri = 'https://github.com/curl/curl.git',
-    [string] $Hash = '7ab9d43720bc34d9aa351c7ca683c1668ebf8335'
+    [string] $Hash = 'd755a5f7c009dd63a61b2c745180d8ba937cbfeb'
 )
 
 function Setup {
