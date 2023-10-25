@@ -3,7 +3,13 @@ param(
     [string] $Version = '6.5.3',
     [string] $Uri = 'https://download.qt.io/official_releases/qt/6.5/6.5.3',
     [string] $Hash = "${PSScriptRoot}/checksums",
-    [array] $Targets = @('x64', 'x86')
+    [array] $Targets = @('x64', 'x86'),
+    [array] $Patches = @(
+        @{
+            PatchFile = "${PSScriptRoot}/patches/Qt6/win/0001-CVE-2023-43114-6.5.patch"
+            HashSum = "882E4B8D0076FF78A9A679D77C77E02EDBF5CC09CA4E9EE8667BA3CB42A65443"
+        }
+    )
 )
 
 $QtComponents = @(
