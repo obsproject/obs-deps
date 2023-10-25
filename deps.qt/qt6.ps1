@@ -13,6 +13,10 @@ param(
             PatchFile = "${PSScriptRoot}/patches/Qt6/win/0002-QTBUG-117779.patch"
             HashSum = "D082EA4F39F7EBF39B45A74B7EA141AB47E4E56B995C2DCE7FDE4A6A52E63AA9"
         }
+        @{
+            PatchFile = "${PSScriptRoot}/patches/Qt6/win/0003-QTBUG-118117.patch"
+            HashSum = "9199DBF395694E1D592C2E86634DD8E84DBA4B70B8F55B365CF5141A00E38E23"
+        }
     )
 )
 
