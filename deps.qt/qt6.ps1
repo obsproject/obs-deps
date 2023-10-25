@@ -59,6 +59,18 @@ function Clean {
     }
 }
 
+function Patch {
+    Log-Information "Patch (${Target})"
+    Push-Location "${Directory}"
+
+    $Patches | ForEach-Object {
+        $Params = $_
+        Safe-Patch @Params
+    }
+
+    Pop-Location
+}
+
 function Configure {
     $OnOff = @('OFF', 'ON')
     $Options = @(
