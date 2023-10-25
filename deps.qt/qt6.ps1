@@ -9,6 +9,10 @@ param(
             PatchFile = "${PSScriptRoot}/patches/Qt6/win/0001-CVE-2023-43114-6.5.patch"
             HashSum = "882E4B8D0076FF78A9A679D77C77E02EDBF5CC09CA4E9EE8667BA3CB42A65443"
         }
+        @{
+            PatchFile = "${PSScriptRoot}/patches/Qt6/win/0002-QTBUG-117779.patch"
+            HashSum = "D082EA4F39F7EBF39B45A74B7EA141AB47E4E56B995C2DCE7FDE4A6A52E63AA9"
+        }
     )
 )
 
