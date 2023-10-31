@@ -162,6 +162,35 @@ jobs:
           ./Build-Dependencies.ps1 @Params
           Remove-Item -Recurse -Force ${{ github.workspace }}/windows_build_temp
 
+      - name: Build VPL Debug
+        if: matrix.target == 'x64'
+        shell: pwsh
+        run: |
+          # Build VPL Debug
+
+          $Params = @{
+            Target = '${{ matrix.target }}'
+            Configuration = 'Debug'
+            Dependencies = 'vpl'
+          }
+
+          ./Build-Dependencies.ps1 @Params
+          Remove-Item -Recurse -Force ${{ github.workspace }}/windows_build_temp
+
+      - name: Build qrcodegencpp Debug
+        shell: pwsh
+        run: |
+          # Build qrcodegencpp Debug
+
+          $Params = @{
+            Target = '${{ matrix.target }}'
+            Configuration = 'Debug'
+            Dependencies = 'qrcodegencpp'
+          }
+
+          ./Build-Dependencies.ps1 @Params
+          Remove-Item -Recurse -Force ${{ github.workspace }}/windows_build_temp
+
       - name: Build Windows Dependencies
         uses: ./.github/actions/build-deps
         with:
