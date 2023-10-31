@@ -37,6 +37,8 @@ runs:
             ;;
         esac
 
+        deps_hash=$(echo "${deps_hash}\n$(cmake --version)" | sha256sum | cut -d " " -f 1)
+
         echo "hash=${deps_hash:0:9}" >> $GITHUB_OUTPUT
 
     - name: Restore Dependencies from Cache
