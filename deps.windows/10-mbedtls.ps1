@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'mbedtls',
-    [string] $Version = '3.4.0',
+    [string] $Version = '3.5.1',
     [string] $Uri = 'https://github.com/Mbed-TLS/mbedtls.git',
-    [string] $Hash = '1873d3bfc2da771672bd8e7e8f41f57e0af77f33',
+    [string] $Hash = 'edb8fec9882084344a314368ac7fd957a187519c',
     [array] $Patches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/mbedtls/0001-enable-dtls-srtp-support.patch"
