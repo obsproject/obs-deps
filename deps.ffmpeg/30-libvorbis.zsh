@@ -143,7 +143,7 @@ fixup() {
         autoload -Uz restore_dlls && restore_dlls
 
         strip_tool=${target_config[cross_prefix]}-w64-mingw32-strip
-        strip_files=(${target_config[output_dir]}/bin/bin/libvorbis*.dll(.))
+        strip_files=(${target_config[output_dir]}/bin/libvorbis*.dll(.))
       }
       ;;
   }
