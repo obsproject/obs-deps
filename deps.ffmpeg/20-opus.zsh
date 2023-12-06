@@ -136,7 +136,7 @@ fixup() {
         autoload -Uz restore_dlls && restore_dlls
 
         strip_tool=${target_config[cross_prefix]}-w64-mingw32-strip
-        strip_files=(${target_config[output_dir]}/bin/bin/libopus*.dll(.))
+        strip_files=(${target_config[output_dir]}/bin/libopus*.dll(.))
       } else {
         rm -rf -- ${target_config[output_dir]}/lib/libopus*.dll(N)
       }
