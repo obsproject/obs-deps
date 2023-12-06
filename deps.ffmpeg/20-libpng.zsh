@@ -145,7 +145,7 @@ fixup() {
         autoload -Uz create_importlibs
         create_importlibs ${target_config[output_dir]}/bin/libpng*.dll(:a)
         strip_tool=${target_config[cross_prefix]}-w64-mingw32-strip
-        strip_files=("${target_config[output_dir]}"/bin/bin/libpng*.dll(.))
+        strip_files=("${target_config[output_dir]}"/bin/libpng*.dll(.))
       } else {
         rm -rf -- ${target_config[output_dir]}/lib/libpng*.dll(N)
       }
