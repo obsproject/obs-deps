@@ -143,7 +143,7 @@ fixup() {
         create_importlibs ${target_config[output_dir]}/bin/libaom*.dll(.)
 
         strip_tool=${target_config[cross_prefix]}-w64-mingw32-strip
-        strip_files=(${target_config[output_dir]}/bin/bin/libaom*.dll(.))
+        strip_files=(${target_config[output_dir]}/bin/libaom*.dll(.))
       } else {
         rm -rf ${target_config[output_dir]}/bin/libaom*.dll(N)
       }
