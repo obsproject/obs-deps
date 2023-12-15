@@ -1,0 +1,30 @@
+From 9f44553b3d297f7a423c51451c4e18c0e5a25d19 Mon Sep 17 00:00:00 2001
+From: Sebastian Beckmann <beckmann.sebastian@outlook.de>
+Date: Wed, 29 Mar 2023 04:20:38 +0200
+Subject: [PATCH] QComboBox: Disable items marked as disabled in native popups
+
+Fixes: QTBUG-56064
+Pick-to: 6.5 6.2 5.15
+Change-Id: I00a17a19b4c14c874e16ec863e794218f0570346
+Reviewed-by: Volker Hilsheimer <volker.hilsheimer@qt.io>
+---
+ a/qtbase/src/widgets/widgets/qcombobox.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/qtbase/src/widgets/widgets/qcombobox.cpp b/qtbase/src/widgets/widgets/qcombobox.cpp
+index 80206b24acb..7c99e8983c6 100644
+--- a/qtbase/src/widgets/widgets/qcombobox.cpp
++++ b/qtbase/src/widgets/widgets/qcombobox.cpp
+@@ -2501,10 +2501,12 @@ bool QComboBoxPrivate::showNativePopup()
+         QVariant textVariant = model->data(rowIndex, Qt::EditRole);
+         item->setText(textVariant.toString());
+         QVariant iconVariant = model->data(rowIndex, Qt::DecorationRole);
++        const Qt::ItemFlags itemFlags = model->flags(rowIndex);
+         if (iconVariant.canConvert<QIcon>())
+             item->setIcon(iconVariant.value<QIcon>());
+         item->setCheckable(true);
+         item->setChecked(i == currentIndex);
++        item->setEnabled(itemFlags & Qt::ItemIsEnabled);
+         if (!currentItem || i == currentIndex)
+             currentItem = item;
+ 
