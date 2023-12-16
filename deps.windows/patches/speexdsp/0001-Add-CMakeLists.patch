@@ -1,6 +1,6 @@
---- null       			   2022-11-22 18:00:00.000000000 -0500
-+++ ./CMakeLists.txt       2022-11-22 18:00:00.000000000 -0500
-@@ -0,0 +1,90 @@
+--- null       			   2023-03-24 18:30:00.000000000 -0400
++++ ./CMakeLists.txt       2023-03-24 18:30:00.000000000 -0400
+@@ -0,0 +1,83 @@
 +cmake_minimum_required(VERSION 3.16)
 +
 +project(speexdsp)
@@ -78,13 +78,6 @@
 +        PUBLIC
 +            "include"
 +    )
-+
-+    include(CheckIPOSupported)
-+    check_ipo_supported(RESULT HasIPOSupport)
-+    if(HasIPOSupport)
-+        set_target_properties(speexdsp PROPERTIES
-+            INTERPROCEDURAL_OPTIMIZATION ON)
-+    endif()
 +
 +    install(TARGETS speexdsp
 +        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"

@@ -1,0 +1,29 @@
+diff --git a/libavcodec/cuviddec.c b/libavcodec/cuviddec.c
+index f03bbd8..7b8ec3a 100644
+--- a/libavcodec/cuviddec.c
++++ b/libavcodec/cuviddec.c
+@@ -817,7 +817,7 @@ static av_cold int cuvid_decode_init(AVCodecContext *avctx)
+                                    &ctx->resize.width, &ctx->resize.height) != 2) {
+         av_log(avctx, AV_LOG_ERROR, "Invalid resize expressions\n");
+         ret = AVERROR(EINVAL);
+-        goto error;
++        return ret;
+     }
+ 
+     if (ctx->crop_expr && sscanf(ctx->crop_expr, "%dx%dx%dx%d",
+@@ -825,13 +825,13 @@ static av_cold int cuvid_decode_init(AVCodecContext *avctx)
+                                  &ctx->crop.left, &ctx->crop.right) != 4) {
+         av_log(avctx, AV_LOG_ERROR, "Invalid cropping expressions\n");
+         ret = AVERROR(EINVAL);
+-        goto error;
++        return ret;
+     }
+ 
+     ret = cuvid_load_functions(&ctx->cvdl, avctx);
+     if (ret < 0) {
+         av_log(avctx, AV_LOG_ERROR, "Failed loading nvcuvid.\n");
+-        goto error;
++        return ret;
+     }
+ 
+     ctx->frame_queue = av_fifo_alloc(ctx->nb_surfaces * sizeof(CuvidParsedFrame));
