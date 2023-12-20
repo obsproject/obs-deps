@@ -1,10 +1,10 @@
 autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
-local name='ntv2'
-local version='16.2'
-local url='https://github.com/aja-video/ntv2.git'
-local hash='0acbac70a0b5e6509cca78cfbf69974c73c10db9'
+local name='libajantv2'
+local version='17.0'
+local url='https://github.com/aja-video/libajantv2.git'
+local hash='08a5a3e7e5fce4abf7deb11567dfd795da4a4ba0'
 
 ## Dependency Overrides
 local -i shared_libs=0
@@ -34,11 +34,16 @@ config() {
 
   args=(
     ${cmake_flags}
-    -DAJA_BUILD_OPENSOURCE=ON
-    -DAJA_BUILD_APPS=OFF
-    -DAJA_INSTALL_SOURCES=OFF
-    -DAJA_INSTALL_HEADERS=ON
-    -DAJA_BUILD_SHARED="${_onoff[(( shared_libs + 1 ))]}"
+    -DAJANTV2_DISABLE_DEMOS:BOOL=ON
+    -DAJANTV2_DISABLE_DRIVER:BOOL=ON
+    -DAJANTV2_DISABLE_TESTS:BOOL=ON
+    -DAJANTV2_DISABLE_TOOLS:BOOL=ON
+    -DAJANTV2_DISABLE_PLUGINS:BOOL=ON
+    -DAJA_INSTALL_SOURCES:BOOL=OFF
+    -DAJA_INSTALL_HEADERS:BOOL=ON
+    -DAJA_INSTALL_MISC:BOOL=OFF
+    -DAJA_INSTALL_CMAKE:BOOL=OFF
+    -DAJA_BUILD_SHARED:BOOL="${_onoff[(( shared_libs + 1 ))]}"
   )
 
   cd ${dir}

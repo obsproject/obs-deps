@@ -459,16 +459,16 @@ jobs:
           "artifactName=${ArtifactName}" >> $env:GITHUB_OUTPUT
           "artifactFileName=${FileName}" >> $env:GITHUB_OUTPUT
 
-      - name: Build ntv2 Debug
+      - name: Build libajantv2 Debug
         if: matrix.target == 'x64'
         shell: pwsh
         run: |
-          # Build ntv2 Debug
+          # Build libajantv2 Debug
 
           $Params = @{
             Target = '${{ matrix.target }}'
             Configuration = 'Debug'
-            Dependencies = 'ntv2'
+            Dependencies = 'libajantv2'
           }
 
           ./Build-Dependencies.ps1 @Params
