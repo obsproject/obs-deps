@@ -129,7 +129,6 @@ jobs:
   ffmpeg-windows-build:
     name: Build FFmpeg for Windows
     runs-on: windows-2022
-    needs: pre-checks
     strategy:
       fail-fast: true
       matrix:
