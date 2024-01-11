@@ -140,7 +140,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [x64]
+        target: [x64, arm64]
         include:
           - target: x64
             config: Release
@@ -224,12 +224,15 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [x64, x86]
+        target: [x64, x86, arm64]
         include:
           - target: x64
             config: Release
             type: static
           - target: x86
+            config: Release
+            type: static
+          - target: arm64
             config: Release
             type: static
     defaults:
@@ -270,7 +273,7 @@ jobs:
           Remove-Item -Recurse -Force ${{ github.workspace }}/windows_build_temp
 
       - name: Build qrcodegencpp Debug
-        if: matrix.target == 'x64'
+        if: matrix.target == 'x64' || matrix.target == 'arm64'
         shell: pwsh
         run: |
           # Build qrcodegencpp Debug
@@ -351,8 +354,70 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Environment
+        id: setup
+        run: |
+          # Setup Environment
+          $ArtifactName="qt6-windows-${{ matrix.target }}-${{ matrix.config }}-nightly"
+          $FileName="windows-deps-qt6-$(Get-Date -Format 'yyyy-MM-dd')-${{ matrix.target }}-${{ matrix.config }}.zip"
+
+          "artifactName=${ArtifactName}" >> $env:GITHUB_OUTPUT
+          "artifactFileName=${FileName}" >> $env:GITHUB_OUTPUT
+
       - name: Build Windows Qt
         uses: ./.github/actions/build-qt
         with:
           target: ${{ matrix.target }}
+          config: ${{ matrix.config }}
+
+      - name: Publish Build Artifacts
+        if: matrix.target == 'x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.setup.outputs.artifactName }}
+          path: ${{ github.workspace }}/windows/${{ steps.setup.outputs.artifactFileName }}
+
+  windows-qt6-arm64-build:
+    name: Build Qt6 (Windows ARM64)
+    runs-on: windows-2022
+    needs: [windows-qt6-build]
+    strategy:
+      fail-fast: true
+      matrix:
+        config: [RelWithDebInfo, Debug]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Environment
+        id: setup
+        run: |
+          # Setup Environment
+          $HostArtifactName="qt6-windows-x64-${{ matrix.config }}-nightly"
+          $HostFileName="windows-deps-qt6-$(Get-Date -Format 'yyyy-MM-dd')-x64-${{ matrix.config }}.zip"
+
+          "hostArtifactName=${HostArtifactName}" >> $env:GITHUB_OUTPUT
+          "hostArtifactFileName=${HostFileName}" >> $env:GITHUB_OUTPUT
+          "qtHostPath=${env:GITHUB_WORKSPACE}/Qt6Host" >> $env:GITHUB_OUTPUT
+
+      - name: Download Host Tools Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.setup.outputs.hostArtifactName }}
+          path: ${{ github.workspace }}/Qt6Host
+
+      - name: Setup Host Tools Artifact
+        run: |
+          . ${{ github.workspace }}/utils.pwsh/Expand-ArchiveExt
+
+          Set-Location ${{ github.workspace }}/Qt6Host
+          Expand-ArchiveExt -Path ${{ steps.setup.outputs.hostArtifactFileName }} -DestinationPath (Get-Location | Convert-Path)
+
+      - name: Build Windows Qt
+        uses: ./.github/actions/build-qt
+        env:
+          QtHostPath: ${{ steps.setup.outputs.qtHostPath }}
+        with:
+          target: arm64
           config: ${{ matrix.config }}
