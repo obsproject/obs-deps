@@ -604,7 +604,7 @@ jobs:
 
             for artifact in ${GITHUB_WORKSPACE}/**/windows-@(deps|ffmpeg)-!(qt6*)-${arch}.*; do
               case ${artifact} in
-                *.zip) unzip ${artifact} > /dev/null ;;
+                *.zip) unzip -o ${artifact} > /dev/null ;;
                 *.tar.xz) XZ_OPT=-T0 tar -xJf ${artifact} ;;
                 *.tar.gz) tar -xzf ${artifact} ;;
               esac
@@ -629,7 +629,7 @@ jobs:
 
             for artifact in ${GITHUB_WORKSPACE}/**/macos-@(deps|ffmpeg)-!(qt6*)-${arch}.*; do
               case ${artifact} in
-                *.zip) unzip ${artifact} > /dev/null ;;
+                *.zip) unzip -o ${artifact} > /dev/null ;;
                 *.tar.xz) XZ_OPT=-T0 tar -xvJf ${artifact} ;;
                 *.tar.gz) tar -xvzf ${artifact} ;;
               esac
