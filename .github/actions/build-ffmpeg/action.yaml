@@ -118,7 +118,7 @@ runs:
         ./Build-Dependencies.ps1 @BuildArgs
 
     - name: Save FFmpeg to Cache
-      if: github.event_name == 'push'
+      if: github.event_name == 'schedule' || (github.event_name == 'push' && steps.ffmpeg-cache.outputs.cache-hit != 'true')
       uses: actions/cache/save@v3
       with:
         path: |
@@ -127,7 +127,7 @@ runs:
         key: ${{ inputs.target }}-ffmpeg-${{ inputs.type }}-${{ inputs.config }}-${{ steps.env-setup.outputs.hash }}
 
     - name: Save FFmpeg Dependencies to Cache
-      if: github.event_name == 'push'
+      if: github.event_name == 'schedule' || (github.event_name == 'push' && steps.ffmpeg-deps-cache.outputs.cache-hit != 'true')
       uses: actions/cache/save@v3
       with:
         path: |
