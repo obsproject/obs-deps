@@ -527,7 +527,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [x64, x86]
+        target: [x64, arm64, x86]
         config: [RelWithDebInfo, Debug]
 
     steps:
@@ -563,7 +563,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [x64, x86]
+        target: [x64, arm64, x86]
     needs: [pre-checks, windows-qt6-build]
     steps:
       - name: Checkout
