@@ -432,12 +432,15 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [x64, x86]
+        target: [x64, x86, arm64]
         include:
           - target: x64
             config: Release
             type: static
           - target: x86
+            config: Release
+            type: static
+          - target: arm64
             config: Release
             type: static
     defaults:
@@ -598,7 +601,7 @@ jobs:
           : Package Windows dependencies
           shopt -s extglob
 
-          for arch in x64 x86; do
+          for arch in x64 arm64 x86; do
             _temp=$(mktemp -d)
             pushd "${_temp}" > /dev/null
 
@@ -663,6 +666,7 @@ jobs:
           body_path: ${{ github.workspace }}/CHECKSUMS.txt
           files: |
             ${{ github.workspace }}/windows-*-x64*.zip
+            ${{ github.workspace }}/windows-*-arm64*.zip
             ${{ github.workspace }}/windows-*-x86*.zip
             ${{ github.workspace }}/macos-*-arm64.tar.xz
             ${{ github.workspace }}/macos-*-x86_64.tar.xz
