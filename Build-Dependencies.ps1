@@ -132,7 +132,7 @@ function Package-Dependencies {
         }
         dependencies {
             Get-ChildItem ./bin/*.lib | Move-Item -Destination ./lib
-            Get-ChildItem ./bin -Exclude 'carla-bridge-native.exe','carla-discovery-native.exe','libcarla_utils.dll','lua51.dll','libcurl.dll','swig.exe','Lib' | Remove-Item
+            Get-ChildItem ./bin -Exclude 'lua51.dll','libcurl.dll','swig.exe','Lib' | Remove-Item
             Get-ChildItem ./cmake/pcre2*,./lib/pcre2* | Remove-Item
             Remove-Item -Recurse ./lib/pkgconfig
             Remove-Item -Recurse ./man
