@@ -2,11 +2,15 @@ param(
     [string] $Name = 'luajit',
     [string] $Version = '2.1',
     [string] $Uri = 'https://github.com/luajit/luajit.git',
-    [string] $Hash = '8635cbabf3094c4d8bd00578c7d812bea87bb2d3'
+    [hashtable] $Hashes = @{
+        x64 = '8635cbabf3094c4d8bd00578c7d812bea87bb2d3'
+        x86 = '8635cbabf3094c4d8bd00578c7d812bea87bb2d3'
+        arm64 = '43d0a19158ceabaa51b0462c1ebc97612b420a2e'
+    }
 )
 
 function Setup {
-    Setup-Dependency -Uri $Uri -Hash $Hash -DestinationPath $Path
+    Setup-Dependency -Uri $Uri -Branch v2.1 -Hash $Hash -DestinationPath $Path
 }
 
 function Build {

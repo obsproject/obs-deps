@@ -2,26 +2,26 @@ param(
     [string] $Name = 'detours',
     [string] $Version = '4.0.1',
     [string] $Uri = 'https://github.com/microsoft/detours.git',
-    [string] $Hash = 'e4bfd6b03e50de46b47abfbd1e46b384f0c5f833'
+    [string] $Hash = '734ac64899c44933151c1335f6ef54a590219221'
 )
 
 function Setup {
-    Setup-Dependency -Uri $Uri -Hash $Hash -DestinationPath $Path
+    Setup-Dependency -Uri $Uri -Hash $Hash -DestinationPath $Path -Branch main
 }
 
 function Clean {
     Set-Location $Path
 
     $Items = @(
-        @{ErrorAction = "SilentlyContinue"; Path = "lib.${Target}"}
-        @{ErrorAction = "SilentlyContinue"; Path = "bin.${Target}"}
-        @{ErrorAction = "SilentlyContinue"; Path = "src/obj..${Target}"}
+        @{ErrorAction = "SilentlyContinue"; Path = "lib.$($Target.ToUpper())"}
+        @{ErrorAction = "SilentlyContinue"; Path = "bin.$($Target.ToUpper())"}
+        @{ErrorAction = "SilentlyContinue"; Path = "src/obj.$($Target.ToUpper())"}
     )
 
     $Items | ForEach-Object {
         $Item = $_
         Log-Information "Clean $($Item.Path) (${Target})"
-        Get-ChildItem @Item | Remove-Item
+        Get-ChildItem @Item | Remove-Item -Recurse
     }
 }
 
@@ -34,7 +34,6 @@ function Build {
         BuildPath = "src"
         BuildCommand = "nmake"
         Target = $Target
-        HostArchitecture = $Target
     }
 
     Invoke-DevShell @Params

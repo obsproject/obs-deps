@@ -3,7 +3,8 @@ param(
     [string] $Version = '16.2',
     [string] $Uri = 'https://github.com/aja-video/ntv2.git',
     [string] $Hash = '0acbac70a0b5e6509cca78cfbf69974c73c10db9',
-    [switch] $ForceStatic = $true
+    [switch] $ForceStatic = $true,
+    [array] $Targets = @('x64', 'x86')
 )
 
 function Setup {

@@ -3,7 +3,8 @@ param(
     [string] $Version = 'v2023.3.0',
     [string] $Uri = 'https://github.com/oneapi-src/oneVPL.git',
     [string] $Hash = 'e12ace9761bb52786409e830f619916b86e87fc5',
-    [switch] $ForceStatic = $true
+    [switch] $ForceStatic = $true,
+    [array] $Targets = @('x64', 'x86')
 )
 
 function Setup {

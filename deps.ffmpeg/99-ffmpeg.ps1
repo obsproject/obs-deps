@@ -49,9 +49,10 @@ function Configure {
     Log-Information "Configure (${Target})"
     Set-Location $Path
 
-    $TargetCPUs = @{
+    $TargetArch = @{
         x64 = 'x86_64'
         x86 = 'x86'
+        arm64 = 'arm64'
     }
 
     New-Item -ItemType Directory -Force "build_${Target}" > $null
@@ -60,13 +61,14 @@ function Configure {
         'bash'
         '../configure'
         ('--prefix="' + $($script:ConfigData.OutputPath -replace '([A-Fa-f]):','/$1' -replace '\\','/') + '"')
-        ('--arch=' + $($TargetCPUs[$Target]))
+        ('--arch=' + $($TargetArch[$Target]))
         '--toolchain=msvc'
-        ('--extra-cflags=' + "'-D_WINDLL -MD -D_WIN32_WINNT=0x0A00'")
+        ('--extra-cflags=' + "'-D_WINDLL -MD -D_WIN32_WINNT=0x0A00" + $(if ( $Target -eq 'arm64' ) { ' -D__ARM_PCS_VFP' }) + "'")
         ('--extra-cxxflags=' + "'-MD -D_WIN32_WINNT=0x0A00'")
         ('--extra-ldflags=' + "'-APPCONTAINER:NO -MACHINE:${Target}'")
+        $(if ( $Target -eq 'arm64' ) { '--as=armasm64.exe','--cpu=armv8' })
         '--pkg-config=pkg-config'
-        $(if ( $Target -eq 'x64' ) { '--target-os=win64' } else { '--target-os=win32' })
+        $(if ( $Target -ne 'x86' ) { '--target-os=win64' } else { '--target-os=win32' })
         $(if ( $Target -eq 'x64' ) { '--enable-libaom' })
         $(if ( $Target -eq 'x64' ) { '--enable-libsvtav1' })
         '--enable-libtheora'
@@ -107,11 +109,13 @@ function Configure {
         PKG_CONFIG_LIBDIR = $env:PKG_CONFIG_LIBDIR
         LDFLAGS = $env:LDFLAGS
         MSYS2_PATH_TYPE = $env:MSYS2_PATH_TYPE
+        PATH = $env:PATH
     }
     $env:CFLAGS = "$($script:CFlags) -I$($script:ConfigData.OutputPath -replace '([A-Fa-f]):','/$1' -replace '\\','/')/include"
     $env:CXXFLAGS = "$($script:CxxFlags) -I$($script:ConfigData.OutputPath -replace '([A-Fa-f]):','/$1' -replace '\\','/')/include"
     $env:PKG_CONFIG_LIBDIR = "$($script:ConfigData.OutputPath -replace '([A-Fa-f]):','/$1' -replace '\\','/')/lib/pkgconfig"
     $env:LDFLAGS = "-LIBPATH:$($script:ConfigData.OutputPath -replace '([A-Fa-f]):','/$1' -replace '\\','/')/lib"
+    $env:PATH = "$($script:WorkRoot -replace '([A-Fa-f]):','/$1' -replace '\\','/')/gas-preprocessor;${Env:PATH})"
     $env:MSYS2_PATH_TYPE = 'inherit'
     Invoke-DevShell @Params
     $Backup.GetEnumerator() | ForEach-Object { Set-Item -Path "env:\$($_.Key)" -Value $_.Value }
@@ -130,11 +134,13 @@ function Build {
     }
 
     $Backup = @{
-        MSYS2_PATH_TYPE = $env:MSYS2_PATH_TYPE
+        MSYS2_PATH_TYPE = $Env:MSYS2_PATH_TYPE
         VERBOSE = $env:VERBOSE
+        PATH = $env:PATH
     }
     $env:MSYS2_PATH_TYPE = 'inherit'
     $env:VERBOSE = $(if ( $VerbosePreference -eq 'Continue' ) { '1' })
+    $env:PATH = "$($script:WorkRoot -replace '([A-Fa-f]):','/$1' -replace '\\','/')/gas-preprocessor;${Env:PATH})"
     Invoke-DevShell @Params
     $Backup.GetEnumerator() | ForEach-Object { Set-Item -Path "env:\$($_.Key)" -Value $_.Value }
 }
