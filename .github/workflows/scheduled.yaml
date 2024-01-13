@@ -108,7 +108,7 @@ jobs:
           if (( #to_remove )) brew uninstall --ignore-dependencies ${to_remove}
 
           local -r date_string=$(date +"%Y-%m-%d")
-          print "ccacheDate=${date_string} >> $GITHUB_OUTPUT
+          print "ccacheDate=${date_string}" >> $GITHUB_OUTPUT
 
       - name: Restore Compilation Cache
         id: ccache-cache
