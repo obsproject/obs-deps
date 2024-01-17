@@ -2,9 +2,9 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='asio'
-local version='1.28.0'
+local version='1.29.0'
 local url='https://github.com/chriskohlhoff/asio.git'
-local hash='c465349fa5cd91a64bb369f5131ceacab2c0c1c3'
+local hash='814f67e730e154547aea3f4d99f709cbdf1ea4a0'
 
 ## Build Steps
 setup() {
