@@ -4,7 +4,7 @@ autoload -Uz log_debug log_error log_info log_status log_output
 local name='syphon'
 local version='5.0'
 local url='https://github.com/Syphon/Syphon-Framework.git'
-local hash='cb3d8ec506dc6ed0d5d9d099ffc5e120719a1a6a'
+local hash='39e31383fff8bfb244bba0abbc7233e2606c82a9'
 
 ## Build Steps
 setup() {
