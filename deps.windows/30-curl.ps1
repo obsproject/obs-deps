@@ -1,14 +1,8 @@
 param(
     [string] $Name = 'curl',
-    [string] $Version = '8.4.0',
+    [string] $Version = '8.5.0',
     [string] $Uri = 'https://github.com/curl/curl.git',
-    [string] $Hash = 'd755a5f7c009dd63a61b2c745180d8ba937cbfeb',
-    [array] $Patches = @(
-        @{
-            PatchFile = "${PSScriptRoot}/patches/curl/0001-Fix-curl-config-cmake-in.patch"
-            HashSum = "4b4ab217ff24875ad0fdb0a6e93f70938186113da885081d8fc99fc88205fb2d"
-        }
-    )
+    [string] $Hash = '7161cb17c01dcff1dc5bf89a18437d9d729f1ecd'
 )
 
 function Setup {
