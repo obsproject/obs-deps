@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'amf',
-    [string] $Version = '1.4.30',
+    [string] $Version = '1.4.32',
     [string] $Uri = 'https://github.com/GPUOpen-LibrariesAndSDKs/AMF.git',
-    [string] $Hash = 'a118570647cfa579af8875c3955a314c3ddd7058'
+    [string] $Hash = 'c48e50ad6c8723c006b2c145d8fa49ecc0651022'
 )
 
 function Setup {
