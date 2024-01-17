@@ -2,9 +2,9 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='nlohmann-json'
-local version='3.11.2'
+local version='3.11.3'
 local url='https://github.com/nlohmann/json.git'
-local hash='bc889afb4c5bf1c0d8ee29ef35eaaf4c8bef8a5d'
+local hash='9cca280a4d0ccf0c08f47a99aa71d1b0e52f8d03'
 
 ## Build Steps
 setup() {
