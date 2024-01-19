@@ -89,6 +89,8 @@ install() {
 
   cd ${dir}/build_${arch}
 
+  if [[ ${arch} == universal ]] sed -i '' -E -e 's/build_(x86_64|arm64)/build_universal/g' Makefile
+
   PATH="${(j.:.)cc_path}" progress make install
 }
 
