@@ -73,7 +73,7 @@ config() {
     -DGEN_FILES=OFF
   )
 
-  if [[ ${config} == Release ]] args+=(-DCMAKE_C_FLAGS="-std=c17 -g")
+  if [[ ${config} == Release ]] args=(${args//-DCMAKE_C_FLAGS=/-DCMAKE_C_FLAGS=-g })
 
   log_info "Config (%F{3}${target}%f)"
   cd "${dir}"
