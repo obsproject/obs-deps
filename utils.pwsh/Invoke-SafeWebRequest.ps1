@@ -57,7 +57,14 @@ function Invoke-SafeWebRequest {
                 }
             }
 
-            Invoke-External curl --fail --location $(if ( $Env:CI -eq $null ) { '--progress-bar' }) --output $OutFile @HeaderStrings $Uri
+            $CurlOptions = @(
+                '--fail'
+                '--location'
+                $(if ( $Env:CI -eq $null ) { '--progress-bar' })
+                '--output', "$OutFile"
+            )
+
+            Invoke-External curl @CurlOptions @HeaderStrings $Uri
 
             $NewHash = Get-FileHash -Path $OutFile -Algorithm $Algorithm
         }
