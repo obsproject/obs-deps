@@ -14,7 +14,7 @@ runs:
   using: composite
   steps:
     - name: Download universal macOS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ${{ inputs.base }}
 
@@ -80,7 +80,7 @@ runs:
         print "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
 
     - name: Publish Build Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.combineArchs.outputs.artifactName }}
         path: ${{ github.workspace }}/${{ steps.combineArchs.outputs.artifactFileName }}
