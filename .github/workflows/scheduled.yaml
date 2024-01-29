@@ -92,7 +92,7 @@ jobs:
         shell: zsh --no-rcs --errexit --pipefail {0}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Environment
         id: setup
@@ -112,7 +112,7 @@ jobs:
 
       - name: Restore Compilation Cache
         id: ccache-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/.ccache
           key: ${{ matrix.target }}-ccache-ffmpeg-${{ steps.setup.outputs.ccacheDate }}
@@ -145,7 +145,7 @@ jobs:
         shell: pwsh
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build FFmpeg
         uses: ./.github/actions/build-ffmpeg
@@ -173,7 +173,7 @@ jobs:
         shell: zsh --no-rcs --errexit --pipefail {0}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Environment
         id: setup
@@ -193,7 +193,7 @@ jobs:
 
       - name: Restore Compilation Cache
         id: ccache-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/.ccache
           key: ${{ matrix.target }}-ccache-deps-${{ matrix.config }}-${{ steps.setup.outputs.ccacheDate }}
@@ -226,7 +226,7 @@ jobs:
         shell: pwsh
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build ntv2 Debug
         if: matrix.target == 'x64'
@@ -287,7 +287,7 @@ jobs:
         shell: zsh --no-rcs --errexit --pipefail {0}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Environment
         id: setup
@@ -306,7 +306,7 @@ jobs:
 
       - name: Restore Compilation Cache
         id: ccache-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/.ccache
           key: macos-universal-ccache-qt6-${{ steps.setup.outputs.ccacheDate }}
@@ -330,7 +330,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build Windows Qt
         uses: ./.github/actions/build-qt

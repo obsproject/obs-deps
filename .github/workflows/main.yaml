@@ -28,7 +28,7 @@ jobs:
       shortHash: ${{ steps.checks.outputs.shortHash }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Check for GitHub Labels
         id: checks
@@ -73,7 +73,7 @@ jobs:
         shell: zsh --no-rcs --errexit --pipefail {0}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Environment
         id: setup
@@ -104,7 +104,7 @@ jobs:
 
       - name: Restore Compilation Cache
         id: ccache-cache
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: ${{ github.workspace }}/.ccache
           key: ${{ matrix.target }}-ccache-ffmpeg-${{ steps.setup.outputs.ccacheDate }}
@@ -120,21 +120,21 @@ jobs:
 
       - name: Publish Build Artifacts
         if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.artifactFileName }}
 
       - name: Publish Debug Symbol Artifacts
         if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.setup.outputs.dsymArtifactName }}
           path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.dsymArtifactFileName }}
 
       - name: Save Compilation Cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4
         with:
           path: ${{ github.workspace }}/.ccache
           key: ${{ matrix.target }}-ccache-ffmpeg-${{ steps.setup.outputs.ccacheDate }}
@@ -159,7 +159,7 @@ jobs:
         shell: pwsh
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Environment
         id: setup
@@ -182,7 +182,7 @@ jobs:
 
       - name: Publish Build Artifacts
         if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}\windows\${{ steps.setup.outputs.artifactFileName }}
@@ -193,7 +193,7 @@ jobs:
     needs: [pre-checks, ffmpeg-macos-build]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Create universal binary package
         if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
@@ -231,7 +231,7 @@ jobs:
         shell: zsh --no-rcs --errexit --pipefail {0}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Environment
         id: setup
@@ -262,7 +262,7 @@ jobs:
 
       - name: Restore Compilation Cache
         id: ccache-cache
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: ${{ github.workspace }}/.ccache
           key: ${{ matrix.target }}-ccache-deps-${{ steps.setup.outputs.ccacheDate }}
@@ -278,21 +278,21 @@ jobs:
 
       - name: Publish Build Artifacts
         if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.artifactFileName }}
 
       - name: Publish Debug Symbol Artifacts
         if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.setup.outputs.dsymArtifactName }}
           path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.dsymArtifactFileName }}
 
       - name: Save Compilation Cache
         if: github.event_name == 'push' && steps.ccache-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4
         with:
           path: ${{ github.workspace }}/.ccache
           key: ${{ matrix.target }}-ccache-deps-${{ steps.setup.outputs.ccacheDate }}
@@ -303,7 +303,7 @@ jobs:
     needs: [pre-checks, macos-build]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Create universal binary package
         if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
@@ -330,7 +330,7 @@ jobs:
         shell: zsh --no-rcs --errexit --pipefail {0}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Environment
         id: setup
@@ -358,7 +358,7 @@ jobs:
 
       - name: Restore Compilation Cache
         id: ccache-cache
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: ${{ github.workspace }}/.ccache
           key: macos-universal-ccache-qt6-${{ steps.setup.outputs.ccacheDate }}
@@ -373,21 +373,21 @@ jobs:
 
       - name: Publish Build Artifacts
         if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}/macos-universal/${{ steps.setup.outputs.artifactFileName }}
 
       - name: Publish Debug Symbol Artifacts
         if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.setup.outputs.dsymArtifactName }}
           path: ${{ github.workspace }}/macos-universal/${{ steps.setup.outputs.dsymArtifactFileName }}
 
       - name: Save Compilation Cache
         if: github.event_name == 'push' && steps.ccache-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4
         with:
           path: ${{ github.workspace }}/.ccache
           key: macos-universal-ccache-qt6-${{ steps.setup.outputs.ccacheDate }}
@@ -407,7 +407,7 @@ jobs:
     needs: [pre-checks, macos-qt6-build]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Create single architecture binary package
         if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
@@ -445,7 +445,7 @@ jobs:
         shell: pwsh
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Environment
         id: setup
@@ -512,7 +512,7 @@ jobs:
 
       - name: Publish Build Artifacts
         if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}\windows\${{ steps.setup.outputs.artifactFileName }}
@@ -529,7 +529,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Environment
         id: setup
@@ -549,7 +549,7 @@ jobs:
 
       - name: Publish Build Artifacts
         if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.setup.outputs.artifactName }}
           path: ${{ github.workspace }}/windows/${{ steps.setup.outputs.artifactFileName }}
@@ -564,7 +564,7 @@ jobs:
     needs: [pre-checks, windows-qt6-build]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Create Windows Qt package
         if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
@@ -591,7 +591,7 @@ jobs:
           echo "version=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
 
       - name: Package Windows dependencies
         run: |

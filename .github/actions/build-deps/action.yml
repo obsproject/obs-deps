@@ -43,7 +43,7 @@ runs:
 
     - name: Restore Dependencies from Cache
       id: deps-cache
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: |
           ${{ inputs.workingDirectory }}/*_build_temp/*
@@ -86,7 +86,7 @@ runs:
         ./Build-Dependencies.ps1 @Params
 
     - name: Save Dependencies to Cache
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       if: github.event_name == 'schedule' || (github.event_name == 'push' && steps.deps-cache.outputs.cache-hit != 'true')
       with:
         path: |
