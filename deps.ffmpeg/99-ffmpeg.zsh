@@ -89,6 +89,13 @@ config() {
         ${ld_flags}
       )
 
+      local clang_version=$(clang --version | head -1 | cut -d ' ' -f 4)
+
+      autoload -Uz is-at-least
+      if is-at-least 15.0.0 ${clang_version}; then
+        ff_ldflags+=(-Wl,-ld_classic)
+      fi
+
       args+=(
         --cc=clang
         --cxx=clang++
