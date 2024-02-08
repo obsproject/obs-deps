@@ -73,8 +73,26 @@ config() {
       autoload -Uz universal_config && universal_config
       return
       ;;
-    macos-arm64) args+=(--host="aarch64-apple-darwin${target_config[darwin_target]}") ;;
-    macos-x86_64) args+=(--host="x86_64-apple-darwin${target_config[darwin_target]}") ;;
+    macos-arm64)
+      args+=(--host="aarch64-apple-darwin${target_config[darwin_target]}")
+
+      local clang_version=$(clang --version | head -1 | cut -d ' ' -f 4)
+
+      autoload -Uz is-at-least
+      if is-at-least 15.0.0 ${clang_version}; then
+        ld_flags+=(-Wl,-ld_classic)
+      fi
+      ;;
+    macos-x86_64)
+      args+=(--host="x86_64-apple-darwin${target_config[darwin_target]}")
+
+      local clang_version=$(clang --version | head -1 | cut -d ' ' -f 4)
+
+      autoload -Uz is-at-least
+      if is-at-least 15.0.0 ${clang_version}; then
+        ld_flags+=(-Wl,-ld_classic)
+      fi
+      ;;
     windows-x*)
       args+=(
         --host="${target_config[cross_prefix]}-pc-mingw32"
