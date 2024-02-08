@@ -75,7 +75,7 @@ jobs:
 
   ffmpeg-macos-build:
     name: Build FFmpeg for macOS
-    runs-on: macos-13
+    runs-on: macos-14
     needs: cache-cleanup
     strategy:
       fail-fast: true
@@ -158,7 +158,7 @@ jobs:
 
   macos-build:
     name: Build macOS Dependencies
-    runs-on: macos-13
+    runs-on: macos-14
     needs: cache-cleanup
     strategy:
       fail-fast: true
@@ -285,7 +285,7 @@ jobs:
 
   macos-qt6-build:
     name: Build Qt6 (macOS)
-    runs-on: macos-13
+    runs-on: macos-14
     needs: cache-cleanup
     defaults:
       run:

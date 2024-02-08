@@ -55,7 +55,7 @@ jobs:
 
   ffmpeg-macos-build:
     name: Build FFmpeg for macOS
-    runs-on: macos-13
+    runs-on: macos-14
     needs: pre-checks
     strategy:
       fail-fast: true
@@ -189,7 +189,7 @@ jobs:
 
   ffmpeg-package-universal:
     name: Build FFmpeg (Universal)
-    runs-on: macos-13
+    runs-on: macos-14
     needs: [pre-checks, ffmpeg-macos-build]
     steps:
       - name: Checkout
@@ -213,7 +213,7 @@ jobs:
 
   macos-build:
     name: Build macOS Dependencies
-    runs-on: macos-13
+    runs-on: macos-14
     needs: pre-checks
     strategy:
       fail-fast: true
@@ -299,7 +299,7 @@ jobs:
 
   macos-package-universal:
     name: Build macOS Dependencies (Universal)
-    runs-on: macos-13
+    runs-on: macos-14
     needs: [pre-checks, macos-build]
     steps:
       - name: Checkout
@@ -323,7 +323,7 @@ jobs:
 
   macos-qt6-build:
     name: Build Qt6 (macOS)
-    runs-on: macos-13
+    runs-on: macos-14
     needs: pre-checks
     defaults:
       run:
@@ -394,7 +394,7 @@ jobs:
 
   macos-qt6-package:
     name: Create macOS Qt6 (${{ matrix.target }})
-    runs-on: macos-13
+    runs-on: macos-14
     strategy:
       fail-fast: true
       matrix:
