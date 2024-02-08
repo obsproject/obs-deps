@@ -51,7 +51,7 @@ jobs:
             fi
           done <<< \
           "$(gh api repos/${GITHUB_REPOSITORY}/actions/caches \
-            --jq '.actions_caches.[] | select(.ref|test("refs/heads/master")) | select(.key|test(".+-(qt6|deps)-.+")) | select(.key|test(".+ffmpeg.+")|not) | {id, key} | join(";")')"
+            --jq '.actions_caches.[] | select(.ref|test("refs/heads/master")) | select(.key|test(".+-(qt6|ffmpeg|deps)-.+")) | {id, key} | join(";")')"
           echo '::endgroup::'
 
           echo '::group::Processing pull request cache entries'
@@ -76,6 +76,7 @@ jobs:
   ffmpeg-macos-build:
     name: Build FFmpeg for macOS
     runs-on: macos-13
+    needs: cache-cleanup
     strategy:
       fail-fast: true
       matrix:
@@ -129,6 +130,7 @@ jobs:
   ffmpeg-windows-build:
     name: Build FFmpeg for Windows
     runs-on: windows-2022
+    needs: cache-cleanup
     strategy:
       fail-fast: true
       matrix:
@@ -157,6 +159,7 @@ jobs:
   macos-build:
     name: Build macOS Dependencies
     runs-on: macos-13
+    needs: cache-cleanup
     strategy:
       fail-fast: true
       matrix:
@@ -210,6 +213,7 @@ jobs:
   windows-build:
     name: Build Windows Dependencies
     runs-on: windows-2022
+    needs: cache-cleanup
     strategy:
       fail-fast: true
       matrix:
@@ -282,6 +286,7 @@ jobs:
   macos-qt6-build:
     name: Build Qt6 (macOS)
     runs-on: macos-13
+    needs: cache-cleanup
     defaults:
       run:
         shell: zsh --no-rcs --errexit --pipefail {0}
@@ -322,6 +327,7 @@ jobs:
   windows-qt6-build:
     name: Build Qt6 (Windows)
     runs-on: windows-2022
+    needs: cache-cleanup
     strategy:
       fail-fast: true
       matrix:
