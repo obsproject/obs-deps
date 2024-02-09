@@ -69,7 +69,7 @@ config() {
   )
 
   case ${target} {
-    macos-*) args+=(-DCONFIG_RUNTIME_CPU_DETECT=0 -DCMAKE_TOOLCHAIN_FILE="build/cmake/toolchains/${target_config[cmake_arch]}-macos.cmake") ;;
+    macos-*) args+=(-DCMAKE_TOOLCHAIN_FILE="build/cmake/toolchains/${target_config[cmake_arch]}-macos.cmake") ;;
     windows-x*) args+=(-DCMAKE_TOOLCHAIN_FILE="build/cmake/toolchains/${target_config[cmake_arch]}-mingw-gcc.cmake")
   }
 
