@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'aom',
-    [string] $Version = '3.8.0',
+    [string] $Version = '3.8.1',
     [string] $Uri = 'https://aomedia.googlesource.com/aom.git',
-    [string] $Hash = 'b681eac83963950afc7be55df56c22fa5210aaa2',
+    [string] $Hash = 'bb6430482199eaefbeaaa396600935082bc43f66',
     [array] $FixupPatches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/aom/0001-windows-pkg-config-fix.patch"
