@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'zlib',
-    [string] $Version = '1.3',
+    [string] $Version = '1.3.1',
     [string] $Uri = 'https://github.com/madler/zlib.git',
-    [string] $Hash = "09155eaa2f9270dc4ed1fa13e2b4b2613e6e4851",
+    [string] $Hash = "51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf",
     [array] $Patches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/zlib/0001-fix-unistd-detection.patch"
