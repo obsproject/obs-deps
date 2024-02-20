@@ -5,6 +5,10 @@ local name='qt6'
 local version=6.6.2
 local url='https://download.qt.io/official_releases/qt/6.6/6.6.2'
 local hash="${0:a:h}/checksums"
+local -a patches=(
+  "macos ${0:a:h}/patches/Qt6/mac/0001-QTBUG-121351.patch \
+    df46dc93e874c36b2ad0da746c43585528308a7fcde60930c1ffb5e841472e7b"
+)
 
 local -a qt_components=(
   'qtbase'
