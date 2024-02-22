@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'srt',
-    [string] $Version = '1.5.3',
-    [string] $Uri = 'https://github.com/Haivision/srt/archive/refs/tags/v1.5.3.zip',
-    [string] $Hash = "${PSScriptRoot}/checksums/v1.5.3.zip.sha256",
+    [string] $Version = '1.5.2',
+    [string] $Uri = 'https://github.com/Haivision/srt/archive/refs/tags/v1.5.2.zip',
+    [string] $Hash = "${PSScriptRoot}/checksums/v1.5.2.zip.sha256",
     [switch] $ForceShared = $true
 )
 
