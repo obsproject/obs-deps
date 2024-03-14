@@ -98,6 +98,11 @@ jobs:
       - name: Setup Environment
         id: setup
         run: |
+          : Setup Environment
+          print '::group::Enable Xcode 15.2'
+          sudo xcode-select --switch /Applications/Xcode_15.2.app/Contents/Developer
+          print '::endgroup::'
+
           local -a to_remove=()
 
           for formula (llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile \
@@ -182,6 +187,9 @@ jobs:
         id: setup
         run: |
           : Setup Environment
+          print '::group::Enable Xcode 15.2'
+          sudo xcode-select --switch /Applications/Xcode_15.2.app/Contents/Developer
+          print '::endgroup::'
 
           to_remove=()
 
@@ -298,6 +306,10 @@ jobs:
         id: setup
         run: |
           : Setup Environment
+          print '::group::Enable Xcode 15.2'
+          sudo xcode-select --switch /Applications/Xcode_15.2.app/Contents/Developer
+          print '::endgroup::'
+
           local -a to_remove=()
 
           for formula (llvm gcc) {
