@@ -33,7 +33,7 @@ clean() {
 patch() {
   autoload -Uz apply_patch
 
-  log_info "Patch (%F{3}${target}%f)"
+  log_info "Patch: (%F{3}${target}%f)"
 
   cd "${dir}"
 
