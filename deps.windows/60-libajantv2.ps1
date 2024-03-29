@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'ntv2',
-    [string] $Version = '16.2',
-    [string] $Uri = 'https://github.com/aja-video/ntv2.git',
-    [string] $Hash = '0acbac70a0b5e6509cca78cfbf69974c73c10db9',
+    [string] $Version = '17.0.1',
+    [string] $Uri = 'https://github.com/aja-video/libajantv2.git',
+    [string] $Hash = 'b6acce6b135c3d9ae7a2bce966180b159ced619f',
     [switch] $ForceStatic = $true
 )
 
@@ -32,11 +32,16 @@ function Configure {
     $OnOff = @('OFF', 'ON')
     $Options = @(
         $CmakeOptions
-        "-DAJA_BUILD_SHARED:BOOL=$($OnOff[$Shared])"
-        '-DAJA_BUILD_OPENSOURCE:BOOL=ON'
-        '-DAJA_BUILD_APPS:BOOL=OFF'
+        "-DAJANTV2_BUILD_SHARED:BOOL=$($OnOff[$Shared])"
+        '-DAJANTV2_DISABLE_DEMOS:BOOL=ON'
+        '-DAJANTV2_DISABLE_DRIVER:BOOL=ON'
+        '-DAJANTV2_DISABLE_TESTS:BOOL=ON'
+        '-DAJANTV2_DISABLE_TOOLS:BOOL=ON'
+        '-DAJANTV2_DISABLE_PLUGINS:BOOL=ON'
         '-DAJA_INSTALL_SOURCES:BOOL=OFF'
         '-DAJA_INSTALL_HEADERS:BOOL=ON'
+        '-DAJA_INSTALL_MISC:BOOL=OFF'
+        '-DAJA_INSTALL_CMAKE:BOOL=OFF'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options
