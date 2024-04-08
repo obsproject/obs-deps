@@ -16,6 +16,7 @@ local -a qt_components=(
   'qtshadertools'
   'qtmultimedia'
   'qtsvg'
+  'qttools'
 )
 
 local dir='qt6'
@@ -209,6 +210,18 @@ qt_add_submodules() {
 
       local -a _args=(${common_cmake_flags})
       if [[ ${component} == qtimageformats ]] _args+=(-DINPUT_tiff:STRING=qt -DINPUT_webp:STRING=qt)
+      if [[ ${component} == qttools ]]; then
+        _args+=(
+          -DFEATURE_assistant:BOOL=OFF
+          -DFEATURE_designer:BOOL=ON
+          -DFEATURE_linguist:BOOL=OFF
+          -DFEATURE_pixeltool:BOOL=OFF
+          -DFEATURE_qtdiag:BOOL=OFF
+          -DFEATURE_qtplugininfo:BOOL=OFF
+          -DFEATURE_qtattributionsscanner:BOOL=OFF
+          -DQT_BUILD_TOOLS_BY_DEFAULT:BOOL=ON
+        )
+      fi
 
       pushd ${dir}/${component}
       log_debug "CMake configuration options: ${_args}'"
