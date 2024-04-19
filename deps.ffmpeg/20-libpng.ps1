@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'libpng',
-    [string] $Version = '1.6.40',
-    [string] $Uri = 'https://sourceforge.net/projects/libpng/files/libpng16/1.6.40/lpng1640.zip',
-    [string] $Hash = "${PSScriptRoot}/checksums/lpng1640.zip.sha256"
+    [string] $Version = '1.6.43',
+    [string] $Uri = 'https://sourceforge.net/projects/libpng/files/libpng16/1.6.43/lpng1643.zip',
+    [string] $Hash = "${PSScriptRoot}/checksums/lpng1643.zip.sha256"
 )
 
 function Setup {
