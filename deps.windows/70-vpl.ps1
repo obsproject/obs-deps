@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'vpl',
-    [string] $Version = 'v2.10.1',
+    [string] $Version = 'v2.10.2',
     [string] $Uri = 'https://github.com/intel/libvpl.git',
-    [string] $Hash = '79ef61b11790c70941cfa4d167b5d20d3a4e9744',
+    [string] $Hash = '383b5caac6df614e76ade5a07c4f53be702e9176',
     [switch] $ForceStatic = $true
 )
 
