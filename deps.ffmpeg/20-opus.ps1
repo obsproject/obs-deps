@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'opus',
-    [string] $Version = '1.4',
+    [string] $Version = '1.5.2',
     [string] $Uri = 'https://github.com/xiph/opus.git',
-    [string] $Hash = "82ac57d9f1aaf575800cf17373348e45b7ce6c0d"
+    [string] $Hash = "ddbe48383984d56acd9e1ab6a090c54ca6b735a6"
 )
 
 function Setup {
