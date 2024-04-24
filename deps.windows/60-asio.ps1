@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'asio',
-    [string] $Version = '1.29.0',
+    [string] $Version = '1.30.2',
     [string] $Uri = 'https://github.com/chriskohlhoff/asio.git',
-    [string] $Hash = "814f67e730e154547aea3f4d99f709cbdf1ea4a0"
+    [string] $Hash = "12e0ce9e0500bf0f247dbd1ae894272656456079"
 )
 
 function Setup {
