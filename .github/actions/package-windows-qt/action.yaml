@@ -111,7 +111,9 @@ runs:
           'qtpaths.pdb'
           'qvkgen.pdb'
           'rcc.pdb'
+          'syncqt.pdb'
           'tracegen.pdb'
+          'tracepointgen.pdb'
           'uic.pdb'
         )
 
