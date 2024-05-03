@@ -117,7 +117,6 @@ config() {
     -DFEATURE_libjpeg:BOOL=ON
     -DFEATURE_libpng:BOOL=ON
     -DFEATURE_macdeployqt:BOOL=OFF
-    -DFEATURE_openssl:BOOL=OFF
     -DFEATURE_pcre2:BOOL=ON
     -DFEATURE_pdf:BOOL=OFF
     -DFEATURE_printdialog:BOOL=OFF
@@ -133,6 +132,7 @@ config() {
     -DFEATURE_system_pcre2:BOOL=OFF
     -DFEATURE_system_zlib:BOOL=ON
     -DFEATURE_windeployqt:BOOL=OFF
+    -DINPUT_openssl:STRING=no
     -DQT_BUILD_BENCHMARKS:BOOL=OFF
     -DQT_BUILD_EXAMPLES:BOOL=OFF
     -DQT_BUILD_EXAMPLES_BY_DEFAULT:BOOL=OFF
