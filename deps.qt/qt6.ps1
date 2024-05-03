@@ -123,6 +123,7 @@ function Configure {
         '-DQT_BUILD_TESTS:BOOL=OFF'
         '-DQT_BUILD_TESTS_BY_DEFAULT:BOOL=OFF'
         '-DQT_BUILD_TOOLS_BY_DEFAULT:BOOL=OFF'
+        '-DQT_USE_VCPKG:BOOL=OFF'
         '-DCMAKE_IGNORE_PREFIX_PATH:PATH=C:/Strawberry/c'
     )
 

@@ -142,6 +142,7 @@ config() {
     -DQT_BUILD_TESTS_BY_DEFAULT:BOOL=OFF
     -DQT_BUILD_TOOLS_BY_DEFAULT:BOOL=OFF
     -DQT_CREATE_VERSIONED_HARD_LINK:BOOL=OFF
+    -DQT_USE_VCPKG:BOOL=OFF
   )
 
   log_info "Config qtbase (%F{3}${target}%f)"
