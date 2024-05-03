@@ -131,6 +131,7 @@ config() {
     -DFEATURE_system_libpng:BOOL=OFF
     -DFEATURE_system_pcre2:BOOL=OFF
     -DFEATURE_system_zlib:BOOL=ON
+    -DFEATURE_testlib:BOOL=OFF
     -DFEATURE_windeployqt:BOOL=OFF
     -DINPUT_openssl:STRING=no
     -DQT_BUILD_BENCHMARKS:BOOL=OFF
