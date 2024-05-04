@@ -114,11 +114,11 @@ config() {
     -DFEATURE_doubleconversion:BOOL=ON
     -DFEATURE_glib:BOOL=OFF
     -DFEATURE_itemmodeltester:BOOL=OFF
-    -DFEATURE_libjpeg:BOOL=ON
-    -DFEATURE_libpng:BOOL=ON
+    -DFEATURE_jpeg:BOOL=ON
     -DFEATURE_macdeployqt:BOOL=OFF
     -DFEATURE_pcre2:BOOL=ON
     -DFEATURE_pdf:BOOL=OFF
+    -DFEATURE_png:BOOL=ON
     -DFEATURE_printdialog:BOOL=OFF
     -DFEATURE_printer:BOOL=OFF
     -DFEATURE_printpreviewdialog:BOOL=OFF
@@ -127,9 +127,9 @@ config() {
     -DFEATURE_qmake:BOOL=OFF
     -DFEATURE_sql:BOOL=OFF
     -DFEATURE_system_doubleconversion:BOOL=OFF
-    -DFEATURE_system_libjpeg:BOOL=OFF
-    -DFEATURE_system_libpng:BOOL=OFF
+    -DFEATURE_system_jpeg:BOOL=OFF
     -DFEATURE_system_pcre2:BOOL=OFF
+    -DFEATURE_system_png:BOOL=OFF
     -DFEATURE_system_zlib:BOOL=ON
     -DFEATURE_testlib:BOOL=OFF
     -DFEATURE_windeployqt:BOOL=OFF
