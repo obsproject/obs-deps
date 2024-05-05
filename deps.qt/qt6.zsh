@@ -216,9 +216,9 @@ qt_add_submodules() {
           -DFEATURE_designer:BOOL=ON
           -DFEATURE_linguist:BOOL=OFF
           -DFEATURE_pixeltool:BOOL=OFF
+          -DFEATURE_qtattributionsscanner:BOOL=OFF
           -DFEATURE_qtdiag:BOOL=OFF
           -DFEATURE_qtplugininfo:BOOL=OFF
-          -DFEATURE_qtattributionsscanner:BOOL=OFF
           -DQT_BUILD_TOOLS_BY_DEFAULT:BOOL=ON
         )
       fi
