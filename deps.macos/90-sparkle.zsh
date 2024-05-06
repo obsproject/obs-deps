@@ -2,9 +2,9 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='Sparkle'
-local version='2.6.1'
-local url='https://github.com/sparkle-project/Sparkle/releases/download/2.6.1/Sparkle-2.6.1.tar.xz'
-local hash="${0:a:h}/checksums/Sparkle-2.6.1.tar.xz.sha256"
+local version='2.6.2'
+local url='https://github.com/sparkle-project/Sparkle/releases/download/2.6.2/Sparkle-2.6.2.tar.xz'
+local hash="${0:a:h}/checksums/Sparkle-2.6.2.tar.xz.sha256"
 
 ## Build Steps
 setup() {
