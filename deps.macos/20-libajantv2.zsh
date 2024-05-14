@@ -57,7 +57,15 @@ build() {
   log_info "Build (%F{3}${target}%f)"
 
   cd ${dir}
-  cmake --build build_${arch} --config ${config}
+  
+  args=(
+    --build build_${arch}
+    --config ${config}
+  )
+
+  if (( _loglevel > 1 )) args+=(--verbose)
+
+  cmake ${args}
 }
 
 install() {
