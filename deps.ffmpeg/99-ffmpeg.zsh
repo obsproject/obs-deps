@@ -184,7 +184,6 @@ config() {
         --cross-prefix="${target_config[cross_prefix]}-w64-mingw32-"
         --pkg-config=pkg-config
         --enable-cross-compile
-        --disable-mediafoundation
       )
 
       if [[ ${arch} == x64 ]] args+=(--enable-libaom --enable-libsvtav1)
