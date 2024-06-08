@@ -88,7 +88,6 @@ function Configure {
         '--disable-sdl2'
         '--disable-doc'
         '--disable-postproc'
-        '--disable-mediafoundation'
         $(if ( ! $script:Shared ) { ('--pkg-config-flags=' + "'--static'") })
         $(if ( $Configuration -eq 'Debug' ) { '--enable-debug' } else { '--disable-debug' })
         $(if ( $Configuration -eq 'RelWithDebInfo' ) { '--disable-stripping' })
