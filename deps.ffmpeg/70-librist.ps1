@@ -53,7 +53,7 @@ function Configure {
     }
 
     $VisualStudioData = Find-VisualStudio
-    $VisualStudioId = ($VisualStudioData.DisplayName -split ' ')[3]
+    $VisualStudioId = ($VisualStudioData.DisplayName -split ' ')[-1]
 
     $Options = @(
         '--buildtype', "$($ConfigStrings[$Configuration])"
