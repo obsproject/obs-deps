@@ -8,7 +8,8 @@ param(
             PatchFile = "${PSScriptRoot}/patches/libtheora/0001-add-windows-cmake.patch"
             HashSum = "9F7554581AABC81F360D040E95C1CBF935E9CD80019526B1A6951A1179524D50"
         }
-    )
+    ),
+    [array] $Targets = @('x64')
 )
 
 function Setup {

@@ -2,7 +2,8 @@ param(
     [string] $Name = 'libogg',
     [string] $Version = '1.3.5',
     [string] $Uri = 'https://github.com/xiph/ogg/releases/download/v1.3.5/libogg-1.3.5.zip',
-    [string] $Hash = "${PSScriptRoot}/checksums/libogg-1.3.5.zip.sha256"
+    [string] $Hash = "${PSScriptRoot}/checksums/libogg-1.3.5.zip.sha256",
+    [array] $Targets = @('x64')
 )
 
 function Setup {

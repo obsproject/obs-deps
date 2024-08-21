@@ -12,7 +12,8 @@ param(
             PatchFile = "${PSScriptRoot}/patches/FFmpeg/0002-libaomenc-presets-Windows.patch"
             HashSum = "cec898b957fc289512094fc2c4e6a61d6872f716e4a643fb970c599a453a33f4"
         }
-    )
+    ),
+    [array] $Targets = @('x64')
 )
 
 function Setup {

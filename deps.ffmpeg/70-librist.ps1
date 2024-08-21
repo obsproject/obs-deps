@@ -9,6 +9,7 @@ param(
             HashSum = "804B845BC66ED180B6C2F962ECF29D55190AA92248FE25F4478C68AE2A91DFFC"
         }
     ),
+    [array] $Targets = @('x64'),
     [switch] $ForceShared = $true
 )
 

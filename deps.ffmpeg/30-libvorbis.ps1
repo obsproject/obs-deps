@@ -2,7 +2,8 @@ param(
     [string] $Name = 'libvorbis',
     [string] $Version = '1.3.7',
     [string] $Uri = 'https://github.com/xiph/vorbis.git',
-    [string] $Hash = "84c023699cdf023a32fa4ded32019f194afcdad0"
+    [string] $Hash = "84c023699cdf023a32fa4ded32019f194afcdad0",
+    [array] $Targets = @('x64')
 )
 
 function Setup {
