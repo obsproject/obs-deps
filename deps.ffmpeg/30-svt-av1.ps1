@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'svt-av1',
-    [string] $Version = '2.0.0',
+    [string] $Version = '2.2.1',
     [string] $Uri = 'https://gitlab.com/AOMediaCodec/SVT-AV1.git',
-    [string] $Hash = '2aeeb4f1a1d495b84bf5c21dbb60ae10e991fada',
+    [string] $Hash = '55a01def732bb9e7016d23cc512384f7a88d6e86',
     [array] $Patches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/svt-av1/0001-cpuinfo-MSVC-detection.patch"
