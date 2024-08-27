@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'FFmpeg',
-    [string] $Version = '7.0',
+    [string] $Version = '7.0.2',
     [string] $Uri = 'https://github.com/FFmpeg/FFmpeg.git',
-    [string] $Hash = "083443d67cb159ce469e5d902346b8d0c2cd1c93",
+    [string] $Hash = "e3a61e91030696348b56361bdf80ea358aef4a19",
     [array] $Patches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/FFmpeg/0001-flvdec-handle-unknown-Windows.patch"
