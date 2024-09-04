@@ -87,6 +87,7 @@ package() {
 
     rm -rf -- lib/^(*.dylib|*.a|*.so*|*.lib|*.framework|*.dSYM|cmake)(N)
     rm -rf -- lib/(libpcre*|libpng*|libfreetype.a)(N)
+    rm -rf -- lib/cmake/MbedTLS(N)
     rm -rf -- bin/^(*.exe|*.dll|*.pdb|swig)(N)
 
     if [[ ${PACKAGE_NAME} == ffmpeg ]] rm -rf -- lib/*.a(N)
