@@ -623,9 +623,10 @@ jobs:
             zip -r windows-deps-${{ steps.metadata.outputs.version }}-${arch}.zip -- *
             mv windows-deps-${{ steps.metadata.outputs.version }}-${arch}.zip ${GITHUB_WORKSPACE}
 
-            if [[ -f ${GITHUB_WORKSPACE}/qt6-windows-${arch}-!(*-@(Debug|RelWithDebInfo|Release|MinSizeRel))/*.zip ]]; then
-              mv ${GITHUB_WORKSPACE}/qt6-windows-${arch}-!(*-@(Debug|RelWithDebInfo|Release|MinSizeRel))/*.zip ${GITHUB_WORKSPACE}
-            fi
+            files=("${GITHUB_WORKSPACE}"/qt6-windows-"${arch}"-!(*-@(Debug|RelWithDebInfo|Release|MinSizeRel))/*.zip)
+            for artifact in ${files}; do
+              mv ${artifact} ${GITHUB_WORKSPACE}
+            done
             popd > /dev/null
           done
 
