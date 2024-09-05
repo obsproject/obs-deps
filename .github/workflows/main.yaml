@@ -607,6 +607,7 @@ jobs:
         run: |
           : Package Windows dependencies
           shopt -s extglob
+          shopt -s nullglob
 
           for arch in x64 x86; do
             _temp=$(mktemp -d)
@@ -624,8 +625,8 @@ jobs:
             mv windows-deps-${{ steps.metadata.outputs.version }}-${arch}.zip ${GITHUB_WORKSPACE}
 
             files=("${GITHUB_WORKSPACE}"/qt6-windows-"${arch}"-!(*-@(Debug|RelWithDebInfo|Release|MinSizeRel))/*.zip)
-            for artifact in ${files}; do
-              mv ${artifact} ${GITHUB_WORKSPACE}
+            for artifact in "${files[@]}"; do
+              mv "${artifact}" "${GITHUB_WORKSPACE}"
             done
             popd > /dev/null
           done
