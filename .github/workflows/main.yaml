@@ -16,6 +16,8 @@ on:
   push:
     branches:
       - '**'  # This will match any branch name
+    tags:
+      - '*'
 
 concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
