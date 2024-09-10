@@ -290,6 +290,8 @@ jobs:
           target: ${{ matrix.target }}
           type: ${{ matrix.type }}
           config: ${{ matrix.config }}
+        env:
+          github_hash: ${{ github.sha }}
 
       - name: Publish Build Artifacts
         if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
