@@ -1,0 +1,111 @@
+name: Build Qt
+description: Builds Qt for obs-deps with specified architecture and build config
+inputs:
+  target:
+    description: Build target for Qt
+    required: true
+  config:
+    description: Build configuration
+    required: false
+    default: Release
+  qtVersion:
+    description: Qt version to build
+    required: false
+    default: '6'
+  workingDirectory:
+    description: Working directory for repository action
+    required: false
+    default: ${{ github.workspace }}
+runs:
+  using: composite
+  steps:
+    - name: Environment Setup
+      id: env-setup
+      shell: bash
+      working-directory: ${{ inputs.workingDirectory }}
+      run: |
+        : Environment Setup
+
+        shopt -s nullglob
+
+        case "${RUNNER_OS}" in
+          macOS)
+            if ! type sha256sum &> /dev/null; then
+              brew install coreutils
+            fi
+
+            deps_hash=$(cat ${PWD}/deps.qt/qt${{ inputs.qtVersion }}.zsh | sha256sum | cut -d " " -f 1)
+            patch_files=(${PWD}/deps.qt/patches/Qt${{ inputs.qtVersion }}/mac/*.patch)
+            ;;
+          Windows)
+            deps_hash=$(cat ${PWD}/deps.qt/qt${{ inputs.qtVersion }}.ps1 | sha256sum | cut -d " " -f 1)
+            patch_files=(${PWD}/deps.qt/patches/Qt${{ inputs.qtVersion }}/win/*.patch)
+            ;;
+        esac
+
+        if (( ${#patch_files[@]} )); then
+          qt_patch_hash=$(cat ${patch_files[@]} | sha256sum | cut -d " " -f 1)
+        else
+          qt_patch_hash=$(echo '' | sha256sum | cut -d " " -f 1)
+        fi
+
+        echo "depHash=${deps_hash:0:9}" >> $GITHUB_OUTPUT
+        echo "patchHash=${qt_patch_hash:0:9}" >> $GITHUB_OUTPUT
+
+    - name: Restore Qt from Cache
+      id: deps-cache
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          ${{ inputs.workingDirectory }}/*_build_temp/qt${{ inputs.qtVersion }}*
+          !${{ inputs.workingDirectory }}/*_build_temp/**/.git
+          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.gz
+          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.xz
+          !${{ inputs.workingDirectory }}/*_build_temp/*.zip
+        key: ${{ inputs.target }}-qt${{ inputs.qtVersion }}-${{inputs.config }}-${{ steps.env-setup.outputs.depHash }}-${{ steps.env-setup.outputs.patchHash }}
+
+    - name: Build and Install Qt
+      if: runner.os == 'macOS'
+      shell: zsh --no-rcs --errexit --pipefail {0}
+      run: |
+        : Build and Install macOS Qt
+
+        local -a build_args=(
+          --target ${{ inputs.target }}
+          --config ${{ inputs.config }}
+          --shared
+        )
+
+        if [[ '${{ steps.deps-cache.outputs.cache-hit }}' == 'true' ]] build_args+=(--skip-build --skip-unpack)
+
+        ./build-qt${{ inputs.qtVersion }}.zsh ${build_args}
+
+    - name: Build and Install Qt
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        # Build and Install Windows Qt
+
+        $Params = @{
+          PackageName = 'qt'
+          Target = '${{ inputs.target }}'
+          Configuration = '${{ inputs.config }}'
+          Shared = $true
+          Dependencies = 'qt${{ inputs.qtVersion }}'
+          SkipBuild = $(if ( '${{ steps.deps-cache.outputs.cache-hit }}' -eq 'true' ) { $true } else { $false })
+          SkipUnpack = $(if ( '${{ steps.deps-cache.outputs.cache-hit }}' -eq 'true' ) { $true } else { $false })
+        }
+
+        ./Build-Dependencies.ps1 @Params
+
+    - name: Save Qt to Cache
+      if: github.event_name == 'schedule' || (github.event_name == 'push' && steps.deps-cache.outputs.cache-hit != 'true')
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          ${{ inputs.workingDirectory }}/*_build_temp/qt${{ inputs.qtVersion }}*
+          !${{ inputs.workingDirectory }}/*_build_temp/**/.git
+          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.gz
+          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.xz
+          !${{ inputs.workingDirectory }}/*_build_temp/*.zip
+        key: ${{ inputs.target }}-qt${{ inputs.qtVersion }}-${{inputs.config }}-${{ steps.env-setup.outputs.depHash }}-${{ steps.env-setup.outputs.patchHash }}

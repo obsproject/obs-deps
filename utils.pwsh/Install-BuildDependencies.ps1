@@ -17,12 +17,15 @@ function Install-BuildDependencies {
     if ( ! ( Test-Path function:Log-Warning ) ) {
         . Logger.ps1
     }
-    
-    $Host64Bit = [System.Environment]::Is64BitOperatingSystem
 
-    $Prefix = (${Env:ProgramFiles(x86)}, $Env:ProgramFiles)[$Host64Bit]
+    $Prefixes = @{
+        'arm64' = ${env:ProgramFiles(arm)}
+        'x64' = ${env:ProgramFiles}
+        'x86' = ${env:ProgramFiles(x86)}
+    }
 
-    $Paths = $Env:Path -split [System.IO.Path]::PathSeparator
+    $Paths = $env:Path -split [System.IO.Path]::PathSeparator
+    $Paths = $Paths | Get-Unique | Where-Object { ( ! ($_ -match 'Strawberry' ) ) }
 
     $WingetOptions = @('install', '--accept-package-agreements', '--accept-source-agreements')
 
@@ -31,13 +34,25 @@ function Install-BuildDependencies {
     }
 
     Get-Content $WingetFile | ForEach-Object {
-        $_, $Package, $_, $Path, $_, $Binary = $_ -replace ',','' -replace "'", '' -split ' '
+        $PackageEntry = $_
+        $_, $Package, $_, $Path, $_, $Binary, $_, $Version = $PackageEntry -replace ',','' -split " +(?=(?:[^\']*\'[^\']*\')*[^\']*$)" -replace "'",''
 
-        $FullPath = "${Prefix}\${Path}"
-        if ( ( Test-Path $FullPath  ) -and ! ( $Paths -contains $FullPath ) ) {
-            $Paths += $FullPath
-            $Env:Path = $Paths -join [System.IO.Path]::PathSeparator
+        if ( $Package -eq 'MSYS2.MSYS2' ) {
+            if ( ( Test-Path "${Path}\${Binary}*" ) -and ! ( $Paths -contains $Path ) ) {
+                $Paths = @($Path) + $Paths
+            }
+        } else {
+            foreach($Prefix in $Prefixes.GetEnumerator()) {
+                $FullPath = "$($Prefix.value)\${Path}"
+
+                if ( ( Test-Path "${FullPath}\${Binary}*" ) -and ! ( $Paths -contains $FullPath ) ) {
+                    $Paths = @($FullPath) + $Paths
+                    break
+                }
+            }
         }
+
+        $env:Path = $Paths -join [System.IO.Path]::PathSeparator
 
         Log-Debug "Checking for command ${Binary}"
         $Found = Get-Command -ErrorAction SilentlyContinue $Binary
@@ -45,15 +60,27 @@ function Install-BuildDependencies {
         if ( $Found ) {
             Log-Status "Found dependency ${Binary} as $($Found.Source)"
         } else {
-            Log-Status "Installing package ${Package}"
+            Log-Status "Installing package ${Package}$(if ( $Version -ne $null ) { " Version: ${Version}" } )"
+
+            if ( $Version -ne $null ) {
+                $WingetOptions += '--version', ${Version}
+            }
 
             try {
-                $Params = $WingetOptions + $Package
+                if ( $env:CI -eq $null ) {
+                    $Params = $WingetOptions + $Package
 
-                winget @Params
+                    Invoke-External winget @Params
+                } else {
+                    if ( $Package -eq 'meson' ) {
+                        python3 -m pip install meson
+                    }
+                }
             } catch {
                 throw "Error while installing winget package ${Package}: $_"
             }
         }
     }
+
+    $env:Path = $Paths -join [System.IO.Path]::PathSeparator
 }

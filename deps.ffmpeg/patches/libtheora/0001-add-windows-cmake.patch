@@ -1,0 +1,110 @@
+--- /dev/null	2023-05-23 02:56:44
++++ ./CMakeLists.txt	2023-05-23 02:55:14
+@@ -0,0 +1,107 @@
++cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
++
++project(
++  libtheora
++  VERSION 1.1.1
++  LANGUAGES C)
++
++add_library(theoradec)
++add_library(theoraenc)
++add_library(theora_sources INTERFACE)
++
++option(BUILD_SHARED_LIBS "Build shared library" OFF)
++
++if(NOT TARGET Ogg::ogg)
++  find_package(Ogg REQUIRED)
++endif()
++
++target_sources(
++  theora_sources
++  INTERFACE
++    # cmake-format: sortable
++    lib/apiwrapper.c
++    lib/bitpack.c
++    lib/dequant.c
++    lib/bitpack.c
++    lib/dequant.c
++    lib/fragment.c
++    lib/idct.c
++    lib/info.c
++    lib/internal.c
++    lib/state.c
++    lib/quant.c
++    lib/decapiwrapper.c
++    lib/decinfo.c
++    lib/decode.c
++    lib/huffdec.c
++    include/theora/codec.h
++    include/theora/theora.h
++    include/theora/theoradec.h
++    include/theora/theoraenc.h
++    "$<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},Win32>:${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_vc/mmxfrag.c>"
++    "$<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},Win32>:${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_vc/mmxidct.c>"
++    "$<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},Win32>:${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_vc/mmxstate.c>"
++    "$<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},Win32>:${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_vc/x86state.c>"
++    "$<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},x64>:${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_vc/mmxfrag.c>"
++    "$<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},x64>:${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_vc/mmxidct.c>"
++    "$<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},x64>:${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_vc/mmxstate.c>"
++    "$<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},x64>:${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_vc/x86state.c>"
++)
++
++target_include_directories(theora_sources
++                           INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
++target_compile_definitions(
++  theora_sources
++  INTERFACE
++    _CRT_SECURE_NO_DEPRECATE
++    _CRT_NONSTDC_NO_DEPRECATE
++    $<$<AND:$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},Win32>,$<CONFIG:Release,RelWithDebInfo,MinSizeRel>>:OC_X86_ASM>
++)
++target_link_libraries(theora_sources INTERFACE Ogg::ogg)
++
++target_sources(
++  theoraenc
++  PRIVATE
++    # cmake-format: sortable
++    lib/analyze.c
++    lib/encapiwrapper.c
++    lib/encfrag.c
++    lib/encinfo.c
++    lib/encode.c
++    lib/enquant.c
++    lib/fdct.c
++    lib/huffenc.c
++    lib/mathops.c
++    lib/mcenc.c
++    lib/rate.c
++    lib/tokenize.c
++    win32/xmingw32/libtheoraenc-all.def
++    "$<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},Win32>:${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_vc/mmxencfrag.c>"
++    "$<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},Win32>:${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_vc/mmxfdct.c>"
++    "$<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},Win32>:${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_vc/x86enc.c>"
++    "$<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},x64>:${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_vc/mmxencfrag.c>"
++    "$<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},x64>:${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_vc/mmxfdct.c>"
++    "$<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},x64>:${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_vc/x86enc.c>"
++)
++
++target_sources(
++  theoradec PRIVATE lib/decapiwrapper.c lib/decinfo.c lib/decode.c
++                    lib/huffdec.c win32/xmingw32/libtheoradec-all.def)
++
++target_link_libraries(theoradec PRIVATE theora_sources)
++set_property(TARGET theoradec APPEND PROPERTY PUBLIC_HEADER include/theora/codec.h include/theora/theora.h include/theora/theoradec.h)
++install(
++  TARGETS theoradec
++  RUNTIME DESTINATION bin
++  LIBRARY DESTINATION lib
++  ARCHIVE DESTINATION lib
++  PUBLIC_HEADER DESTINATION include/theora)
++
++target_link_libraries(theoraenc PRIVATE theora_sources)
++set_property(TARGET theoraenc APPEND PROPERTY PUBLIC_HEADER include/theora/codec.h include/theora/theora.h include/theora/theoraenc.h)
++install(
++  TARGETS theoraenc
++  RUNTIME DESTINATION bin
++  LIBRARY DESTINATION lib
++  ARCHIVE DESTINATION lib
++  PUBLIC_HEADER DESTINATION include/theora)

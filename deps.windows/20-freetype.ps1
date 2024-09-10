@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'freetype',
-    [string] $Version = '2.13.0',
+    [string] $Version = '2.13.2',
     [string] $Uri = 'https://github.com/freetype/freetype.git',
-    [string] $Hash = 'de8b92dd7ec634e9e2b25ef534c54a3537555c11'
+    [string] $Hash = '920c5502cc3ddda88f6c7d85ee834ac611bb11cc'
 )
 
 function Setup {
@@ -24,12 +24,12 @@ function Configure {
     $OnOff = @('OFF', 'ON')
     $Options = @(
         $CmakeOptions
-        "-DBUILD_SHARED_LIBS=$($OnOff[$script:Shared.isPresent])"
-        '-DFT_DISABLE_BROTLI=ON'
-        '-DFT_DISABLE_BZIP2=ON'
-        '-DFT_DISABLE_HARFBUZZ=ON'
-        '-DFT_DISABLE_PNG=ON'
-        '-DFT_DISABLE_ZLIB=ON'
+        "-DBUILD_SHARED_LIBS:BOOL=$($OnOff[$script:Shared.isPresent])"
+        '-DFT_DISABLE_BROTLI:BOOL=ON'
+        '-DFT_DISABLE_BZIP2:BOOL=ON'
+        '-DFT_DISABLE_HARFBUZZ:BOOL=ON'
+        '-DFT_DISABLE_PNG:BOOL=ON'
+        '-DFT_DISABLE_ZLIB:BOOL=ON'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options

@@ -1,0 +1,86 @@
+name: Create Single Architecture macOS Build
+description: Takes the contents of an universal macOS build artifact and creates single architecture macOS binaries
+inputs:
+  base:
+    description: Name of the universal macOS artifact
+    required: true
+  target:
+    description: Target architecture to extract from universal builds
+    required: true
+  outputName:
+    description: Name for created universal macOS artifact
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Download universal macOS artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.base }}
+
+    - name: Combine macOS architectures
+      id: combineArchs
+      shell: zsh {0}
+      run: |
+        setopt ERR_EXIT
+        setopt ERR_RETURN
+        setopt PIPE_FAIL
+        setopt EXTENDED_GLOB
+
+        extract() {
+          case ${1} {
+            *.tar.xz) XZ_OPT=-T0 tar -xJf ${1} ;;
+            *.tar.gz) tar -xjf ${1} ;;
+            *.zip) unzip ${1} ;;
+            *.tar) tar -xf ${1} ;;
+            *) print -u2 "${0}: archive type unsupported ${1}"
+          }
+        }
+
+        local target='${{ inputs.target }}'
+        local artifact=(*universal*(.))
+
+        mkdir -p ${artifact:r:r}
+        pushd ${artifact:r:r}
+        extract ../${artifact}
+        popd
+
+        target_dir="${${artifact:r:r}//universal/${target##*-}}"
+
+        cp -cpR ${artifact:r:r} ${target_dir}
+        pushd ${target_dir}
+
+        local file
+        local magic
+        local target_arch="${target##*-}"
+        local -A other_arch=(arm64 x86_64 x86_64 arm64)
+
+        for file (**/*(.)) {
+          magic=$(xxd -ps -l 4 ${file})
+
+          if [[ ${magic} == "cafebabe" ]] fixups+=(${file})
+        }
+
+        /usr/bin/xcrun --sdk macosx -show-sdk-version &> /dev/null
+        for file (${fixups}) {
+          lipo -remove "${other_arch[${target_arch}]}" ${file} -output ${file}
+        }
+
+        artifact_name="${{ inputs.outputName }}"
+        file_name="${artifact//universal/${target##*-}}"
+
+        XZ_OPT=-T0 tar -cJf ${file_name} -- *
+
+        mv ${file_name} ${{ github.workspace }}/${file_name}
+        popd
+
+        rm -rf -- *(universal)*(N)
+
+        print "artifactName=${artifact_name}" >> $GITHUB_OUTPUT
+        print "artifactFileName=${file_name}" >> $GITHUB_OUTPUT
+
+    - name: Publish Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.combineArchs.outputs.artifactName }}
+        path: ${{ github.workspace }}/${{ steps.combineArchs.outputs.artifactFileName }}

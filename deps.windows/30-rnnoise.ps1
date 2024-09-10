@@ -25,8 +25,8 @@ function Configure {
     $OnOff = @('OFF', 'ON')
     $Options = @(
         $CmakeOptions
-        "-DBUILD_SHARED_LIBS=$($OnOff[$script:Shared.isPresent])"
-        '-DRNNOISE_COMPILE_OPUS=ON'
+        "-DBUILD_SHARED_LIBS:BOOL=$($OnOff[$script:Shared.isPresent])"
+        '-DRNNOISE_COMPILE_OPUS:BOOL=ON'
     )
 
     Log-Debug "CMake configure options: ${Options}"

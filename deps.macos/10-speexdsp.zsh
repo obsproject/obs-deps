@@ -20,12 +20,12 @@ setup() {
 }
 
 clean() {
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${clean_build} -gt 0 && -f "build_${arch}/Makefile" ]] {
+  if [[ ${clean_build} -gt 0 && -f build_${arch}/Makefile ]] {
     log_info "Clean build directory (%F{3}${target}%f)"
 
-    rm -rf "build_${arch}"
+    rm -rf build_${arch}
   }
 }
 
@@ -33,18 +33,14 @@ patch() {
   autoload -Uz apply_patch
 
   log_info "Patch (%F{3}${target}%f)"
-  cd "${dir}"
+  cd ${dir}
 
-  case ${target} {
-    macos-*)
-      local patch
-      for patch (${patches}) {
-        local _url
-        local _hash
-        read _url _hash <<< "${patch}"
-        apply_patch "${_url}" "${_hash}"
-      }
-      ;;
+  local patch
+  local _url
+  local _hash
+  for patch (${patches}) {
+    read _url _hash <<< "${patch}"
+    apply_patch ${_url} ${_hash}
   }
 }
 
@@ -62,7 +58,7 @@ config() {
   }
 
   log_info "Config (%F{3}${target}%f)"
-  cd "${dir}"
+  cd ${dir}
 
   progress ./autogen.sh
 
@@ -75,7 +71,7 @@ config() {
   )
 
   log_debug "Configure options: ${args}"
-  CFLAGS="${c_flags}" \
+  CFLAGS="${c_flags//-std=c17/}" \
   LDFLAGS="${ld_flags}" \
   PKG_CONFIG_PATH="${target_config[output_dir]}/lib/pkgconfig" \
   PATH="${(j.:.)cc_path}" \
@@ -93,10 +89,10 @@ build() {
   }
 
   log_info "Build (%F{3}${target}%f)"
-  cd "${dir}/build_${arch}"
+  cd ${dir}/build_${arch}
 
   log_debug "Running make -j ${num_procs}"
-  PATH="${(j.:.)cc_path}" progress make -j "${num_procs}"
+  PATH="${(j.:.)cc_path}" progress make -j ${num_procs}
 }
 
 install() {
@@ -108,28 +104,23 @@ install() {
   }
 
   log_info "Install (%F{3}${target}%f)"
-  cd "${dir}/build_${arch}"
+  cd ${dir}/build_${arch}
 
-  if [[ ${config} =~ "Release|MinSizeRel" ]] {
-    progress make install-strip
-  } else {
-    progress make install
-  }
+  progress make install
 }
 
 fixup() {
-  autoload -Uz fix_rpaths
+  cd ${dir}
 
-  cd "${dir}"
+  if (( shared_libs )) {
+    local -a dylib_files=(${target_config[output_dir]}/lib/libspeexdsp*.dylib(.))
 
-  case ${target} {
-    macos*)
-      if (( shared_libs )) {
-        log_info "Fixup (%F{3}${target}%f)"
-        fix_rpaths "${target_config[output_dir]}"/lib/libspeexdsp*.dylib
-      } else {
-        rm "${target_config[output_dir]}"/lib/libspeexdsp*.dylib(N)
-      }
-      ;;
+    log_info "Fixup (%F{3}${target}%f)"
+    autoload -Uz fix_rpaths && fix_rpaths ${dylib_files}
+
+    if [[ ${config} == Release ]] dsymutil ${dylib_files}
+    if [[ ${config} == (Release|MinSizeRel) ]] strip -x ${dylib_files}
+  } else {
+    rm -rf -- ${target_config[output_dir]}/lib/libspeexdsp*.(dylib|dSYM)(N)
   }
 }

@@ -13,12 +13,12 @@ setup() {
 }
 
 clean() {
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${clean_build} -gt 0 && -d "build_${arch}" ]] {
+  if [[ ${clean_build} -gt 0 && -d build_${arch} ]] {
     log_info "Clean build directory (%F{3}${target}%f)"
 
-    rm -rf "build_${arch}"
+    rm -rf build_${arch}
   }
 }
 
@@ -36,9 +36,9 @@ config() {
     -DJANSSON_BUILD_SHARED_LIBS="${_onoff[(( shared_libs + 1 ))]}"
   )
 
-  cd "${dir}"
+  cd ${dir}
   log_debug "CMake configure args: ${args}'"
-  progress cmake -S . -B "build_${arch}" -G Ninja ${args}
+  progress cmake -S . -B build_${arch} -G Ninja ${args}
 }
 
 build() {
@@ -46,8 +46,8 @@ build() {
 
   log_info "Build (%F{3}${target}%f)"
 
-  cd "${dir}"
-  cmake --build "build_${arch}" --config "${config}"
+  cd ${dir}
+  cmake --build build_${arch} --config ${config}
 }
 
 install() {
@@ -60,33 +60,33 @@ install() {
     --config "${config}"
   )
 
-  if [[ "${config}" =~ "Release|MinSizeRel" ]] args+=(--strip)
-
-  cd "${dir}"
+  cd ${dir}
   progress cmake ${args}
 }
 
 fixup() {
-  cd "${dir}"
+  cd ${dir}
 
-  case ${target} {
-    macos*)
-      if (( shared_libs )) {
-        log_info "Fixup (%F{3}${target}%f)"
-        pushd "${target_config[output_dir]}"/lib
-        if [[ -h libjansson.dylib ]] {
-          rm libjansson.dylib
-          ln -s libjansson.*.dylib(.) libjansson.dylib
-        }
-        popd
+  if (( shared_libs )) {
+    pushd "${target_config[output_dir]}"/lib
+    if [[ -h libjansson.dylib ]] {
+      rm libjansson.dylib
+      ln -s libjansson.*.dylib(.) libjansson.dylib
+    }
+    popd
 
-        autoload -Uz fix_rpaths
-        fix_rpaths "${target_config[output_dir]}"/lib/libjansson*.dylib
+    local -a dylib_files=(${target_config[output_dir]}/lib/libjansson*.dylib(.))
 
-        for file ("${target_config[output_dir]}"/lib/cmake/jansson/janssonTargets-*.cmake) {
-          sed -i '' 's/libjansson.*.dylib/libjansson.dylib/' "${file}"
-        }
-      }
-      ;;
+    log_info "Fixup (%F{3}${target}%f)"
+    autoload -Uz fix_rpaths && fix_rpaths ${dylib_files}
+
+    if [[ ${config} == Release ]] dsymutil ${dylib_files}
+    if [[ ${config} == (Release|MinSizeRel) ]] strip -x ${dylib_files}
+
+    for file (${target_config[output_dir]}/lib/cmake/jansson/janssonTargets-*.cmake) {
+      sed -i '' 's/libjansson.*.dylib/libjansson.dylib/' "${file}"
+    }
+  } else {
+    rm -rf -- ${target_config[output_dir]}/lib/libjansson*.(dylib|dSYM)(N)
   }
 }

@@ -1,0 +1,14 @@
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.PowerShell.Commands.FileHashInfo</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Microsoft.PowerShell.Commands.FileHashInfo</ToString>
+    <Props>
+      <S N="Algorithm">SHA256</S>
+      <S N="Hash">2686F75533BD53EC917DAB6129186B124B4D105EADAA6A84E83719AC3B5AE6BD</S>
+      <S N="Path">v1.5.2.zip</S>
+    </Props>
+  </Obj>
+</Objs>

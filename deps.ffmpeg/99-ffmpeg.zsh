@@ -2,9 +2,9 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='FFmpeg'
-local version='6.0'
+local version='7.0'
 local url='https://github.com/FFmpeg/FFmpeg.git'
-local hash='a6dc92968a325d331bb6dcf9b3b2248026cd1d6c'
+local hash='083443d67cb159ce469e5d902346b8d0c2cd1c93'
 local -a patches=(
   "* ${0:a:h}/patches/FFmpeg/0001-flvdec-handle-unknown.patch \
     5a5185f54cbcf4672763cce687d1b6ddb662549b69637da826279ce4797f57ef"
@@ -21,12 +21,12 @@ setup() {
 }
 
 clean() {
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${clean_build} -gt 0 && -f "build_${arch}/Makefile" ]] {
+  if [[ ${clean_build} -gt 0 && -f build_${arch}/Makefile ]] {
     log_info "Clean build directory (%F{3}${target}%f)"
 
-    rm -rf "build_${arch}"
+    rm -rf build_${arch}
   }
 }
 
@@ -35,7 +35,7 @@ patch() {
 
   log_info "Patch: (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
   local patch
   local _target
@@ -45,7 +45,7 @@ patch() {
   for patch (${patches}) {
     read _target _url _hash <<< "${patch}"
 
-    if [[ "${target%%-*}" == ${~_target} ]] apply_patch "${_url}" "${_hash}"
+    if [[ ${target%%-*} == ${~_target} ]] apply_patch ${_url} ${_hash}
   }
 }
 
@@ -70,8 +70,8 @@ config() {
       for lib (${hide_libs}) {
         read -r lib_name lib_file <<< "${lib}"
 
-        if [[ -d "${HOMEBREW_PREFIX}/opt/${lib_name}" && -h "${HOMEBREW_PREFIX}/lib/${lib_file}" ]] {
-          brew unlink "${lib_name}"
+        if [[ -d ${HOMEBREW_PREFIX}/opt/${lib_name} && -h ${HOMEBREW_PREFIX}/lib/${lib_file} ]] {
+          brew unlink ${lib_name}
         }
       }
 
@@ -91,11 +91,17 @@ config() {
         ${ld_flags}
       )
 
+      local clang_version=$(clang --version | head -1 | cut -d ' ' -f 4)
+
+      autoload -Uz is-at-least
+      if is-at-least 15.0.0 ${clang_version}; then
+        ff_ldflags+=(-Wl,-ld_classic)
+      fi
+
       args+=(
         --cc=clang
         --cxx=clang++
         --host-cc=clang
-        --extra-libs="-lstdc++"
         --arch="${arch}"
         --enable-libaom
         --enable-videotoolbox
@@ -105,7 +111,7 @@ config() {
         --enable-rpath
       )
 
-      if [[ ${CPUTYPE} != "${arch}" ]] args+=(--enable-cross-compile)
+      if [[ ${CPUTYPE} != ${arch} ]] args+=(--enable-cross-compile)
     ;;
     linux-*)
       ff_cflags=(
@@ -139,7 +145,7 @@ config() {
         )
       }
 
-      if [[ ${CPUTYPE} != "${arch}" ]] args+=(--enable-cross-compile)
+      if [[ ${CPUTYPE} != ${arch} ]] args+=(--enable-cross-compile)
       ;;
     windows-x*)
       ff_cflags=(
@@ -183,7 +189,7 @@ config() {
         --disable-mediafoundation
       )
 
-      if [[ ${arch} == 'x64' ]] args+=(--enable-libaom --enable-libsvtav1)
+      if [[ ${arch} == x64 ]] args+=(--enable-libaom --enable-libsvtav1)
     ;;
   }
 
@@ -209,6 +215,7 @@ config() {
     --disable-sdl2
     --disable-doc
     --disable-postproc
+    --disable-stripping
     --disable-encoder="hevc"
     --disable-decoder="hevc"
   )
@@ -218,9 +225,9 @@ config() {
   } 
 
   log_info "Config (%F{3}${target}%f)"
-  cd "${dir}"
+  cd ${dir}
 
-  mkcd "build_${arch}"
+  mkcd build_${arch}
 
   log_debug "Configure options: ${args}"
   PKG_CONFIG_LIBDIR="${target_config[output_dir]}/lib/pkgconfig" \
@@ -240,10 +247,10 @@ build() {
   }
 
   log_info "Build (%F{3}${target}%f)"
-  cd "${dir}/build_${arch}"
+  cd ${dir}/build_${arch}
 
   log_debug "Running make -j ${num_procs}"
-  PATH="${(j.:.)cc_path}" progress make -j "${num_procs}"
+  PATH="${(j.:.)cc_path}" progress make -j ${num_procs}
 }
 
 install() {
@@ -251,10 +258,10 @@ install() {
 
   log_info "Install (%F{3}${target}%f)"
 
-  if [[ ${target} == 'macos-universal' ]] {
-    cd "${dir}/build_${CPUTYPE}"
+  if [[ ${target} == macos-universal ]] {
+    cd ${dir}/build_${CPUTYPE}
   } else {
-    cd "${dir}/build_${arch}"
+    cd ${dir}/build_${arch}
   }
 
   make install
@@ -263,8 +270,10 @@ install() {
 }
 
 function _fixup_ffmpeg() {
-  autoload -Uz fix_rpaths create_importlibs
   log_info "Fixup (%F{3}${target}%f)"
+
+  local strip_tool
+  local -a strip_files
 
   case ${target} {
     macos*)
@@ -272,24 +281,40 @@ function _fixup_ffmpeg() {
       local cross_lib
       local lib
 
-      if [[ ${arch} == 'universal' ]] {
+      if [[ ${arch} == universal ]] {
         log_info "Create universal binaries"
-        for lib ("${target_config[output_dir]}"/lib/lib(sw|av|postproc)*.dylib(.)) {
+        for lib (${target_config[output_dir]}/lib/lib(sw|av|postproc)*.dylib(.)) {
           if [[ ! -e ${lib} || -h ${lib} ]] continue
 
-          cross_lib=("../build_${other_arch[${CPUTYPE}]}/**/${~${lib##*/}%%.*}*.dylib(.)")
+          cross_lib=(../build_${other_arch[${CPUTYPE}]}/**/${~${lib##*/}%%.*}*.dylib(.))
 
           lipo -create ${lib} ${~cross_lib[1]} -output ${lib}
           log_status "Combined ${lib##*/}"
         }
       }
 
-      fix_rpaths "${target_config[output_dir]}"/lib/lib(sw|av|postproc)*.dylib
+      dylib_files=(${target_config[output_dir]}/lib/lib(sw|av|postproc)*.dylib(.))
+
+      autoload -Uz fix_rpaths && fix_rpaths ${dylib_files}
+
+      if [[ ${config} == Release ]] dsymutil ${dylib_files}
+
+      strip_tool=strip
+      strip_files=(${dylib_files})
+      ;;
+    linux-*)
+      strip_tool=strip
+      strip_files=(${target_config[output_dir]}/lib/lib(sw|av|postproc)*.so.*(.))
       ;;
     windows-x*)
       mv "${target_config[output_dir]}"/bin/(sw|av|postproc)*.lib "${target_config[output_dir]}"/lib
 
+      strip_tool=${target_config[cross_prefix]}-w64-mingw32-strip
+      strip_files=(${target_config[output_dir]}/bin/(sw|av|postproc)*.dll(.))
+
       if (( ! shared_libs )) { autoload -Uz restore_dlls && restore_dlls }
       ;;
   }
+
+  if (( #strip_files )) && [[ ${config} == (Release|MinSizeRel) ]] ${strip_tool} -x ${strip_files}
 }

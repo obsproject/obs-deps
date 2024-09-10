@@ -62,8 +62,8 @@ function Setup-Dependency {
 
         Invoke-SafeWebRequest @Params
 
-        if ( ! ( $script:SkipUnpack ) ) {
-            Expand-ArchiveExt -Path $File -Force
+        if ( ! ( $script:SkipUnpack -or $script:SkipAll ) ) {
+            Expand-ArchiveExt -Path $File -DestinationPath $DestinationPath -Force
         }
     }
 }

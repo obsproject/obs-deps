@@ -1,0 +1,26 @@
+From 047044c1fda8515975b163f0b011da1a80191377 Mon Sep 17 00:00:00 2001
+From: Sebastian Beckmann <beckmann.sebastian@outlook.de>
+Date: Mon, 12 Feb 2024 20:30:54 +0100
+Subject: [PATCH] Revert "QMessageBox: don't use a native dialog if a style
+ sheet is active"
+
+This reverts commit 1b71e2d894c2be7052518cdcb96020c9950e2dc7.
+---
+ src/widgets/dialogs/qmessagebox.cpp | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/qtbase/src/widgets/dialogs/qmessagebox.cpp b/qtbase/src/widgets/dialogs/qmessagebox.cpp
+index cc8e985caf..51a986e8aa 100644
+--- a/qtbase/src/widgets/dialogs/qmessagebox.cpp
++++ b/qtbase/src/widgets/dialogs/qmessagebox.cpp
+@@ -2821,7 +2821,6 @@ bool QMessageBoxPrivate::canBeNativeDialog() const
+         return true;
+     if (QCoreApplication::testAttribute(Qt::AA_DontUseNativeDialogs)
+         || q->testAttribute(Qt::WA_DontShowOnScreen)
+-        || q->testAttribute(Qt::WA_StyleSheet)
+         || (options->options() & QMessageDialogOptions::Option::DontUseNativeDialog)) {
+         return false;
+     }
+-- 
+2.37.5
+
