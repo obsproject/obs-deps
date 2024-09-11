@@ -667,6 +667,17 @@ jobs:
 
             popd > /dev/null
 
+            echo "github.workspace: " ${{ github.workspace }}
+            echo "steps.metadata.outputs.version: " ${{ steps.metadata.outputs.version }}
+            ls ${{ github.workspace }}
+            echo '--- 1'
+            ls ${{ github.workspace }}/qt6-macos-${arch}-*
+
+            rm -rf ${{ github.workspace }}/qt6-macos-${arch}-dSYMs*
+
+            echo '--- 2'
+            ls ${{ github.workspace }}/qt6-macos-${arch}-*
+
             mv ${{ github.workspace }}/qt6-macos-${arch}-*/*.tar.xz ${{ github.workspace }}/macos-deps-qt6-${{ steps.metadata.outputs.version }}-${arch}.tar.xz
           done
 
