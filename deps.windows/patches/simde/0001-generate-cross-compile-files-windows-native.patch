@@ -9,7 +9,7 @@
 +
 +[binaries]
 +c = 'cl'
-+cxx = 'cl'
++cpp = 'cl'
 +ld = 'link'
 --- /dev/null	2023-05-22 20:53:17
 +++ b/windows-x86.txt	2023-05-22 20:51:38
@@ -22,7 +22,7 @@
 +
 +[binaries]
 +c = 'cl'
-+cxx = 'cl'
++cpp = 'cl'
 +ld = 'link'
 --- /dev/null   2023-06-04 19:23:54.000000000 +0200
 +++ ./windows-arm64.txt   2023-06-04 19:23:41.542759100 +0200
@@ -35,5 +35,5 @@
 +
 +[binaries]
 +c = 'cl'
-+cxx = 'cl'
++cpp = 'cl'
 +ld = 'link'

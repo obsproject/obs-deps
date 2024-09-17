@@ -3,7 +3,7 @@ param(
     [string] $Version = '3.11.3',
     [string] $Uri = 'https://github.com/nlohmann/json.git',
     [string] $Hash = '9cca280a4d0ccf0c08f47a99aa71d1b0e52f8d03',
-    [array] $Targets = @('x64')
+    [array] $Targets = @('x64', 'arm64')
 )
 
 function Setup {

@@ -3,7 +3,7 @@ param(
     [string] $Version = '8.9.1',
     [string] $Uri = 'https://github.com/curl/curl.git',
     [string] $Hash = '83bedbd730d62b83744cc26fa0433d3f6e2e4cd6',
-    [array] $Targets = @('x64')
+    [array] $Targets = @('x64', 'arm64')
 )
 
 function Setup {

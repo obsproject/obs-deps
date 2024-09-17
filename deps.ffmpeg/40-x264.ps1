@@ -3,7 +3,7 @@ param(
     [string] $Version = 'r3106',
     [string] $Uri = 'https://github.com/mirror/x264.git',
     [string] $Hash = 'eaa68fad9e5d201d42fde51665f2d137ae96baf0',
-    [array] $Targets = @('x64'),
+    [array] $Targets = @('x64', 'arm64'),
     [switch] $ForceShared = $true
 )
 
@@ -11,8 +11,15 @@ function Setup {
     Setup-Dependency -Uri $Uri -Hash $Hash -DestinationPath $Path
 
     if ( ! ( $SkipAll -or $SkipDeps ) ) {
-        Invoke-External pacman.exe -S --noconfirm --needed --noprogressbar nasm
+        if ( $Target -ne 'arm64' ) {
+            Invoke-External pacman.exe -S --noconfirm --needed --noprogressbar nasm
+        }
         Invoke-External pacman.exe -S --noconfirm --needed --noprogressbar make
+    }
+
+    if ( $Target -eq 'arm64' ) {
+        Remove-Item -Path "${Path}/tools/gas-preprocessor.pl" -ErrorAction SilentlyContinue
+        Copy-Item -Path "$($script:WorkRoot)/gas-preprocessor/gas-preprocessor.pl" -Destination "${Path}/tools/"
     }
 }
 
@@ -31,6 +38,7 @@ function Configure {
     $TargetCPUs = @{
         x64 = 'x86_64'
         x86 = 'x86'
+        arm64 = 'aarch64'
     }
 
     if ( $ForceShared -and ( $script:Shared -eq $false ) ) {
@@ -54,7 +62,7 @@ function Configure {
         '--disable-interlaced'
         '--disable-cli'
         $(if ( $Shared ) { '--enable-shared' })
-        $(if ( $Configuration -eq 'Debug' ) { '--enable-debug' })
+        $(if ( $Configuration -match '(Debug|RelWithDebInfo)' ) { '--enable-debug' })
     )
 
     $Params = @{

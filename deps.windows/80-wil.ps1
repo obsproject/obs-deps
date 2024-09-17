@@ -3,7 +3,7 @@ param(
     [string] $Version = 'v1.0.240803.1',
     [string] $Uri = 'https://github.com/microsoft/wil.git',
     [string] $Hash = 'f0c6a81c0c9a4b23b6801f40554b8bec425a83b4',
-    [array] $Targets = @('x64'),
+    [array] $Targets = @('x64', 'arm64'),
     [switch] $ForceStatic = $true
 )
 
