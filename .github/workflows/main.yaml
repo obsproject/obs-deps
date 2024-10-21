@@ -1,23 +1,16 @@
 name: build_deps
 
-#on:
-#  push:
-#    branches:
-#      - streamlabs
-#    tags:
-#      - '20[2-9][0-9]-[0-9][0-9]-[0-9][0-9].*'
-#  pull_request:
-#    paths-ignore:
-#      - '**.md'
-#    branches:
-#      - streamlabs
-
 on:
-  push:
-    branches:
-      - '**'  # This will match any branch name
-    tags:
-      - '*'
+ push:
+   branches:
+     - streamlabs
+   tags:
+     - '20[2-9][0-9]-[0-9][0-9]-[0-9][0-9].*'
+ pull_request:
+   paths-ignore:
+     - '**.md'
+   branches:
+     - streamlabs
 
 concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
