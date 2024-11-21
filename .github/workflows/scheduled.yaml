@@ -75,7 +75,7 @@ jobs:
 
   ffmpeg-macos-build:
     name: Build FFmpeg for macOS
-    runs-on: macos-14
+    runs-on: macos-15
     needs: cache-cleanup
     strategy:
       fail-fast: true
@@ -99,19 +99,20 @@ jobs:
         id: setup
         run: |
           : Setup Environment
-          print '::group::Enable Xcode 15.2'
-          sudo xcode-select --switch /Applications/Xcode_15.2.app/Contents/Developer
+          print '::group::Enable Xcode 16.1'
+          sudo xcode-select --switch /Applications/Xcode_16.1.0.app/Contents/Developer
           print '::endgroup::'
 
-          local -a to_remove=()
-
-          for formula (llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile \
+          local -a unwanted_formulas=(llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile \
             libogg composer php gd freetype fontconfig webp libpng lame libtiff opus kotlin \
-            sbt libxft libxcb) {
-            if [[ -d /usr/local/opt/${formula} ]] to_remove+=(${formula})
+            sbt libxft libxcb pkg-config@0.29.2)
+
+          local -a remove_formulas=()
+          for formula (${unwanted_formulas}) {
+            if [[ -d ${HOMEBREW_PREFIX}/Cellar/${formula} ]] remove_formulas+=(${formula})
           }
 
-          if (( #to_remove )) brew uninstall --ignore-dependencies ${to_remove}
+          if (( #remove_formulas )) brew uninstall --ignore-dependencies ${remove_formulas}
 
           local -r date_string=$(date +"%Y-%m-%d")
           print "ccacheDate=${date_string}" >> $GITHUB_OUTPUT
@@ -160,7 +161,7 @@ jobs:
 
   macos-build:
     name: Build macOS Dependencies
-    runs-on: macos-14
+    runs-on: macos-15
     needs: cache-cleanup
     strategy:
       fail-fast: true
@@ -184,17 +185,18 @@ jobs:
         id: setup
         run: |
           : Setup Environment
-          print '::group::Enable Xcode 15.2'
-          sudo xcode-select --switch /Applications/Xcode_15.2.app/Contents/Developer
+          print '::group::Enable Xcode 16.1'
+          sudo xcode-select --switch /Applications/Xcode_16.1.0.app/Contents/Developer
           print '::endgroup::'
 
-          to_remove=()
+          local -a unwanted_formulas=(llvm gcc pkg-config@0.29.2)
 
-          for formula (llvm gcc) {
-            if [[ -d /usr/local/opt/"${formula}" ]] to_remove+=(${formula})
+          local -a remove_formulas=()
+          for formula (${unwanted_formulas}) {
+            if [[ -d ${HOMEBREW_PREFIX}/Cellar/${formula} ]] remove_formulas+=(${formula})
           }
 
-          if (( #to_remove )) brew uninstall --ignore-dependencies ${to_remove}
+          if (( #remove_formulas )) brew uninstall --ignore-dependencies ${remove_formulas}
 
           local -r date_string=$(date +"%Y-%m-%d")
           print "ccacheDate=${date_string}" >> $GITHUB_OUTPUT
@@ -291,7 +293,7 @@ jobs:
 
   macos-qt6-build:
     name: Build Qt6 (macOS)
-    runs-on: macos-14
+    runs-on: macos-15
     needs: cache-cleanup
     defaults:
       run:
@@ -304,17 +306,18 @@ jobs:
         id: setup
         run: |
           : Setup Environment
-          print '::group::Enable Xcode 15.2'
-          sudo xcode-select --switch /Applications/Xcode_15.2.app/Contents/Developer
+          print '::group::Enable Xcode 16.1'
+          sudo xcode-select --switch /Applications/Xcode_16.1.0.app/Contents/Developer
           print '::endgroup::'
 
-          local -a to_remove=()
+          local -a unwanted_formulas=(llvm gcc pkg-config)
 
-          for formula (llvm gcc) {
-            if [[ -d /usr/local/opt/"${formula}" ]] to_remove+=(${formula})
+          local -a remove_formulas=()
+          for formula (${unwanted_formulas}) {
+            if [[ -d ${HOMEBREW_PREFIX}/Cellar/${formula} ]] remove_formulas+=(${formula})
           }
 
-          if (( #to_remove )) brew uninstall --ignore-dependencies ${to_remove}
+          if (( #remove_formulas )) brew uninstall --ignore-dependencies ${remove_formulas}
 
           local -r date_string=$(date +"%Y-%m-%d")
           print "ccacheDate=${date_string}" >> $GITHUB_OUTPUT
