@@ -3,15 +3,15 @@ autoload -Uz log_debug log_error log_info log_status log_output
 ## Dependency Information
 local name='mbedtls'
 local -A versions=(
-  macos 3.4.1
-  linux 3.4.1
-  windows 3.4.1
+  macos 3.6.2
+  linux 3.6.2
+  windows 3.6.2
 )
 local url='https://github.com/Mbed-TLS/mbedtls.git'
 local -A hashes=(
-  macos 72718dd87e087215ce9155a826ee5a66cfbe9631
-  linux 72718dd87e087215ce9155a826ee5a66cfbe9631
-  windows 72718dd87e087215ce9155a826ee5a66cfbe9631
+  macos 107ea89daaefb9867ea9121002fbbdf926780e98
+  linux 107ea89daaefb9867ea9121002fbbdf926780e98
+  windows 107ea89daaefb9867ea9121002fbbdf926780e98
 )
 local -a patches=(
   "macos ${0:a:h}/patches/mbedtls/0001-enable-posix-threading-support.patch \
@@ -185,6 +185,8 @@ fixup() {
         local -a dylib_files=(${target_config[output_dir]}/lib/libmbed*.dylib(.))
 
         autoload -Uz fix_rpaths && fix_rpaths ${dylib_files}
+
+        sed -E -i '' -e 's#(libmbedcrypto|libmbedx509|libmbedtls).*\.dylib#\1.dylib#' ${target_config[output_dir]}/lib/cmake/MbedTLS/MbedTLSTargets-${config}.cmake
 
         if [[ ${config} == Release ]] dsymutil ${dylib_files}
 

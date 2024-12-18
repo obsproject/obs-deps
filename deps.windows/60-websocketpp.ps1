@@ -3,7 +3,7 @@ param(
     [string] $Version = '0.8.2',
     [string] $Uri = 'https://github.com/zaphoyd/websocketpp.git',
     [string] $Hash = '56123c87598f8b1dd471be83ca841ceae07f95ba',
-    [array] $Targets = @('x64'),
+    [array] $Targets = @('x64', 'arm64'),
     [array] $Patches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/websocketpp/0001-update-minimum-cmake.patch"

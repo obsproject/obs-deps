@@ -3,11 +3,11 @@ param(
     [string] $Version = '1.14.1',
     [string] $Uri = 'https://github.com/webmproject/libvpx/archive/refs/tags/v1.14.1.zip',
     [string] $Hash = "${PSScriptRoot}/checksums/v1.14.1.zip.sha256",
-    [array] $Targets = @('x64')
+    [array] $Targets = @('x64', 'arm64')
 )
 
 function Setup {
-    Setup-Dependency -Uri $Uri -Hash $Hash -DestinationPath .
+    Setup-Dependency -Uri $Uri -Hash $Hash -DestinationPath "."
 
     if ( ! ( $SkipAll -or $SkipDeps ) ) {
         Invoke-External pacman.exe -S --noconfirm --needed --noprogressbar nasm
@@ -31,6 +31,7 @@ function Configure {
     $BuildTargets = @{
         x64 = 'x86_64-win64-vs17'
         x86 = 'x86-win32-vs17'
+        arm64 = 'arm64-win64-vs17-clangcl'
     }
 
     New-Item -ItemType Directory -Force "build_${Target}" > $null
@@ -40,7 +41,7 @@ function Configure {
         '../configure'
         ('--prefix="' + $($script:ConfigData.OutputPath -replace '([A-Fa-f]):','/$1' -replace '\\','/') + '"')
         ('--target=' + $($BuildTargets[$Target]))
-        '--enable-runtime-cpu-detect'
+        $(if ( $Target -eq 'arm64' ) { '--disable-neon_dotprod --disable-neon_i8mm' })
         '--enable-vp8'
         '--enable-vp9'
         '--enable-vp9-highbitdepth'
