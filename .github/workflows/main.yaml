@@ -680,6 +680,6 @@ jobs:
           files: |
             ${{ github.workspace }}/windows-*-x64*.zip
             ${{ github.workspace }}/windows-*-x86*.zip
-            ${{ github.workspace }}/macos-*-arm64.tar.xz
-            ${{ github.workspace }}/macos-*-x86_64.tar.xz
-            ${{ github.workspace }}/macos-*-universal.tar.xz
+            ${{ github.workspace }}/macos-*-arm64*.tar.xz
+            ${{ github.workspace }}/macos-*-x86_64*.tar.xz
+            ${{ github.workspace }}/macos-*-universal*.tar.xz
