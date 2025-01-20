@@ -706,7 +706,7 @@ jobs:
             _temp=$(mktemp -d)
             pushd "${_temp}" > /dev/null
 
-            for artifact in ${GITHUB_WORKSPACE}/**/macos-@(deps|ffmpeg)-!(qt6*)-${arch}.*; do
+            for artifact in ${GITHUB_WORKSPACE}/**/macos-@(deps|ffmpeg)-!(qt6*)-${arch}?(-dSYMs).*; do
               case ${artifact} in
                 *.zip) unzip -o ${artifact} > /dev/null ;;
                 *.tar.xz) XZ_OPT=-T0 tar -xvJf ${artifact} ;;
@@ -714,8 +714,9 @@ jobs:
               esac
             done
 
-            XZ_OPT=-T0 tar -cvJf macos-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz -- *
-            mv macos-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz ${GITHUB_WORKSPACE}
+            XZ_OPT=-T0 tar -cvJf macos-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz -- !(*.dSYM)
+            XZ_OPT=-T0 tar -cvJf macos-deps-${{ steps.metadata.outputs.version }}-${arch}-dSYMs.tar.xz -- *.dSYM
+            mv macos-deps-${{ steps.metadata.outputs.version }}-${arch}?(-dSYMs).tar.xz ${GITHUB_WORKSPACE}
 
             popd > /dev/null
           done
@@ -744,6 +745,6 @@ jobs:
             ${{ github.workspace }}/windows-*-x64*.zip
             ${{ github.workspace }}/windows-*-arm64*.zip
             ${{ github.workspace }}/windows-*-x86*.zip
-            ${{ github.workspace }}/macos-*-arm64.tar.xz
-            ${{ github.workspace }}/macos-*-x86_64.tar.xz
-            ${{ github.workspace }}/macos-*-universal.tar.xz
+            ${{ github.workspace }}/macos-*-arm64?(-dSYMs).tar.xz
+            ${{ github.workspace }}/macos-*-x86_64?(-dSYMs).tar.xz
+            ${{ github.workspace }}/macos-*-universal?(-dSYMs).tar.xz
