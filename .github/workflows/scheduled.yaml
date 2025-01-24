@@ -145,6 +145,10 @@ jobs:
           - target: x64
             config: Release
             type: static
+          - target: arm64
+            config: Release
+            type: static
+
     defaults:
       run:
         shell: pwsh
