@@ -375,13 +375,6 @@ jobs:
           target: ${{ matrix.target }}
           config: ${{ matrix.config }}
 
-      - name: Publish Build Artifacts
-        if: matrix.target == 'x64'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.setup.outputs.artifactName }}
-          path: ${{ github.workspace }}/windows/${{ steps.setup.outputs.artifactFileName }}
-
   windows-qt6-arm64-build:
     name: Build Qt6 (Windows ARM64)
     runs-on: windows-2022
