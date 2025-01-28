@@ -40,7 +40,7 @@ function Build {
         Target = $Target
     }
 
-    if ( $Target -eq 'x86' ) {
+    if ( $env:CI -ne $null -and $Target -eq 'x86' ) {
         $Params += @{
             HostArchitecture = $Target
         }
