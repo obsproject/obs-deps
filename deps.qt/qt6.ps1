@@ -8,6 +8,7 @@ param(
 
 $QtComponents = @(
     'qtbase'
+    'qtcharts'
     'qtimageformats'
     'qtshadertools'
     'qtmultimedia'
