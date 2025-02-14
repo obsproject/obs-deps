@@ -1,13 +1,13 @@
 param(
     [string] $Name = 'libpng',
-    [string] $Version = '1.6.43',
-    [string] $Uri = 'https://sourceforge.net/projects/libpng/files/libpng16/1.6.43/lpng1643.zip',
-    [string] $Hash = "${PSScriptRoot}/checksums/lpng1643.zip.sha256",
+    [string] $Version = '1.6.47',
+    [string] $Uri = 'https://sourceforge.net/projects/libpng/files/libpng16/1.6.47/lpng1647.zip',
+    [string] $Hash = "${PSScriptRoot}/checksums/lpng1647.zip.sha256",
     [array] $Targets = @('x64', 'arm64'),
     [array] $Patches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/libpng/0001-enable-ARM-NEON-optimisations-windows.patch"
-            HashSum = "6d84fe660b89a4841a67e8167172af2dcc72cef7a1f9bfec981fc84fc7421dd8"
+            HashSum = "90bc06d1232a9bb11ad91f0592889614835319f9400426c2cd6ffb8bc7688078"
         }
     )
 )
