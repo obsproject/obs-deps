@@ -4,7 +4,7 @@ autoload -Uz log_debug log_error log_info log_status log_output
 local name='luajit'
 local version='2.1'
 local url='https://github.com/LuaJIT/LuaJIT.git'
-local hash='f725e44cda8f359869bf8f92ce71787ddca45618'
+local hash='a4f56a459a588ae768801074b46ba0adcfb49eb1'
 local branch='v2.1'
 local patches=(
   "${0:a:h}/patches/libluajit/0001-change-hardcoded-compiler-name.patch \
