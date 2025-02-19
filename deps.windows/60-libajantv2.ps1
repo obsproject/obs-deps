@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'ntv2',
-    [string] $Version = '17.0.1',
+    [string] $Version = '17.1.3',
     [string] $Uri = 'https://github.com/aja-video/libajantv2.git',
-    [string] $Hash = 'b6acce6b135c3d9ae7a2bce966180b159ced619f',
+    [string] $Hash = 'bf5649fc95c9d40cb6028373630f2805109268e4',
     [array] $Targets = @('x64'),
     [switch] $ForceStatic = $true
 )
@@ -98,7 +98,7 @@ function Fixup {
 
     $Items = @(
         @{
-            Path = "$($ConfigData.OutputPath)/lib/ajantv2$(if ( $Configuration -eq 'Debug' ) { 'd' }).lib"
+            Path = "$($ConfigData.OutputPath)/lib/ajantv2_vs[0-9]*_M[DT]$(if ( $Configuration -eq 'Debug' ) { 'd' }).lib"
             Destination = "$($ConfigData.OutputPath)/lib"
             Force = $true
         }
