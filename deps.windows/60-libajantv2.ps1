@@ -79,34 +79,3 @@ function Install {
 
     Invoke-External cmake @Options
 }
-
-function Fixup {
-    Log-Information "Fixup (${Target})"
-    Set-Location $Path
-
-    $Params = @{
-        ErrorAction = "SilentlyContinue"
-        Path = @(
-            "$($ConfigData.OutputPath)/bin"
-            "$($ConfigData.OutputPath)/lib"
-        )
-        ItemType = "Directory"
-        Force = $true
-    }
-
-    New-Item @Params *> $null
-
-    $Items = @(
-        @{
-            Path = "$($ConfigData.OutputPath)/lib/ajantv2_vs[0-9]*_M[DT]$(if ( $Configuration -eq 'Debug' ) { 'd' }).lib"
-            Destination = "$($ConfigData.OutputPath)/lib"
-            Force = $true
-        }
-    )
-
-    $Items | ForEach-Object {
-        $Item = $_
-        Log-Output ('{0} => {1}' -f ($Item.Path -join ", "), $Item.Destination)
-        Move-Item @Item
-    }
-}
