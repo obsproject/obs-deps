@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'aom',
-    [string] $Version = '3.9.1',
+    [string] $Version = '3.12.0',
     [string] $Uri = 'https://aomedia.googlesource.com/aom.git',
-    [string] $Hash = '8ad484f8a18ed1853c094e7d3a4e023b2a92df28',
+    [string] $Hash = '3b624af45b86646a20b11a9ff803aeae588cdee6',
     [array] $Targets = @('x64', 'arm64'),
     [array] $FixupPatches = @(
         @{

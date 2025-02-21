@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'ntv2',
-    [string] $Version = '17.0.1',
+    [string] $Version = '17.1.3',
     [string] $Uri = 'https://github.com/aja-video/libajantv2.git',
-    [string] $Hash = 'b6acce6b135c3d9ae7a2bce966180b159ced619f',
+    [string] $Hash = 'bf5649fc95c9d40cb6028373630f2805109268e4',
     [array] $Targets = @('x64'),
     [switch] $ForceStatic = $true
 )
@@ -78,35 +78,4 @@ function Install {
     }
 
     Invoke-External cmake @Options
-}
-
-function Fixup {
-    Log-Information "Fixup (${Target})"
-    Set-Location $Path
-
-    $Params = @{
-        ErrorAction = "SilentlyContinue"
-        Path = @(
-            "$($ConfigData.OutputPath)/bin"
-            "$($ConfigData.OutputPath)/lib"
-        )
-        ItemType = "Directory"
-        Force = $true
-    }
-
-    New-Item @Params *> $null
-
-    $Items = @(
-        @{
-            Path = "$($ConfigData.OutputPath)/lib/ajantv2$(if ( $Configuration -eq 'Debug' ) { 'd' }).lib"
-            Destination = "$($ConfigData.OutputPath)/lib"
-            Force = $true
-        }
-    )
-
-    $Items | ForEach-Object {
-        $Item = $_
-        Log-Output ('{0} => {1}' -f ($Item.Path -join ", "), $Item.Destination)
-        Move-Item @Item
-    }
 }
