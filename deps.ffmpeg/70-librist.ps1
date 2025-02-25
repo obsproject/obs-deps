@@ -40,7 +40,7 @@ function Configure {
     Log-Information "Configure (${Target})"
     Set-Location $Path
 
-   if ( $ForceShared -and ( ! $script:Shared ) ) {
+    if ( $ForceShared -and ( ! $script:Shared ) ) {
         $Shared = $true
     } else {
         $Shared = $script:Shared.isPresent

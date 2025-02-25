@@ -40,7 +40,7 @@ function Configure {
     Log-Information "Configure (${Target})"
     Set-Location "${Name}-${Version}"
 
-   if ( $ForceShared -and ( $script:Shared -eq $false ) ) {
+    if ( $ForceShared -and ( $script:Shared -eq $false ) ) {
         $Shared = $true
     } else {
         $Shared = $script:Shared.isPresent
