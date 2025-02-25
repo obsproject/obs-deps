@@ -24,10 +24,16 @@ function Configure {
     Log-Information "Configure (${Target})"
     Set-Location $Path
 
+    if ( $ForceShared -and ( $script:Shared -eq $false ) ) {
+        $Shared = $true
+    } else {
+        $Shared = $script:Shared.isPresent
+    }
+
     $OnOff = @('OFF', 'ON')
     $Options = @(
         $CmakeOptions
-        "-DBUILD_SHARED_LIBS:BOOL=$($OnOff[$script:Shared.isPresent])"
+        "-DBUILD_SHARED_LIBS:BOOL=$($OnOff[$Shared])"
         '-DUSE_MBEDTLS:BOOL=ON'
         '-DNO_WEBSOCKET:BOOL=ON'
         '-DNO_TESTS:BOOL=ON'
