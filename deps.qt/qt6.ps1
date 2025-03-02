@@ -3,6 +3,12 @@ param(
     [string] $Version = '6.6.3',
     [string] $Uri = 'https://download.qt.io/archive/qt/6.6/6.6.3',
     [string] $Hash = "${PSScriptRoot}/checksums",
+    [array] $Patches = @(
+        @{
+            PatchFile = "${PSScriptRoot}/patches/qt6/arm64/0001-override-host-req.patch"
+            HashSum = "B13A06D681046DC514BF3BD6686C9FB0AB47A670445690546B0E5B513117565E"
+        }
+    ),
     [array] $Targets = @('x64', 'arm64')
 )
 
