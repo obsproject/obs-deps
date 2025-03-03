@@ -72,7 +72,7 @@ function Install-BuildDependencies {
 
                     Invoke-External winget @Params
                 } else {
-                    if ( $Package -eq 'meson' ) {
+                    if ( $Package -eq 'mesonbuild.meson' ) {
                         python3 -m pip install meson
                     }
                 }
