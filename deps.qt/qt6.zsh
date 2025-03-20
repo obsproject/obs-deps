@@ -103,7 +103,7 @@ config() {
     fi
   }
 
-  if (( shared_libs )) && [[ ${config} == Release ]] common_cmake_flags+=(-DFEATURE_separate_debug_info:BOOL=ON -DQT_FEATURE_force_debug_info:BOOL=ON)
+  if (( shared_libs )) && [[ ${config} == Release ]] common_cmake_flags+=(-DQT_FEATURE_force_debug_info:BOOL=ON)
   if (( shared_libs )) && [[ ${config} == Debug ]] common_cmake_flags+=(-DCMAKE_PLATFORM_NO_VERSIONED_SONAME:BOOL=ON)
 
   args=(
@@ -120,6 +120,7 @@ config() {
     -DFEATURE_png:BOOL=ON
     -DFEATURE_printsupport:BOOL=OFF
     -DFEATURE_qmake:BOOL=OFF
+    -DFEATURE_separate_debug_info:BOOL=ON
     -DFEATURE_sql:BOOL=OFF
     -DFEATURE_system_doubleconversion:BOOL=OFF
     -DFEATURE_system_jpeg:BOOL=OFF
