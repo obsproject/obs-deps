@@ -2,25 +2,9 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='libvorbis'
-local -A versions=(
-  macos 1.3.7
-  linux 1.3.7
-  windows 1.3.7
-)
-local -A urls=(
-  macos https://github.com/xiph/vorbis/releases/download/v1.3.7/libvorbis-1.3.7.tar.xz
-  linux https://github.com/xiph/vorbis.git
-  windows https://github.com/xiph/vorbis.git
-)
-local -A hashes=(
-  macos "${0:a:h}/checksums/libvorbis-1.3.7.tar.xz.sha256"
-  linux 84c023699cdf023a32fa4ded32019f194afcdad0
-  windows 84c023699cdf023a32fa4ded32019f194afcdad0
-)
-local -a patches=(
-  "windows ${0:a:h}/patches/libvorbis/0001-fix-outdated-windows-import-library-definition.patch \
-  61509491d9f4dd596502b0c5b1272de276c0f5a2f03ff44b43c90cfd7e62ead8"
-)
+local version='1.3.7'
+local url='https://gitlab.xiph.org/xiph/vorbis.git'
+local hash=2eac96b03ff67953354cb0a649c08aa3a23267ef
 
 ## Build Steps
 setup() {
