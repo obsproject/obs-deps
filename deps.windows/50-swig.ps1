@@ -43,7 +43,10 @@ function Configure {
     Log-Information "Configure (${Target})"
     Set-Location $Path
 
-    $Options = $CmakeOptions
+    $Options = @(
+        $CmakeOptions
+        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5'
+    )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options
 
