@@ -51,6 +51,7 @@ config() {
     -DENABLE_CPP11=ON
     -DBUILD_EXAMPLES=OFF
     -DBUILD_TESTS=OFF
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
   )
 
   cd ${dir}
