@@ -2,9 +2,9 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='pcre2'
-local version='10.40'
-local url='https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.40/pcre2-10.40.tar.bz2'
-local hash="${0:a:h}/checksums/pcre2-10.40.tar.bz2.sha256"
+local version='10.45'
+local url='https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.45/pcre2-10.45.tar.gz'
+local hash="${0:a:h}/checksums/pcre2-10.45.tar.gz.sha256"
 local patches=()
 
 ## Dependency Overrides
