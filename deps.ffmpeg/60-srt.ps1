@@ -53,6 +53,7 @@ function Configure {
         '-DENABLE_STATIC:BOOL=ON'
         '-DENABLE_APPS:BOOL=OFF'
         '-DUSE_ENCLIB:STRING=mbedtls'
+        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options
