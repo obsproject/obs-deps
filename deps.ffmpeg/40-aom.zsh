@@ -117,7 +117,9 @@ install() {
 
   if [[ ${target} == macos-universal ]] {
     pushd build_universal
-    sed -i -E -e 's/build_x86_64/build_universal/g' cmake_install.cmake
+    if [[ -f CMakeFiles/InstallScripts.json ]] sed -i '' -E -e 's/build_x86_64/build_universal/g' CMakeFiles/InstallScripts.json
+    sed -i '' -E -e 's/build_x86_64/build_universal/g' cmake_install.cmake
+    args=(${args//build_x86_64/build_universal})
     popd
   }
 
