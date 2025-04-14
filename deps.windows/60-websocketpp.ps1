@@ -44,6 +44,7 @@ function Configure {
         '-DENABLE_CPP11:BOOL=ON'
         '-DBUILD_EXAMPLES:BOOL=OFF'
         '-DBUILD_TESTS:BOOL=OFF'
+        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options
