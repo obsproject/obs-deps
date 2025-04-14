@@ -39,6 +39,7 @@ config() {
     -DNO_WEBSOCKET=1
     -DNO_TESTS=1
     -DNO_EXAMPLES=1
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
   )
 
   log_info "Config (%F{3}${target}%f)"

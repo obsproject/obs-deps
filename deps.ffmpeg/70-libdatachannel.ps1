@@ -38,6 +38,7 @@ function Configure {
         '-DNO_WEBSOCKET:BOOL=ON'
         '-DNO_TESTS:BOOL=ON'
         '-DNO_EXAMPLES:BOOL=ON'
+        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options
