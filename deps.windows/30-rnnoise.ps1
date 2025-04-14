@@ -28,6 +28,7 @@ function Configure {
         $CmakeOptions
         "-DBUILD_SHARED_LIBS:BOOL=$($OnOff[$script:Shared.isPresent])"
         '-DRNNOISE_COMPILE_OPUS:BOOL=ON'
+        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5'
     )
 
     Log-Debug "CMake configure options: ${Options}"
