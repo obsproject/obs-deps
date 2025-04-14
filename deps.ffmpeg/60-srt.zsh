@@ -58,6 +58,7 @@ config() {
     -DENABLE_STATIC=ON
     -DENABLE_APPS=OFF
     -DUSE_ENCLIB="mbedtls"
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
   )
 
   case ${target} {
