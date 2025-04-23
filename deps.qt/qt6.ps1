@@ -11,6 +11,7 @@ $QtComponents = @(
     'qtimageformats'
     'qtshadertools'
     'qtmultimedia'
+    'qtserialport'
     'qtsvg'
     'qttools'
 )

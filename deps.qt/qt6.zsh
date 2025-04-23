@@ -15,6 +15,7 @@ local -a qt_components=(
   'qtimageformats'
   'qtshadertools'
   'qtmultimedia'
+  'qtserialport'
   'qtsvg'
   'qttools'
 )
