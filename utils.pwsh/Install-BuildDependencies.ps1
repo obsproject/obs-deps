@@ -37,6 +37,8 @@ function Install-BuildDependencies {
         $PackageEntry = $_
         $_, $Package, $_, $Path, $_, $Binary, $_, $Version = $PackageEntry -replace ',','' -split " +(?=(?:[^\']*\'[^\']*\')*[^\']*$)" -replace "'",''
 
+        Log-Debug "$($MyInvocation.MyCommand): $PackageEntry"
+
         if ( $Package -eq 'MSYS2.MSYS2' ) {
             if ( ( Test-Path "${Path}\${Binary}*" ) -and ! ( $Paths -contains $Path ) ) {
                 $Paths = @($Path) + $Paths
