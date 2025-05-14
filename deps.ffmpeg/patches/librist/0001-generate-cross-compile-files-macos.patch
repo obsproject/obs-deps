@@ -12,7 +12,7 @@
 +cpp = 'c++'
 +ar = 'ar'
 +strip = 'strip'
-+pkgconfig = 'pkg-config'
++pkg-config = 'pkg-config'
 +
 +[built-in options]
 +c_std = 'c11'
@@ -36,7 +36,7 @@
 +cpp = 'c++'
 +ar = 'ar'
 +strip = 'strip'
-+pkgconfig = 'pkg-config'
++pkg-config = 'pkg-config'
 +
 +[built-in options]
 +c_std = 'c11'
