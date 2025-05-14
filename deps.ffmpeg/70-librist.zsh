@@ -7,9 +7,9 @@ local url='https://code.videolan.org/rist/librist.git'
 local hash='809390b3b75a259a704079d0fb4d8f1b5f7fa956'
 local -a patches=(
   "macos ${0:a:h}/patches/librist/0001-generate-cross-compile-files-macos.patch \
-    f185682aba370288585dda020d259311486056b228169cdfa5559dd7a03e2473"
+    e14ae6f6565c9412c3f99f3917c1e8410181faede1530cbc014d2d5e03f9c124"
   "windows ${0:a:h}/patches/librist/0001-generate-cross-compile-files-windows.patch \
-    c7b8459642281a82a85c23acf7939c7a2c8345fc23b89773b8d1e9d8152dca2e"
+    d58305066a9148b398389135a7a84f47cd584e566124b192ae20477de5160a51"
 )
 
 ## Dependency Overrides

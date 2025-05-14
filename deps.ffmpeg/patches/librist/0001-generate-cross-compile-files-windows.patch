@@ -17,7 +17,7 @@ index 0000000..559f598
 +ranlib = 'i686-w64-mingw32-ranlib'
 +strip = 'i686-w64-mingw32-strip'
 +windres = 'i686-w64-mingw32-windres'
-+pkgconfig = '/usr/bin/pkg-config'
++pkg-config = '/usr/bin/pkg-config'
 +
 +[built-in options]
 +c_std = 'c11'
@@ -42,7 +42,7 @@ index 0000000..a5b0606
 +ld = 'x86_64-w64-mingw32-ld'
 +ar = 'x86_64-w64-mingw32-ar'
 +strip = 'x86_64-w64-mingw32-strip'
-+pkgconfig = '/usr/bin/pkg-config'
++pkg-config = '/usr/bin/pkg-config'
 +objdump = 'x86_64-w64-mingw32-objdump'
 +
 +[built-in options]
