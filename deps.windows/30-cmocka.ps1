@@ -1,7 +1,7 @@
 param(
     [string] $Name = 'cmocka',
     [string] $Version = '1.1.7',
-    [string] $Uri = 'https://git.cryptomilk.org/projects/cmocka.git',
+    [string] $Uri = 'https://gitlab.com/cmocka/cmocka.git',
     [string] $Hash = 'a01cc69ee9536f90e57c61a198f2d1944d3d4313',
     [array] $Targets = @('x64')
 )
