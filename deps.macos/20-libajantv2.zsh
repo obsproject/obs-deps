@@ -34,11 +34,16 @@ config() {
 
   args=(
     ${cmake_flags}
-    -DAJA_BUILD_OPENSOURCE=ON
-    -DAJA_BUILD_APPS=OFF
+    -DAJA_BUILD_SHARED="${_onoff[(( shared_libs + 1 ))]}"
+    -DAJANTV2_DISABLE_DEMOS=ON
+    -DAJANTV2_DISABLE_DRIVER=ON
+    -DAJANTV2_DISABLE_TESTS=ON
+    -DAJANTV2_DISABLE_TOOLS=ON
+    -DAJANTV2_DISABLE_PLUGINS=ON
     -DAJA_INSTALL_SOURCES=OFF
     -DAJA_INSTALL_HEADERS=ON
-    -DAJA_BUILD_SHARED="${_onoff[(( shared_libs + 1 ))]}"
+    -DAJA_INSTALL_MISC=OFF
+    -DAJA_INSTALL_CMAKE=OFF
   )
 
   cd ${dir}
@@ -52,7 +57,15 @@ build() {
   log_info "Build (%F{3}${target}%f)"
 
   cd ${dir}
-  cmake --build build_${arch} --config ${config}
+  
+  args=(
+    --build build_${arch}
+    --config ${config}
+  )
+
+  if (( _loglevel > 1 )) args+=(--verbose)
+
+  cmake ${args}
 }
 
 install() {

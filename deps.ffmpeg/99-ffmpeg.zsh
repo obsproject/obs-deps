@@ -2,9 +2,9 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='FFmpeg'
-local version='7.0'
+local version='7.0.2'
 local url='https://github.com/FFmpeg/FFmpeg.git'
-local hash='083443d67cb159ce469e5d902346b8d0c2cd1c93'
+local hash='e3a61e91030696348b56361bdf80ea358aef4a19'
 local -a patches=(
   "* ${0:a:h}/patches/FFmpeg/0001-flvdec-handle-unknown.patch \
     5a5185f54cbcf4672763cce687d1b6ddb662549b69637da826279ce4797f57ef"
@@ -186,7 +186,6 @@ config() {
         --cross-prefix="${target_config[cross_prefix]}-w64-mingw32-"
         --pkg-config=pkg-config
         --enable-cross-compile
-        --disable-mediafoundation
       )
 
       if [[ ${arch} == x64 ]] args+=(--enable-libaom --enable-libsvtav1)

@@ -2,9 +2,9 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='freetype'
-local version='2.13.2'
-local url='https://downloads.sourceforge.net/project/freetype/freetype2/2.13.2/freetype-2.13.2.tar.xz'
-local hash="${0:a:h}/checksums/freetype-2.13.2.tar.xz.sha256"
+local version='2.13.3'
+local url='https://downloads.sourceforge.net/project/freetype/freetype2/2.13.3/freetype-2.13.3.tar.xz'
+local hash="${0:a:h}/checksums/freetype-2.13.3.tar.xz.sha256"
 
 local -i shared_libs=1
 

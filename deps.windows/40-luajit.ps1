@@ -2,7 +2,8 @@ param(
     [string] $Name = 'luajit',
     [string] $Version = '2.1',
     [string] $Uri = 'https://github.com/luajit/luajit.git',
-    [string] $Hash = '5790d253972c9d78a0c2aece527eda5b134bbbf7'
+    [string] $Hash = 'f725e44cda8f359869bf8f92ce71787ddca45618',
+    [array] $Targets = @('x64')
 )
 
 function Setup {
