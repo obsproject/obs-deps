@@ -8,7 +8,8 @@ param(
             PatchFile = "${PSScriptRoot}/patches/zlib/0001-fix-unistd-detection.patch"
             HashSum = "2114ff9ebfc79765019353b06915a09f4dc4802ce722d2df6e640a59666dd875"
         }
-    )
+    ),
+    [array] $Targets = @('x64')
 )
 
 function Setup {

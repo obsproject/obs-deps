@@ -57,7 +57,19 @@ function Invoke-SafeWebRequest {
                 }
             }
 
-            Invoke-External curl --fail --location $(if ( $Env:CI -eq $null ) { '--progress-bar' }) --output $OutFile @HeaderStrings $Uri
+            $CurlOptions = @(
+                '--fail'
+                '--location'
+                $(if ( $Env:CI -eq $null ) { '--progress-bar' })
+                '--output', "$OutFile"
+            )
+
+            $CurlVersionResult = $($(Invoke-External curl --version) -join ' ') -match 'curl (?<CurlVersion>\d+\.\d+\.\d+)'
+            if ( ( $Matches.CurlVersion -ge '8.5.0' ) -and $Resume ) {
+                $CurlOptions += @('-C', '-')
+            }
+
+            Invoke-External curl @CurlOptions @HeaderStrings $Uri
 
             $NewHash = Get-FileHash -Path $OutFile -Algorithm $Algorithm
         }

@@ -3,6 +3,7 @@ param(
     [string] $Version = 'r3106',
     [string] $Uri = 'https://github.com/mirror/x264.git',
     [string] $Hash = 'eaa68fad9e5d201d42fde51665f2d137ae96baf0',
+    [array] $Targets = @('x64'),
     [switch] $ForceShared = $true
 )
 
