@@ -2,7 +2,7 @@ param(
     [string] $Name = 'librist',
     [string] $Version = '0.2.7',
     [string] $Uri = 'https://code.videolan.org/rist/librist.git',
-    [string] $Hash = "809390b3b75a259a704079d0fb4d8f1b5f7fa956",
+    [string] $Hash = "186bedbb6a2ec77f994689ccdde4a9bd88548d22",
     [array] $Targets = @('x64', 'arm64'),
     [array] $Patches = @(
         @{
