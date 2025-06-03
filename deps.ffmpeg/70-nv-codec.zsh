@@ -2,9 +2,9 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='nv-codec-headers'
-local version='12.0.16'
+local version='12.1.14.0'
 local url='https://github.com/ffmpeg/nv-codec-headers.git'
-local hash='c5e4af74850a616c42d39ed45b9b8568b71bf8bf'
+local hash='1889e62e2d35ff7aa9baca2bceb14f053785e6f1'
 
 ## Dependency Overrides
 local targets=('windows-x*')
@@ -19,7 +19,7 @@ build() {
   autoload -Uz mkcd progress
 
   log_info "Build (%F{3}${target}%f)"
-  cd "${dir}"
+  cd ${dir}
 
   log_debug "Running make"
   make PREFIX="${target_config[output_dir]}"
@@ -30,7 +30,7 @@ install() {
 
   log_info "Install (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
   make PREFIX="${target_config[output_dir]}" install
 }

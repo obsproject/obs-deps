@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'nlohmann-json',
-    [string] $Version = '3.11.2',
+    [string] $Version = '3.11.3',
     [string] $Uri = 'https://github.com/nlohmann/json.git',
-    [string] $Hash = 'bc889afb4c5bf1c0d8ee29ef35eaaf4c8bef8a5d'
+    [string] $Hash = '9cca280a4d0ccf0c08f47a99aa71d1b0e52f8d03'
 )
 
 function Setup {
@@ -24,7 +24,7 @@ function Configure {
 
     $Options = @(
         $CmakeOptions
-        '-DJSON_BuildTests=OFF'
+        '-DJSON_BuildTests:BOOL=OFF'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options

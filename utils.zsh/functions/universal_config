@@ -18,6 +18,8 @@ for arch (x86_64 arm64) {
     typeset -g -a cxx_flags=(${cxx_flags//universal/${arch}})
     typeset -g -a ld_flags=(${ld_flags//universal/${arch}})
     typeset -g -a as_flags=(${as_flags//universal/${arch}})
+    typeset -g -A target_config=(${(kv)target_config//x86_64;arm64/${arch}})
+    typeset -g -a cmake_flags=(${cmake_flags//x86_64;arm64/${arch}})
     config
   )
   if (( $? )) exit 2

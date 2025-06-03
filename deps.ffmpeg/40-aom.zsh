@@ -2,9 +2,9 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='aom'
-local version='3.6.0'
+local version='3.9.0'
 local url='https://aomedia.googlesource.com/aom.git'
-local hash='3c65175b1972da4a1992c1dae2365b48d13f9a8d'
+local hash='6cab58c3925e0f4138e15a4ed510161ea83b6db1'
 local -a patches=(
   "windows ${0:a:h}/patches/libaom/0001-force-threading-shim-usage.patch \
   6fa9ca74001c5fa3a6521a2b4944be2a8b4350d31c0234aede9a7052a8f1890b"
@@ -20,12 +20,12 @@ setup() {
 }
 
 clean() {
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${clean_build} -gt 0 && -d "build_${arch}" ]] {
+  if [[ ${clean_build} -gt 0 && -d build_${arch} ]] {
     log_info "Clean build directory (%F{3}${target}%f)"
 
-    rm -rf "build_${arch}"
+    rm -rf build_${arch}
   }
 }
 
@@ -34,7 +34,7 @@ patch() {
 
   log_info "Patch (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
   local patch
   local _target
@@ -43,12 +43,17 @@ patch() {
   for patch (${patches}) {
     read _target _url _hash <<< "${patch}"
 
-    if [[ ${_target} == "${target%%-*}" ]] apply_patch "${_url}" "${_hash}"
+    if [[ ${_target} == ${target%%-*} ]] apply_patch ${_url} ${_hash}
   }
 }
 
 config() {
   autoload -Uz mkcd progress
+
+  if [[ ${target} == macos-universal ]] {
+      autoload -Uz universal_config && universal_config
+      return
+  }
 
   local _onoff=(OFF ON)
 
@@ -64,26 +69,31 @@ config() {
   )
 
   case ${target} {
-    macos-*) args+=(-DCONFIG_RUNTIME_CPU_DETECT=0 -DCMAKE_TOOLCHAIN_FILE="build/cmake/toolchains/${target_config[cmake_arch]}-macos.cmake") ;;
+    macos-*) args+=(-DCMAKE_TOOLCHAIN_FILE="build/cmake/toolchains/${target_config[cmake_arch]}-macos.cmake") ;;
     windows-x*) args+=(-DCMAKE_TOOLCHAIN_FILE="build/cmake/toolchains/${target_config[cmake_arch]}-mingw-gcc.cmake")
   }
 
   log_info "Config (%F{3}${target}%f)"
-  cd "${dir}"
+  cd ${dir}
   log_debug "CMake configuration options: ${args}'"
-  progress cmake -S . -B "build_${arch}" -G Ninja ${args}
+  progress cmake -S . -B build_${arch} -G Ninja ${args}
 }
 
 build() {
   autoload -Uz mkcd progress
 
+  if [[ ${target} == macos-universal ]] {
+      autoload -Uz universal_build && universal_build
+      return
+  }
+
   log_info "Build (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
   args=(
-    --build "build_${arch}"
-    --config "${config}"
+    --build build_${arch}
+    --config ${config}
   )
 
   if (( _loglevel > 1 )) args+=(--verbose)
@@ -97,25 +107,65 @@ install() {
   log_info "Install (%F{3}${target}%f)"
 
   args=(
-    --install "build_${arch}"
-    --config "${config}"
+    --install build_${arch}
+    --config ${config}
   )
 
-  if [[ "${config}" =~ "Release|MinSizeRel" ]] args+=(--strip)
   if (( _loglevel > 1 )) args+=(--verbose)
 
-  cd "${dir}"
+  cd ${dir}
+
+  if [[ ${target} == macos-universal ]] {
+    pushd build_universal
+    sed -i -E -e 's/build_x86_64/build_universal/g' cmake_install.cmake
+    popd
+  }
+
   progress cmake ${args}
 }
 
 fixup() {
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${target} == "windows-x"* ]] {
-    if (( shared_libs )) {
-      log_info "Fixup (%F{3}${target}%f)"
-      autoload -Uz create_importlibs
-      create_importlibs ${target_config[output_dir]}/bin/libaom*.dll(.)
-    }
+  log_info "Fixup (%F{3}${target}%f)"
+
+  local strip_tool
+  local -a strip_files
+
+  case ${target} {
+    macos*)
+      if (( shared_libs )) {
+        local -a dylib_files=(${target_config[output_dir]}/lib/libaom*.dylib(.))
+
+        autoload -Uz fix_rpaths && fix_rpaths ${dylib_files}
+
+        if [[ ${config} == Release ]] dsymutil ${dylib_files}
+        strip_tool=strip
+        strip_files=(${dylib_files})
+      } else {
+        rm -rf -- ${target_config[output_dir]}/lib/libaom*.(dylib|dSYM)(N)
+      }
+      ;;
+    linux-*)
+      if (( shared_libs )) {
+        strip_tool=strip
+        strip_files=(${target_config[output_dir]}/lib/libaom.so.*(.))
+      } else {
+        rm -rf -- ${target_config[output_dir]}/lib/libaom.so.*(N)
+      }
+      ;;
+    windows-x*)
+      if (( shared_libs )) {
+        autoload -Uz create_importlibs
+        create_importlibs ${target_config[output_dir]}/bin/libaom*.dll(.)
+
+        strip_tool=${target_config[cross_prefix]}-w64-mingw32-strip
+        strip_files=(${target_config[output_dir]}/bin/libaom*.dll(.))
+      } else {
+        rm -rf ${target_config[output_dir]}/bin/libaom*.dll(N)
+      }
+      ;;
   }
+
+  if (( #strip_files )) && [[ ${config} == (Release|MinSizeRel) ]] ${strip_tool} -x ${strip_files}
 }

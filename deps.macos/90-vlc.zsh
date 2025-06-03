@@ -17,7 +17,7 @@ build() {
 
   log_info "Build (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
   local -a version_strings=(${(s:.:)version})
 
@@ -27,6 +27,6 @@ build() {
 install() {
   log_info "Install (%F{3}${target}%f)"
 
-  cd "${dir}"
-  cp -r include/vlc "${target_config[output_dir]}"/include
+  cd ${dir}
+  cp -r include/vlc ${target_config[output_dir]}/include
 }

@@ -1,0 +1,98 @@
+name: Build Dependencies
+description: Builds dependencies for obs-deps with specified architecture, type, and build config
+inputs:
+  target:
+    description: Build target for dependencies
+    required: true
+  type:
+    description: Build type (shared or static libraries)
+    required: false
+    default: static
+  config:
+    description: Build configuration
+    required: false
+    default: Release
+  workingDirectory:
+    description: Working directory for repository action
+    required: false
+    default: ${{ github.workspace }}
+runs:
+  using: composite
+  steps:
+    - name: Environment Setup
+      id: env-setup
+      shell: bash
+      working-directory: ${{ inputs.workingDirectory }}
+      run: |
+        : Environment Setup
+        case "${RUNNER_OS}" in
+          macOS)
+            if ! type sha256sum > /dev/null 2>&1; then
+              brew install coreutils
+            fi
+            deps_hash=$(cat ${PWD}/deps.macos/*.zsh | sha256sum | cut -d " " -f 1)
+            ;;
+          Windows)
+            deps_hash=$(cat ${PWD}/deps.windows/*.ps1 | sha256sum | cut -d " " -f 1)
+            ;;
+        esac
+
+        deps_hash=$(echo "${deps_hash}\n$(cmake --version)" | sha256sum | cut -d " " -f 1)
+
+        echo "hash=${deps_hash:0:9}" >> $GITHUB_OUTPUT
+
+    - name: Restore Dependencies from Cache
+      id: deps-cache
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          ${{ inputs.workingDirectory }}/*_build_temp/*
+          !${{ inputs.workingDirectory }}/*_build_temp/**/.git
+          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.gz
+          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.xz
+          !${{ inputs.workingDirectory }}/*_build_temp/*.zip
+        key: ${{ inputs.target }}-deps-${{ inputs.type }}-${{ inputs.config }}-${{ steps.env-setup.outputs.hash }}
+
+    - name: Build and Install Dependencies
+      if: runner.os == 'macOS'
+      shell: zsh --no-rcs --errexit --pipefail {0}
+      run: |
+        : Build and Install macOS Dependencies
+
+        local -a build_args=(
+          --target ${{ inputs.target }}
+          --config ${{ inputs.config }}
+          --${{ inputs.type }}
+        )
+
+        if [[ '${{ steps.ffmpeg-cache.outputs.cache-hit }}' == 'true' ]] build_args+=(--skip-build --skip-unpack)
+
+        ./build-deps.zsh ${build_args}
+
+    - name: Build and Install Dependencies
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        # Build and Install Windows Dependencies
+
+        $Params = @{
+          Target = '${{ inputs.target }}'
+          Configuration = '${{ inputs.config }}'
+          Shared = $(if ( '${{ inputs.type }}' -eq 'shared' ) { $true } else { $false })
+          SkipBuild = $(if ( '${{ steps.deps-cache.outputs.cache-hit }}' -eq 'true' ) { $true } else { $false })
+          SkipUnpack = $(if ( '${{ steps.deps-cache.outputs.cache-hit }}' -eq 'true' ) { $true } else { $false })
+        }
+
+        ./Build-Dependencies.ps1 @Params
+
+    - name: Save Dependencies to Cache
+      uses: actions/cache/save@v4
+      if: github.event_name == 'schedule' || (github.event_name == 'push' && steps.deps-cache.outputs.cache-hit != 'true')
+      with:
+        path: |
+          ${{ inputs.workingDirectory }}/*_build_temp/*
+          !${{ inputs.workingDirectory }}/*_build_temp/**/.git
+          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.gz
+          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.xz
+          !${{ inputs.workingDirectory }}/*_build_temp/*.zip
+        key: ${{ inputs.target }}-deps-${{ inputs.type }}-${{ inputs.config }}-${{ steps.env-setup.outputs.hash }}

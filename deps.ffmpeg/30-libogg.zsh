@@ -29,12 +29,12 @@ setup() {
 }
 
 clean() {
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${clean_build} -gt 0 && -d "build_${arch}" ]] {
+  if [[ ${clean_build} -gt 0 && -d build_${arch} ]] {
     log_info "Clean build directory (%F{3}${target}%f)"
 
-    rm -rf "build_${arch}"
+    rm -rf build_${arch}
   }
 }
 
@@ -43,7 +43,7 @@ patch() {
 
   log_info "Patch (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
   local patch
   local _target
@@ -52,7 +52,7 @@ patch() {
   for patch (${patches}) {
     read _target _url _hash <<< "${patch}"
 
-    if [[ ${_target} == "${target%%-*}" ]] apply_patch "${_url}" "${_hash}"
+    if [[ ${_target} == "${target%%-*}" ]] apply_patch ${_url} ${_hash}
   }
 }
 
@@ -69,9 +69,9 @@ config() {
   )
 
   log_info "Config (%F{3}${target}%f)"
-  cd "${dir}"
+  cd ${dir}
   log_debug "CMake configuration options: ${args}'"
-  progress cmake -S . -B "build_${arch}" -G Ninja ${args}
+  progress cmake -S . -B build_${arch} -G Ninja ${args}
 }
 
 build() {
@@ -79,11 +79,11 @@ build() {
 
   log_info "Build (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
   args=(
-    --build "build_${arch}"
-    --config "${config}"
+    --build build_${arch}
+    --config ${config}
   )
 
   if (( _loglevel > 1 )) args+=(--verbose)
@@ -97,28 +97,59 @@ install() {
   log_info "Install (%F{3}${target}%f)"
 
   args=(
-    --install "build_${arch}"
-    --config "${config}"
+    --install build_${arch}
+    --config ${config}
   )
 
-  if [[ "${config}" =~ "Release|MinSizeRel" ]] args+=(--strip)
   if (( _loglevel > 1 )) args+=(--verbose)
 
-  cd "${dir}"
+  cd ${dir}
   progress cmake ${args}
 }
 
 fixup() {
-  cd "${dir}"
+  cd ${dir}
+
+  log_info "Fixup (%F{3}${target}%f)"
+
+  local strip_tool
+  local -a strip_files
 
   case ${target} {
-    macos-*|linux-*) rm -rf "${target_config[output_dir]}"/lib/cmake/Ogg ;;
+    macos*)
+      if (( shared_libs )) {
+        local -a dylib_files=(${target_config[output_dir]}/lib/libogg*.dylib(.))
+
+        autoload -Uz fix_rpaths && fix_rpaths ${dylib_files}
+
+        if [[ ${config} == Release ]] dsymutil ${dylib_files}
+        strip_tool=strip
+        strip_files=(${dylib_files})
+      } else {
+        rm -rf -- ${target_config[output_dir]}/lib/libogg*.(dylib|dSYM)(N)
+      }
+      ;;
+    linux-*)
+      if (( shared_libs )) {
+        strip_tool=strip
+        strip_files=(${target_config[output_dir]}/lib/libogg.so.*(.))
+      } else {
+        rm -rf -- ${target_config[output_dir]}/lib/libogg.so.*(N)
+      }
+      ;;
     windows-*)
       if (( shared_libs )) {
-        log_info "Fixup (%F{3}${target}%f)"
         autoload -Uz create_importlibs
         create_importlibs ${target_config[output_dir]}/bin/libogg*.dll
+
+        strip_tool=${target_config[cross_prefix]}-w64-mingw32-strip
+        strip_files=(${target_config[output_dir]}/bin/libogg*.dll(.))
+      } else {
+        rm -rf -- ${target_config[output_dir]}/bin/libogg*.dll(N)
       }
       ;;
   }
+
+  rm -rf ${target_config[output_dir]}/lib/cmake/Ogg
+  if (( #strip_files )) && [[ ${config} == (Release|MinSizeRel) ]] ${strip_tool} -x ${strip_files}
 }

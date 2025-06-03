@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'zstd',
-    [string] $Version = 'v1.5.4',
+    [string] $Version = 'v1.5.6',
     [string] $Uri = 'https://github.com/facebook/zstd.git',
-    [string] $Hash = '945f27758c0fd67b636103a38dbf050266c6b90a'
+    [string] $Hash = '794ea1b0afca0f020f4e57b6732332231fb23c70'
 )
 
 function Setup {
@@ -24,11 +24,11 @@ function Configure {
 
     $Options = @(
         $CmakeOptions
-        '-DZSTD_BUILD_PROGRAMS=OFF'
-        '-DZSTD_BUILD_TESTS=OFF'
-        '-DZSTD_BUILD_SHARED=OFF'
-        '-DZSTD_USE_STATIC_RUNTIME=ON'
-        '-DZSTD_LEGACY_SUPPORT=OFF'
+        '-DZSTD_BUILD_PROGRAMS:BOOL=OFF'
+        '-DZSTD_BUILD_TESTS:BOOL=OFF'
+        '-DZSTD_BUILD_SHARED:BOOL=OFF'
+        '-DZSTD_USE_STATIC_RUNTIME:BOOL=ON'
+        '-DZSTD_LEGACY_SUPPORT:BOOL=OFF'
     )
 
     Invoke-External cmake -S build/cmake -B "build_${Target}" @Options

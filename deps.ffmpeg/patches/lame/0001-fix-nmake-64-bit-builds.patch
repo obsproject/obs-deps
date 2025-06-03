@@ -1,0 +1,12 @@
+--- a/Makefile.MSVC	2023-05-22 00:23:20
++++ b/Makefile.MSVC	2023-05-22 00:24:19
+@@ -99,7 +99,9 @@
+ !	ENDIF
+ 
+ OFF = win32
++!	IF "$(MACHINE)" == ""
+ MACHINE = /machine:I386
++!	ENDIF
+ LIB_OPTS = /nologo $(MACHINE) 
+ 
+ !	MESSAGE ----------------------------------------------------------------------

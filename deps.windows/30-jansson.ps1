@@ -24,10 +24,10 @@ function Configure {
     $OnOff = @('OFF', 'ON')
     $Options = @(
         $CmakeOptions
-        '-DJANSSON_EXAMPLES=OFF'
-        '-DJANSSON_BUILD_DOCS=OFF'
-        "-DJANSSON_BUILD_SHARED_LIBS=$($OnOff[$script:Shared.isPresent])"
-        '-DJANSSON_WITHOUT_TESTS=ON'
+        '-DJANSSON_EXAMPLES:BOOL=OFF'
+        '-DJANSSON_BUILD_DOCS:BOOL=OFF'
+        "-DJANSSON_BUILD_SHARED_LIBS:BOOL=$($OnOff[$script:Shared.isPresent])"
+        '-DJANSSON_WITHOUT_TESTS:BOOL=ON'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options

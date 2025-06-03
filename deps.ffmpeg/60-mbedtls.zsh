@@ -3,21 +3,23 @@ autoload -Uz log_debug log_error log_info log_status log_output
 ## Dependency Information
 local name='mbedtls'
 local -A versions=(
-  macos 3.2.1
-  linux 3.2.1
-  windows 3.2.1
+  macos 3.4.1
+  linux 3.4.1
+  windows 3.4.1
 )
 local url='https://github.com/Mbed-TLS/mbedtls.git'
 local -A hashes=(
-  macos 869298bffeea13b205343361b7a7daf2b210e33d
-  linux 869298bffeea13b205343361b7a7daf2b210e33d
-  windows 869298bffeea13b205343361b7a7daf2b210e33d
+  macos 72718dd87e087215ce9155a826ee5a66cfbe9631
+  linux 72718dd87e087215ce9155a826ee5a66cfbe9631
+  windows 72718dd87e087215ce9155a826ee5a66cfbe9631
 )
 local -a patches=(
   "macos ${0:a:h}/patches/mbedtls/0001-enable-posix-threading-support.patch \
     ea52cf47ca01211cbadf03c0493986e8d4e0d1e9ab4aaa42365b2dea7b591188"
   "linux ${0:a:h}/patches/mbedtls/0001-enable-posix-threading-support.patch \
     ea52cf47ca01211cbadf03c0493986e8d4e0d1e9ab4aaa42365b2dea7b591188"
+  "* ${0:a:h}/patches/mbedtls/0002-enable-dtls-srtp-support.patch \
+    c299066df252b8b5a08d169925a82ea6c76d6ae8b6c0069b1bb72ac1d40ba67e"
 )
 
 ## Dependency Overrides
@@ -30,12 +32,12 @@ setup() {
 }
 
 clean() {
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${clean_build} -gt 0 && -d "build_${arch}" ]] {
+  if [[ ${clean_build} -gt 0 && -d build_${arch} ]] {
     log_info "Clean build directory (%F{3}${target}%f)"
 
-    rm -rf "build_${arch}"
+    rm -rf build_${arch}
   }
 }
 
@@ -44,7 +46,7 @@ patch() {
 
   log_info "Patch (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
   local patch
   local _target
@@ -53,7 +55,7 @@ patch() {
   for patch (${patches}) {
     read _target _url _hash <<< "${patch}"
 
-    if [[ ${_target} == "${target%%-*}" ]] apply_patch "${_url}" "${_hash}"
+    if [[ "${target%%-*}" == ${~_target} ]] apply_patch "${_url}" "${_hash}"
   }
 }
 
@@ -71,10 +73,12 @@ config() {
     -DGEN_FILES=OFF
   )
 
+  if [[ ${config} == Release ]] args=(${args//-DCMAKE_C_FLAGS=/-DCMAKE_C_FLAGS=-g })
+
   log_info "Config (%F{3}${target}%f)"
   cd "${dir}"
   log_debug "CMake configuration options: ${args}'"
-  progress cmake -S . -B "build_${arch}" -G Ninja ${args}
+  progress cmake -S . -B build_${arch} -G Ninja ${args}
 }
 
 build() {
@@ -82,11 +86,11 @@ build() {
 
   log_info "Build (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
   args=(
-    --build "build_${arch}"
-    --config "${config}"
+    --build build_${arch}
+    --config ${config}
   )
 
   if (( _loglevel > 1 )) args+=(--verbose)
@@ -100,14 +104,13 @@ install() {
   log_info "Install (%F{3}${target}%f)"
 
   args=(
-    --install "build_${arch}"
-    --config "${config}"
+    --install build_${arch}
+    --config ${config}
   )
 
-  if [[ "${config}" =~ "Release|MinSizeRel" ]] args+=(--strip)
   if (( _loglevel > 1 )) args+=(--verbose)
 
-  cd "${dir}"
+  cd ${dir}
   progress cmake ${args}
 
   _install_pkgconfig
@@ -115,7 +118,7 @@ install() {
 
 
 _install_pkgconfig() {
-  mkdir -p "${target_config[output_dir]}/lib/pkgconfig"
+  mkdir -p ${target_config[output_dir]}/lib/pkgconfig
 
   zsh -c "cat <<'EOF' > ${target_config[output_dir]}/lib/pkgconfig/mbedcrypto.pc
 prefix=${target_config[output_dir]}
@@ -160,14 +163,17 @@ EOF"
 }
 
 fixup() {
-  cd "${dir}"
+  cd ${dir}
+
+  log_info "Fixup (%F{3}${target}%f)"
+
+  local strip_tool
+  local -a strip_files
 
   case ${target} {
     macos*)
       if (( shared_libs )) {
-        log_info "Fixup (%F{3}${target}%f)"
         pushd "${target_config[output_dir]}"/lib
-
         for file (libmbed(crypto|tls|x509).dylib(@)) {
           if [[ -h "${file}" ]] {
             rm "${file}"
@@ -176,17 +182,39 @@ fixup() {
         }
         popd
 
-        autoload -Uz fix_rpaths
-        fix_rpaths "${target_config[output_dir]}"/lib/libmbed*.dylib(.)
+        local -a dylib_files=(${target_config[output_dir]}/lib/libmbed*.dylib(.))
+
+        autoload -Uz fix_rpaths && fix_rpaths ${dylib_files}
+
+        if [[ ${config} == Release ]] dsymutil ${dylib_files}
+
+        strip_tool=strip
+        strip_files=(${dylib_files})
+      } else {
+        rm -rf -- ${target_config[output_dir]}/lib/libmbed*.(dylib|dSYM)(N)
       }
       ;;
-    windows*)
-      log_info "Fixup (%F{3}${target}%f)"
+    linux-*)
+      if (( shared_libs )) {
+        strip_tool=strip
+        strip_files=(${target_config[output_dir]}/lib/libmbed*.so.*(.))
+      } else {
+        rm -rf -- ${target_config[output_dir]}/lib/libmbed*.so.*(N)
+      }
+      ;;
+    windows-x*)
       if (( shared_libs )) {
         mkdir -p ${target_config[output_dir]}/bin
         autoload -Uz create_importlibs
-        create_importlibs ${target_config[output_dir]}/bin/libmbed*.dll
+        create_importlibs ${target_config[output_dir]}/bin/libmbed*.dll(.)
+
+        strip_tool=${target_config[cross_prefix]}-w64-mingw32-strip
+        strip_files=(${target_config[output_dir]}/bin/libmbed*.dll(.))
+      } else {
+        rm -rf -- ${target_config[output_dir]}/bin/libmbed*.dll(N)
       }
       ;;
   }
+
+  if (( #strip_files )) && [[ ${config} == (Release|MinSizeRel) ]] ${strip_tool} -x ${strip_files}
 }

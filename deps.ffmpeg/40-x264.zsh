@@ -36,12 +36,12 @@ setup() {
 }
 
 clean() {
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${clean_build} -gt 0 && -f "build_${arch}${suffix:-}/Makefile" ]] {
+  if [[ ${clean_build} -gt 0 && -f build_${arch}${suffix:-}/Makefile ]] {
     log_info "Clean build directory (%F{3}${target}%f)"
 
-    rm -rf "build_${arch}${suffix:-}${suffix:-}"
+    rm -rf build_${arch}${suffix:-}${suffix:-}
   }
 }
 
@@ -50,7 +50,7 @@ patch() {
 
   log_info "Patch (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
   local patch
   local _target
@@ -60,7 +60,7 @@ patch() {
   for patch (${patches}) {
     read _target _url _hash <<< "${patch}"
 
-    if [[ ${_target} == "${target%%-*}" ]] apply_patch "${_url}" "${_hash}"
+    if [[ ${_target} == ${target%%-*} ]] apply_patch ${_url} ${_hash}
   }
 }
 
@@ -68,13 +68,31 @@ config() {
   autoload -Uz mkcd progress
 
   local cross_prefix
-  case "${target}" {
+  case ${target} {
     macos-universal)
       autoload -Uz universal_config && universal_config
       return
       ;;
-    macos-arm64) args+=(--host="aarch64-apple-darwin${target_config[darwin_target]}") ;;
-    macos-x86_64) args+=(--host="x86_64-apple-darwin${target_config[darwin_target]}") ;;
+    macos-arm64)
+      args+=(--host="aarch64-apple-darwin${target_config[darwin_target]}")
+
+      local clang_version=$(clang --version | head -1 | cut -d ' ' -f 4)
+
+      autoload -Uz is-at-least
+      if is-at-least 15.0.0 ${clang_version}; then
+        ld_flags+=(-Wl,-ld_classic)
+      fi
+      ;;
+    macos-x86_64)
+      args+=(--host="x86_64-apple-darwin${target_config[darwin_target]}")
+
+      local clang_version=$(clang --version | head -1 | cut -d ' ' -f 4)
+
+      autoload -Uz is-at-least
+      if is-at-least 15.0.0 ${clang_version}; then
+        ld_flags+=(-Wl,-ld_classic)
+      fi
+      ;;
     windows-x*)
       args+=(
         --host="${target_config[cross_prefix]}-pc-mingw32"
@@ -84,9 +102,9 @@ config() {
   }
 
   log_info "Config (%F{3}${target}%f)"
-  cd "${dir}"
+  cd ${dir}
 
-  mkcd "build_${arch}${suffix:-}"
+  mkcd build_${arch}${suffix:-}
 
   args+=(
     --prefix="${target_config[output_dir]}"
@@ -123,10 +141,10 @@ build() {
   }
 
   log_info "Build (%F{3}${target}%f)"
-  cd "${dir}/build_${arch}${suffix:-}"
+  cd ${dir}/build_${arch}${suffix:-}
 
   log_debug "Running make -j ${num_procs}"
-  PATH="${(j.:.)cc_path}" progress make -j "${num_procs}"
+  PATH="${(j.:.)cc_path}" progress make -j ${num_procs}
 }
 
 install() {
@@ -134,7 +152,7 @@ install() {
 
   log_info "Install (%F{3}${target}%f)"
 
-  cd "${dir}/build_${arch}${suffix:-}"
+  cd ${dir}/build_${arch}${suffix:-}
   progress make install
 }
 
@@ -142,40 +160,48 @@ install() {
 fixup() {
   cd "${dir}"
 
-  if (( shared_libs )) {
-    local strip_tool
-    local -a strip_files
+  log_info "Fixup (%F{3}${target}%f)"
 
-    log_info "Fixup (%F{3}${target}%f)"
-    case ${target} {
-      macos*)
-        autoload -Uz fix_rpaths
-        fix_rpaths "${target_config[output_dir]}"/lib/libx264*.dylib(.)
+  local strip_tool
+  local -a strip_files
+
+  case ${target} {
+    macos*)
+      if (( shared_libs )) {
+        local -a dylib_files=(${target_config[output_dir]}/lib/libx264*.dylib(.))
+
+        autoload -Uz fix_rpaths && fix_rpaths ${dylib_files}
+
+        if [[ ${config} == Release ]] dsymutil ${dylib_files}
 
         strip_tool=strip
-        strip_files=("${target_config[output_dir]}"/lib/libx264*.dylib(.))
-        ;;
-      linux-*)
-        strip_tool=strip
-        strip_files=("${target_config[output_dir]}"/lib/libx264.so.*(.))
-        ;;
-      windows-x*)
-        autoload -Uz create_importlibs
-        create_importlibs "${target_config[output_dir]}"/bin/libx264-*.dll(.)
-
-        rm "${target_config[output_dir]}"/bin/x264.exe
-        strip_tool=${target_config[cross_prefix]}-w64-mingw32-strip
-        strip_files=("${target_config[output_dir]}"/bin/libx264-*.dll(.))
-        mv "${target_config[output_dir]}"/lib/libx264-*.lib(.) "${target_config[output_dir]}"/lib/libx264.lib
-        ;;
-    }
-
-    if [[ "${config}" == (Release|MinSizeRel) ]] {
-      local file
-      for file (${strip_files}(N)) {
-        ${strip_tool} -x "${file}"
-        log_status "Stripped ${file#"${target_config[output_dir]}"}"
+        strip_files=(${dylib_files})
+      } else {
+        rm -rf -- ${target_config[output_dir]}/lib/libx264*.(dylib|dSYM)(N)
       }
-    }
+      ;;
+    linux-*)
+      if (( shared_libs )) {
+        strip_tool=strip
+        strip_files=(${target_config[output_dir]}/lib/libx264.so.*(.))
+      } else {
+        rm -rf -- ${target_config[output_dir]}/lib/libx264.so.*(N)
+      }
+      ;;
+    windows-x*)
+      if (( shared_libs )) {
+        autoload -Uz create_importlibs
+        create_importlibs ${target_config[output_dir]}/bin/libx264-*.dll(.)
+
+        rm ${target_config[output_dir]}/bin/x264.exe
+        strip_tool=${target_config[cross_prefix]}-w64-mingw32-strip
+        strip_files=(${target_config[output_dir]}/bin/libx264-*.dll(.))
+        mv ${target_config[output_dir]}/lib/libx264-*.lib(.) ${target_config[output_dir]}/lib/libx264.lib
+      } else {
+        rm -rf -- ${target_config[output_dir]}/bin/libx264-*.dll(N)
+      }
+      ;;
   }
+
+  if (( #strip_files )) && [[ ${config} == (Release|MinSizeRel) ]] ${strip_tool} -x ${strip_files}
 }

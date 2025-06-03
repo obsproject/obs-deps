@@ -8,7 +8,7 @@ local hash="${0:a:h}/checksums/pcre2-10.40.tar.bz2.sha256"
 local patches=()
 
 ## Dependency Overrides
-local -i force_static=1
+local -i shared_libs=0
 
 ## Build Steps
 setup() {
@@ -17,12 +17,12 @@ setup() {
 }
 
 clean() {
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${clean_build} -gt 0 && -d "build_${arch}" ]] {
+  if [[ ${clean_build} -gt 0 && -d build_${arch} ]] {
     log_info "Clean build directory (%F{3}${target}%f)"
 
-    rm -rf "build_${arch}"
+    rm -rf build_${arch}
   }
 }
 
@@ -31,40 +31,31 @@ patch() {
 
   log_info "Patch (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
-  case ${target} {
-    macos-*)
-      local patch
-      for patch (${patches}) {
-        local _url
-        local _hash
-        read _url _hash <<< "${patch}"
-        apply_patch "${_url}" "${_hash}"
-      }
-      ;;
+  local patch
+  for patch (${patches}) {
+    local _url
+    local _hash
+    read _url _hash <<< "${patch}"
+    apply_patch ${_url} ${_hash}
   }
 }
 
 config() {
   autoload -Uz mkcd progress
 
-  if (( shared_libs )) {
-    local shared=$(( shared_libs - force_static ))
-  } else {
-    local shared=0
-  }
   local _onoff=(OFF ON)
 
   args=(
     ${cmake_flags//ARCHITECTURES=${arch}/"ARCHITECTURES='x86_64;arm64'"}
-    -DBUILD_SHARED_LIBS="${_onoff[(( shared + 1 ))]}"
+    -DBUILD_SHARED_LIBS="${_onoff[(( shared_libs + 1 ))]}"
   )
 
   log_info "Config (%F{3}${target}%f)"
-  cd "${dir}"
+  cd ${dir}
   log_debug "CMake configuration options: ${args}'"
-  progress cmake -S . -B "build_${arch}" -G Ninja ${args}
+  progress cmake -S . -B build_${arch} -G Ninja ${args}
 }
 
 build() {
@@ -72,11 +63,11 @@ build() {
 
   log_info "Build (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
   args=(
-    --build "build_${arch}"
-    --config "${config}"
+    --build build_${arch}
+    --config ${config}
   )
 
   if (( _loglevel > 1 )) args+=(--verbose)
@@ -90,13 +81,28 @@ install() {
   log_info "Install (%F{3}${target}%f)"
 
   args=(
-    --install "build_${arch}"
-    --config "${config}"
+    --install build_${arch}
+    --config ${config}
   )
 
-  if [[ "${config}" =~ "Release|MinSizeRel" ]] args+=(--strip)
   if (( _loglevel > 1 )) args+=(--verbose)
 
-  cd "${dir}"
+  cd ${dir}
   progress cmake ${args}
+}
+
+fixup() {
+  cd ${dir}
+
+  if (( shared_libs )) {
+    local -a dylib_files=(${target_config[output_dir]}/lib/libpcre2*.dylib(.))
+
+    log_info "Fixup (%F{3}${target}%f)"
+    autoload -Uz fix_rpaths && fix_rpaths ${dylib_files}
+
+    if [[ ${config} == Release ]] dsymutil ${dylib_files}
+    if [[ ${config} == (Release|MinSizeRel) ]] strip -x ${dylib_files}
+  } else {
+    rm -rf -- ${target_config[output_dir]}/lib/libpcre2*.(dylib|dSYM)(N)
+  }
 }

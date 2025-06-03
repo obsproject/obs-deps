@@ -2,9 +2,9 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='nlohmann-json'
-local version='3.11.2'
+local version='3.11.3'
 local url='https://github.com/nlohmann/json.git'
-local hash='bc889afb4c5bf1c0d8ee29ef35eaaf4c8bef8a5d'
+local hash='9cca280a4d0ccf0c08f47a99aa71d1b0e52f8d03'
 
 ## Build Steps
 setup() {
@@ -13,12 +13,12 @@ setup() {
 }
 
 clean() {
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${clean_build} -gt 0 && -d "build_${arch}" ]] {
+  if [[ ${clean_build} -gt 0 && -d build_${arch} ]] {
     log_info "Clean build directory (%F{3}${target}%f)"
 
-    rm -rf "build_${arch}"
+    rm -rf build_${arch}
   }
 }
 
@@ -32,9 +32,9 @@ config() {
     -DJSON_BuildTests=OFF
   )
 
-  cd "${dir}"
+  cd ${dir}
   log_debug "CMake configure options: ${args}"
-  progress cmake -S . -B "build_${arch}" -G Ninja ${args}
+  progress cmake -S . -B build_${arch} -G Ninja ${args}
 }
 
 build() {
@@ -42,8 +42,8 @@ build() {
 
   log_info "Build (%F{3}${target}%f)"
 
-  cd "${dir}"
-  cmake --build "build_${arch}" --config "${config}"
+  cd ${dir}
+  cmake --build build_${arch} --config ${config}
 }
 
 install() {
@@ -52,11 +52,9 @@ install() {
   log_info "Install (%F{3}${target}%f)"
 
   args=(
-    --install "build_${arch}"
-    --config "${config}"
+    --install build_${arch}
+    --config ${config}
   )
-
-  if [[ "${config}" =~ "Release|MinSizeRel" ]] args+=(--strip)
 
   cd "${dir}"
   progress cmake ${args}

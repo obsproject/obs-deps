@@ -1,0 +1,14 @@
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.PowerShell.Commands.FileHashInfo</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Microsoft.PowerShell.Commands.FileHashInfo</ToString>
+    <Props>
+      <S N="Algorithm">SHA256</S>
+      <S N="Hash">FD4E5BA7E93B84B3EC41CDF01494CC586EF6E912B313DBAB25512DD02665DFAF</S>
+      <S N="Path">libogg-1.3.5.zip</S>
+    </Props>
+  </Obj>
+</Objs>

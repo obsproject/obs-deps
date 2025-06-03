@@ -2,12 +2,12 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='libpng'
-local version='1.6.39'
-local url='https://downloads.sourceforge.net/project/libpng/libpng16/1.6.39/libpng-1.6.39.tar.xz'
-local hash="${0:a:h}/checksums/libpng-1.6.39.tar.xz.sha256"
+local version='1.6.43'
+local url='https://downloads.sourceforge.net/project/libpng/libpng16/1.6.43/libpng-1.6.43.tar.xz'
+local hash="${0:a:h}/checksums/libpng-1.6.43.tar.xz.sha256"
 local -a patches=(
   "macos ${0:a:h}/patches/libpng/0001-enable-ARM-NEON-optimisations.patch \
-  f9ce2b5f8b63ef6caa9ab0195d27c52563652da56ab53956ffa51b34ff90ad4d"
+  ae8c78755ea64256fc001390af4cb429b8b85ec1b1d8878ec0ca4c7d6bc2af3b"
 )
 
 local -i shared_libs=0
@@ -19,12 +19,12 @@ setup() {
 }
 
 clean() {
-  cd "${dir}"
+  cd ${dir}
 
-  if [[ ${clean_build} -gt 0 && -d "build_${arch}" ]] {
+  if [[ ${clean_build} -gt 0 && -d build_${arch} ]] {
     log_info "Clean build directory (%F{3}${target}%f)"
 
-    rm -rf "build_${arch}"
+    rm -rf build_${arch}
   }
 }
 
@@ -32,7 +32,7 @@ patch() {
   autoload -Uz apply_patch
 
   log_info "Patch (%F{3}${target}%f)"
-  cd "${dir}"
+  cd ${dir}
 
   local patch
   local _target
@@ -40,8 +40,7 @@ patch() {
   local _hash
   for patch (${patches}) {
     read _target _url _hash <<< "${patch}"
-
-    if [[ ${_target} == "${target%%-*}" ]] apply_patch "${_url}" "${_hash}"
+    apply_patch ${_url} ${_hash}
   }
 }
 
@@ -57,7 +56,7 @@ config() {
     -DPNG_SHARED="${_onoff[(( shared_libs + 1 ))]}"
   )
 
-  if [[ "${config}" == "Debug" ]] {
+  if [[ ${config} == Debug ]] {
     args+=(-DPNG_DEBUG=ON)
   } else {
     args+=(-DPNG_DEBUG=OFF)
@@ -70,14 +69,14 @@ config() {
         -DPNG_ARM_NEON=on
       )
 
-      mkdir -p "${dir}/build_${arch}/arm64"
+      mkdir -p ${dir}/build_${arch}/arm64
       ;;
   }
 
   log_info "Config (%F{3}${target}%f)"
-  cd "${dir}"
+  cd ${dir}
   log_debug "CMake configuration options: ${args}'"
-  progress cmake -S . -B "build_${arch}" -G Ninja ${args}
+  progress cmake -S . -B build_${arch} -G Ninja ${args}
 }
 
 build() {
@@ -85,7 +84,7 @@ build() {
 
   log_info "Build (%F{3}${target}%f)"
 
-  cd "${dir}"
+  cd ${dir}
 
   args=(
     --build "build_${arch}"
@@ -107,27 +106,34 @@ install() {
     --config "${config}"
   )
 
-  if [[ "${config}" =~ "Release|MinSizeRel" ]] args+=(--strip)
   if (( _loglevel > 1 )) args+=(--verbose)
 
-  cd "${dir}"
+  cd ${dir}
   progress cmake ${args}
 }
 
 fixup() {
-  cd "${dir}"
+  cd ${dir}
 
   log_info "Fixup (%F{3}${target}%f)"
-  case ${target} {
-    macos*)
-      if [[ "${config}" == "Debug" ]] {
-        local _file
-        local -a _debug_files
-        _debug_files=("${target_config[output_dir]}"/lib/libpng16d.*(N))
-        for _file (${_debug_files}) {
-          mv "${_file}" "${_file//d./.}"
-        }
-      }
-      ;;
+  if [[ ${config} == Debug ]] {
+    local _file
+    local -a _debug_files
+    _debug_files=(${target_config[output_dir]}/lib/libpng16d.*(N))
+    for _file (${_debug_files}) {
+      mv ${_file} ${_file//d./.}
+    }
+  }
+
+  if (( shared_libs )) {
+    local -a dylib_files=(${target_config[output_dir]}/lib/libpng*.dylib(.))
+
+    autoload -Uz fix_rpaths
+    fix_rpaths ${dylib_files}
+
+    if [[ ${config} == (Release|MinSizeRel) ]] {
+      dsymutil ${dylib_files}
+      strip -x ${dylib_files}
+    }
   }
 }
