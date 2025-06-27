@@ -23,6 +23,7 @@ function Setup {
         Invoke-External pacman.exe -S --noconfirm --needed --noprogressbar nasm
         Invoke-External pacman.exe -S --noconfirm --needed --noprogressbar make
         Invoke-External pacman.exe -S --noconfirm --needed --noprogressbar perl
+        Invoke-External pacman.exe -S --noconfirm --needed --noprogressbar gcc
         Invoke-External pacman.exe -S --noconfirm --needed --noprogressbar pkgconf
     }
 }
