@@ -51,6 +51,7 @@ function Configure {
         '-DBUILD_ENC:BOOL=ON'
         '-DENABLE_NASM:BOOL=ON'
         '-DBUILD_TESTING:BOOL=OFF'
+        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options
