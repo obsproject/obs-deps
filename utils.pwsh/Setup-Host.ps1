@@ -28,6 +28,7 @@ function Setup-Host {
         }
 
         Install-BuildDependencies -WingetFile ${script:PSScriptRoot}/.Wingetfile
+        Invoke-External pacman.exe -S --sysupgrade --refresh --refresh --noconfirm --needed --noprogressbar
     }
 }
 
