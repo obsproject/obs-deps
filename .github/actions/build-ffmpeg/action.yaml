@@ -38,20 +38,6 @@ runs:
 
         echo "hash=${ffmpeg_dep_hash:0:9}" >> $GITHUB_OUTPUT
 
-    - name: Restore FFmpeg Dependencies from Cache
-      id: ffmpeg-deps-cache
-      uses: actions/cache/restore@v4
-      with:
-        path: |
-          ${{ inputs.workingDirectory }}/*_build_temp/*
-          !${{ inputs.workingDirectory }}/*_build_temp/**/.git
-          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.gz
-          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.xz
-          !${{ inputs.workingDirectory }}/*_build_temp/*.zip
-          !${{ inputs.workingDirectory }}/*_build_temp/FFmpeg*
-          !${{ inputs.workingDirectory }}/*_build_temp/x264-*-shared/
-        key: ${{ inputs.target }}-ffmpeg-deps-${{ inputs.type }}-${{ inputs.config }}-${{ steps.env-setup.outputs.hash }}
-
     - name: Build and Install FFmpeg Dependencies
       if: runner.os == 'macOS' && steps.ffmpeg-deps-cache.outputs.cache-hit != 'true'
       shell: zsh --no-rcs --errexit --pipefail {0}
@@ -74,15 +60,6 @@ runs:
         }
 
         ./Build-Dependencies.ps1 @BuildArgs
-
-    - name: Restore FFmpeg from Cache
-      id: ffmpeg-cache
-      uses: actions/cache/restore@v4
-      with:
-        path: |
-          ${{ github.workspace }}/*_build_temp/FFmpeg*/*
-          !${{ github.workspace }}/*_build_temp/FFmpeg*/.git
-        key: ${{ inputs.target }}-ffmpeg-${{ inputs.type }}-${{ inputs.config }}-${{ steps.env-setup.outputs.hash }}
 
     - name: Build and Install FFmpeg
       if: runner.os == 'macOS'
@@ -117,25 +94,3 @@ runs:
 
         ./Build-Dependencies.ps1 @BuildArgs
 
-    - name: Save FFmpeg to Cache
-      if: github.event_name == 'schedule' || (github.event_name == 'push' && steps.ffmpeg-cache.outputs.cache-hit != 'true')
-      uses: actions/cache/save@v4
-      with:
-        path: |
-          ${{ github.workspace }}/*_build_temp/FFmpeg*/*
-          !${{ github.workspace }}/*_build_temp/FFmpeg*/.git
-        key: ${{ inputs.target }}-ffmpeg-${{ inputs.type }}-${{ inputs.config }}-${{ steps.env-setup.outputs.hash }}
-
-    - name: Save FFmpeg Dependencies to Cache
-      if: github.event_name == 'schedule' || (github.event_name == 'push' && steps.ffmpeg-deps-cache.outputs.cache-hit != 'true')
-      uses: actions/cache/save@v4
-      with:
-        path: |
-          ${{ inputs.workingDirectory }}/*_build_temp/*
-          !${{ inputs.workingDirectory }}/*_build_temp/**/.git
-          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.gz
-          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.xz
-          !${{ inputs.workingDirectory }}/*_build_temp/*.zip
-          !${{ inputs.workingDirectory }}/*_build_temp/FFmpeg*
-          !${{ inputs.workingDirectory }}/*_build_temp/x264-*-shared/
-        key: ${{ inputs.target }}-ffmpeg-deps-${{ inputs.type }}-${{ inputs.config }}-${{ steps.env-setup.outputs.hash }}

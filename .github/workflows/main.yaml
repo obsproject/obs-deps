@@ -3,9 +3,11 @@ name: build_deps
 on:
  push:
    branches:
-     - streamlabs
+    - streamlabs
+    # - "*"
    tags:
-     - '20[2-9][0-9]-[0-9][0-9]-[0-9][0-9].*'
+    - '20[2-9][0-9]-[0-9][0-9]-[0-9][0-9].*'
+    #- "*"
  pull_request:
    paths-ignore:
      - '**.md'
@@ -106,14 +108,13 @@ jobs:
           print "dsymArtifactFileName=${dsym_file_name}" >> $GITHUB_OUTPUT
           print "ccacheDate=${sha_string}" >> $GITHUB_OUTPUT
 
-      - name: Restore Compilation Cache
-        id: ccache-cache
-        uses: actions/cache/restore@v4
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          path: ${{ github.workspace }}/.ccache
-          key: ${{ matrix.target }}-ccache-ffmpeg-${{ steps.setup.outputs.ccacheDate }}
-          restore-keys: |
-            ${{ matrix.target }}-ccache-ffmpeg-
+          cmake-version: '3.31'
+
+      - name: Check CMake version
+        run: cmake --version
 
       - name: Build FFmpeg
         uses: ./.github/actions/build-ffmpeg
@@ -137,13 +138,6 @@ jobs:
         with:
           name: ${{ steps.setup.outputs.dsymArtifactName }}
           path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.dsymArtifactFileName }}
-
-      - name: Save Compilation Cache
-        if: github.event_name == 'push'
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ github.workspace }}/.ccache
-          key: ${{ matrix.target }}-ccache-ffmpeg-${{ steps.setup.outputs.ccacheDate }}
 
   ffmpeg-windows-build:
     name: Build FFmpeg for Windows
@@ -171,7 +165,7 @@ jobs:
 
           $Target='${{ matrix.target }}'
           $ArtifactName="ffmpeg-windows-${Target}-${{ needs.pre-checks.outputs.shortHash }}"
-          $FileName="windows-ffmpeg-$(Get-Date -Format 'yyyy-MM-dd')-${Target}.zip"
+          $FileName="windows-ffmpeg-${{ steps.metadata.outputs.version }}-${Target}.zip"
 
           "artifactName=${ArtifactName}" >> $env:GITHUB_OUTPUT
           "artifactFileName=${FileName}" >> $env:GITHUB_OUTPUT
@@ -267,14 +261,13 @@ jobs:
           echo "dsymArtifactFileName=${dsym_file_name}" >> $GITHUB_OUTPUT
           echo "ccacheDate=${sha_string}" >> $GITHUB_OUTPUT
 
-      - name: Restore Compilation Cache
-        id: ccache-cache
-        uses: actions/cache/restore@v4
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          path: ${{ github.workspace }}/.ccache
-          key: ${{ matrix.target }}-ccache-deps-${{ steps.setup.outputs.ccacheDate }}
-          restore-keys: |
-            ${{ matrix.target }}-ccache-deps-
+          cmake-version: '3.31'
+
+      - name: Check CMake version
+        run: cmake --version
 
       - name: Build macOS Dependencies
         uses: ./.github/actions/build-deps
@@ -298,13 +291,6 @@ jobs:
         with:
           name: ${{ steps.setup.outputs.dsymArtifactName }}
           path: ${{ github.workspace }}/${{ matrix.target }}/${{ steps.setup.outputs.dsymArtifactFileName }}
-
-      - name: Save Compilation Cache
-        if: github.event_name == 'push' && steps.ccache-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ github.workspace }}/.ccache
-          key: ${{ matrix.target }}-ccache-deps-${{ steps.setup.outputs.ccacheDate }}
 
   macos-package-universal:
     name: Build macOS Dependencies (Universal)
@@ -369,15 +355,6 @@ jobs:
           print "dsymArtifactFileName=${dsym_file_name}" >> $GITHUB_OUTPUT
           print "ccacheDate=${sha_string}" >> $GITHUB_OUTPUT
 
-      - name: Restore Compilation Cache
-        id: ccache-cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ github.workspace }}/.ccache
-          key: macos-universal-ccache-qt6-${{ steps.setup.outputs.ccacheDate }}
-          restore-keys: |
-            macos-universal-ccache-qt6-
-
       - name: Build macOS Qt6
         uses: ./.github/actions/build-qt
         with:
@@ -399,13 +376,6 @@ jobs:
         with:
           name: ${{ steps.setup.outputs.dsymArtifactName }}
           path: ${{ github.workspace }}/macos-universal/${{ steps.setup.outputs.dsymArtifactFileName }}
-
-      - name: Save Compilation Cache
-        if: github.event_name == 'push' && steps.ccache-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ github.workspace }}/.ccache
-          key: macos-universal-ccache-qt6-${{ steps.setup.outputs.ccacheDate }}
 
   macos-qt6-package:
     name: Create macOS Qt6 (${{ matrix.target }})

@@ -52,18 +52,6 @@ runs:
         echo "depHash=${deps_hash:0:9}" >> $GITHUB_OUTPUT
         echo "patchHash=${qt_patch_hash:0:9}" >> $GITHUB_OUTPUT
 
-    - name: Restore Qt from Cache
-      id: deps-cache
-      uses: actions/cache/restore@v4
-      with:
-        path: |
-          ${{ inputs.workingDirectory }}/*_build_temp/qt${{ inputs.qtVersion }}*
-          !${{ inputs.workingDirectory }}/*_build_temp/**/.git
-          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.gz
-          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.xz
-          !${{ inputs.workingDirectory }}/*_build_temp/*.zip
-        key: ${{ inputs.target }}-qt${{ inputs.qtVersion }}-${{inputs.config }}-${{ steps.env-setup.outputs.depHash }}-${{ steps.env-setup.outputs.patchHash }}
-
     - name: Build and Install Qt
       if: runner.os == 'macOS'
       shell: zsh --no-rcs --errexit --pipefail {0}
@@ -97,15 +85,3 @@ runs:
         }
 
         ./Build-Dependencies.ps1 @Params
-
-    - name: Save Qt to Cache
-      if: github.event_name == 'schedule' || (github.event_name == 'push' && steps.deps-cache.outputs.cache-hit != 'true')
-      uses: actions/cache/save@v4
-      with:
-        path: |
-          ${{ inputs.workingDirectory }}/*_build_temp/qt${{ inputs.qtVersion }}*
-          !${{ inputs.workingDirectory }}/*_build_temp/**/.git
-          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.gz
-          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.xz
-          !${{ inputs.workingDirectory }}/*_build_temp/*.zip
-        key: ${{ inputs.target }}-qt${{ inputs.qtVersion }}-${{inputs.config }}-${{ steps.env-setup.outputs.depHash }}-${{ steps.env-setup.outputs.patchHash }}

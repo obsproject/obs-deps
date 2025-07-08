@@ -41,18 +41,6 @@ runs:
 
         echo "hash=${deps_hash:0:9}" >> $GITHUB_OUTPUT
 
-    - name: Restore Dependencies from Cache
-      id: deps-cache
-      uses: actions/cache/restore@v4
-      with:
-        path: |
-          ${{ inputs.workingDirectory }}/*_build_temp/*
-          !${{ inputs.workingDirectory }}/*_build_temp/**/.git
-          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.gz
-          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.xz
-          !${{ inputs.workingDirectory }}/*_build_temp/*.zip
-        key: ${{ inputs.target }}-deps-${{ inputs.type }}-${{ inputs.config }}-${{ steps.env-setup.outputs.hash }}
-
     - name: Build and Install Dependencies
       if: runner.os == 'macOS'
       shell: zsh --no-rcs --errexit --pipefail {0}
@@ -85,14 +73,3 @@ runs:
 
         ./Build-Dependencies.ps1 @Params
 
-    - name: Save Dependencies to Cache
-      uses: actions/cache/save@v4
-      if: github.event_name == 'schedule' || (github.event_name == 'push' && steps.deps-cache.outputs.cache-hit != 'true')
-      with:
-        path: |
-          ${{ inputs.workingDirectory }}/*_build_temp/*
-          !${{ inputs.workingDirectory }}/*_build_temp/**/.git
-          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.gz
-          !${{ inputs.workingDirectory }}/*_build_temp/*.tar.xz
-          !${{ inputs.workingDirectory }}/*_build_temp/*.zip
-        key: ${{ inputs.target }}-deps-${{ inputs.type }}-${{ inputs.config }}-${{ steps.env-setup.outputs.hash }}
