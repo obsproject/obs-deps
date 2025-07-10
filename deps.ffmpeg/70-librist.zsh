@@ -4,7 +4,7 @@ autoload -Uz log_debug log_error log_info log_status log_output
 local name='librist'
 local version='0.2.7'
 local url='https://code.videolan.org/rist/librist.git'
-local hash='809390b3b75a259a704079d0fb4d8f1b5f7fa956'
+local hash='186bedbb6a2ec77f994689ccdde4a9bd88548d22'
 local -a patches=(
   "macos ${0:a:h}/patches/librist/0001-generate-cross-compile-files-macos.patch \
     e14ae6f6565c9412c3f99f3917c1e8410181faede1530cbc014d2d5e03f9c124"
