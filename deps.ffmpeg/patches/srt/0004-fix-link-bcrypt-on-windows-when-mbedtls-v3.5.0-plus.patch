@@ -1,0 +1,30 @@
+From 618ddfed45a53d99e4a0ce8528b2ecfe2860b5bc Mon Sep 17 00:00:00 2001
+From: Tommy Wu <7903172+tommyvct@users.noreply.github.com>
+Date: Thu, 7 Mar 2024 03:45:03 -0600
+Subject: [PATCH] [build] Fix: link bcrypt on Windows when mbedtls >=v3.5.0
+ (#2860).
+
+Only link to bcrypt if mbedtls is not found by find_package(mbedtls).
+---
+ CMakeLists.txt | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8951dc46c..c5994d3b7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -365,11 +365,11 @@ if (ENABLE_ENCRYPTION)
+ 			set (SSL_INCLUDE_DIRS ${MBEDTLS_INCLUDE_DIR})
+ 			set (SSL_LIBRARIES  ${MBEDTLS_LIBRARIES})
+ 		endif()
++		if (WIN32)
++			set (SSL_LIBRARIES ${SSL_LIBRARIES} bcrypt)
++		endif()
+ 		if ("${SSL_LIBRARIES}" STREQUAL "")
+ 			set (SSL_LIBRARIES  mbedtls mbedcrypto)
+-			if (WIN32)
+-				set (SSL_LIBRARIES ${SSL_LIBRARIES} bcrypt)
+-			endif()
+ 		endif()
+ 		message(STATUS "SSL enforced mbedtls: -I ${SSL_INCLUDE_DIRS} -l;${SSL_LIBRARIES}")
+ 
