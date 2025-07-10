@@ -1,0 +1,23 @@
+From 7899f1520b12218bcce4538bbe40e8e08663141b Mon Sep 17 00:00:00 2001
+From: Jay Zhang <wangyoucao577@gmail.com>
+Date: Mon, 8 Jan 2024 17:21:55 +0800
+Subject: [PATCH] [build] Fix mbedtls >=v3.5.0 build error on windows (#2842).
+
+---
+ CMakeLists.txt | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4611f0ca2..b62c3176c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -358,6 +358,9 @@ if (ENABLE_ENCRYPTION)
+ 		endif()
+ 		if ("${SSL_LIBRARIES}" STREQUAL "")
+ 			set (SSL_LIBRARIES  mbedtls mbedcrypto)
++			if (WIN32)
++				set (SSL_LIBRARIES ${SSL_LIBRARIES} bcrypt)
++			endif()
+ 		endif()
+ 		message(STATUS "SSL enforced mbedtls: -I ${SSL_INCLUDE_DIRS} -l;${SSL_LIBRARIES}")
+ 
