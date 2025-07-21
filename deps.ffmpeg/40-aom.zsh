@@ -2,9 +2,9 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='aom'
-local version='3.9.1'
+local version='3.12.0'
 local url='https://aomedia.googlesource.com/aom.git'
-local hash='8ad484f8a18ed1853c094e7d3a4e023b2a92df28'
+local hash='3b624af45b86646a20b11a9ff803aeae588cdee6'
 local -a patches=(
   "windows ${0:a:h}/patches/libaom/0001-force-threading-shim-usage.patch \
   6fa9ca74001c5fa3a6521a2b4944be2a8b4350d31c0234aede9a7052a8f1890b"
@@ -117,7 +117,9 @@ install() {
 
   if [[ ${target} == macos-universal ]] {
     pushd build_universal
-    sed -i -E -e 's/build_x86_64/build_universal/g' cmake_install.cmake
+    if [[ -f CMakeFiles/InstallScripts.json ]] sed -i '' -E -e 's/build_x86_64/build_universal/g' CMakeFiles/InstallScripts.json
+    sed -i '' -E -e 's/build_x86_64/build_universal/g' cmake_install.cmake
+    args=(${args//build_x86_64/build_universal})
     popd
   }
 

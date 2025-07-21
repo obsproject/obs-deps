@@ -34,11 +34,12 @@ config() {
 
   args=(
     ${cmake_flags}
-    -DENABLE_SHARED="${_onoff[(( shared_libs + 1 ))]}"
+    -DBUILD_SHARED_LIBS="${_onoff[(( shared_libs + 1 ))]}"
     -DUSE_MBEDTLS=1
     -DNO_WEBSOCKET=1
     -DNO_TESTS=1
     -DNO_EXAMPLES=1
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
   )
 
   log_info "Config (%F{3}${target}%f)"

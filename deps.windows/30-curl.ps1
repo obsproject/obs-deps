@@ -1,9 +1,9 @@
 param(
     [string] $Name = 'curl',
-    [string] $Version = '8.9.1',
+    [string] $Version = '8.12.1',
     [string] $Uri = 'https://github.com/curl/curl.git',
-    [string] $Hash = '83bedbd730d62b83744cc26fa0433d3f6e2e4cd6',
-    [array] $Targets = @('x64')
+    [string] $Hash = '57495c64871d18905a0941db9196ef90bafe9a29',
+    [array] $Targets = @('x64', 'arm64')
 )
 
 function Setup {
@@ -37,6 +37,7 @@ function Configure {
         $CmakeOptions
         '-DBUILD_CURL_EXE:BOOL=OFF'
         '-DBUILD_TESTING:BOOL=OFF'
+        '-DCURL_USE_LIBPSL=OFF'
         '-DCURL_USE_LIBSSH2:BOOL=OFF'
         '-DCURL_USE_SCHANNEL:BOOL=ON'
         '-DCURL_ZLIB:BOOL=OFF'

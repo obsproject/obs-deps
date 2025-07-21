@@ -2,9 +2,9 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='jansson'
-local version='2.14'
-local url='https://github.com/akheron/jansson/releases/download/v2.14/jansson-2.14.tar.gz'
-local hash="${0:a:h}/checksums/jansson-2.14.tar.gz.sha256"
+local version='2.14.1'
+local url='https://github.com/akheron/jansson.git'
+local hash="96d160df90016066d04d493d1d69639474ba4f20"
 
 ## Build Steps
 setup() {

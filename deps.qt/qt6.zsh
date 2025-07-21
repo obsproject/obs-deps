@@ -2,8 +2,8 @@ autoload -Uz log_debug log_error log_info log_status log_output
 
 ## Dependency Information
 local name='qt6'
-local version=6.6.3
-local url='https://download.qt.io/archive/qt/6.6/6.6.3'
+local version=6.8.3
+local url='https://download.qt.io/archive/qt/6.8/6.8.3'
 local hash="${0:a:h}/checksums"
 local -a patches=(
   "macos ${0:a:h}/patches/Qt6/mac/0001-QTBUG-121351.patch \
@@ -103,7 +103,7 @@ config() {
     fi
   }
 
-  if (( shared_libs )) && [[ ${config} == Release ]] common_cmake_flags+=(-DFEATURE_separate_debug_info:BOOL=ON -DQT_FEATURE_force_debug_info:BOOL=ON)
+  if (( shared_libs )) && [[ ${config} == Release ]] common_cmake_flags+=(-DQT_FEATURE_force_debug_info:BOOL=ON)
   if (( shared_libs )) && [[ ${config} == Debug ]] common_cmake_flags+=(-DCMAKE_PLATFORM_NO_VERSIONED_SONAME:BOOL=ON)
 
   args=(
@@ -120,6 +120,7 @@ config() {
     -DFEATURE_png:BOOL=ON
     -DFEATURE_printsupport:BOOL=OFF
     -DFEATURE_qmake:BOOL=OFF
+    -DFEATURE_separate_debug_info:BOOL=ON
     -DFEATURE_sql:BOOL=OFF
     -DFEATURE_system_doubleconversion:BOOL=OFF
     -DFEATURE_system_jpeg:BOOL=OFF

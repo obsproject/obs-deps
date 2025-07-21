@@ -47,6 +47,7 @@ config() {
 
   args=(
     ${cmake_flags//ARCHITECTURES=${arch}/"ARCHITECTURES='x86_64;arm64'"}
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
   )
 
   log_info "Config (%F{3}${target}%f)"

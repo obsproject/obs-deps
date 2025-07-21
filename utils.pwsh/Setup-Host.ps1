@@ -28,6 +28,8 @@ function Setup-Host {
         }
 
         Install-BuildDependencies -WingetFile ${script:PSScriptRoot}/.Wingetfile
+        Invoke-External bash.exe -c "rm -rf /etc/pacman.d/gnupg; pacman-key --init && pacman-key --populate msys2"
+        Invoke-External pacman.exe -S --sysupgrade --refresh --refresh --noconfirm --needed --noprogressbar
     }
 }
 
@@ -35,11 +37,4 @@ function Cleanup {
     Log-Debug "Running Cleanup actions"
 }
 
-function Get-HostArchitecture {
-    $Host64Bit = [System.Environment]::Is64BitOperatingSystem
-    $HostArchitecture = ('x86', 'x64')[$Host64Bit]
-
-    return $HostArchitecture
-}
-
-$script:HostArchitecture = Get-HostArchitecture
+$script:HostArchitecture = ([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture).ToString().ToLower()

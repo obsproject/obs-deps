@@ -3,7 +3,7 @@ param(
     [string] $Version = '2020-07-28',
     [string] $Uri = 'https://github.com/xiph/rnnoise.git',
     [string] $Hash = '2938bcf94a2fe3f850df542f5de3996905059c97',
-    [array] $Targets = @('x64')
+    [array] $Targets = @('x64', 'arm64')
 )
 
 function Setup {
@@ -28,6 +28,7 @@ function Configure {
         $CmakeOptions
         "-DBUILD_SHARED_LIBS:BOOL=$($OnOff[$script:Shared.isPresent])"
         '-DRNNOISE_COMPILE_OPUS:BOOL=ON'
+        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5'
     )
 
     Log-Debug "CMake configure options: ${Options}"

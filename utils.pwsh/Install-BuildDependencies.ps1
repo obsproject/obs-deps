@@ -25,7 +25,7 @@ function Install-BuildDependencies {
     }
 
     $Paths = $env:Path -split [System.IO.Path]::PathSeparator
-    $Paths = $Paths | Get-Unique | Where-Object { ( ! ($_ -match 'Strawberry' ) ) }
+    $Paths = $Paths | Get-Unique | Where-Object { ( ! ( $_ -match 'Strawberry' ) ) }
 
     $WingetOptions = @('install', '--accept-package-agreements', '--accept-source-agreements')
 
@@ -36,6 +36,8 @@ function Install-BuildDependencies {
     Get-Content $WingetFile | ForEach-Object {
         $PackageEntry = $_
         $_, $Package, $_, $Path, $_, $Binary, $_, $Version = $PackageEntry -replace ',','' -split " +(?=(?:[^\']*\'[^\']*\')*[^\']*$)" -replace "'",''
+
+        Log-Debug "$($MyInvocation.MyCommand): $PackageEntry"
 
         if ( $Package -eq 'MSYS2.MSYS2' ) {
             if ( ( Test-Path "${Path}\${Binary}*" ) -and ! ( $Paths -contains $Path ) ) {
@@ -72,8 +74,8 @@ function Install-BuildDependencies {
 
                     Invoke-External winget @Params
                 } else {
-                    if ( $Package -eq 'meson' ) {
-                        python3 -m pip install meson
+                    if ( $Package -eq 'mesonbuild.meson' ) {
+                        python3 -m pip install 'git+https://github.com/mesonbuild/meson@master'
                     }
                 }
             } catch {

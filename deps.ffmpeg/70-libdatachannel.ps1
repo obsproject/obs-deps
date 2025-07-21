@@ -3,7 +3,7 @@ param(
     [string] $Version = 'v0.21.0',
     [string] $Uri = 'https://github.com/paullouisageneau/libdatachannel.git',
     [string] $Hash = '9d5c46b8f506943727104d766e5dad0693c5a223',
-    [array] $Targets = @('x64'),
+    [array] $Targets = @('x64', 'arm64'),
     [switch] $ForceShared = $true
 )
 
@@ -24,14 +24,21 @@ function Configure {
     Log-Information "Configure (${Target})"
     Set-Location $Path
 
+    if ( $ForceShared -and ( $script:Shared -eq $false ) ) {
+        $Shared = $true
+    } else {
+        $Shared = $script:Shared.isPresent
+    }
+
     $OnOff = @('OFF', 'ON')
     $Options = @(
         $CmakeOptions
-        "-DBUILD_SHARED_LIBS:BOOL=$($OnOff[$script:Shared.isPresent])"
+        "-DBUILD_SHARED_LIBS:BOOL=$($OnOff[$Shared])"
         '-DUSE_MBEDTLS:BOOL=ON'
         '-DNO_WEBSOCKET:BOOL=ON'
         '-DNO_TESTS:BOOL=ON'
         '-DNO_EXAMPLES:BOOL=ON'
+        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5'
     )
 
     Invoke-External cmake -S . -B "build_${Target}" @Options

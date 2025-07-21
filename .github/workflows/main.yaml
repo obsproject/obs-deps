@@ -3,11 +3,11 @@ name: build_deps
 on:
  push:
    branches:
-    - streamlabs
-    # - "*"
+    #- streamlabs
+    - "*"
    tags:
-    - '20[2-9][0-9]-[0-9][0-9]-[0-9][0-9].*'
-    #- "*"
+    #- '20[2-9][0-9]-[0-9][0-9]-[0-9][0-9].*'
+    - "*"
  pull_request:
    paths-ignore:
      - '**.md'
@@ -21,7 +21,7 @@ concurrency:
 jobs:
   pre-checks:
     name: Run Pre-Checks
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     defaults:
       run:
         shell: bash
@@ -57,7 +57,7 @@ jobs:
 
   ffmpeg-macos-build:
     name: Build FFmpeg for macOS
-    runs-on: macos-14
+    runs-on: macos-15
     needs: pre-checks
     strategy:
       fail-fast: true
@@ -80,19 +80,20 @@ jobs:
       - name: Setup Environment
         id: setup
         run: |
-          print '::group::Enable Xcode 15.2'
-          sudo xcode-select --switch /Applications/Xcode_15.2.app/Contents/Developer
+          print '::group::Enable Xcode 16.1'
+          sudo xcode-select --switch /Applications/Xcode_16.1.0.app/Contents/Developer
           print '::endgroup::'
 
-          local -a to_remove=()
-
-          for formula (llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile \
+          local -a unwanted_formulas=(llvm gcc postgresql openjdk sox libsndfile flac libvorbis opusfile \
             libogg composer php gd freetype fontconfig webp libpng lame libtiff opus kotlin \
-            sbt libxft libxcb) {
-            if [[ -d /usr/local/opt/${formula} ]] to_remove+=(${formula})
+            sbt libxft libxcb pkg-config@0.29.2)
+
+          local -a remove_formulas=()
+          for formula (${unwanted_formulas}) {
+            if [[ -d ${HOMEBREW_PREFIX}/Cellar/${formula} ]] remove_formulas+=(${formula})
           }
 
-          if (( #to_remove )) brew uninstall --ignore-dependencies ${to_remove}
+          if (( #remove_formulas )) brew uninstall --ignore-dependencies ${remove_formulas}
 
           local -r sha_string=${{ github.sha }}
           local -r target='${{ matrix.target }}'
@@ -146,9 +147,12 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [x64]
+        target: [x64, arm64]
         include:
           - target: x64
+            config: Release
+            type: static
+          - target: arm64
             config: Release
             type: static
     defaults:
@@ -186,7 +190,7 @@ jobs:
 
   ffmpeg-package-universal:
     name: Build FFmpeg (Universal)
-    runs-on: macos-14
+    runs-on: macos-15
     needs: [pre-checks, ffmpeg-macos-build]
     steps:
       - name: Checkout
@@ -210,7 +214,7 @@ jobs:
 
   macos-build:
     name: Build macOS Dependencies
-    runs-on: macos-14
+    runs-on: macos-15
     needs: pre-checks
     strategy:
       fail-fast: true
@@ -234,18 +238,18 @@ jobs:
         id: setup
         run: |
           : Setup Environment
-
-          print '::group::Enable Xcode 15.2'
-          sudo xcode-select --switch /Applications/Xcode_15.2.app/Contents/Developer
+          print '::group::Enable Xcode 16.1'
+          sudo xcode-select --switch /Applications/Xcode_16.1.0.app/Contents/Developer
           print '::endgroup::'
 
-          to_remove=()
+          local -a unwanted_formulas=(llvm gcc pkg-config@0.29.2)
 
-          for formula (llvm gcc) {
-            if [[ -d /usr/local/opt/"${formula}" ]] to_remove+=(${formula})
+          local -a remove_formulas=()
+          for formula (${unwanted_formulas}) {
+            if [[ -d ${HOMEBREW_PREFIX}/Cellar/${formula} ]] remove_formulas+=(${formula})
           }
 
-          if (( #to_remove )) brew uninstall --ignore-dependencies ${to_remove}
+          if (( #remove_formulas )) brew uninstall --ignore-dependencies ${remove_formulas}
 
           local -r sha_string=${{ github.sha }}
           local -r target='${{ matrix.target }}'
@@ -294,7 +298,7 @@ jobs:
 
   macos-package-universal:
     name: Build macOS Dependencies (Universal)
-    runs-on: macos-14
+    runs-on: macos-15
     needs: [pre-checks, macos-build]
     steps:
       - name: Checkout
@@ -318,7 +322,7 @@ jobs:
 
   macos-qt6-build:
     name: Build Qt6 (macOS)
-    runs-on: macos-14
+    runs-on: macos-15
     needs: pre-checks
     defaults:
       run:
@@ -331,17 +335,18 @@ jobs:
         id: setup
         run: |
           : Setup Environment
-          print '::group::Enable Xcode 15.2'
-          sudo xcode-select --switch /Applications/Xcode_15.2.app/Contents/Developer
+          print '::group::Enable Xcode 16.1'
+          sudo xcode-select --switch /Applications/Xcode_16.1.0.app/Contents/Developer
           print '::endgroup::'
 
-          local -a to_remove=()
+          local -a unwanted_formulas=(llvm gcc pkg-config@0.29.2)
 
-          for formula (llvm gcc) {
-            if [[ -d /usr/local/opt/"${formula}" ]] to_remove+=(${formula})
+          local -a remove_formulas=()
+          for formula (${unwanted_formulas}) {
+            if [[ -d ${HOMEBREW_PREFIX}/Cellar/${formula} ]] remove_formulas+=(${formula})
           }
 
-          if (( #to_remove )) brew uninstall --ignore-dependencies ${to_remove}
+          if (( #remove_formulas )) brew uninstall --ignore-dependencies ${remove_formulas}
 
           local -r sha_string=${{ github.sha }}
           artifact_name="qt6-macos-universal-${{ needs.pre-checks.outputs.shortHash }}"
@@ -379,7 +384,7 @@ jobs:
 
   macos-qt6-package:
     name: Create macOS Qt6 (${{ matrix.target }})
-    runs-on: macos-14
+    runs-on: macos-15
     strategy:
       fail-fast: true
       matrix:
@@ -417,12 +422,15 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [x64, x86]
+        target: [x64, x86, arm64]
         include:
           - target: x64
             config: Release
             type: static
           - target: x86
+            config: Release
+            type: static
+          - target: arm64
             config: Release
             type: static
     defaults:
@@ -475,7 +483,7 @@ jobs:
           Remove-Item -Recurse -Force ${{ github.workspace }}/windows_build_temp
 
       - name: Build qrcodegencpp Debug
-        if: matrix.target == 'x64'
+        if: matrix.target == 'x64' || matrix.target == 'arm64'
         shell: pwsh
         run: |
           # Build qrcodegencpp Debug
@@ -534,6 +542,63 @@ jobs:
           config: ${{ matrix.config }}
 
       - name: Publish Build Artifacts
+        if: matrix.target == 'x64' || (github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters))
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.setup.outputs.artifactName }}
+          path: ${{ github.workspace }}/windows/${{ steps.setup.outputs.artifactFileName }}
+
+  windows-qt6-arm64-build:
+    name: Build Qt6 (Windows ARM64)
+    runs-on: windows-2022
+    needs: [pre-checks, windows-qt6-build]
+    strategy:
+      fail-fast: true
+      matrix:
+        config: [RelWithDebInfo, Debug]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Environment
+        id: setup
+        run: |
+          # Setup Environment
+          $HostArtifactName="qt6-windows-x64-${{ matrix.config }}-${{ needs.pre-checks.outputs.shortHash }}"
+          $HostFileName="windows-deps-qt6-$(Get-Date -Format 'yyyy-MM-dd')-x64-${{ matrix.config }}.zip"
+
+          $ArtifactName="qt6-windows-arm64-${{ matrix.config }}-${{ needs.pre-checks.outputs.shortHash }}"
+          $FileName="windows-deps-qt6-$(Get-Date -Format 'yyyy-MM-dd')-arm64-${{ matrix.config }}.zip"
+
+          "hostArtifactName=${HostArtifactName}" >> $env:GITHUB_OUTPUT
+          "hostArtifactFileName=${HostFileName}" >> $env:GITHUB_OUTPUT
+          "qtHostPath=${env:GITHUB_WORKSPACE}/Qt6Host" >> $env:GITHUB_OUTPUT
+          "artifactName=${ArtifactName}" >> $env:GITHUB_OUTPUT
+          "artifactFileName=${FileName}" >> $env:GITHUB_OUTPUT
+
+      - name: Download Host Tools Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.setup.outputs.hostArtifactName }}
+          path: ${{ github.workspace }}/Qt6Host
+
+      - name: Setup Host Tools Artifact
+        run: |
+          . ${{ github.workspace }}/utils.pwsh/Expand-ArchiveExt
+
+          Set-Location ${{ github.workspace }}/Qt6Host
+          Expand-ArchiveExt -Path ${{ steps.setup.outputs.hostArtifactFileName }} -DestinationPath (Get-Location | Convert-Path)
+
+      - name: Build Windows Qt
+        uses: ./.github/actions/build-qt
+        env:
+          QtHostPath: ${{ steps.setup.outputs.qtHostPath }}
+        with:
+          target: arm64
+          config: ${{ matrix.config }}
+
+      - name: Publish Build Artifacts
         if: github.event_name != 'pull_request' || fromJSON(needs.pre-checks.outputs.seekingTesters)
         uses: actions/upload-artifact@v4
         with:
@@ -546,8 +611,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target: [x64]
-    needs: [pre-checks, windows-qt6-build]
+        target: [x64, arm64]
+    needs: [pre-checks, windows-qt6-build, windows-qt6-arm64-build]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -587,7 +652,7 @@ jobs:
           shopt -s extglob
           shopt -s nullglob
 
-          for arch in x64 x86; do
+          for arch in x64 x86 arm64; do
             _temp=$(mktemp -d)
             pushd "${_temp}" > /dev/null
 
@@ -619,7 +684,7 @@ jobs:
             _temp=$(mktemp -d)
             pushd "${_temp}" > /dev/null
 
-            for artifact in ${GITHUB_WORKSPACE}/**/macos-@(deps|ffmpeg)-!(qt6*)-${arch}.*; do
+            for artifact in ${GITHUB_WORKSPACE}/**/macos-@(deps|ffmpeg)-!(qt6*)-${arch}?(-dSYMs).*; do
               case ${artifact} in
                 *.zip) unzip -o ${artifact} > /dev/null ;;
                 *.tar.xz) XZ_OPT=-T0 tar -xvJf ${artifact} ;;
@@ -627,8 +692,9 @@ jobs:
               esac
             done
 
-            XZ_OPT=-T0 tar -cvJf macos-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz -- *
-            mv macos-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz ${GITHUB_WORKSPACE}
+            XZ_OPT=-T0 tar -cvJf macos-deps-${{ steps.metadata.outputs.version }}-${arch}.tar.xz -- !(*.dSYM)
+            XZ_OPT=-T0 tar -cvJf macos-deps-${{ steps.metadata.outputs.version }}-${arch}-dSYMs.tar.xz -- *.dSYM
+            mv macos-deps-${{ steps.metadata.outputs.version }}-${arch}?(-dSYMs).tar.xz ${GITHUB_WORKSPACE}
 
             popd > /dev/null
 
@@ -668,10 +734,11 @@ jobs:
           body_path: ${{ github.workspace }}/CHECKSUMS.txt
           files: |
             ${{ github.workspace }}/windows-*-x64*.zip
+            ${{ github.workspace }}/windows-*-arm64*.zip
             ${{ github.workspace }}/windows-*-x86*.zip
-            ${{ github.workspace }}/macos-*-arm64.tar.xz
-            ${{ github.workspace }}/macos-*-x86_64.tar.xz
-            ${{ github.workspace }}/macos-*-universal.tar.xz
+            ${{ github.workspace }}/macos-*-arm64?(-dSYMs).tar.xz
+            ${{ github.workspace }}/macos-*-x86_64?(-dSYMs).tar.xz
+            ${{ github.workspace }}/macos-*-universal?(-dSYMs).tar.xz
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
