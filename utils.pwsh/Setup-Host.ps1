@@ -28,8 +28,6 @@ function Setup-Host {
         }
 
         Install-BuildDependencies -WingetFile ${script:PSScriptRoot}/.Wingetfile
-        Invoke-External bash.exe -c "rm -rf /etc/pacman.d/gnupg; pacman-key --init && pacman-key --populate msys2"
-        Invoke-External pacman.exe -S --sysupgrade --refresh --refresh --noconfirm --needed --noprogressbar
     }
 }
 
