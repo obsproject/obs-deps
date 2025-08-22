@@ -347,13 +347,18 @@ jobs:
 
   windows-qt6-build:
     name: Build Qt6 (Windows)
-    runs-on: windows-2022
     needs: cache-cleanup
     strategy:
       fail-fast: true
       matrix:
-        target: [x64]
+        target: [x64, arm64]
         config: [RelWithDebInfo, Debug]
+        include:
+          - target: x64
+            runner-os: windows-2022
+          - target: arm64
+            runner-os: windows-11-arm
+    runs-on: ${{ matrix.runner-os }}
 
     steps:
       - name: Checkout
