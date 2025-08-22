@@ -75,7 +75,7 @@ function Install-BuildDependencies {
                     Invoke-External winget @Params
                 } else {
                     if ( $Package -eq 'mesonbuild.meson' ) {
-                        python3 -m pip install 'git+https://github.com/mesonbuild/meson@master'
+                        python3 -m pip install meson
                     }
                 }
             } catch {
