@@ -68,7 +68,7 @@ function Configure {
         '--toolchain=msvc'
         ('--extra-cflags=' + "'-D_WINDLL -MD -D_WIN32_WINNT=0x0A00" + $(if ( $Target -eq 'arm64' ) { ' -D__ARM_PCS_VFP' }) + "'")
         ('--extra-cxxflags=' + "'-MD -D_WIN32_WINNT=0x0A00'")
-        ('--extra-ldflags=' + "'-APPCONTAINER:NO -MACHINE:${Target}'")
+        ('--extra-ldflags=' + "'-APPCONTAINER:NO -MACHINE:${Target}'" + $(if ( $Configuration -match '(Debug|RelWithDebInfo)' ) { ' -DEBUG' }))
         $(if ( $Target -eq 'arm64' ) { '--as=armasm64.exe','--cpu=armv8' })
         '--pkg-config=pkg-config'
         $(if ( $Target -ne 'x86' ) { '--target-os=win64' } else { '--target-os=win32' })
