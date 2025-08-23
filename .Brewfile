@@ -4,7 +4,7 @@ brew "cmake"
 brew "coreutils"
 brew "gnu-tar"
 brew "libtool"
-brew "meson", args: ["HEAD"]
+brew "meson"
 brew "nasm"
 brew "ninja"
 brew "pkgconf"
