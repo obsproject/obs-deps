@@ -6,8 +6,10 @@ local version='3.13.1'
 local url='https://aomedia.googlesource.com/aom.git'
 local hash='d772e334cc724105040382a977ebb10dfd393293'
 local -a patches=(
-  "windows ${0:a:h}/patches/libaom/0001-force-threading-shim-usage.patch \
+  "windows ${0:a:h}/patches/aom/0001-force-threading-shim-usage.patch \
   6fa9ca74001c5fa3a6521a2b4944be2a8b4350d31c0234aede9a7052a8f1890b"
+  "macos ${0:a:h}/patches/aom/0002-fix-cmake-nasm-detection.patch \
+  47d926731a31990b432f188e7e16628bd2ca334f5b71fe55241d7b845884a35d"
 )
 
 ## Dependency Overrides
