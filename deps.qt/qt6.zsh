@@ -14,6 +14,7 @@ local -a patches=(
 
 local -a qt_components=(
   'qtbase'
+  'qtcharts'
   'qtimageformats'
   'qtshadertools'
   'qtmultimedia'
