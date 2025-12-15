@@ -14,6 +14,7 @@ local -a patches=(
 
 local -a qt_components=(
   'qtbase'
+  'qtcharts'
   'qtimageformats'
   'qtshadertools'
   'qtmultimedia'
@@ -131,6 +132,7 @@ config() {
     -DFEATURE_system_zlib:BOOL=ON
     -DFEATURE_testlib:BOOL=OFF
     -DFEATURE_windeployqt:BOOL=OFF
+    -DINPUT_opengl:STRING=no
     -DINPUT_openssl:STRING=no
     -DQT_BUILD_BENCHMARKS:BOOL=OFF
     -DQT_BUILD_EXAMPLES:BOOL=OFF
