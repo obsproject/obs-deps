@@ -1,8 +1,8 @@
 param(
     [string] $Name = 'FFmpeg',
-    [string] $Version = '7.1.1',
+    [string] $Version = '8.1',
     [string] $Uri = 'https://github.com/FFmpeg/FFmpeg.git',
-    [string] $Hash = "db69d06eeeab4f46da15030a80d539efb4503ca8",
+    [string] $Hash = "9047fa1b084f76b1b4d065af2d743df1b40dfb56",
     [array] $Targets = @('x64', 'arm64'),
     [array] $Patches = @(
         @{
@@ -92,7 +92,6 @@ function Configure {
         '--disable-indev=jack'
         '--disable-sdl2'
         '--disable-doc'
-        '--disable-postproc'
         $(if ( ! $script:Shared ) { ('--pkg-config-flags=' + "'--static'") })
         $(if ( $Configuration -eq 'Debug' ) { '--enable-debug' } else { '--disable-debug' })
         $(if ( $Configuration -eq 'RelWithDebInfo' ) { '--disable-stripping' })
