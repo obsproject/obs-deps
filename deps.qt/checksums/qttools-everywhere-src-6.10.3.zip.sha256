@@ -7,8 +7,8 @@
     <ToString>Microsoft.PowerShell.Commands.FileHashInfo</ToString>
     <Props>
       <S N="Algorithm">SHA256</S>
-      <S N="Hash">30B81E4F641CDBD608AE8C01A48677338D1C69545117C5552063B63262C7EB1B</S>
-      <S N="Path">qtimageformats-everywhere-src-6.8.3.zip</S>
+      <S N="Hash">211FBE415F689C1E5FA593AE56A2B5FB5151723CC045A8B48FFC3F3515180B0A</S>
+      <S N="Path">qttools-everywhere-src-6.10.3.zip</S>
     </Props>
   </Obj>
 </Objs>
