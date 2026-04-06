@@ -20,7 +20,7 @@ function Setup-Host {
         $script:ProjectRoot = $($script:PSScriptRoot)
     }
 
-    $script:WorkRoot = "${ProjectRoot}\windows_build_temp"
+    $script:WorkRoot = "${ProjectRoot}/windows_build_temp"
 
     if ( ! ( $script:SkipAll ) && ( $script:SkipDeps ) ) {
         if ( ! ( Test-Path function:Install-BuildDependencies ) ) {
