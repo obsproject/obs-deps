@@ -22,12 +22,14 @@ function Setup-Host {
 
     $script:WorkRoot = "${ProjectRoot}/windows_build_temp"
 
-    if ( ! ( $script:SkipAll ) && ( $script:SkipDeps ) ) {
+    if ( ! ( $script:SkipAll -or $script:SkipDeps ) ) {
         if ( ! ( Test-Path function:Install-BuildDependencies ) ) {
             . $PSScriptRoot/Install-BuildDependencies.ps1
         }
 
         Install-BuildDependencies -WingetFile ${script:PSScriptRoot}/.Wingetfile
+    } else {
+        Log-Debug "Skipping Install-BuildDependencies"
     }
 }
 
