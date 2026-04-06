@@ -27,7 +27,7 @@ function Setup-Target {
     $script:ConfigData = $TargetData[$script:Target]
 
     $script:ConfigData += @{
-        OutputPath = "${script:ProjectRoot}\windows\obs-${script:PackageName}-${script:Target}"
+        OutputPath = "${script:ProjectRoot}/windows/obs-${script:PackageName}-${script:Target}"
     }
 
     Log-Debug "
