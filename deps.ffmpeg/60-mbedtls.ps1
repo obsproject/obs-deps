@@ -50,7 +50,7 @@ function Configure {
     $Options = @(
         $CmakeOptions
         "-DUSE_SHARED_MBEDTLS_LIBRARY:BOOL=$($OnOff[$Shared])"
-        "-DUSE_STATIC_MBEDTLS_LIBRARY:BOOL=$($OnOff[$Shared -ne $true]))"
+        "-DUSE_STATIC_MBEDTLS_LIBRARY:BOOL=$($OnOff[$Shared -ne $true])"
         '-DENABLE_PROGRAMS:BOOL=OFF'
         '-DENABLE_TESTING:BOOL=OFF'
         '-DGEN_FILES:BOOL=OFF'
