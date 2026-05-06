@@ -8,6 +8,7 @@ param(
 
 $QtComponents = @(
     'qtbase'
+    'qtcharts'
     'qtimageformats'
     'qtshadertools'
     'qtmultimedia'
@@ -110,6 +111,7 @@ function Configure {
         '-DFEATURE_system_zlib:BOOL=OFF'
         '-DFEATURE_testlib:BOOL=OFF'
         '-DFEATURE_windeployqt:BOOL=OFF'
+        '-DINPUT_opengl:STRING=no'
         '-DINPUT_openssl:STRING=no'
         '-DQT_BUILD_BENCHMARKS:BOOL=OFF'
         '-DQT_BUILD_EXAMPLES:BOOL=OFF'
