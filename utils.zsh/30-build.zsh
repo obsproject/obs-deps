@@ -113,6 +113,8 @@ setup_build_parameters() {
         -DCMAKE_C_FLAGS="${c_flags} -std=c17"
         -DCMAKE_C_FLAGS_RELEASE="-O3 -g -DNDEBUG"
         -DCMAKE_CXX_FLAGS_RELEASE="-O3 -g -DNDEBUG"
+        -DCMAKE_OBJC_FLAGS_RELEASE="-O3 -g -DNDEBUG"
+        -DCMAKE_OBJCXX_FLAGS_RELEASE="-O3 -g -DNDEBUG"
       )
 
       if [[ "${PACKAGE_NAME}" != 'qt6' ]] {
