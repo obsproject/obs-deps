@@ -119,7 +119,7 @@ runs:
 
     - name: Save FFmpeg to Cache
       if: github.event_name == 'schedule' || (github.event_name == 'push' && steps.ffmpeg-cache.outputs.cache-hit != 'true')
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae
       with:
         path: |
           ${{ github.workspace }}/*_build_temp/FFmpeg*/*
@@ -128,7 +128,7 @@ runs:
 
     - name: Save FFmpeg Dependencies to Cache
       if: github.event_name == 'schedule' || (github.event_name == 'push' && steps.ffmpeg-deps-cache.outputs.cache-hit != 'true')
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae
       with:
         path: |
           ${{ inputs.workingDirectory }}/*_build_temp/*

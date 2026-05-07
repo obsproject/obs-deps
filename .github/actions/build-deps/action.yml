@@ -86,7 +86,7 @@ runs:
         ./Build-Dependencies.ps1 @Params
 
     - name: Save Dependencies to Cache
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae
       if: github.event_name == 'schedule' || (github.event_name == 'push' && steps.deps-cache.outputs.cache-hit != 'true')
       with:
         path: |

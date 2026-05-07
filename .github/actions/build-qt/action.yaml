@@ -100,7 +100,7 @@ runs:
 
     - name: Save Qt to Cache
       if: github.event_name == 'schedule' || (github.event_name == 'push' && steps.deps-cache.outputs.cache-hit != 'true')
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae
       with:
         path: |
           ${{ inputs.workingDirectory }}/*_build_temp/qt${{ inputs.qtVersion }}*
