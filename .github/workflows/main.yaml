@@ -139,7 +139,7 @@ jobs:
 
       - name: Save Compilation Cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae
         with:
           path: ${{ github.workspace }}/.ccache
           key: ${{ matrix.target }}-ccache-ffmpeg-${{ steps.setup.outputs.ccacheDate }}
@@ -301,7 +301,7 @@ jobs:
 
       - name: Save Compilation Cache
         if: github.event_name == 'push' && steps.ccache-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae
         with:
           path: ${{ github.workspace }}/.ccache
           key: ${{ matrix.target }}-ccache-deps-${{ steps.setup.outputs.ccacheDate }}
@@ -401,7 +401,7 @@ jobs:
 
       - name: Save Compilation Cache
         if: github.event_name == 'push' && steps.ccache-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae
         with:
           path: ${{ github.workspace }}/.ccache
           key: macos-universal-ccache-qt6-${{ steps.setup.outputs.ccacheDate }}
