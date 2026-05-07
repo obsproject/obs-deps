@@ -120,7 +120,7 @@ jobs:
 
       - name: Restore Compilation Cache
         id: ccache-cache
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         with:
           path: ${{ github.workspace }}/.ccache
           key: ${{ matrix.target }}-ccache-ffmpeg-${{ steps.setup.outputs.ccacheDate }}
@@ -208,7 +208,7 @@ jobs:
 
       - name: Restore Compilation Cache
         id: ccache-cache
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         with:
           path: ${{ github.workspace }}/.ccache
           key: ${{ matrix.target }}-ccache-deps-${{ matrix.config }}-${{ steps.setup.outputs.ccacheDate }}
@@ -332,7 +332,7 @@ jobs:
 
       - name: Restore Compilation Cache
         id: ccache-cache
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         with:
           path: ${{ github.workspace }}/.ccache
           key: macos-universal-ccache-qt6-${{ steps.setup.outputs.ccacheDate }}
