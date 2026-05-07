@@ -43,7 +43,7 @@ runs:
 
     - name: Restore Dependencies from Cache
       id: deps-cache
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae
       with:
         path: |
           ${{ inputs.workingDirectory }}/*_build_temp/*
