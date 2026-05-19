@@ -166,4 +166,9 @@ function Install {
     $env:VERBOSE = $(if ( $VerbosePreference -eq 'Continue' ) { '1' })
     Invoke-DevShell @Params
     $Backup.GetEnumerator() | ForEach-Object { Set-Item -Path "env:\$($_.Key)" -Value $_.Value }
+
+    Push-Location "build_${Target}"
+    Copy-Item 'ffmpeg_g.exe','ffprobe_g.exe' "$($script:ConfigData.OutputPath)/bin"
+    Get-ChildItem -Path '.' -Filter '*.pdb' -Recurse | Copy-Item -Destination "$($script:ConfigData.OutputPath)/bin"
+    Pop-Location
 }
