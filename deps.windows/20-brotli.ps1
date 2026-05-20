@@ -1,9 +1,8 @@
 param(
-    [string] $Name = 'curl',
-    [string] $Version = '8.12.1',
-    [string] $Uri = 'https://github.com/curl/curl.git',
-    [string] $Hash = '57495c64871d18905a0941db9196ef90bafe9a29',
-    [array] $Targets = @('x64', 'arm64')
+    [string] $Name = 'brotli',
+    [string] $Version = 'v1.1.0',
+    [string] $Uri = 'https://github.com/google/brotli.git',
+    [string] $Hash = 'ed738e842d2fbdf2d6459e39267a633c4a9b2f5d'
 )
 
 function Setup {
@@ -35,19 +34,10 @@ function Configure {
 
     $Options = @(
         $CmakeOptions
-        '-DBUILD_CURL_EXE:BOOL=OFF'
-        '-DBUILD_TESTING:BOOL=OFF'
-        '-DCURL_USE_LIBPSL=OFF'
-        '-DCURL_USE_LIBSSH2:BOOL=OFF'
-        '-DCURL_USE_SCHANNEL:BOOL=ON'
-        '-DCURL_ZLIB:BOOL=OFF'
-        '-DBUILD_SHARED_LIBS:BOOL=OFF'
-        '-DCURL_BROTLI:BOOL=ON'
-        '-DUSE_NGHTTP2:BOOL=ON'
+        '-DBUILD_SHARED_LIBS=OFF'
+        '-DBROTLI_DISABLE_TESTS=ON'
     )
 
-    $env:CFLAGS="-DNGHTTP2_STATICLIB"
-    $env:CXXFLAGS="-DNGHTTP2_STATICLIB"
     Invoke-External cmake -S . -B "build_${Target}" @Options
 }
 
@@ -81,11 +71,4 @@ function Install {
     }
 
     Invoke-External cmake @Options
-}
-
-function Fixup {
-    Log-Information "Fixup (${Target})"
-    Set-Location $Path
-
-    Remove-Item -ErrorAction 'SilentlyContinue' "$($ConfigData.OutputPath)/bin/curl-config"
 }
