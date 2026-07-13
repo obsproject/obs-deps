@@ -1,0 +1,41 @@
+From 8fe02a7dbe7aef06f1db034d2b4c23cbd3c12253 Mon Sep 17 00:00:00 2001
+From: Volker Hilsheimer <volker.hilsheimer@qt.io>
+Date: Sat, 23 May 2026 13:50:13 +0900
+Subject: [PATCH] QWidgetWindow: deliver synthesized context menu event to
+ disabled widget
+
+QWidget consistently ignores input events in the QWidget::event handler
+when disabled, and that code is still there also for context menu event.
+Not delivering such events further down the stack prevents event filters
+or override of events to respond to such events, breaking interactions
+with disabled widgets in a form in Qt Designer.
+
+Amends 84a5f50c7766c99f62b22bb4388137e0aa8dd13d.
+
+Task-number: QTBUG-93486
+Fixes: QTBUG-146665
+Fixes: QTBUG-146666
+Change-Id: Ia155d7df392dbeebcb3657848f06af641db3fd65
+Reviewed-by: Shawn Rutledge <shawn.rutledge@qt.io>
+(cherry picked from commit 264b97fc9e4c957b014f2da35c1caad28ebc3c99)
+Reviewed-by: Qt Cherry-pick Bot <cherrypick_bot@qt-project.org>
+---
+ src/widgets/kernel/qwidgetwindow.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/qtbase/src/widgets/kernel/qwidgetwindow.cpp b/qtbase/src/widgets/kernel/qwidgetwindow.cpp
+index 1923f113fc9..4d56b26c82d 100644
+--- a/qtbase/src/widgets/kernel/qwidgetwindow.cpp
++++ b/qtbase/src/widgets/kernel/qwidgetwindow.cpp
+@@ -1234,7 +1234,7 @@ void QWidgetWindow::handleContextMenuEvent(QContextMenuEvent *e)
+         pos = receiver->mapFromGlobal(e->globalPos());
+     }
+ 
+-    if (receiver && receiver->isEnabled()) {
++    if (receiver) {
+         QContextMenuEvent widgetEvent(e->reason(), pos, globalPos, e->modifiers());
+         QGuiApplication::forwardEvent(receiver, &widgetEvent, e);
+     }
+-- 
+2.52.0.windows.1
+

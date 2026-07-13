@@ -3,7 +3,13 @@ param(
     [string] $Version = '6.11.1',
     [string] $Uri = 'https://download.qt.io/archive/qt/6.11/6.11.1',
     [string] $Hash = "${PSScriptRoot}/checksums",
-    [array] $Targets = @('x64', 'arm64')
+    [array] $Targets = @('x64', 'arm64'),
+    [array] $Patches = @(
+        @{
+            PatchFile = "${PSScriptRoot}/patches/Qt6/win/0001-QTBUG-146665.patch"
+            HashSum = "461D06DFF5AAB49816693EF301639626C142CAEDFB63332F4F756471899BFCE7"
+        }
+    )
 )
 
 $QtComponents = @(
