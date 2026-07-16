@@ -10,9 +10,6 @@ local -a patches=(
     86eecb205665903c13aa1c55e49cecfee45aa8482e422616905bcc0d7a0d37a3"
 )
 
-## Dependency Overrides
-local targets=('windows-x*')
-
 ## Build Steps
 setup() {
   log_info "Setup (%F{3}${target}%f)"

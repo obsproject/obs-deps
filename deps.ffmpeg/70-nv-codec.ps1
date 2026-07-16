@@ -3,7 +3,7 @@ param(
     [string] $Version = '13.0.19.0',
     [string] $Uri = 'https://github.com/FFmpeg/nv-codec-headers.git',
     [string] $Hash = 'e844e5b26f46bb77479f063029595293aa8f812d',
-    [array] $Targets = @('x64'),
+    [array] $Targets = @('x64', 'arm64'),
     [array] $Patches = @(
         @{
             PatchFile = "${PSScriptRoot}/patches/nv-codec/0001-Load-nvEncodeAPI.dll-for-native-Windows-ARM64-Windows.patch"
