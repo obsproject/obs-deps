@@ -1,0 +1,37 @@
+From 15ee32753c92faddbabbff11676779618fc6db7e Mon Sep 17 00:00:00 2001
+From: Diego de Souza <ddesouza@nvidia.com>
+Date: Fri, 26 Jun 2026 22:59:03 +0200
+Subject: [PATCH] Load nvEncodeAPI.dll for native Windows ARM64
+
+On Windows on Arm, nvEncodeAPI.dll is an Arm64X dispatch proxy.
+It routes native ARM64 callers to nvEncodeAPIa64.dll and x64 or
+ARM64EC callers to nvEncodeAPI64.dll.
+
+Select the proxy for native ARM64 builds while preserving the existing
+library name for other 64-bit Windows targets.
+
+Signed-off-by: Diego de Souza <ddesouza@nvidia.com>
+---
+ include/ffnvcodec/dynlink_loader.h | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/include/ffnvcodec/dynlink_loader.h b/include/ffnvcodec/dynlink_loader.h
+index 6d6a0ec..1be0dbf 100644
+--- a/include/ffnvcodec/dynlink_loader.h
++++ b/include/ffnvcodec/dynlink_loader.h
+@@ -50,7 +50,11 @@
+ # define CUDA_LIBNAME "nvcuda.dll"
+ # define NVCUVID_LIBNAME "nvcuvid.dll"
+ # if defined(_WIN64) || defined(__CYGWIN64__)
+-#  define NVENC_LIBNAME "nvEncodeAPI64.dll"
++#  if defined(_M_ARM64) || defined(__aarch64__)
++#   define NVENC_LIBNAME "nvEncodeAPI.dll"
++#  else
++#   define NVENC_LIBNAME "nvEncodeAPI64.dll"
++#  endif
+ # else
+ #  define NVENC_LIBNAME "nvEncodeAPI.dll"
+ # endif
+-- 
+2.52.0.windows.1
+
