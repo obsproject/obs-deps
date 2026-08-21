@@ -141,11 +141,11 @@ function Find-VisualStudio {
         }
     }
 
-    $VisualStudioData = Get-VSSetupInstance -Prerelease:$($script:VSPrerelease) | Select-VSSetupInstance -Version '[16.0,18.0)' -Latest
+    $VisualStudioData = Get-VSSetupInstance -Prerelease:$($script:VSPrerelease) | Select-VSSetupInstance -Version '[17.0,19.0)' -Latest
 
     if ( $VisualStudioData -eq $null ) {
         $ErrorMessage = @(
-            "A Visual Studio installation (2019 or newer) is required for this build script.",
+            "A Visual Studio installation (2022 or newer) is required for this build script.",
             "The Visual Studio Community edition is available for free at https://visualstudio.microsoft.com/vs/community/.",
             "",
             "If Visual Studio is indeed installed, locate the directory ",
