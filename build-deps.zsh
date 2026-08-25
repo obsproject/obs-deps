@@ -89,7 +89,7 @@ package() {
     rm -rf -- lib/(libpcre*|libpng*|libfreetype.a)(N)
     rm -rf -- bin/^(*.exe|*.dll|*.pdb|swig)(N)
 
-    if [[ ${PACKAGE_NAME} == ffmpeg ]] rm -rf -- lib/*.a(N)
+    if [[ ${PACKAGE_NAME} == ffmpeg ]] rm -rf -- lib/(*.a~(libp256m.a|libeverest.a))(N)
 
     if [[ -f bin/swig ]] {
       swig_lib=(share/swig/*(/))
