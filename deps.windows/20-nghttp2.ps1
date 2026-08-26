@@ -1,9 +1,8 @@
 param(
-    [string] $Name = 'curl',
-    [string] $Version = '8.12.1',
-    [string] $Uri = 'https://github.com/curl/curl.git',
-    [string] $Hash = '57495c64871d18905a0941db9196ef90bafe9a29',
-    [array] $Targets = @('x64', 'arm64')
+    [string] $Name = 'nghttp2',
+    [string] $Version = 'v1.58.0',
+    [string] $Uri = 'https://github.com/nghttp2/nghttp2.git',
+    [string] $Hash = 'e2bc59bec9004bca47df961cbbad20664d7e53b2'
 )
 
 function Setup {
@@ -19,35 +18,19 @@ function Clean {
     }
 }
 
-function Patch {
-    Log-Information "Patch (${Target})"
-    Set-Location $Path
-
-    $Patches | ForEach-Object {
-        $Params = $_
-        Safe-Patch @Params
-    }
-}
-
 function Configure {
     Log-Information "Configure (${Target})"
     Set-Location $Path
 
     $Options = @(
         $CmakeOptions
-        '-DBUILD_CURL_EXE:BOOL=OFF'
-        '-DBUILD_TESTING:BOOL=OFF'
-        '-DCURL_USE_LIBPSL=OFF'
-        '-DCURL_USE_LIBSSH2:BOOL=OFF'
-        '-DCURL_USE_SCHANNEL:BOOL=ON'
-        '-DCURL_ZLIB:BOOL=OFF'
-        '-DBUILD_SHARED_LIBS:BOOL=OFF'
-        '-DCURL_BROTLI:BOOL=ON'
-        '-DUSE_NGHTTP2:BOOL=ON'
+        '-DENABLE_LIB_ONLY=ON'
+        '-DENABLE_STATIC_LIB=ON'
+        '-DENABLE_SHARED_LIB=OFF'
+        '-DENABLE_HTTP3=OFF'
+        '-DENABLE_DOC=OFF'
     )
 
-    $env:CFLAGS="-DNGHTTP2_STATICLIB"
-    $env:CXXFLAGS="-DNGHTTP2_STATICLIB"
     Invoke-External cmake -S . -B "build_${Target}" @Options
 }
 
@@ -81,11 +64,4 @@ function Install {
     }
 
     Invoke-External cmake @Options
-}
-
-function Fixup {
-    Log-Information "Fixup (${Target})"
-    Set-Location $Path
-
-    Remove-Item -ErrorAction 'SilentlyContinue' "$($ConfigData.OutputPath)/bin/curl-config"
 }
