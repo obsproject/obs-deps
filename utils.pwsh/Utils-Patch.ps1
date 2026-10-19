@@ -11,7 +11,13 @@ function Run-PatchExe {
 
     $Is64Bit = [System.Environment]::Is64BitOperatingSystem
 
-    $GitBasePath = Resolve-Path -Path "$((Get-Command git).Source | Split-Path)\..\usr\bin"
+    $GitPath = (Get-Command git).Source
+
+    $GitBasePath = if ($GitPath -eq 'C:\msys64\usr\bin\git.exe') {
+        ${GitPath} | Split-Path | Resolve-Path
+    } else {
+        Resolve-Path -Path "$(${GitPath} | Split-Path)\..\usr\bin"
+    }
 
     $PatchExe = "${GitBasePath}\patch.exe"
 

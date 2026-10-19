@@ -7,8 +7,8 @@
     <ToString>Microsoft.PowerShell.Commands.FileHashInfo</ToString>
     <Props>
       <S N="Algorithm">SHA256</S>
-      <S N="Hash">F40E4C7E7B4025D18BE17A8225F8BE2F26B349715399CD36C2DE573FE976DFD7</S>
-      <S N="Path">v1.14.1.zip</S>
+      <S N="Hash">7C23E98494B8896F128AF9661C4C02EA9D4913EA6006898347030683D7686517</S>
+      <S N="Path">v1.17.0.zip</S>
     </Props>
   </Obj>
 </Objs>
