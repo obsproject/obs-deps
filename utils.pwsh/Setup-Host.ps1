@@ -14,7 +14,19 @@ function Setup-Host {
     }
 
     try {
-        $script:ProjectRoot = Invoke-External git rev-parse --show-toplevel 2>$null
+        $HasCygpath = if ((Get-Command -Name cygpath)) {
+            $true
+        } else {
+            $false
+        }
+
+        $PathString = Invoke-External git rev-parse --show-toplevel 2>$null
+
+        $script:ProjectRoot = if ($HasCygpath) {
+            Invoke-External cygpath --windows $PathString
+        } else {
+            $PathString
+        }
     } catch {
         Log-Warning "Not running in a git repository, interpreting project root instead"
         $script:ProjectRoot = $($script:PSScriptRoot)
