@@ -1,4 +1,4 @@
-From 8b3ce4cfa488a6468b52cb0fba56a5de979bedec Mon Sep 17 00:00:00 2001
+From 251f0168c042861763f73b744f0b3583c70431a2 Mon Sep 17 00:00:00 2001
 From: James Zern <jzern@google.com>
 Date: Wed, 29 Jul 2026 19:13:39 -0700
 Subject: [PATCH] x86_abi_support.asm: use .rdata for win32/win64
@@ -9,7 +9,6 @@ which cause Visual Studio builds to fail. This also matches x86inc.asm.
 Bug: 540261859
 Fixed: 540261859
 Change-Id: Ic869fb72622f122aa959922539b8956a23ea0069
-(cherry picked from commit 251f0168c042861763f73b744f0b3583c70431a2)
 ---
 
 diff --git a/vpx_ports/x86_abi_support.asm b/vpx_ports/x86_abi_support.asm
