@@ -1,9 +1,15 @@
 param(
     [string] $Name = 'libvpx',
-    [string] $Version = '1.14.1',
-    [string] $Uri = 'https://github.com/webmproject/libvpx/archive/refs/tags/v1.14.1.zip',
-    [string] $Hash = "${PSScriptRoot}/checksums/v1.14.1.zip.sha256",
-    [array] $Targets = @('x64', 'arm64')
+    [string] $Version = '1.17.0',
+    [string] $Uri = 'https://github.com/webmproject/libvpx/archive/refs/tags/v1.17.0.zip',
+    [string] $Hash = "${PSScriptRoot}/checksums/v1.17.0.zip.sha256",
+    [array] $Targets = @('x64', 'arm64'),
+    [array] $Patches = @(
+        @{
+            PatchFile = "${PSScriptRoot}/patches/libvpx/0001-windows-fix-rodata.patch"
+            HashSum = "09df4cb1ac8271ca299c3e2f8c3dfbfb584d72d505b6191682ff08c3b58cc4e1"
+        }
+    )
 )
 
 function Setup {
@@ -21,6 +27,16 @@ function Clean {
     if ( Test-Path "build_${Target}" ) {
         Log-Information "Clean build directory (${Target})"
         Remove-Item -Path "build_${Target}" -Recurse -Force
+    }
+}
+
+function Patch {
+    Log-Information "Patch (${Target})"
+    Set-Location "${Name}-${Version}"
+
+    $Patches | ForEach-Object {
+        $Params = $_
+        Safe-Patch @Params
     }
 }
 
