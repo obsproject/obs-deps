@@ -10,6 +10,8 @@ local -a patches=(
     df46dc93e874c36b2ad0da746c43585528308a7fcde60930c1ffb5e841472e7b"
   "macos ${0:a:h}/patches/Qt6/mac/0002-QTBUG-146665.patch \
     48120aa1118711447cddba04b3c2a19aa8c1fe91f3ed4815f8f33e759ef22634"
+  "macos ${0:a:h}/patches/Qt6/mac/0003-QTBUG-147602.patch \
+    66eb0019e3faafcc37c68c647b174f6e723e216865ee436d2b9eb89b18e02db7"
 )
 
 local -a qt_components=(
