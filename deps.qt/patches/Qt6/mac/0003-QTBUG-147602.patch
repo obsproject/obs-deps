@@ -1,0 +1,140 @@
+From 08e464f8559719662c5b2207d1d4c84c251eca07 Mon Sep 17 00:00:00 2001
+From: Eirik Aavitsland <eirik.aavitsland@qt.io>
+Date: Fri, 19 Jun 2026 05:55:39 +0200
+Subject: [PATCH] Fix regression in QImage::toCGImage() with custom color space
+
+The internal function qt_mac_cgImageFormatForImage() would return a
+struct with a raw CGColorSpaceRef. It was created as a local variable
+wrapped in QCFType, so at return time, it would already be deallocated.
+For the default SRGB colorspace, that did not matter, since it would
+refer to a system color space object which was not actually deallocated.
+But for a custom color space, this issue would cause a crash.
+
+Fix by introducing our own struct type that holds the color space in a
+QCFType<CGColorSpaceRef>, so that it is kept alive, and use that as the
+return type of qt_mac_cgImageFormatForImage() instead.
+
+This modifies 272a091d1cf7aff8480754c042f0f124894fba19
+
+Fixes: QTBUG-147602
+Change-Id: If9d76346fbb87ba4e6aff69ad858a634e498d989
+Reviewed-by: Tor Arne Vestbø <tor.arne.vestbo@qt.io>
+(cherry picked from commit a481ede673e8eb50fd9d61347def81a22d3e169f)
+Reviewed-by: Qt Cherry-pick Bot <cherrypick_bot@qt-project.org>
+(cherry picked from commit 9bf3e90fe3967108eb3ec9475275eeb5cc3600be)
+---
+
+diff --git a/qtbase/src/gui/CMakeLists.txt b/qtbase/src/gui/CMakeLists.txt
+index 5799112..a4dfa64 100644
+--- a/qtbase/src/gui/CMakeLists.txt
++++ b/qtbase/src/gui/CMakeLists.txt
+@@ -434,7 +434,6 @@
+         ${FWCoreGraphics}
+         ${FWCoreText}
+         ${FWFoundation}
+-        ${FWAccelerate}
+     PUBLIC_LIBRARIES
+         ${FWImageIO}
+ )
+diff --git a/qtbase/src/gui/image/qimage_darwin.mm b/qtbase/src/gui/image/qimage_darwin.mm
+index 6efeac7..865f310 100644
+--- a/qtbase/src/gui/image/qimage_darwin.mm
++++ b/qtbase/src/gui/image/qimage_darwin.mm
+@@ -8,7 +8,6 @@
+ 
+ #import <Foundation/Foundation.h>
+ #import <CoreGraphics/CoreGraphics.h>
+-#include <Accelerate/Accelerate.h>
+ 
+ QT_BEGIN_NAMESPACE
+ 
+@@ -49,13 +48,14 @@
+     QCFType<CGDataProviderRef> dataProvider =
+         CGDataProviderCreateWithData(new QImage(*this), bits(), sizeInBytes(), deleter);
+ 
+-    const bool shouldInterpolate = false;
++    static constexpr bool shouldInterpolate = false;
++    static constexpr CGFloat *decodeArray = nullptr;
+ 
+     return CGImageCreate(width(), height(),
+         cgImageFormat->bitsPerComponent, cgImageFormat->bitsPerPixel,
+         this->bytesPerLine(), cgImageFormat->colorSpace,
+-        cgImageFormat->bitmapInfo, dataProvider, cgImageFormat->decode,
+-        shouldInterpolate, cgImageFormat->renderingIntent
++        cgImageFormat->bitmapInfo, dataProvider, decodeArray,
++        shouldInterpolate, kCGRenderingIntentDefault
+     );
+ }
+ 
+diff --git a/qtbase/src/gui/painting/qcoregraphics.mm b/qtbase/src/gui/painting/qcoregraphics.mm
+index 819f3c8..7df871b 100644
+--- a/qtbase/src/gui/painting/qcoregraphics.mm
++++ b/qtbase/src/gui/painting/qcoregraphics.mm
+@@ -19,15 +19,13 @@
+ # include <UIKit/UIKit.h>
+ #endif
+ 
+-#include <Accelerate/Accelerate.h>
+-
+ QT_USE_NAMESPACE
+ 
+ QT_BEGIN_NAMESPACE
+ 
+ // ---------------------- Images ----------------------
+ 
+-std::optional<vImage_CGImageFormat> qt_mac_cgImageFormatForImage(const QImage &image)
++std::optional<QCGImageFormat> qt_mac_cgImageFormatForImage(const QImage &image)
+ {
+     const QPixelFormat format = image.pixelFormat();
+ 
+@@ -131,10 +129,9 @@
+         }
+     }();
+ 
+-    return vImage_CGImageFormat{
++    return QCGImageFormat{
+         bitsPerComponent, format.bitsPerPixel(),
+-        colorSpace, bitmapInfo, 0, nullptr,
+-        kCGRenderingIntentDefault
++        colorSpace, bitmapInfo
+     };
+ }
+ 
+diff --git a/qtbase/src/gui/painting/qcoregraphics_p.h b/qtbase/src/gui/painting/qcoregraphics_p.h
+index 9d17651..00ba98f 100644
+--- a/qtbase/src/gui/painting/qcoregraphics_p.h
++++ b/qtbase/src/gui/painting/qcoregraphics_p.h
+@@ -37,11 +37,17 @@
+ Q_FORWARD_DECLARE_OBJC_CLASS(UIImage);
+ Q_FORWARD_DECLARE_OBJC_CLASS(NSColor);
+ 
+-struct vImage_CGImageFormat;
+-
+ QT_BEGIN_NAMESPACE
+ 
+-Q_GUI_EXPORT std::optional<vImage_CGImageFormat> qt_mac_cgImageFormatForImage(const QImage &image);
++struct Q_GUI_EXPORT QCGImageFormat
++{
++    uint32_t bitsPerComponent = 0;
++    uint32_t bitsPerPixel = 0;
++    QCFType<CGColorSpaceRef> colorSpace;
++    CGBitmapInfo bitmapInfo = 0;
++};
++
++Q_GUI_EXPORT std::optional<QCGImageFormat> qt_mac_cgImageFormatForImage(const QImage &image);
+ 
+ #ifdef QT_PLATFORM_UIKIT
+ Q_GUI_EXPORT QImage qt_mac_toQImage(const UIImage *image, QSizeF size);
+diff --git a/qtbase/src/gui/text/coretext/qfontengine_coretext.mm b/qtbase/src/gui/text/coretext/qfontengine_coretext.mm
+index 4f4d246..aa9f6da 100644
+--- a/qtbase/src/gui/text/coretext/qfontengine_coretext.mm
++++ b/qtbase/src/gui/text/coretext/qfontengine_coretext.mm
+@@ -27,8 +27,6 @@
+ #import <UIKit/UIKit.h>
+ #endif
+ 
+-#include <Accelerate/Accelerate.h>
+-
+ // These are available cross platform, exported as kCTFontWeightXXX from CoreText.framework,
+ // but they are not documented and are not in public headers so are private API and exposed
+ // only through the NSFontWeightXXX and UIFontWeightXXX aliases in AppKit and UIKit (rdar://26109857)
