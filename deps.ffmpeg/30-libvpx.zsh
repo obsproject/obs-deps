@@ -22,6 +22,8 @@ local -a patches=(
   9553b8186feac616d4421188d7c6ca75fbce900265e688cafdf1ed3333ad376a"
   "windows ${0:a:h}/patches/libvpx/0002-force-pthread-shim.patch \
   f1c823f10320205494e80e9995722045831c6982fe8463a81fdebb69ca385c94"
+  "windows ${0:a:h}/patches/libvpx/0003-x86_abi_support.asm-use-.rdata-for-win32win64.patch \
+  f80ea0fd7988529388960a61b08cdf69692ec5a02e27cdf1416d6304091f5301"
 )
 
 ## Dependency Overrides
