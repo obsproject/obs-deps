@@ -1,13 +1,13 @@
 param(
     [string] $Name = 'libvpx',
-    [string] $Version = '1.14.1',
-    [string] $Uri = 'https://github.com/webmproject/libvpx/archive/refs/tags/v1.14.1.zip',
-    [string] $Hash = "${PSScriptRoot}/checksums/v1.14.1.zip.sha256",
+    [string] $Version = '1.17.0',
+    [string] $Uri = 'https://github.com/webmproject/libvpx/archive/refs/tags/v1.17.0.zip',
+    [string] $Hash = "${PSScriptRoot}/checksums/v1.17.0.zip.sha256",
     [array] $Targets = @('x64', 'arm64'),
     [array] $Patches = @(
         @{
-            PatchFile = "${PSScriptRoot}/patches/libvpx/0003-x86_abi_support.asm-use-.rdata-for-win32win64.patch"
-            HashSum = "f80ea0fd7988529388960a61b08cdf69692ec5a02e27cdf1416d6304091f5301"
+            PatchFile = "${PSScriptRoot}/patches/libvpx/0001-windows-fix-rodata.patch"
+            HashSum = "09df4cb1ac8271ca299c3e2f8c3dfbfb584d72d505b6191682ff08c3b58cc4e1"
         }
     )
 )
